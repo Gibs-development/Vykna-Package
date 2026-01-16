@@ -1,1 +1,1 @@
-rootProject.name = "vykna-server"
+rootProject.name = "Vykna Gameserver"

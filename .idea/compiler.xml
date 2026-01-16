@@ -1,21 +1,33 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CompilerConfiguration">
-    <annotationProcessing>
-      <profile name="Gradle Imported" enabled="true">
-        <outputRelativeToContentRoot value="true" />
-        <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.8/448003bc1b234aac04b58e27d7755c12c3ec4236/lombok-1.18.8.jar" />
-        </processorPath>
-        <module name="Vykna-Package.Xeros_Client.main" />
-      </profile>
-    </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="Vykna Client.Xeros_Client.main" target="8" />
+      <module name="Vykna Client.Xeros_Client.test" target="8" />
+      <module name="Vykna-Package.Xeros_Client" target="1.8" />
+      <module name="Vykna-Package.Xeros_Client.main" target="8" />
+      <module name="Vykna-Package.Xeros_Client.test" target="8" />
+      <module name="vykna-server" target="17" />
+      <module name="vykna-server.main" target="17" />
+      <module name="vykna-server.test" target="17" />
+      <module name="Vykna_Gameserver" target="17" />
+      <module name="Vykna_Gameserver.main" target="17" />
+      <module name="Vykna_Gameserver.test" target="17" />
+      <module name="Xeros_Client" target="1.8" />
+      <module name="Xeros_Client.main" target="8" />
+      <module name="Xeros_Client.test" target="8" />
+    </bytecodeTargetLevel>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Vykna Client.Xeros_Client.main" options="-Xlint:none" />
+      <module name="Vykna Client.Xeros_Client.test" options="-Xlint:none" />
       <module name="Vykna-Package.Xeros_Client" options="-Xlint:none" />
       <module name="Vykna-Package.Xeros_Client.main" options="-Xlint:none" />
       <module name="Vykna-Package.Xeros_Client.test" options="-Xlint:none" />
+      <module name="Vykna_Client" options="-Xlint:none" />
+      <module name="Vykna_Client.main" options="-Xlint:none" />
+      <module name="Vykna_Client.test" options="-Xlint:none" />
       <module name="Xeros_Client" options="-Xlint:none" />
       <module name="Xeros_Client.main" options="-Xlint:none" />
       <module name="Xeros_Client.test" options="-Xlint:none" />

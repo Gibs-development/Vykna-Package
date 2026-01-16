@@ -1,1 +1,1 @@
-rootProject.name = "Xeros Client"
+rootProject.name = "Vykna Client"
