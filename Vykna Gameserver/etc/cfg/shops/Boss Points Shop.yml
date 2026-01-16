@@ -1,0 +1,119 @@
+---
+id: 121
+name: "Boss Points Shop"
+items:
+
+- name: "cooked karambwan noted"
+  price: 1
+- name: "anglerfish noted"
+  price: 2
+- name: "dragon bones noted"
+  price: 2
+- name: "dragon arrow"
+  price: 2
+- name: "dragon dart"
+  price: 2
+- name: "dragon javelin"
+  price: 3
+- name: "divine ranging potion4 noted"
+  price: 50
+- name: "divine magic potion4 noted"
+  price: 50
+- name: "divine super combat potion4 noted"
+  price: 50
+- name: "casket"
+  price: 100
+- name: "crystal key"
+  price: 200
+- name: "overload 4"
+  price: 10
+- name: "fighter torso"
+  price: 450
+- name: "uncut onyx"
+  price: 800
+- name: "amulet of fury"
+  price: 800
+
+- name: "darklight"
+  price: 450
+- name: "berserker necklace"
+  price: 800
+- name: "master wand"
+  price: 1250
+- name: "mages book"
+  price: 1250
+
+- name: "royal seed pod"
+  price: 850
+
+- name: "rune pouch"
+  price: 850
+
+- name: "crystal weapon seed"
+  price: 1250
+- name: "zamorakian spear"
+  price: 1250
+- name: "ring of wealth"
+  price: 2850
+- name: "ammo mould"
+  price: 2850
+- name: "ring of wealth scroll"
+  price: 11000
+- name: "abyssal whip"
+  price: 850
+- name: "abyssal tentacle"
+  price: 1600
+- name: "armadyl godsword"
+  price: 11000
+- name: "saradomins blessed sword"
+  price: 1600
+- name: "dragonfire shield"
+  price: 8500
+- name: "armadyl crossbow"
+  price: 6500
+- name: "dragon boots"
+  price: 450
+- name: "primordial boots"
+  price: 9000
+- name: "eternal boots"
+  price: 9000
+- name: "pegasian boots"
+  price: 9000
+- name: "dragon crossbow"
+  price: 4500
+- name: "dragon hunter crossbow"
+  price: 8000
+- name: "ranger boots"
+  price: 2000
+- name: "warrior ring"
+  price: 350
+- name: "berserker ring"
+  price: 350
+- name: "seers ring"
+  price: 350
+- name: "archers ring"
+  price: 350
+- name: "ring of the gods"
+  price: 1250
+- name: "bandos chestplate"
+  price: 6000
+- name: "bandos tassets"
+  price: 6000
+- name: "bandos boots"
+  price: 2000
+- name: "armadyl helmet"
+  price: 5000
+- name: "armadyl chestplate"
+  price: 5000
+- name: "armadyl chainskirt"
+  price: 5000
+- name: "trident of the swamp"
+  price: 5000
+- name: "toxic staff of the dead"
+  price: 7000
+- name: "bolt rack"
+  price: 1
+- name: "necklace of anguish"
+  price: 6000
+- name: "ecumenical key"
+  price: 280

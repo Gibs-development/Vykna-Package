@@ -1,0 +1,50 @@
+---
+id: 197
+name: "Lms Points Shop"
+items:
+
+- id: 12873
+  price: 20
+
+- id: 12877
+  price: 20
+- id: 12875
+  price: 20
+- id: 12883
+  price: 20
+
+- id: 12881
+  price: 20
+- id: 12904
+  price: 120
+- id: 12926
+  price: 150
+- id: 11773
+  price: 145
+
+- id: 11770
+  price: 145
+- id: 11772
+  price: 145
+- id: 11771
+  price: 145
+
+- id: 21015
+  price: 1320
+- id: 22326
+  price: 1310
+- id: 22327
+  price: 1310
+- id: 22328
+  price: 1310
+
+- id: 21021
+  price: 350
+- id: 21024
+  price: 350
+- id: 21018
+  price: 350
+- id: 21006
+  price: 210
+- id: 22323
+  price: 250

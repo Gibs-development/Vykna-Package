@@ -1,0 +1,11 @@
+[
+  {
+    "id": 3400,
+    "position": {
+      "x": 9999,
+      "y": 9999,
+      "height": 0
+    },
+    "walkingType": "FACE_NORTH"
+  }
+]

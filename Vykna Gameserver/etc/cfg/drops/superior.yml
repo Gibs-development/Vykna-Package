@@ -1,0 +1,129 @@
+---
+npc_id:
+- 7388
+- 7389
+- 7390
+- 7391
+- 7392
+- 7393
+- 7394
+- 7395
+- 7396
+- 7397
+- 7398
+- 7399
+- 7400
+- 7401
+- 7404
+- 7405
+- 7406
+- 7407
+- 7409
+- 7410
+- 7411
+constant:
+  accessibility: 0
+  items:
+    - name: "coins"
+      minimum: 250000
+      maximum: 950000
+common:
+  accessibility: 10
+  items:
+    - name: "dragon platelegs"
+      minimum: 1
+      maximum: 1
+    - name: "dragon plateskirt"
+      minimum: 1
+      maximum: 1
+    - name: "dragon dagger"
+      minimum: 1
+      maximum: 1
+    - name: "dragon longsword"
+      minimum: 1
+      maximum: 1
+    - name: "death rune"
+      minimum: 450
+      maximum: 800
+    - name: "blood rune"
+      minimum: 450
+      maximum: 800
+    - name: "law rune"
+      minimum: 450
+      maximum: 800
+    - name: "dragonstone bolt tips"
+      minimum: 450
+      maximum: 700
+    - name: "onyx bolt tips"
+      minimum: 450
+      maximum: 700
+    - name: "coal noted"
+      minimum: 450
+      maximum: 800
+    - name: "manta ray noted"
+      minimum: 100
+      maximum: 200
+    - name: "yew logs noted"
+      minimum: 350
+      maximum: 500
+    - name: "magic logs noted"
+      minimum: 100
+      maximum: 300
+    - name: "runite ore noted"
+      minimum: 50
+      maximum: 200
+    - name: "runite bar noted"
+      minimum: 50
+      maximum: 100
+    - name: "adamantite bar noted"
+      minimum: 50
+      maximum: 200
+
+    - item: 21053
+      minimum: 1
+      maximum: 1
+uncommon:
+  accessibility: 15
+  items:
+
+    - item: 21053
+      minimum: 2
+      maximum: 3
+
+rare:
+  accessibility: 45
+  items:
+    - item: 4151
+      maximum: 1
+      minimum: 1
+
+    - item: 20724
+      maximum: 1
+      minimum: 1
+
+    - item: 691
+      maximum: 1
+      minimum: 1
+very_rare:
+  accessibility: 150
+  items:
+
+    - item: 4151
+      maximum: 2
+      minimum: 2
+
+    - item: 20724
+      maximum: 1
+      minimum: 1
+
+    - item: 8167
+      maximum: 1
+      minimum: 1
+
+    - item: 2984
+      maximum: 1
+      minimum: 1
+
+    - item: 6607
+      maximum: 1
+      minimum: 1

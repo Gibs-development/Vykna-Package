@@ -1,0 +1,73 @@
+---
+id: 199
+name: "Afk Points Shop"
+items:
+
+- id: 13223
+  price: 15000
+
+- id: 12800
+  price: 1500
+- id: 11920
+  price: 1200
+- id: 6739
+  price: 1000
+- id: 10933
+  price: 800
+
+- id: 10939
+  price: 800
+- id: 10940
+  price: 800
+- id: 10941
+  price: 800
+- id: 12013
+  price: 800
+
+- id: 12014
+  price: 800
+- id: 12015
+  price: 800
+- id: 12016
+  price: 800
+- id: 12792
+  price: 250
+
+- id: 536
+  price: 3
+- id: 11230
+  price: 3
+- id: 13258
+  price: 800
+
+- id: 13259
+  price: 800
+
+- id: 13260
+  price: 800
+- id: 13261
+  price: 800
+- id: 5553
+  price: 800
+- id: 5554
+  price: 800
+- id: 5555
+  price: 800
+
+
+- id: 5556
+  price: 800
+- id: 5557
+  price: 800
+- id: 30000
+  price: 3
+- id: 30001
+  price: 6
+- id: 30002
+  price: 15
+- id: 13226
+  price: 2500
+- id: 13441
+  price: 1
+- id: 7409
+  price: 2000

@@ -1,0 +1,84 @@
+---
+npc_id:
+- 11294
+- 11283
+- 11284
+- 11285
+- 11286
+constant:
+  accessibility: 0
+  items:
+  - name: "ashes"
+    minimum: 1
+    maximum: 1
+
+  - item: 391
+    minimum: 3
+    maximum: 3
+common:
+  accessibility: 2
+  items:
+
+  - item: 7937
+    minimum: 5
+    maximum: 15
+
+  - item: 3024
+    minimum: 3
+    maximum: 3
+
+  - name: "pure essence"
+    minimum: 1
+    maximum: 1
+
+  - name: "coins"
+    minimum: 1100
+    maximum: 2500
+uncommon:
+  accessibility: 20
+  items:
+  - name: "astral rune"
+    minimum: 6
+    maximum: 25
+  - name: "blood rune"
+    minimum: 20
+    maximum: 40
+  - name: "mud rune"
+    minimum: 2
+    maximum: 15
+  - name: "air rune"
+    minimum: 7
+    maximum: 55
+  - name: "shark"
+    minimum: 3
+    maximum: 8
+
+  - item: 11942
+    minimum: 1
+    maximum: 1
+rare:
+  accessibility: 250
+  items:
+
+  - item: 26221
+    minimum: 1
+    maximum: 1
+
+  - item: 26223
+    minimum: 1
+    maximum: 1
+
+  - item: 26227
+    minimum: 1
+    maximum: 1
+
+  - item: 26229
+    minimum: 1
+    maximum: 1
+
+very_rare:
+  accessibility: 700
+  items:
+  - item: 26225
+    minimum: 1
+    maximum: 1

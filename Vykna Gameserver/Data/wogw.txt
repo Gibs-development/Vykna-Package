@@ -1,0 +1,8 @@
+experience-amount=20000000
+experience-timer=0
+minigame-amount=20000000
+minigame-timer=0
+drops-amount=0
+drops-timer=0
+barrows-amount=0
+barrows-timer=0
