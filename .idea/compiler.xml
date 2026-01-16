@@ -5,15 +5,17 @@
       <profile name="Gradle Imported" enabled="true">
         <outputRelativeToContentRoot value="true" />
         <processorPath useClasspath="false">
-          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.32/17d46b3e205515e1e8efd3ee4d57ce8018914163/lombok-1.18.32.jar" />
+          <entry name="$USER_HOME$/.gradle/caches/modules-2/files-2.1/org.projectlombok/lombok/1.18.8/448003bc1b234aac04b58e27d7755c12c3ec4236/lombok-1.18.8.jar" />
         </processorPath>
-        <module name="vykna-server.main" />
-        <module name="vykna-server.test" />
+        <module name="Vykna-Package.Xeros_Client.main" />
       </profile>
     </annotationProcessing>
   </component>
   <component name="JavacSettings">
     <option name="ADDITIONAL_OPTIONS_OVERRIDE">
+      <module name="Vykna-Package.Xeros_Client" options="-Xlint:none" />
+      <module name="Vykna-Package.Xeros_Client.main" options="-Xlint:none" />
+      <module name="Vykna-Package.Xeros_Client.test" options="-Xlint:none" />
       <module name="Xeros_Client" options="-Xlint:none" />
       <module name="Xeros_Client.main" options="-Xlint:none" />
       <module name="Xeros_Client.test" options="-Xlint:none" />
