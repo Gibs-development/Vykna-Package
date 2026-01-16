@@ -36,7 +36,7 @@ public class Announcement {
 	private final static int PENDING_ANNOUNCEMENT_INTERVAL = 5;
 
 	private static int value = Misc.random(34);//changed to 34 any problems changed back to 37 cam
-
+//hello world
 	public static void announce(String string, String colour) {
 		for (int i = 0; i < Configuration.MAX_PLAYERS; i++) {
 			if (PlayerHandler.players[i] != null) {
