@@ -39,7 +39,7 @@ public final class PerkDefinitions {
         }
 
         public Sprite getIcon(int rank) {
-            return new Sprite("sprites/perks/" + iconKey + "+" + rank);
+            return new Sprite("/perks/" + iconKey);
         }
     }
 

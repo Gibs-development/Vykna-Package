@@ -1087,8 +1087,8 @@ public class Commands implements PacketType {
                     c.sendMessage(NO_ACCESS);
                     return;
                 }
-                String[] args = playerCommand.split(" ");
-                int rarityId = args.length > 1 ? Integer.parseInt(args[1]) : 2;
+                String[] args1 = playerCommand.split(" ");
+                int rarityId = args1.length > 1 ? Integer.parseInt(args1[1]) : 2;
                 List<io.xeros.model.items.RarityPerkPool.PerkRoll> rolls =
                         io.xeros.model.items.RarityPerkPool.rollPerks(rarityId, 2);
                 ItemAttributes attrs = new ItemAttributes();
