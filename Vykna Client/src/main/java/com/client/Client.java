@@ -12168,6 +12168,7 @@ public class Client extends RSApplet {
 				repackCacheAll();
 			}
 
+			packCustomMaps();
 			if (Configuration.dumpMaps) {
 				onDemandFetcher.dumpMaps();
 			}
