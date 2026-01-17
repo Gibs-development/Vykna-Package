@@ -2235,11 +2235,7 @@ public class ItemAssistant {
 			return;
 		}
 
-		BankItem toRemove = new BankItem(bankItem.getId(), withdrawAmount);
-		if (bankItem.hasAttrs()) {
-			toRemove.setAttrs(bankItem.getAttrs());
-		}
-		tab.remove(toRemove, 0, player.placeHolders);
+		tab.removeAtSlot(slot, withdrawAmount, player.placeHolders);
 
 		if (tab.size() == 0) {
 			player.getBank().setCurrentBankTab(player.getBank().getBankTab(0));
