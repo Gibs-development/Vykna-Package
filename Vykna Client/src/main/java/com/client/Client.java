@@ -4572,6 +4572,7 @@ public class Client extends RSApplet {
 		GameTimerHandler.getSingleton().stopAll();
 		Preferences.save();
 		setGameMode(ScreenMode.FIXED, false);
+		resetAllImageProducers();
 	}
 
 	public void method45() {
@@ -13474,6 +13475,12 @@ public class Client extends RSApplet {
 		}
 	}
 
+	private boolean isBankContainer(int interfaceId) {
+		return interfaceId == 5064
+				|| interfaceId == 41583
+				|| (interfaceId >= 41573 && interfaceId <= 41581);
+	}
+
 	public void drawInterface(int scrollPosition, int xPosition, RSInterface rsInterface, int yPosition, boolean inheritDrawingArea) {
 		try {
 			if (rsInterface.type != 0 || rsInterface.children == null)
@@ -13638,17 +13645,9 @@ public class Client extends RSApplet {
 												&& j6 < DrawingArea.bottomY || activeInterfaceType != 0 && itemDraggingSlot == i3) {
 											int itemOutlineColor = 0;
 
-// keep the white outline when selected
+											// keep the white outline when selected
 											if (itemSelected == 1 && anInt1283 == i3 && anInt1284 == class9_1.id) {
 												itemOutlineColor = 0xffffff;
-											} else {
-												// otherwise, rarity outline tint (optional)
-												com.client.attributes.ItemAttrStore.Attr attr =
-														com.client.attributes.ItemAttrStore.get(class9_1.id, i3);
-												if (attr != null) {
-													int col = ItemAttrStore.rarityToColor(attr.rarityId);
-													if (col != -1) itemOutlineColor = col;
-												}
 											}
 
 
@@ -13747,20 +13746,21 @@ public class Client extends RSApplet {
 												 * Draws item sprite
 												 */
 													itemSprite.drawTransparentSprite(k5, j6, itemSpriteOpacity);
-												// Rarity outline / glow overlay (separate from "Use" highlight)
+												// Rarity outline (separate from "Use" highlight)
 												com.client.attributes.ItemAttrStore.Attr attr = com.client.attributes.ItemAttrStore.get(class9_1.id, i3);
-												if (attr != null && attr.rarityId > 0 && !(itemSelected == 1 && anInt1283 == i3 && anInt1284 == class9_1.id)) {
-													int col = com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
-													if (col != -1) {
-														//drawSpriteSilhouetteOutline(itemSprite, k5 + k6, j6 + j7, col);
-													}
-													if (attr != null && attr.rarityId > 0) {
-														Sprite raritySprite = ItemAttrStore.spriteForRarity(attr.rarityId);
-														if (raritySprite != null) {
-															raritySprite.drawSprite(k5 + k6+ 20, j6 + j7+18);
+												boolean isSelected = (itemSelected == 1 && anInt1283 == i3 && anInt1284 == class9_1.id);
+												if (attr != null && attr.rarityId > 0 && !isSelected) {
+													boolean bankOpen = openInterfaceID == 5292;
+													if (bankOpen && isBankContainer(class9_1.id)) {
+														int col = com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
+														if (col != -1) {
+															drawSpriteSilhouetteOutline(itemSprite, k5 + k6, j6 + j7, col);
 														}
 													}
-
+													Sprite raritySprite = ItemAttrStore.spriteForRarity(attr.rarityId);
+													if (raritySprite != null) {
+														raritySprite.drawSprite(k5 + k6 + 20, j6 + j7 + 18);
+													}
 												}
 
 
