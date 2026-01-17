@@ -13,17 +13,10 @@ import io.xeros.model.cycleevent.CycleEvent;
 import io.xeros.model.cycleevent.CycleEventContainer;
 import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.entity.npc.NPC;
-import io.xeros.model.entity.player.Boundary;
 import io.xeros.model.entity.player.ClientGameTimer;
 import io.xeros.model.entity.player.Player;
-import io.xeros.model.entity.player.Position;
 
 public class BossFactoryInstance extends InstancedArea {
-    public static final int ENTRY_OBJECT_ID = 42344;
-    public static final Position TELEPORT_POSITION = new Position(1636, 4821, 0);
-    public static final Position BOSS_SPAWN = new Position(1626, 4816, 0);
-    public static final Boundary ARENA_BOUNDARY = new Boundary(1610, 4810, 1649, 4847);
-
     private static final long DURATION_MS = TimeUnit.HOURS.toMillis(1);
     private static final InstanceConfiguration CONFIGURATION = new InstanceConfigurationBuilder()
             .setCloseOnPlayersEmpty(false)
@@ -37,12 +30,13 @@ public class BossFactoryInstance extends InstancedArea {
     private NPC bossNpc;
 
     public BossFactoryInstance(Player owner, BossFactoryInstanceConfig config) {
-        super(CONFIGURATION, ARENA_BOUNDARY);
+        super(CONFIGURATION, GoblinNecromancerBoss.ARENA_BOUNDARY);
         this.owner = owner;
         this.config = config;
         this.expiryTime = System.currentTimeMillis() + DURATION_MS;
         spawnBoss();
         startTimer();
+        startBossTargetUpdates();
     }
 
     public Player getOwner() {
@@ -59,15 +53,17 @@ public class BossFactoryInstance extends InstancedArea {
 
     public void enter(Player player) {
         add(player);
-        player.moveTo(resolve(TELEPORT_POSITION));
+        player.moveTo(resolve(GoblinNecromancerBoss.TELEPORT_POSITION));
         sendTimeMessage(player, remainingMs());
         sendInstanceTimer(player);
+        sendBossTarget(player);
     }
 
     @Override
     public void remove(Player player) {
         super.remove(player);
         clearInstanceTimer(player);
+        clearBossTarget(player);
     }
 
     public boolean isOwnerInside() {
@@ -76,11 +72,13 @@ public class BossFactoryInstance extends InstancedArea {
 
     public void onPlayerDeath(Player player) {
         clearInstanceTimer(player);
+        clearBossTarget(player);
         cleanupBoss(BossCleanupReason.PLAYER_DEATH);
     }
 
     public void onPlayerTeleport(Player player) {
         clearInstanceTimer(player);
+        clearBossTarget(player);
         cleanupBoss(BossCleanupReason.TELEPORT);
     }
 
@@ -88,12 +86,13 @@ public class BossFactoryInstance extends InstancedArea {
     public void onDispose() {
         CycleEventHandler.getSingleton().stopEvents(this);
         clearInstanceTimerForPlayers();
+        clearBossTargetForPlayers();
         cleanupBoss(BossCleanupReason.INSTANCE_EXPIRED);
         BossFactoryInstanceManager.unregister(owner.getLoginNameLower());
     }
 
     private void spawnBoss() {
-        bossNpc = new NPC(GoblinNecromancerBoss.NPC_ID, resolve(BOSS_SPAWN));
+        bossNpc = new NPC(GoblinNecromancerBoss.NPC_ID, resolve(GoblinNecromancerBoss.BOSS_SPAWN));
         add(bossNpc);
         if (BossFactoryRegistry.isBoss(bossNpc)) {
             io.xeros.content.bossfactory.BossController controller = BossFactoryRegistry.getOrCreate(bossNpc);
@@ -122,6 +121,7 @@ public class BossFactoryInstance extends InstancedArea {
                     expired = true;
                     broadcast("Your instance has expired and no further bosses will spawn.");
                     clearInstanceTimerForPlayers();
+                    clearBossTargetForPlayers();
                     if (bossNpc != null) {
                         bossNpc.getBehaviour().setRespawn(false);
                         bossNpc.needRespawn = false;
@@ -152,6 +152,15 @@ public class BossFactoryInstance extends InstancedArea {
         }, 100);
     }
 
+    private void startBossTargetUpdates() {
+        CycleEventHandler.getSingleton().addEvent(this, new CycleEvent() {
+            @Override
+            public void execute(CycleEventContainer container) {
+                updateBossTargetForPlayers();
+            }
+        }, 10);
+    }
+
     private long remainingMs() {
         return expiryTime - System.currentTimeMillis();
     }
@@ -175,6 +184,37 @@ public class BossFactoryInstance extends InstancedArea {
 
     private void clearInstanceTimerForPlayers() {
         getPlayers().forEach(this::clearInstanceTimer);
+    }
+
+    public void onBossDeath() {
+        clearBossTargetForPlayers();
+    }
+
+    private void sendBossTarget(Player player) {
+        if (bossNpc != null && !bossNpc.isDead()) {
+            player.getPA().sendEntityTarget(1, bossNpc);
+        }
+    }
+
+    private void clearBossTarget(Player player) {
+        if (bossNpc == null) {
+            return;
+        }
+        player.getPA().sendEntityTarget(0, bossNpc);
+    }
+
+    private void updateBossTargetForPlayers() {
+        if (bossNpc == null) {
+            return;
+        }
+        if (bossNpc.isDead()) {
+            return;
+        }
+        getPlayers().forEach(this::sendBossTarget);
+    }
+
+    private void clearBossTargetForPlayers() {
+        getPlayers().forEach(this::clearBossTarget);
     }
 
     private String formatRemaining(long remaining) {

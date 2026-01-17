@@ -22,11 +22,16 @@ import io.xeros.model.Graphic;
 import io.xeros.model.ProjectileBase;
 import io.xeros.model.entity.Entity;
 import io.xeros.model.entity.npc.NPC;
+import io.xeros.model.entity.player.Boundary;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.Position;
 
 public class GoblinNecromancerBoss implements BossController, BossMechanicToggle {
     public static final int NPC_ID = 3515;
+    public static final int ENTRY_OBJECT_ID = 42344;
+    public static final Position TELEPORT_POSITION = new Position(1636, 4821, 0);
+    public static final Position BOSS_SPAWN = new Position(1626, 4816, 0);
+    public static final Boundary ARENA_BOUNDARY = new Boundary(1610, 4810, 1649, 4847);
 
     private static final int MAGIC_ANIM = 9829;
     private static final int RANGE_ANIM = 9830;

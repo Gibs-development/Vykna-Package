@@ -16,7 +16,8 @@ public class BossFactoryInstanceDialogue {
         DialogueBuilder builder = new DialogueBuilder(player)
                 .option("Boss Factory Instance",
                         new DialogueOption("Start instance (200k)", plr -> startInstance(plr)),
-                        new DialogueOption("Join instance", BossFactoryInstanceDialogue::joinInstance));
+                        new DialogueOption("Join instance", BossFactoryInstanceDialogue::joinInstance),
+                        new DialogueOption("Rejoin last instance", BossFactoryInstanceDialogue::rejoinLastInstance));
         builder.send();
     }
 
@@ -98,6 +99,15 @@ public class BossFactoryInstanceDialogue {
                         plr.getPA().closeAllWindows();
                     }, () -> plr.sendMessage("No active Boss Factory instance found for that owner."));
         });
+    }
+
+    private static void rejoinLastInstance(Player player) {
+        BossFactoryInstanceManager.getByOwner(player.getLoginNameLower())
+                .filter(instance -> !instance.isExpired())
+                .ifPresentOrElse(instance -> {
+                    instance.enter(player);
+                    player.getPA().closeAllWindows();
+                }, () -> player.sendMessage("You do not have an active Boss Factory instance to rejoin."));
     }
 
     private static String statusLabel(boolean enabled) {

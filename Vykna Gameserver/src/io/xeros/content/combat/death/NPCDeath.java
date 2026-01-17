@@ -18,6 +18,7 @@ import io.xeros.content.bossfactory.BossController;
 import io.xeros.content.bossfactory.BossFactoryRegistry;
 import io.xeros.content.bossfactory.drop.BossDropContext;
 import io.xeros.content.bossfactory.drop.GlobalLootChestReceiver;
+import io.xeros.content.bossfactory.instance.BossFactoryInstance;
 import io.xeros.content.bosses.nightmare.NightmareConstants;
 import io.xeros.content.bosses.wildypursuit.FragmentOfSeren;
 import io.xeros.content.bosses.wildypursuit.TheUnbearable;
@@ -69,6 +70,9 @@ public class NPCDeath {
         if (c.getTargeted() != null && npc.equals(c.getTargeted())) {
             c.setTargeted(null);
             c.getPA().sendEntityTarget(0, npc);
+        }
+        if (npc.getInstance() instanceof BossFactoryInstance) {
+            ((BossFactoryInstance) npc.getInstance()).onBossDeath();
         }
         c.getAchievements().kill(npc);
         PetHandler.rollOnNpcDeath(c, npc);
@@ -370,8 +374,7 @@ public class NPCDeath {
             c.getNpcDeathTracker().add(NpcDef.forId(npcId).getName(), NpcDef.forId(npcId).getCombatLevel(), bossPoints);
         }
 
-        int finalAmountOfDrops = amountOfDrops;
-        Runnable dropAction = () -> Server.getDropManager().create(c, npc, location, finalAmountOfDrops, npcId);
+        Runnable dropAction = () -> Server.getDropManager().create(c, npc, location, amountOfDrops, npcId);
         if (BossFactoryRegistry.isBossId(npcId) && c.isBossLootChestUnlocked()) {
             BossDropContext.runWithReceiver(new GlobalLootChestReceiver(), dropAction);
         } else {
