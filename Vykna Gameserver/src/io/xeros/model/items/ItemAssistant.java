@@ -106,6 +106,14 @@ public class ItemAssistant {
 		sendBankAttrs();
 	}
 
+	public void sendInventoryAttrsNow() {
+		sendInventoryAttrs();
+	}
+
+	public void sendEquipmentAttrsNow() {
+		sendEquipmentAttrs();
+	}
+
 
 	public void addContainerUpdate(ContainerUpdate containerUpdate) {
 		if (!containerUpdates.contains(containerUpdate)) {
@@ -2242,6 +2250,7 @@ public class ItemAssistant {
 		}
 		if (updateView) {
 			queueBankContainerUpdate();
+			processContainerUpdates();
 		}
 		player.getItems().sendInventoryInterface(5064);
 	}

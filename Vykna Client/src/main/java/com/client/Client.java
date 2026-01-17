@@ -4572,6 +4572,7 @@ public class Client extends RSApplet {
 		GameTimerHandler.getSingleton().stopAll();
 		Preferences.save();
 		setGameMode(ScreenMode.FIXED, false);
+		resetAllImageProducers();
 	}
 
 	public void method45() {

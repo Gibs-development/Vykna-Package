@@ -36,6 +36,22 @@ public final class ItemAttributeDropRules {
 		return defaultRule;
 	}
 
+	/**
+	 * Example usage:
+	 * <pre>
+	 * ItemAttributeDropRules rules = ItemAttributeDropRules.getInstance();
+	 * rules.allowItems(Items.ABYSSAL_WHIP, Items.DRAGON_SCIMITAR);
+	 * rules.ruleForNpc(Npcs.ABYSSAL_SIRE)
+	 *     .addRarityChance(1, 0.20) // uncommon 20%
+	 *     .addRarityChance(2, 0.05) // rare 5%
+	 *     .addPerkPool(0.10, 1, 3, 100, 101, 102); // 10% to roll a perk in this pool
+	 * rules.defaultRule().setEnabled(false); // disable elsewhere if desired
+	 * </pre>
+	 */
+	public void exampleSetup() {
+		// Intentionally left empty: copy the snippet above into your startup config.
+	}
+
 	public Rule ruleForNpc(int npcId) {
 		return npcRules.computeIfAbsent(npcId, id -> new Rule());
 	}
