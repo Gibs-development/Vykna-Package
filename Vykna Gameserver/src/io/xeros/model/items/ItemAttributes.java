@@ -37,4 +37,30 @@ public final class ItemAttributes {
                 && perk1 == o.perk1 && perk1Rank == o.perk1Rank
                 && perk2 == o.perk2 && perk2Rank == o.perk2Rank;
     }
+
+    public static String rarityName(int rarityId) {
+        switch (rarityId) {
+            case 0:
+                return "Common";
+            case 1:
+                return "Uncommon";
+            case 2:
+                return "Rare";
+            case 3:
+                return "Epic";
+            case 4:
+                return "Mythic";
+            case 5:
+                return "Mythic";
+            default:
+                return "Unknown";
+        }
+    }
+
+    public static String rarityLabel(ItemAttributes attrs) {
+        if (attrs == null || attrs.rarityId <= 0) {
+            return "";
+        }
+        return " [" + rarityName(attrs.rarityId).toUpperCase() + "]";
+    }
 }

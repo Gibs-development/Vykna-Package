@@ -40,6 +40,10 @@ public class GroundItem {
 	 */
 	private final int amount;
 
+	// ---- Vykna item attributes (rarity/perks/etc) ----
+	private ItemAttributes attrs; // null = no attributes
+	private int attrsHash;        // 0 = no attributes
+
 	public int globalisationTicks;
 
 	public int removeTicks;
@@ -70,6 +74,24 @@ public class GroundItem {
 		this.amount = amount;
 		this.globalisationTicks = globalisationTicks;
 		this.ownerName = name;
+	}
+
+	public boolean hasAttrs() {
+		return attrs != null && attrsHash != 0;
+	}
+
+	public ItemAttributes getAttrs() {
+		return attrs;
+	}
+
+	public int getAttrsHash() {
+		return attrsHash;
+	}
+
+	public GroundItem setAttrs(ItemAttributes attrs) {
+		this.attrs = attrs == null ? null : attrs.copy();
+		this.attrsHash = (attrs == null) ? 0 : attrs.computeHash();
+		return this;
 	}
 
 	public boolean isViewable(Player player) {

@@ -28,6 +28,7 @@ import io.xeros.content.world_event_solak.SolakEventBossHandler;
 import io.xeros.model.Npcs;
 import io.xeros.model.cycleevent.CycleEvent;
 import io.xeros.model.cycleevent.CycleEventContainer;
+import io.xeros.model.items.ItemAttributes;
 import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.definitions.NpcDef;
@@ -356,19 +357,48 @@ public class NPCDeath {
 
     public static void announce(Player player, GameItem item, int npcId) {
         if (!player.getDisplayName().equalsIgnoreCase("thimble") && !player.getDisplayName().equalsIgnoreCase("top hat")) {
-            announceKc(player, item, player.getNpcDeathTracker().getKc(NpcDef.forId(npcId).getName()));
+            announceNpcDrop(player, item, npcId, player.getNpcDeathTracker().getKc(NpcDef.forId(npcId).getName()));
         }
     }
 
     public static void announceKc(Player player, GameItem item, int kc) {
-        PlayerHandler.executeGlobalMessage("@pur@" + player.getDisplayNameFormatted() + " received a drop: " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at <col=E9362B>" + kc  + "</col>@pur@ kills.");
+        String message = buildDropAnnouncement(player, item, null, kc);
+        PlayerHandler.executeGlobalMessage(message);
+        Discord.writeDropsSyncMessage(stripTags(message));
+    }
 
-        Discord.writeDropsSyncMessage(""+ player.getLoginName() + " received a drop: " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at " + kc  + " kills.");
+    private static void announceNpcDrop(Player player, GameItem item, int npcId, int kc) {
+        String message = buildDropAnnouncement(player, item, NpcDef.forId(npcId).getName(), kc);
+        PlayerHandler.executeGlobalMessage(message);
+        Discord.writeDropsSyncMessage(stripTags(message));
     }
 
     public static boolean isDoubleDrops() {
         return (Configuration.DOUBLE_DROPS_TIMER > 0 || Configuration.DOUBLE_DROPS);
+    }
+
+    private static String buildDropAnnouncement(Player player, GameItem item, String npcName, int kc) {
+        String rarityText = "";
+        if (item != null && item.getAttrs() != null) {
+            rarityText = ItemAttributes.rarityName(item.getAttrs().rarityId).toUpperCase() + " ";
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("@pur@")
+                .append(player.getDisplayNameFormatted())
+                .append(" received a ")
+                .append(rarityText)
+                .append("drop: ")
+                .append(ItemDef.forId(item.getId()).getName())
+                .append(" x ")
+                .append(item.getAmount());
+        if (npcName != null && !npcName.isEmpty()) {
+            builder.append(" from ").append(npcName);
+        }
+        builder.append(" at <col=E9362B>").append(kc).append("</col>@pur@ kills.");
+        return builder.toString();
+    }
+
+    private static String stripTags(String text) {
+        return text.replaceAll("<[^>]+>", "").replaceAll("@[a-zA-Z0-9]+@", "");
     }
 }

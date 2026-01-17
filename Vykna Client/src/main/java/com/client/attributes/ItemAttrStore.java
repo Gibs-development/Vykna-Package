@@ -14,27 +14,37 @@ public final class ItemAttrStore {
         public int perk1, perk1Rank;
         public int perk2, perk2Rank;
     }
+    /**
+     * Canonical rarity mapping (icons + text colors):
+     * Common   -> items/itemcommon.png   -> white/grey text
+     * Uncommon -> items/itemuncommon.png -> green text
+     * Rare     -> items/itemrare.png     -> blue text
+     * Epic     -> items/itemepic.png     -> purple text
+     * Mythic   -> items/itemmythic.png   -> orange/gold text
+     */
     public static int rarityToColor(int rarityId) {
         switch (rarityId) {
-            case 1: return 0x00FF00; // common (green)
-            case 2: return 0xA0A0A0; // uncommon (grey)
-            case 3: return 0x2E6BFF; // rare (blue)
-            case 4: return 0xB84DFF; // epic (purple)
-            case 5: return 0xFF2E2E; // mythic (red)
+            case 0: return 0xE0E0E0; // common
+            case 1: return 0x2ECC71; // uncommon
+            case 2: return 0x3B82F6; // rare
+            case 3: return 0xA855F7; // epic
+            case 4: return 0xF5A623; // mythic
+            case 5: return 0xF5A623; // mythic (legacy)
             default: return -1;
         }
     }
-    private static final Sprite COMMON   = new Sprite("items/itemCommon");
-    private static final Sprite UNCOMMON = new Sprite("items/itemUncommon");
-    private static final Sprite RARE     = new Sprite("items/itemRare");
-    private static final Sprite EPIC     = new Sprite("items/itemEpic");
-    private static final Sprite MYTHIC   = new Sprite("items/itemMythic");
+    private static final Sprite COMMON   = new Sprite("items/itemcommon");
+    private static final Sprite UNCOMMON = new Sprite("items/itemuncommon");
+    private static final Sprite RARE     = new Sprite("items/itemrare");
+    private static final Sprite EPIC     = new Sprite("items/itemepic");
+    private static final Sprite MYTHIC   = new Sprite("items/itemmythic");
     public static Sprite spriteForRarity(int rarityId) {
         switch (rarityId) {
-            case 1: return COMMON;
-            case 2: return UNCOMMON;
-            case 3: return RARE;
-            case 4: return EPIC;
+            case 0: return COMMON;
+            case 1: return UNCOMMON;
+            case 2: return RARE;
+            case 3: return EPIC;
+            case 4: return MYTHIC;
             case 5: return MYTHIC;
             default: return null;
         }
