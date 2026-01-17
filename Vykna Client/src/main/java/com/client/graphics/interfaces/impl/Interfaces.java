@@ -4377,80 +4377,9 @@ interfaceId+=5000;
 
 
 	public static void achievementInterface(TextDrawingArea[] TDA) {
-		RSInterface rsi = addTabInterface(35000);
-		addSprite(35001, 517, "Interfaces/newachievements/IMAGE");
-		addHoverButton(35002,"Interfaces/newachievements/IMAGE", 17, 15, 15, "Close", 250, 35003, 3);
-		addHoveredButton(35003,"Interfaces/newachievements/IMAGE", 18, 15, 15, 35004);
-		addText(35005, ""+Configuration.CLIENT_TITLE+" Achievements", TDA, 2, 0xF7AA25, true, true);
-		addText(35006, "{ ACHIEVEMENT NAME }", TDA, 2, 0xBF7D0A, true, true);
-		addText(35007, "Description:", TDA, 1, 0xF7AA25, false, true);
-		addText(35008, "{ DESCRIPTION HERE }", TDA, 0, 0xD19732, false, true);
-		addText(35009, "Difficulty:", TDA, 1, 0xF7AA25, false, true);
-		addText(35010, "{ DIFFICULTY HERE }", TDA, 0, 0xD19732, false, true);
-		addText(35011, "Progress:", TDA, 1, 0xF7AA25, false, true);
-		addText(35012, "{ PROGRESS HERE }", TDA, 0, 0xD19732, false, true);
-		addText(35013, "Reward:", TDA, 1, 0xF7AA25, false, true);
-		addText(35014, "{ REWARD HERE }", TDA, 0, 0xD19732, false, true);
-		addText(36000, "Other rewards:", TDA, 1, 0xff9040, false, true);
-		addText(35015, "Completed: 3/10", TDA, 0, 0xBF7D0A, true, true);
-		addText(35016, "Points: 12", TDA, 0, 0xBF7D0A, true, true);
-
-		addItemContainer(36002, 2, 10, 0, 0, false);
-		addHoverButton(35017,"Interfaces/newachievements/IMAGE", 513, 37, 25, "Easy", -1, 35018, 1);
-		addHoveredButton(35018, "Interfaces/newachievements/IMAGE",514, 37, 25, 35019);
-		addHoverButton(35020,"Interfaces/newachievements/IMAGE", 513, 37, 25, "Medium", -1, 35021, 1);
-		addHoveredButton(35021,"Interfaces/newachievements/IMAGE", 514, 37, 25, 35022);
-		addHoverButton(35023,"Interfaces/newachievements/IMAGE", 513, 37, 25, "Hard", -1, 35024, 1);
-		addHoveredButton(35024,"Interfaces/newachievements/IMAGE", 514, 37, 25, 35025);
-		addText(35026, "Easy", TDA, 0, 0xBF7D0A, true, true);
-		addText(35027, "Med", TDA, 0, 0xBF7D0A, true, true);
-		addText(35028, "Hard", TDA, 0, 0xBF7D0A, true, true);
-		addConfigSpriteNew(35029,"Interfaces/newachievements/IMAGE", 518, 519, 0, 694);
-		rsi.totalChildren(28);
-		rsi.child(0, 35001, 14, 18);
-		rsi.child(1, 35002, 470, 30);
-		rsi.child(2, 35003, 470, 30);
-		rsi.child(3, 35005, 270, 31);
-		rsi.child(4, 35006, 340, 75);
-		rsi.child(5, 35007, 200, 100);
-		rsi.child(6, 35008, 210, 120);
-		rsi.child(7, 35009, 200, 140);
-		rsi.child(8, 35010, 210, 160);
-		rsi.child(9, 35011, 200, 180);
-		rsi.child(10, 35012, 210, 200);
-		rsi.child(11, 35013, 200, 220);
-		rsi.child(12, 35014, 210, 240);
-		rsi.child(13, 35030, 22, 91);
-		rsi.child(14, 35015, 260, 286);
-		rsi.child(15, 35016, 420, 286);
-		rsi.child(16, 35017, 40, 64);
-		rsi.child(17, 35018, 40, 64);
-		rsi.child(18, 35020, 83, 64);
-		rsi.child(19, 35021, 83, 64);
-		rsi.child(20, 35023, 125, 64);
-		rsi.child(21, 35024, 125, 64);
-		rsi.child(22, 35026, 57, 71);
-		rsi.child(23, 35027, 101, 71);
-		rsi.child(24, 35028, 142, 71);
-		rsi.child(25, 35029, 463, 65);
-
-		rsi.child(26, 36000, 380, 206);
-		rsi.child(27, 36002, 408, 229);//365 229
-		RSInterface scrollInterface = addTabInterface(35030);
-		scrollInterface.scrollPosition = 0;
-		scrollInterface.contentType = 0;
-		scrollInterface.width = 138;
-		scrollInterface.height = 218;
-		scrollInterface.scrollMax = 500;
-		int x = 7, y = 9;
-		int amountOfLines = 50;
-		scrollInterface.totalChildren(amountOfLines);
-		for (int i = 0; i < amountOfLines; i++) {
-			addHoverText(35031 + i, "", "View achievement", TDA, 0, 0xff0000, false, true, 168);
-			scrollInterface.child(i, 35031 + i, x, y);
-			y += 18;
-		}
+		CombatAchievementsInterface.build(TDA);
 	}
+
 
 	public static void playerProfiler(TextDrawingArea[] TDA) {
 		RSInterface rsi = addInterface(41800);
