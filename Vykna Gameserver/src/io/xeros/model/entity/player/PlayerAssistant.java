@@ -43,6 +43,7 @@ import io.xeros.content.skills.slayer.Task;
 import io.xeros.content.skills.smithing.Smelting;
 import io.xeros.content.skills.smithing.Smelting.Bars;
 import io.xeros.content.skills.woodcutting.Tree;
+import io.xeros.content.bossfactory.instance.BossFactoryInstance;
 import io.xeros.content.sound.Sfx;
 import io.xeros.content.wildwarning.WildWarning;
 import io.xeros.model.AmountInput;
@@ -2328,6 +2329,9 @@ public class PlayerAssistant {
 		}
 		if (!canTeleport(teleportType)) {
 			return;
+		}
+		if (c.getInstance() instanceof BossFactoryInstance) {
+			((BossFactoryInstance) c.getInstance()).onPlayerTeleport(c);
 		}
 
 		if (c.stopPlayerSkill) {
