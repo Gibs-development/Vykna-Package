@@ -71,6 +71,8 @@ public class DropManager {
     private static final int DROP_AMOUNT_CONFIG_ID = 1356;
     private static final String LAST_OPENED_TABLE_KEY = "drop_manager_last_opened";
 
+    private final ItemAttributeDropRules attributeDropRules = ItemAttributeDropRules.getInstance();
+
     private static final Comparator<Integer> COMPARE_NAMES =(o1, o2) -> {
         String name1 = NpcDef.forId(o1).getName();
         String name2 = NpcDef.forId(o2).getName();
@@ -636,15 +638,15 @@ public class DropManager {
             double modifier = getModifier(player);
             List<GameItem> drops = g.access(player, npc, modifier, repeats, npcId);
             for (GameItem item : drops) {
+                GameItem dropItem = attributeDropRules.applyAttributes(npcId, item);
 
                 if (player.getItems().isWearingItem(21126) && Misc.random(100) == 1) { // Hazelmere signut author C.T
-                    player.sendMessage("<col=ff7000>The power of Hazelmere blesses your " + item.getDef().getName() + ", doubling it before your very eyes!</col>");
-                    Server.itemHandler.createGroundItem(player, item.getId(), location.getX(), location.getY(), location.getZ(), item.getAmount(), player.getIndex());
+                    player.sendMessage("<col=ff7000>The power of Hazelmere blesses your " + dropItem.getDef().getName() + ", doubling it before your very eyes!</col>");
+                    Server.itemHandler.createGroundItem(player, dropItem, location.toPosition());
                 }
 
-                onDrop(player, item, npcId);
-                Server.itemHandler.createGroundItem(player, item.getId(), location.getX(), location.getY(),
-                        location.getZ(), item.getAmount(), player.getIndex());
+                onDrop(player, dropItem, npcId);
+                Server.itemHandler.createGroundItem(player, dropItem, location.toPosition());
             }
             handle(player, npc, location, repeats, npcId);
         });
