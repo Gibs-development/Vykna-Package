@@ -95,6 +95,18 @@ public final class NpcDefinition {
 			entityDef.size = 6;
 		}
 
+		if (i == 3515) {//Giant sea snake
+			entityDef.name = "Mother Madera";
+			entityDef.combatLevel = 252;
+			entityDef.actions = new String[] { null, "Attack", null, null, null };
+			//entityDef.getDegreesToTurn = 64;
+			entityDef.anInt91 = 500;
+			entityDef.anInt86 = 500;
+			//	entityDef.combatLevel = 0;
+			entityDef.size = 6;
+		}
+
+
 
 
 		if (i == 3406) {//Mini solak
