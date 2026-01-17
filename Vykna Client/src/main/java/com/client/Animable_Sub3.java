@@ -20,9 +20,15 @@ final class Animable_Sub3 extends Renderable {
 
 	@Override
 	public Model getRotatedModel() {
+		if (aSpotAnim_1568 == null) {
+			return null;
+		}
 		Model model = aSpotAnim_1568.getModel();
 		if (model == null)
 			return null;
+		if (aSpotAnim_1568.aAnimation_407 == null) {
+			return model;
+		}
 		int j = aSpotAnim_1568.aAnimation_407.anIntArray353[anInt1569];
 		Model model_1 = new Model(true, Class36.method532(j), false, model);
 		if (!aBoolean1567) {
@@ -53,6 +59,9 @@ final class Animable_Sub3 extends Renderable {
 	}
 
 	public void method454(int i) {
+		if (aSpotAnim_1568 == null || aSpotAnim_1568.aAnimation_407 == null) {
+			return;
+		}
 		for (anInt1570 += i; anInt1570 > aSpotAnim_1568.aAnimation_407.method258(anInt1569); ) {
 			anInt1570 -= aSpotAnim_1568.aAnimation_407.method258(anInt1569) + 1;
 			anInt1569++;
