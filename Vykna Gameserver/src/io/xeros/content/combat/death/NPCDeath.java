@@ -28,6 +28,7 @@ import io.xeros.content.world_event_solak.SolakEventBossHandler;
 import io.xeros.model.Npcs;
 import io.xeros.model.cycleevent.CycleEvent;
 import io.xeros.model.cycleevent.CycleEventContainer;
+import io.xeros.model.items.ItemAttributes;
 import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.definitions.NpcDef;
@@ -356,16 +357,29 @@ public class NPCDeath {
 
     public static void announce(Player player, GameItem item, int npcId) {
         if (!player.getDisplayName().equalsIgnoreCase("thimble") && !player.getDisplayName().equalsIgnoreCase("top hat")) {
-            announceKc(player, item, player.getNpcDeathTracker().getKc(NpcDef.forId(npcId).getName()));
+            announceNpcDrop(player, item, npcId, player.getNpcDeathTracker().getKc(NpcDef.forId(npcId).getName()));
         }
     }
 
     public static void announceKc(Player player, GameItem item, int kc) {
-        PlayerHandler.executeGlobalMessage("@pur@" + player.getDisplayNameFormatted() + " received a drop: " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at <col=E9362B>" + kc  + "</col>@pur@ kills.");
+        String rarityLabel = ItemAttributes.rarityLabel(item.getAttrs());
+        PlayerHandler.executeGlobalMessage("@pur@" + player.getDisplayNameFormatted() + " received a drop" + rarityLabel + ": " +
+                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at <col=E9362B>" + kc + "</col>@pur@ kills.");
 
-        Discord.writeDropsSyncMessage(""+ player.getLoginName() + " received a drop: " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at " + kc  + " kills.");
+        Discord.writeDropsSyncMessage("" + player.getLoginName() + " received a drop" + rarityLabel + ": " +
+                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at " + kc + " kills.");
+    }
+
+    private static void announceNpcDrop(Player player, GameItem item, int npcId, int kc) {
+        String npcName = NpcDef.forId(npcId).getName();
+        String rarityLabel = ItemAttributes.rarityLabel(item.getAttrs());
+        PlayerHandler.executeGlobalMessage("@pur@" + player.getDisplayNameFormatted() + " received a drop" + rarityLabel + ": " +
+                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " from " + npcName
+                + " at <col=E9362B>" + kc + "</col>@pur@ kills.");
+
+        Discord.writeDropsSyncMessage("" + player.getLoginName() + " received a drop" + rarityLabel + ": " +
+                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " from " + npcName
+                + " at " + kc + " kills.");
     }
 
     public static boolean isDoubleDrops() {

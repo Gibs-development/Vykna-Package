@@ -914,6 +914,15 @@ public class Client extends RSApplet {
 		}
 	}
 
+	private void refreshShellResizableState() {
+		JFrame frame = ClientWindow.getFrame();
+		if (frame instanceof VyknaShell) {
+			VyknaShell shell = (VyknaShell) frame;
+			shell.updateResizableState(currentScreenMode, getUserSettings().getInterfaceStyle());
+			frame.setResizable(ClientWindow.isResizable());
+		}
+	}
+
 
 	/**
 	 * Width of the viewport into the game world, which doesn't include tab/chat/minimap interface area on fixed.
@@ -4572,7 +4581,8 @@ public class Client extends RSApplet {
 		GameTimerHandler.getSingleton().stopAll();
 		Preferences.save();
 		setGameMode(ScreenMode.FIXED, false);
-		resetAllImageProducers();
+		resetAllImageProducers(true);
+		refreshShellResizableState();
 	}
 
 	public void method45() {
@@ -9486,46 +9496,8 @@ public class Client extends RSApplet {
 			mouseY-=50;
 		}
 
-		if(controlIsDown){
-			drawStatMenu(itemName, itemId,color);
-			return;
-		}
-
-		if (menuActionRow < 2 && itemSelected == 0 && spellSelected == 0) {
-			return;
-		}
-		if(menuOpen){
-			return;
-		}
-		if(tabID!=3){
-			return;
-		}
-
-
-		if(currentScreenMode == ScreenMode.FIXED){
-			if(Client.instance.getMouseY() < 214 || Client.instance.getMouseX() < 561){
-				return;
-			}
-			mouseX-=516;
-			// mouseX-=491;
-			mouseY-=158;
-			if(Client.instance.getMouseX() > 600 && Client.instance.getMouseX() < 685) {
-				mouseX-=60;
-
-			}
-			if(Client.instance.getMouseX() > 685){
-				mouseX-=120;
-			}
-		}
-
-
-		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, 150, 36, 0x696969);
-		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, 150, 37, 0x000000,90);
-
-		Client.instance.newSmallFont.drawBasicString(itemName, mouseX + 150 / (12 +  Client.instance.newSmallFont.getTextWidth(itemName))+30 , mouseY + 17, color, 1);
-		Client.instance.newSmallFont.drawBasicString("Hold CTRL to view details", mouseX + 4, mouseY + 35, color, 1);
-
-
+		drawStatMenu(itemName, itemId, color);
+		return;
 
 	}
 	public void drawStatMenu(String itemName,int itemId, int color) {
@@ -9582,34 +9554,81 @@ public class Client extends RSApplet {
 		com.client.attributes.ItemAttrStore.Attr attr =
 				com.client.attributes.ItemAttrStore.get(interfaceId, slot);
 
-		int boxH = 105;
-		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, 200, boxH, 0x696969);
-		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, 200, boxH + 1, 0x000000, 90);
+		int perkCount = 0;
+		if (attr != null) {
+			if (attr.perk1 > 0) {
+				perkCount++;
+			}
+			if (attr.perk2 > 0) {
+				perkCount++;
+			}
+		}
 
-// Title
-		Client.instance.newSmallFont.drawBasicString(itemName, mouseX + 6, mouseY + 18, color, 1);
+		int boxWidth = 240;
+		int perkBlockHeight = 46;
+		int boxH = perkCount > 0 ? 76 + perkBlockHeight : 80;
+		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, boxWidth, boxH, 0x696969);
+		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, boxWidth, boxH + 1, 0x000000, 90);
 
-// If nothing found, show that clearly (this is your “are we receiving packets?” signal)
-		if (attr == null) {
-			Client.instance.newSmallFont.drawBasicString("No attributes received", mouseX + 6, mouseY + 35, 0xAAAAAA, 1);
-			Client.instance.newSmallFont.drawBasicString("iface=" + interfaceId + " slot=" + slot, mouseX + 6, mouseY + 50, 0xAAAAAA, 1);
-			Client.instance.newSmallFont.drawBasicString("Tip: check opcode decode + server send", mouseX + 6, mouseY + 65, 0xAAAAAA, 1);
+		Client.instance.newSmallFont.drawBasicString(itemName, mouseX + 8, mouseY + 18, color, 1);
+
+		String rarityLabel = attr == null ? "None" : rarityName(attr.rarityId);
+		int rarityColor = attr == null ? color : com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
+		if (rarityColor <= 0) {
+			rarityColor = color;
+		}
+		Client.instance.newSmallFont.drawBasicString("Rarity: " + rarityLabel, mouseX + 8, mouseY + 34, rarityColor, 1);
+
+		if (attr == null || perkCount == 0) {
+			Client.instance.newSmallFont.drawBasicString("No perks rolled", mouseX + 8, mouseY + 52, 0xAAAAAA, 1);
 			return;
 		}
 
-// Lines
-		String line1 = "Hash: " + attr.hash;
-		String line2 = "Rarity: " + rarityName(attr.rarityId) + " (" + attr.rarityId + ")";
-		String line3 = "Perk1: " + attr.perk1 + "  Rank: " + attr.perk1Rank;
-		String line4 = "Perk2: " + attr.perk2 + "  Rank: " + attr.perk2Rank;
-		String line5 = "iface=" + interfaceId + " slot=" + slot + " id=" + itemId;
+		int padding = 8;
+		int blockGap = 6;
+		int columns = perkCount > 1 ? 2 : 1;
+		int blockWidth = columns == 2 ? (boxWidth - (padding * 2) - blockGap) / 2 : (boxWidth - (padding * 2));
+		int blockY = mouseY + 48;
 
-		Client.instance.newSmallFont.drawBasicString(line1, mouseX + 6, mouseY + 35, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line2, mouseX + 6, mouseY + 49, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line3, mouseX + 6, mouseY + 63, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line4, mouseX + 6, mouseY + 77, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line5, mouseX + 6, mouseY + 91, 0xAAAAAA, 1);
+		if (attr.perk1 > 0) {
+			int blockX = mouseX + padding;
+			drawPerkBlock(blockX, blockY, blockWidth, attr.perk1, attr.perk1Rank, color);
+		}
+		if (attr.perk2 > 0) {
+			int blockX = mouseX + padding + blockWidth + blockGap;
+			if (columns == 1) {
+				blockX = mouseX + padding;
+				blockY += perkBlockHeight + 6;
+			}
+			drawPerkBlock(blockX, blockY, blockWidth, attr.perk2, attr.perk2Rank, color);
+		}
 
+	}
+
+	private void drawPerkBlock(int x, int y, int width, int perkId, int perkRank, int textColor) {
+		com.client.attributes.PerkDefinitions.PerkDefinition perk =
+				com.client.attributes.PerkDefinitions.forId(perkId);
+		String perkName = perk == null ? ("Unknown Perk (" + perkId + ")") : perk.getName();
+		String perkDesc = perk == null ? "Unknown perk effect." : perk.getDescription();
+		Sprite icon = perk == null ? null : perk.getIcon(perkRank);
+
+		int iconSize = 24;
+		int iconX = x + 2;
+		int iconY = y + 4;
+		if (icon != null && icon.myWidth > 0) {
+			icon.drawSprite(iconX, iconY);
+			iconSize = icon.myWidth;
+		}
+
+		int textX = x + iconSize + 8;
+		int textWidth = Math.max(60, width - (textX - x) - 4);
+		Client.instance.newSmallFont.drawBasicString(perkName + " (Rank " + perkRank + ")", textX, y + 14, textColor, 1);
+		String[] descLines = Client.instance.newSmallFont.wrap(perkDesc, textWidth);
+		int descY = y + 28;
+		for (int i = 0; i < descLines.length && i < 2; i++) {
+			Client.instance.newSmallFont.drawBasicString(descLines[i], textX, descY, 0xCCCCCC, 1);
+			descY += 12;
+		}
 	}
 
 	private void buildChatAreaMenu(int j) {
@@ -21633,8 +21652,8 @@ public class Client extends RSApplet {
 		particles.add(particle);
 	}
 
-	public void resetAllImageProducers() {
-		if (super.fullGameScreen != null) {
+	public void resetAllImageProducers(boolean force) {
+		if (!force && super.fullGameScreen != null) {
 			return;
 		}
 		loginScreenGraphicsBuffer = null;

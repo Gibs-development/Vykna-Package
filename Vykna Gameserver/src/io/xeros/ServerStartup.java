@@ -38,6 +38,8 @@ import io.xeros.content.world_boss_events.EventBossHandler;
 import io.xeros.content.world_event.Tournament;
 import io.xeros.content.world_event.WorldEvent;
 import io.xeros.content.world_event_galvek.GalvekEventBossHandler;
+import io.xeros.model.entity.npc.drops.ItemAttributeDropConfig;
+import io.xeros.model.entity.npc.drops.ItemAttributeDropRules;
 import io.xeros.content.world_event_solak.SolakEventBossHandler;
 import io.xeros.model.Npcs;
 import io.xeros.model.collisionmap.ObjectDef;
@@ -124,6 +126,7 @@ public class ServerStartup {
         LobbyManager.initializeLobbies();
       //  VotePanelManager.init();
         Server.getDropManager().read();
+        ItemAttributeDropConfig.configure(ItemAttributeDropRules.getInstance());
         TreasureTrailsRewards.load();
         AnimationLength.startup();
         PresetManager.getSingleton().init();
