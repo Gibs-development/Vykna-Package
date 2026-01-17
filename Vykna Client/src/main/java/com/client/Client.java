@@ -19661,6 +19661,7 @@ public class Client extends RSApplet {
 									com.client.attributes.ItemAttrStore.Attr attr =
 											new com.client.attributes.ItemAttrStore.Attr();
 									attr.hash = hash;
+									attr.itemId = id2;
 									attr.rarityId = rarity;
 									attr.perk1 = perk1;
 									attr.perk1Rank = perk1Rank;
