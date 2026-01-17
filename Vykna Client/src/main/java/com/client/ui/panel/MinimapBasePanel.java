@@ -54,4 +54,9 @@ public class MinimapBasePanel extends PanelManager.BasePanel {
 		client.processRs3MinimapClick(absoluteX, absoluteY, bounds.x, bounds.y + headerHeight, bounds.width, bounds.height - headerHeight);
 		return true;
 	}
+
+	@Override
+	public boolean isClosable() {
+		return false;
+	}
 }

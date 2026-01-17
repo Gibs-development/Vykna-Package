@@ -362,6 +362,18 @@ public class PanelManager {
 		ensureRs3Layout(client);
 	}
 
+	public void reloadLayoutFromSettings(Client client) {
+		activePanel = null;
+		dragging = false;
+		resizing = false;
+		mouseDownLastFrame = false;
+		layoutWidth = -1;
+		layoutHeight = -1;
+		panels.clear();
+		preferredBounds.clear();
+		ensureRs3Layout(client);
+	}
+
 	public void saveLayout(Client client) {
 		saveLayoutToSettings(client);
 	}
@@ -539,8 +551,8 @@ public class PanelManager {
 		private static final int TELEPORT_HEIGHT = 20;
 		private static final int XP_PANEL_WIDTH = 130;
 		private static final int XP_PANEL_HEIGHT = 28;
-		private static final int ACTION_BAR_WIDTH = 420;
-		private static final int ACTION_BAR_HEIGHT = 70;
+		private static final int ACTION_BAR_WIDTH = 520;
+		private static final int ACTION_BAR_HEIGHT = 96;
 		private static final int CHAT_PANEL_WIDTH = 516;
 		private static final int CHAT_PANEL_HEIGHT = 165 + PANEL_HEADER_HEIGHT;
 		private static final int TAB_BAR_PANEL_WIDTH = 76;
@@ -1064,6 +1076,8 @@ public class PanelManager {
 			}
 		}
 		int headerColor = adjustColor(backgroundColor, 10);
+		int highlightColor = adjustColor(backgroundColor, 22);
+		int shadowColor = adjustColor(backgroundColor, -12);
 		Rectangle bounds = panel.getBounds();
 		int headerHeight = getPanelHeaderHeight(client, panel);
 		if (backgroundAlpha < 255) {
@@ -1071,16 +1085,22 @@ public class PanelManager {
 			if (headerHeight > 0) {
 				DrawingArea.drawAlphaPixels(bounds.x, bounds.y, bounds.width, headerHeight, headerColor, backgroundAlpha);
 			}
+			DrawingArea.drawAlphaGradient(bounds.x, bounds.y, bounds.width, bounds.height,
+					highlightColor, shadowColor, Math.min(backgroundAlpha, 140));
 		} else {
 			DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x, backgroundColor, bounds.width);
 			if (headerHeight > 0) {
 				DrawingArea.drawPixels(headerHeight, bounds.y, bounds.x, headerColor, bounds.width);
 			}
+			DrawingArea.drawAlphaGradient(bounds.x, bounds.y, bounds.width, bounds.height,
+					highlightColor, shadowColor, 110);
 		}
 		DrawingArea.drawPixels(1, bounds.y, bounds.x, PANEL_BORDER, bounds.width);
 		DrawingArea.drawPixels(1, bounds.y + bounds.height - 1, bounds.x, PANEL_BORDER, bounds.width);
 		DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x, PANEL_BORDER, 1);
 		DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x + bounds.width - 1, PANEL_BORDER, 1);
+		DrawingArea.drawPixels(1, bounds.y + 1, bounds.x + 1, highlightColor, bounds.width - 2);
+		DrawingArea.drawPixels(1, bounds.y + bounds.height - 2, bounds.x + 1, shadowColor, bounds.width - 2);
 		if (headerHeight > 0) {
 			DrawingArea.drawPixels(1, bounds.y + headerHeight, bounds.x, PANEL_BORDER, bounds.width);
 			String title = panel.getTitle();

@@ -11,7 +11,9 @@ import com.client.utilities.settings.Settings;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicButtonUI;
+import javax.swing.plaf.basic.BasicComboBoxUI;
 import javax.swing.plaf.basic.BasicScrollBarUI;
+import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -316,17 +318,34 @@ public final class VyknaShell extends JFrame {
         cb.setBorder(BorderFactory.createLineBorder(BORDER));
         cb.setFocusable(false);
 
+        cb.setUI(new BasicComboBoxUI() {
+            @Override protected JButton createArrowButton() {
+                JButton b = new JButton("▾");
+                b.setFocusable(false);
+                b.setOpaque(true);
+                b.setBackground(PANEL_2);
+                b.setForeground(TEXT_DIM);
+                b.setBorder(BorderFactory.createMatteBorder(0, 1, 0, 0, BORDER));
+                b.setPreferredSize(new Dimension(20, 18));
+                b.addMouseListener(new MouseAdapter() {
+                    @Override public void mouseEntered(MouseEvent e) { b.setForeground(TEXT); }
+                    @Override public void mouseExited(MouseEvent e) { b.setForeground(TEXT_DIM); }
+                });
+                return b;
+            }
+        });
+
         cb.setRenderer(new DefaultListCellRenderer() {
             @Override
             public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                           boolean isSelected, boolean cellHasFocus) {
                 JLabel l = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
                 l.setOpaque(true);
-                l.setBorder(new EmptyBorder(4, 8, 4, 8));
+                l.setBorder(new EmptyBorder(6, 10, 6, 10));
                 l.setForeground(isSelected ? TEXT : TEXT_DIM);
-                l.setBackground(isSelected ? new Color(30, 32, 35) : PANEL);
-                list.setBackground(PANEL);
-                list.setSelectionBackground(new Color(30, 32, 35));
+                l.setBackground(isSelected ? new Color(34, 36, 40) : PANEL_2);
+                list.setBackground(PANEL_2);
+                list.setSelectionBackground(new Color(34, 36, 40));
                 list.setSelectionForeground(TEXT);
                 return l;
             }
@@ -337,9 +356,57 @@ public final class VyknaShell extends JFrame {
         if (child instanceof JPopupMenu) {
             JPopupMenu popup = (JPopupMenu) child;
             popup.setBorder(BorderFactory.createLineBorder(BORDER));
-            popup.setBackground(PANEL);
+            popup.setBackground(PANEL_2);
             popup.setOpaque(true);
         }
+    }
+
+    static void styleSlider(JSlider slider) {
+        slider.setOpaque(false);
+        slider.setForeground(ACCENT);
+        slider.setBackground(PANEL);
+        slider.setUI(new BasicSliderUI(slider) {
+            @Override public void paintTrack(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                try {
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    int trackHeight = 6;
+                    int trackY = trackRect.y + (trackRect.height - trackHeight) / 2;
+                    int trackX = trackRect.x;
+                    int trackW = trackRect.width;
+
+                    g2.setColor(new Color(22, 24, 27));
+                    g2.fillRoundRect(trackX, trackY, trackW, trackHeight, 6, 6);
+
+                    int fillW = (int) ((trackW) * (slider.getValue() - slider.getMinimum()) / (double) (slider.getMaximum() - slider.getMinimum()));
+                    g2.setColor(new Color(180, 130, 50));
+                    g2.fillRoundRect(trackX, trackY, fillW, trackHeight, 6, 6);
+
+                    g2.setColor(new Color(48, 52, 58));
+                    g2.drawRoundRect(trackX, trackY, trackW - 1, trackHeight - 1, 6, 6);
+                } finally {
+                    g2.dispose();
+                }
+            }
+
+            @Override public void paintThumb(Graphics g) {
+                Graphics2D g2 = (Graphics2D) g.create();
+                try {
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                    int size = 14;
+                    int x = thumbRect.x + (thumbRect.width - size) / 2;
+                    int y = thumbRect.y + (thumbRect.height - size) / 2;
+                    g2.setColor(new Color(44, 47, 52));
+                    g2.fillOval(x, y, size, size);
+                    g2.setColor(new Color(200, 150, 60));
+                    g2.drawOval(x, y, size - 1, size - 1);
+                    g2.setColor(new Color(90, 65, 20));
+                    g2.drawOval(x + 2, y + 2, size - 5, size - 5);
+                } finally {
+                    g2.dispose();
+                }
+            }
+        });
     }
 
     private final class ResizeGlassPane extends JComponent {

@@ -21,6 +21,7 @@ import lombok.extern.java.Log;
 public class SettingsManager {
 
 	private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(SettingsManager.class.getName());
+	private static final String PRESET_PREFIX = "settings_preset_";
 
 	public static final int DEFAULT_FOG_COLOR = 0;
 	public static final int DEFAULT_START_MENU_COLOR = 0;
@@ -61,5 +62,42 @@ public class SettingsManager {
         } catch (ClassNotFoundException ex) {
         	ex.printStackTrace();
 		}
+	}
+
+	public static void savePreset(Settings settings, String presetName) throws IOException {
+		if (settings == null) {
+			return;
+		}
+		String safeName = sanitizePresetName(presetName);
+		ObjectOutputStream output = new ObjectOutputStream(new FileOutputStream(new File(Signlink.getCacheDirectory() + PRESET_PREFIX + safeName + ".ser")));
+		try {
+			output.writeObject(settings);
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			output.flush();
+			output.close();
+		}
+	}
+
+	public static Settings loadPreset(String presetName) {
+		String safeName = sanitizePresetName(presetName);
+		File presetFile = new File(Signlink.getCacheDirectory() + PRESET_PREFIX + safeName + ".ser");
+		if (!presetFile.exists()) {
+			return null;
+		}
+		try (ObjectInputStream input = new ObjectInputStream(new FileInputStream(presetFile))) {
+			return (Settings) input.readObject();
+		} catch (IOException | ClassNotFoundException ex) {
+			log.severe("Could not load preset, keeping current settings.");
+			return null;
+		}
+	}
+
+	private static String sanitizePresetName(String presetName) {
+		if (presetName == null || presetName.isBlank()) {
+			return "Default";
+		}
+		return presetName.replaceAll("[^a-zA-Z0-9_-]", "_");
 	}
 }

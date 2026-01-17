@@ -421,51 +421,12 @@ public class Client extends RSApplet {
 		DrawingArea.drawPixels(1, bounds.y + bounds.height - 1, bounds.x, color, bounds.width);
 		DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x, color, 1);
 		DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x + bounds.width - 1, color, 1);
-		DrawingArea.drawPixels(VIEWPORT_RESIZE_HANDLE, bounds.y + bounds.height - VIEWPORT_RESIZE_HANDLE,
-				bounds.x + bounds.width - VIEWPORT_RESIZE_HANDLE, 0x2a2a2a, VIEWPORT_RESIZE_HANDLE);
 	}
 
 	private boolean handleViewportResize(int mouseX, int mouseY, boolean mouseDown) {
-		if (!isRs3EditMode() || currentScreenMode == ScreenMode.FIXED) {
-			viewportResizing = false;
-			viewportMouseDownLastFrame = mouseDown;
-			return false;
-		}
-		ensureRs3ViewportBounds();
-		Rectangle bounds = rs3ViewportBounds;
-		boolean onHandle = mouseX >= bounds.x + bounds.width - VIEWPORT_RESIZE_HANDLE
-				&& mouseX <= bounds.x + bounds.width
-				&& mouseY >= bounds.y + bounds.height - VIEWPORT_RESIZE_HANDLE
-				&& mouseY <= bounds.y + bounds.height;
-		if (mouseDown && !viewportMouseDownLastFrame && onHandle) {
-			viewportResizing = true;
-			viewportResizeStartX = mouseX;
-			viewportResizeStartY = mouseY;
-			viewportResizeStartWidth = bounds.width;
-			viewportResizeStartHeight = bounds.height;
-		}
-		if (!mouseDown && viewportResizing) {
-			viewportResizing = false;
-			persistRs3ViewportBounds();
-		}
-		if (mouseDown && viewportResizing) {
-			int newWidth = viewportResizeStartWidth + (mouseX - viewportResizeStartX);
-			int newHeight = viewportResizeStartHeight + (mouseY - viewportResizeStartY);
-			int maxWidth = currentGameWidth - bounds.x;
-			int maxHeight = currentGameHeight - bounds.y;
-			newWidth = clamp(newWidth, 200, maxWidth);
-			newHeight = clamp(newHeight, 200, maxHeight);
-			if (newWidth != bounds.width || newHeight != bounds.height) {
-				bounds.setSize(newWidth, newHeight);
-				worldViewportWidth = newWidth;
-				worldViewportHeight = newHeight;
-				updateGameScreen();
-			}
-			viewportMouseDownLastFrame = mouseDown;
-			return true;
-		}
+		viewportResizing = false;
 		viewportMouseDownLastFrame = mouseDown;
-		return viewportResizing;
+		return false;
 	}
 
 	private static int clamp(int value, int min, int max) {
@@ -557,6 +518,10 @@ public class Client extends RSApplet {
 
 	public void resetRs3PanelLayout() {
 		panelManager.resetLayout(this);
+		rs3ViewportBounds = null;
+		worldViewportWidth = currentGameWidth;
+		worldViewportHeight = currentGameHeight;
+		minimapState = 0;
 	}
 
 	public void resetRs3InventoryLayout() {
@@ -12038,6 +12003,14 @@ public class Client extends RSApplet {
 
 
 		SettingsManager.loadSettings();
+		Settings initialSettings = getUserSettings();
+		if (initialSettings != null && initialSettings.isLoadPresetOnLogin()) {
+			Settings preset = SettingsManager.loadPreset(initialSettings.getActivePresetName());
+			if (preset != null) {
+				preset.setLoadPresetOnLogin(initialSettings.isLoadPresetOnLogin());
+				Client.setUserSettings(preset);
+			}
+		}
 		enforceRs3ScreenMode();
 		ClientScripts.load();
 		drawLoadingText(10, "Loading title screen - 0%");
