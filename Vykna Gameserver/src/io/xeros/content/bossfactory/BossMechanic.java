@@ -4,6 +4,7 @@ public enum BossMechanic {
     BASIC_MAGIC("Basic Magic", true),
     BASIC_RANGE("Basic Ranged", true),
     FLOOR_SPLAT("Tile Splat", false),
+    ARENA_WALL("Arena Wall", false),
     ARENA_BEAM("Arena Beam", false);
 
     private final String displayName;
