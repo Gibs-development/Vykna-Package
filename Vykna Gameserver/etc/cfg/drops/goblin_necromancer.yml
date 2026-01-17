@@ -1,0 +1,38 @@
+---
+npc_id: 3515
+constant:
+  accessibility: 0
+  items:
+  - item: 995
+    minimum: 5000
+    maximum: 15000
+  - item: 526
+    minimum: 1
+    maximum: 1
+common:
+  accessibility: 5
+  items:
+  - item: 558
+    minimum: 50
+    maximum: 150
+  - item: 561
+    minimum: 30
+    maximum: 80
+uncommon:
+  accessibility: 12
+  items:
+  - item: 892
+    minimum: 40
+    maximum: 120
+  - item: 4151
+    minimum: 1
+    maximum: 1
+rare:
+  accessibility: 80
+  items:
+  - item: 6731
+    minimum: 1
+    maximum: 1
+  - item: 11998
+    minimum: 1
+    maximum: 1

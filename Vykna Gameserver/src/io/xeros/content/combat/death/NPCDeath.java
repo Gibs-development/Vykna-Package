@@ -14,6 +14,10 @@ import io.xeros.content.achievement_diary.impl.FremennikDiaryEntry;
 import io.xeros.content.achievement_diary.impl.MorytaniaDiaryEntry;
 import io.xeros.content.barrows.Barrows;
 import io.xeros.content.bosses.*;
+import io.xeros.content.bossfactory.BossController;
+import io.xeros.content.bossfactory.BossFactoryRegistry;
+import io.xeros.content.bossfactory.drop.BossDropContext;
+import io.xeros.content.bossfactory.drop.GlobalLootChestReceiver;
 import io.xeros.content.bosses.nightmare.NightmareConstants;
 import io.xeros.content.bosses.wildypursuit.FragmentOfSeren;
 import io.xeros.content.bosses.wildypursuit.TheUnbearable;
@@ -344,6 +348,20 @@ public class NPCDeath {
         if (isDoubleDrops()) {
             amountOfDrops++;
         }
+        double dropMultiplier = 1.0;
+        if (BossFactoryRegistry.isBossId(npcId)) {
+            BossController controller = BossFactoryRegistry.getOrCreate(npc);
+            dropMultiplier = controller.getDropMultiplier(c);
+            double scaled = amountOfDrops * dropMultiplier;
+            int scaledDrops = (int) Math.floor(scaled);
+            if (Math.random() < (scaled - scaledDrops)) {
+                scaledDrops++;
+            }
+            if (scaledDrops <= 0) {
+                return;
+            }
+            amountOfDrops = scaledDrops;
+        }
 
         int bossPoints = BossPoints.getPointsOnDeath(npc);
         BossPoints.addPoints(c, bossPoints, false);
@@ -352,7 +370,12 @@ public class NPCDeath {
             c.getNpcDeathTracker().add(NpcDef.forId(npcId).getName(), NpcDef.forId(npcId).getCombatLevel(), bossPoints);
         }
 
-        Server.getDropManager().create(c, npc, location, amountOfDrops, npcId);
+        Runnable dropAction = () -> Server.getDropManager().create(c, npc, location, amountOfDrops, npcId);
+        if (BossFactoryRegistry.isBossId(npcId) && c.isBossLootChestUnlocked()) {
+            BossDropContext.runWithReceiver(new GlobalLootChestReceiver(), dropAction);
+        } else {
+            dropAction.run();
+        }
     }
 
     public static void announce(Player player, GameItem item, int npcId) {

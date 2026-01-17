@@ -58,6 +58,8 @@ import io.xeros.content.skills.hunter.Hunter;
 import io.xeros.content.skills.runecrafting.Runecrafting;
 import io.xeros.content.skills.smithing.CannonballSmelting;
 import io.xeros.content.skills.thieving.Thieving.Stall;
+import io.xeros.content.bossfactory.instance.BossFactoryInstance;
+import io.xeros.content.bossfactory.instance.BossFactoryInstanceDialogue;
 import io.xeros.content.skills.woodcutting.Tree;
 import io.xeros.content.skills.woodcutting.Woodcutting;
 import io.xeros.content.tradingpost.Listing;
@@ -208,6 +210,9 @@ public class ObjectOptionOne {
 		}
 		Location3D location = new Location3D(obX, obY, c.heightLevel);
 		switch (objectType) {
+			case BossFactoryInstance.ENTRY_OBJECT_ID:
+				BossFactoryInstanceDialogue.open(c);
+				break;
 
 
 			case 42967:
