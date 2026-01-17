@@ -20,6 +20,7 @@ import io.xeros.model.Animation;
 import io.xeros.model.CombatType;
 import io.xeros.model.Graphic;
 import io.xeros.model.ProjectileBase;
+import io.xeros.model.definitions.AnimationLength;
 import io.xeros.model.entity.Entity;
 import io.xeros.model.entity.npc.NPC;
 import io.xeros.model.entity.player.Boundary;
@@ -120,11 +121,12 @@ public class GoblinNecromancerBoss implements BossController, BossMechanicToggle
     }
 
     private NPCAutoAttack basicMagic() {
+        int attackDelay = attackDelayFor(MAGIC_ANIM, 4);
         return new NPCAutoAttackBuilder()
                 .setAnimation(new Animation(MAGIC_ANIM))
                 .setCombatType(CombatType.MAGE)
                 .setMaxHit(22)
-                .setAttackDelay(4)
+                .setAttackDelay(attackDelay)
                 .setHitDelay(4)
                 .setDistanceRequiredForAttack(12)
                 .setProjectile(new ProjectileBase(MAGIC_PROJECTILE, 1, 40, 20, 30, 16, 0))
@@ -135,11 +137,12 @@ public class GoblinNecromancerBoss implements BossController, BossMechanicToggle
     }
 
     private NPCAutoAttack basicRange() {
+        int attackDelay = attackDelayFor(RANGE_ANIM, 4);
         return new NPCAutoAttackBuilder()
                 .setAnimation(new Animation(RANGE_ANIM))
                 .setCombatType(CombatType.RANGE)
                 .setMaxHit(24)
-                .setAttackDelay(4)
+                .setAttackDelay(attackDelay)
                 .setHitDelay(3)
                 .setDistanceRequiredForAttack(12)
                 .setProjectile(new ProjectileBase(RANGE_PROJECTILE, 1, 36, 20, 30, 16, 0))
@@ -150,10 +153,11 @@ public class GoblinNecromancerBoss implements BossController, BossMechanicToggle
     }
 
     private NPCAutoAttack arenaBeamSpecial(NPC npc, Entity target) {
+        int attackDelay = attackDelayFor(SPECIAL_ANIM, 6);
         return new NPCAutoAttackBuilder()
                 .setAnimation(new Animation(SPECIAL_ANIM))
                 .setCombatType(CombatType.MAGE)
-                .setAttackDelay(6)
+                .setAttackDelay(attackDelay)
                 .setHitDelay(4)
                 .setDistanceRequiredForAttack(14)
                 .setProjectile(new ProjectileBase(SPECIAL_PROJECTILE, 1, 30, 25, 35, 16, 0))
@@ -168,10 +172,11 @@ public class GoblinNecromancerBoss implements BossController, BossMechanicToggle
     }
 
     private NPCAutoAttack tileSplatSpecial(NPC npc, Entity target) {
+        int attackDelay = attackDelayFor(SPECIAL_ANIM, 6);
         return new NPCAutoAttackBuilder()
                 .setAnimation(new Animation(SPECIAL_ANIM))
                 .setCombatType(CombatType.MAGE)
-                .setAttackDelay(6)
+                .setAttackDelay(attackDelay)
                 .setHitDelay(4)
                 .setDistanceRequiredForAttack(14)
                 .setProjectile(new ProjectileBase(SPECIAL_PROJECTILE, 1, 30, 25, 35, 16, 0))
@@ -206,5 +211,9 @@ public class GoblinNecromancerBoss implements BossController, BossMechanicToggle
         @Override
         public void cleanup(BossCleanupReason reason) {
         }
+    }
+
+    private int attackDelayFor(int animationId, int fallback) {
+        return Math.max(fallback, AnimationLength.getFrameLength(animationId));
     }
 }

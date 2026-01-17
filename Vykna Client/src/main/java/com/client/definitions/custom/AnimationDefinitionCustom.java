@@ -217,6 +217,14 @@ public class AnimationDefinitionCustom {
                 anims[j].anIntArray353 = new int[] { 30801923, 30801922, 30801920, 30801921, };
                 anims[j].frameLengths = new int[] { 10, 9, 11, 10, };
                 break;
+            case 9829:
+            case 9830:
+                anim.anInt356 = -1;
+                anim.aBoolean358 = false;
+                anim.anInt362 = 99;
+                anim.anInt363 = 0;
+                anim.anInt364 = 0;
+                break;
 
             case 1676:
                 // fileID = 474
