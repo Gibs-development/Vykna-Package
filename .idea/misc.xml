@@ -6,6 +6,7 @@
   </component>
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
+    <file type="web" url="file://$PROJECT_DIR$/Vykna Client" />
     <file type="web" url="file://$PROJECT_DIR$/Vykna Gameserver" />
   </component>
   <component name="ProjectRootManager" version="2">
