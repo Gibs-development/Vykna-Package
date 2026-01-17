@@ -36,7 +36,7 @@ final class Animable_Sub4 extends Renderable {
 			return null;
 		int j = -1;
 		if (aSpotAnim_1592.aAnimation_407 != null)
-			j = aSpotAnim_1592.aAnimation_407.anIntArray353[anInt1593];
+			j = aSpotAnim_1592.aAnimation_407.primaryFrameIds[anInt1593];
 		Model model_1 = new Model(true, Class36.method532(j), false, model);
 		if (j != -1) {
 			model_1.method469();
@@ -86,7 +86,7 @@ final class Animable_Sub4 extends Renderable {
 					.method258(anInt1593);) {
 				anInt1594 -= aSpotAnim_1592.aAnimation_407.method258(anInt1593) + 1;
 				anInt1593++;
-				if (anInt1593 >= aSpotAnim_1592.aAnimation_407.anInt352)
+				if (anInt1593 >= aSpotAnim_1592.aAnimation_407.frameCount)
 					anInt1593 = 0;
 			}
 

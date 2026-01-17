@@ -100,10 +100,10 @@ public final class NpcDefinition {
 			entityDef.combatLevel = 252;
 			entityDef.actions = new String[] { null, "Attack", null, null, null };
 			//entityDef.getDegreesToTurn = 64;
-			entityDef.anInt91 = 500;
-			entityDef.anInt86 = 500;
+			entityDef.anInt91 = 300;
+			entityDef.anInt86 = 300;
 			//	entityDef.combatLevel = 0;
-			entityDef.size = 6;
+			entityDef.size = 3;
 		}
 
 

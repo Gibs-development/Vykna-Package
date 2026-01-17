@@ -30,7 +30,7 @@ public final class Player extends Entity {
 				Model model_3 = new Model(true, Class36.method532(super.anInt1521), false, model_2);
 				model_3.method475(0, -super.anInt1524, 0);
 				model_3.method469();
-				model_3.method470(spotAnim.aAnimation_407.anIntArray353[super.anInt1521]);
+				model_3.method470(spotAnim.aAnimation_407.primaryFrameIds[super.anInt1521]);
 				model_3.faceGroups = null;
 				model_3.vertexGroups = null;
 				if (spotAnim.anInt410 != 128 || spotAnim.anInt411 != 128)
@@ -170,9 +170,9 @@ public final class Player extends Entity {
 		if (desc != null) {
 			int j = -1;
 			if (super.anim >= 0 && super.anInt1529 == 0)
-				j = AnimationDefinition.anims[super.anim].anIntArray353[super.animFrameIndex];
+				j = AnimationDefinition.anims[super.anim].primaryFrameIds[super.animFrameIndex];
 			else if (super.anInt1517 >= 0)
-				j = AnimationDefinition.anims[super.anInt1517].anIntArray353[super.anInt1518];
+				j = AnimationDefinition.anims[super.anInt1517].primaryFrameIds[super.anInt1518];
 			Model model = desc.method164(-1, j, null);
 			return model;
 		}
@@ -183,19 +183,19 @@ public final class Player extends Entity {
 		int k1 = -1;
 		if (super.anim >= 0 && super.anInt1529 == 0) {
 			AnimationDefinition animation = AnimationDefinition.anims[super.anim];
-			k = animation.anIntArray353[super.animFrameIndex];
+			k = animation.primaryFrameIds[super.animFrameIndex];
 			if (super.anInt1517 >= 0 && super.anInt1517 != super.anInt1511)
-				i1 = AnimationDefinition.anims[super.anInt1517].anIntArray353[super.anInt1518];
-			if (animation.anInt360 >= 0) {
-				j1 = animation.anInt360;
+				i1 = AnimationDefinition.anims[super.anInt1517].primaryFrameIds[super.anInt1518];
+			if (animation.leftHandItemID >= 0) {
+				j1 = animation.leftHandItemID;
 				l += j1 - equipment[5] << 40;
 			}
-			if (animation.anInt361 >= 0) {
-				k1 = animation.anInt361;
+			if (animation.rightHandItemID >= 0) {
+				k1 = animation.rightHandItemID;
 				l += k1 - equipment[3] << 48;
 			}
 		} else if (super.anInt1517 >= 0)
-			k = AnimationDefinition.anims[super.anInt1517].anIntArray353[super.anInt1518];
+			k = AnimationDefinition.anims[super.anInt1517].primaryFrameIds[super.anInt1518];
 		Model model_1 = (Model) mruNodes.insertFromCache(l);
 		if (model_1 == null) {
 			boolean flag = false;

@@ -9940,7 +9940,7 @@ public class Client extends RSApplet {
 					}
 
 				model.method469();
-				model.method470(AnimationDefinition.anims[myPlayer.anInt1511].anIntArray353[0]);
+				model.method470(AnimationDefinition.anims[myPlayer.anInt1511].primaryFrameIds[0]);
 				model.method479(64, 1300, 0, -570, 0, true);
 				class9.anInt233 = 5;
 				class9.mediaID = 0;
@@ -9965,7 +9965,7 @@ public class Client extends RSApplet {
 					}
 				int staticFrame = myPlayer.anInt1511;
 				characterDisplay.method469();
-				characterDisplay.method470(AnimationDefinition.anims[staticFrame].anIntArray353[0]);
+				characterDisplay.method470(AnimationDefinition.anims[staticFrame].primaryFrameIds[0]);
 				// characterDisplay.method479(64, 850, -30, -50, -30, true);
 				rsInterface.anInt233 = 5;
 				rsInterface.mediaID = 0;
@@ -11577,7 +11577,7 @@ public class Client extends RSApplet {
 					i1 = -1;
 				int i2 = stream.readUnsignedByte();
 				if (i1 == npc.anim && i1 != -1) {
-					int l2 = AnimationDefinition.anims[i1].anInt365;
+					int l2 = AnimationDefinition.anims[i1].resetCycle;
 					if (l2 == 1) {
 						npc.animFrameIndex = 0;
 						npc.anInt1528 = 0;
@@ -11587,7 +11587,7 @@ public class Client extends RSApplet {
 					if (l2 == 2)
 						npc.anInt1530 = 0;
 				} else if (i1 == -1 || npc.anim == -1
-						|| AnimationDefinition.anims[i1].anInt359 >= AnimationDefinition.anims[npc.anim].anInt359) {
+						|| AnimationDefinition.anims[i1].priority >= AnimationDefinition.anims[npc.anim].priority) {
 					npc.anim = i1;
 					npc.animFrameIndex = 0;
 					npc.anInt1528 = 0;
@@ -12858,11 +12858,11 @@ public class Client extends RSApplet {
 		}
 		if (entity.anim != -1 && entity.anInt1529 == 0) {
 			AnimationDefinition animation = AnimationDefinition.anims[entity.anim];
-			if (entity.anInt1542 > 0 && animation.anInt363 == 0) {
+			if (entity.anInt1542 > 0 && animation.precedenceAnimating == 0) {
 				entity.anInt1503++;
 				return;
 			}
-			if (entity.anInt1542 <= 0 && animation.anInt364 == 0) {
+			if (entity.anInt1542 <= 0 && animation.precedenceWalking == 0) {
 				entity.anInt1503++;
 				return;
 			}
@@ -13014,11 +13014,11 @@ public class Client extends RSApplet {
 				}
 			}
 
-			if (entity.anInt1518 < animation.anInt352 && entity.anInt1519 > animation.method258(entity.anInt1518)) {
+			if (entity.anInt1518 < animation.frameCount && entity.anInt1519 > animation.method258(entity.anInt1518)) {
 				entity.anInt1519 = 1;
 				entity.anInt1518++;
 			}
-			if (entity.anInt1518 >= animation.anInt352) {
+			if (entity.anInt1518 >= animation.frameCount) {
 				entity.anInt1519 = 1;
 				entity.anInt1518 = 0;
 			}
@@ -13042,12 +13042,12 @@ public class Client extends RSApplet {
 				}
 			}
 
-			for (entity.anInt1522++; entity.anInt1521 < animation_1.anInt352
+			for (entity.anInt1522++; entity.anInt1521 < animation_1.frameCount
 					&& entity.anInt1522 > animation_1.method258(entity.anInt1521); entity.anInt1521++)
 				entity.anInt1522 -= animation_1.method258(entity.anInt1521);
 
-			if (entity.anInt1521 >= animation_1.anInt352
-					&& (entity.anInt1521 < 0 || entity.anInt1521 >= animation_1.anInt352))
+			if (entity.anInt1521 >= animation_1.frameCount
+					&& (entity.anInt1521 < 0 || entity.anInt1521 >= animation_1.frameCount))
 				entity.anInt1520 = -1;
 		}
 		if (entity.anim != -1 && entity.anInt1529 <= 1) {
@@ -13056,7 +13056,7 @@ public class Client extends RSApplet {
 				return;
 			}
 			AnimationDefinition animation_2 = AnimationDefinition.anims[entity.anim];
-			if (animation_2.anInt363 == 1 && entity.anInt1542 > 0 && entity.anInt1547 <= loopCycle
+			if (animation_2.precedenceAnimating == 1 && entity.anInt1542 > 0 && entity.anInt1547 <= loopCycle
 					&& entity.anInt1548 < loopCycle) {
 				entity.anInt1529 = 1;
 				return;
@@ -13072,18 +13072,18 @@ public class Client extends RSApplet {
 				}
 			}
 
-			for (entity.anInt1528++; entity.animFrameIndex < animation_3.anInt352
+			for (entity.anInt1528++; entity.animFrameIndex < animation_3.frameCount
 					&& entity.anInt1528 > animation_3.method258(entity.animFrameIndex); entity.animFrameIndex++)
 				entity.anInt1528 -= animation_3.method258(entity.animFrameIndex);
-			if (entity.animFrameIndex >= animation_3.anInt352) {
-				entity.animFrameIndex -= animation_3.anInt356;
+			if (entity.animFrameIndex >= animation_3.frameCount) {
+				entity.animFrameIndex -= animation_3.loopOffset;
 				entity.anInt1530++;
-				if (entity.anInt1530 >= animation_3.anInt362)
+				if (entity.anInt1530 >= animation_3.replayCount)
 					entity.anim = -1;
-				if (entity.animFrameIndex < 0 || entity.animFrameIndex >= animation_3.anInt352)
+				if (entity.animFrameIndex < 0 || entity.animFrameIndex >= animation_3.frameCount)
 					entity.anim = -1;
 			}
-			entity.aBoolean1541 = animation_3.aBoolean358;
+			entity.aBoolean1541 = animation_3.stretches;
 		}
 		if (entity.anInt1529 > 0)
 			entity.anInt1529--;
@@ -14056,12 +14056,12 @@ public class Client extends RSApplet {
 								model = class9_1.method209(-1, -1, flag2);
 							} else {
 								AnimationDefinition animation = AnimationDefinition.anims[i7];
-								if (class9_1.anInt246 >= animation.anIntArray354.length || class9_1.anInt246 >= animation.anIntArray353.length) {
+								if (class9_1.anInt246 >= animation.secondaryFrameIds.length || class9_1.anInt246 >= animation.primaryFrameIds.length) {
 									class9_1.anInt246 = 0; // Fixes array index out of bounds on npc dialogues
 								}
 
-								model = class9_1.method209(animation.anIntArray354[class9_1.anInt246],
-										animation.anIntArray353[class9_1.anInt246], flag2);
+								model = class9_1.method209(animation.secondaryFrameIds[class9_1.anInt246],
+										animation.primaryFrameIds[class9_1.anInt246], flag2);
 							}
 							if (model != null)
 								model.render(class9_1.modelRotation2, 0, class9_1.modelRotation1, 0, i5, l5);
@@ -14757,7 +14757,7 @@ public class Client extends RSApplet {
 				l = -1;
 			int i2 = stream.method427();
 			if (l == player.anim && l != -1) {
-				int i3 = AnimationDefinition.anims[l].anInt365;
+				int i3 = AnimationDefinition.anims[l].resetCycle;
 				if (i3 == 1) {
 					player.animFrameIndex = 0;
 					player.anInt1528 = 0;
@@ -14767,7 +14767,7 @@ public class Client extends RSApplet {
 				if (i3 == 2)
 					player.anInt1530 = 0;
 			} else if (l == -1 || player.anim == -1
-					|| AnimationDefinition.anims[l].anInt359 >= AnimationDefinition.anims[player.anim].anInt359) {
+					|| AnimationDefinition.anims[l].priority >= AnimationDefinition.anims[player.anim].priority) {
 				player.anim = l;
 				player.animFrameIndex = 0;
 				player.anInt1528 = 0;
@@ -15535,9 +15535,9 @@ public class Client extends RSApplet {
 					for (class9_1.anInt208 += i; class9_1.anInt208 > animation.method258(class9_1.anInt246);) {
 						class9_1.anInt208 -= animation.method258(class9_1.anInt246) + 1;
 						class9_1.anInt246++;
-						if (class9_1.anInt246 >= animation.anInt352) {
-							class9_1.anInt246 -= animation.anInt356;
-							if (class9_1.anInt246 < 0 || class9_1.anInt246 >= animation.anInt352)
+						if (class9_1.anInt246 >= animation.frameCount) {
+							class9_1.anInt246 -= animation.loopOffset;
+							if (class9_1.anInt246 < 0 || class9_1.anInt246 >= animation.frameCount)
 								class9_1.anInt246 = 0;
 						}
 						flag1 = true;

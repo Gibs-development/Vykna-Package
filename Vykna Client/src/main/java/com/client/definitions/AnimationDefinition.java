@@ -86,7 +86,7 @@ public final class AnimationDefinition {
 		try {
 			int j = frameLengths[i];
 			if (j == 0) {
-				Class36 class36 = Class36.forId(anIntArray353[i]);
+				Class36 class36 = Class36.forId(primaryFrameIds[i]);
 				if (class36 != null)
 					j = frameLengths[i] = class36.anInt636;
 			}
@@ -105,23 +105,23 @@ public final class AnimationDefinition {
 		while ((i = stream.readUnsignedByte()) != 0) {
 
 			if (i == 1) {
-				anInt352 = stream.readUShort();
-				anIntArray353 = new int[anInt352];
-				anIntArray354 = new int[anInt352];
-				frameLengths = new int[anInt352];
-				for (int j = 0; j < anInt352; j++)
+				frameCount = stream.readUShort();
+				primaryFrameIds = new int[frameCount];
+				secondaryFrameIds = new int[frameCount];
+				frameLengths = new int[frameCount];
+				for (int j = 0; j < frameCount; j++)
 					frameLengths[j] = stream.readUShort();
 
-				for (int j = 0; j < anInt352; j++) {
-					anIntArray353[j] = stream.readUShort();
-					anIntArray354[j] = -1;
+				for (int j = 0; j < frameCount; j++) {
+					primaryFrameIds[j] = stream.readUShort();
+					secondaryFrameIds[j] = -1;
 				}
-				for (int j = 0; j < anInt352; j++) {
-					anIntArray353[j] += stream.readUShort() << 16;
-					anIntArray354[j] = -1;
+				for (int j = 0; j < frameCount; j++) {
+					primaryFrameIds[j] += stream.readUShort() << 16;
+					secondaryFrameIds[j] = -1;
 				}
 			} else if (i == 2)
-				anInt356 = stream.readUShort();
+				loopOffset = stream.readUShort();
 			else if (i == 3) {
 				int k = stream.readUnsignedByte();
 				anIntArray357 = new int[k + 1];
@@ -129,30 +129,30 @@ public final class AnimationDefinition {
 					anIntArray357[l] = stream.readUnsignedByte();
 				anIntArray357[k] = 9999999;
 			} else if (i == 4)
-				aBoolean358 = true;
+				stretches = true;
 			else if (i == 5)
-				anInt359 = stream.readUnsignedByte();
+				priority = stream.readUnsignedByte();
 			else if (i == 6)
-				anInt360 = stream.readUShort();
+				leftHandItemID = stream.readUShort();
 			else if (i == 7)
-				anInt361 = stream.readUShort();
+				rightHandItemID = stream.readUShort();
 			else if (i == 8)
-				anInt362 = stream.readUnsignedByte();
+				replayCount = stream.readUnsignedByte();
 			else if (i == 9)
-				anInt363 = stream.readUnsignedByte();
+				precedenceAnimating = stream.readUnsignedByte();
 			else if (i == 10)
-				anInt364 = stream.readUnsignedByte();
+				precedenceWalking = stream.readUnsignedByte();
 			else if (i == 11)
-				anInt365 = stream.readUnsignedByte();
+				resetCycle = stream.readUnsignedByte();
 			else if (i == 12) {
 				int len = stream.readUnsignedByte();
-				anIntArray354 = new int[len];
+				secondaryFrameIds = new int[len];
 				for (int i2 = 0; i2 < len; i2++) {
-					anIntArray354[i2] = stream.readUShort();
+					secondaryFrameIds[i2] = stream.readUShort();
 				}
 
 				for (int i2 = 0; i2 < len; i2++) {
-					anIntArray354[i2] += stream.readUShort() << 16;
+					secondaryFrameIds[i2] += stream.readUShort() << 16;
 				}
 			} else if (i == 13) {
 				int var3 = stream.readUnsignedByte();
@@ -171,58 +171,58 @@ public final class AnimationDefinition {
 				// Hidden
 			} else System.out.println("Error unrecognised seq config code: " + i);
 		}
-		if (anInt352 == 0) {
-			anInt352 = 1;
-			anIntArray353 = new int[1];
-			anIntArray353[0] = -1;
-			anIntArray354 = new int[1];
-			anIntArray354[0] = -1;
+		if (frameCount == 0) {
+			frameCount = 1;
+			primaryFrameIds = new int[1];
+			primaryFrameIds[0] = -1;
+			secondaryFrameIds = new int[1];
+			secondaryFrameIds[0] = -1;
 			frameLengths = new int[1];
 			frameLengths[0] = -1;
 		}
-		if (anInt363 == -1)
+		if (precedenceAnimating == -1)
 			if (anIntArray357 != null)
-				anInt363 = 2;
+				precedenceAnimating = 2;
 			else
-				anInt363 = 0;
-		if (anInt364 == -1) {
+				precedenceAnimating = 0;
+		if (precedenceWalking == -1) {
 			if (anIntArray357 != null) {
-				anInt364 = 2;
+				precedenceWalking = 2;
 				return;
 			}
-			anInt364 = 0;
+			precedenceWalking = 0;
 		}
 	}
 
 	public AnimationDefinition() {
-		anInt356 = -1;
-		aBoolean358 = false;
-		anInt359 = 5;
-		anInt360 = -1;
-		anInt361 = -1;
-		anInt362 = 99;
-		anInt363 = -1;
-		anInt364 = -1;
-		anInt365 = 2;
+		loopOffset = -1;
+		stretches = false;
+		priority = 5;
+		leftHandItemID = -1;
+		rightHandItemID = -1;
+		replayCount = 99;
+		precedenceAnimating = -1;
+		precedenceWalking = -1;
+		resetCycle = 2;
 	}
 
 	public static AnimationDefinition anims[];
 	public int id;
-	public int anInt352;
-	public int anIntArray353[];
-	public int anIntArray354[];
+	public int frameCount;
+	public int primaryFrameIds[];
+	public int secondaryFrameIds[];
 	public int frameSounds[];
 	public int[] frameLengths;
-	public int anInt356;
+	public int loopOffset;
 	public int anIntArray357[];
-	public boolean aBoolean358;
-	public int anInt359;
-	public int anInt360;
-	public int anInt361;
-	public int anInt362;
-	public int anInt363;
-	public int anInt364;
-	public int anInt365;
+	public boolean stretches;
+	public int priority;
+	public int leftHandItemID;
+	public int rightHandItemID;
+	public int replayCount;
+	public int precedenceAnimating;
+	public int precedenceWalking;
+	public int resetCycle;
 
 	public static void dump() {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter("./temp/animation_dump.txt"))) {
@@ -231,28 +231,28 @@ public final class AnimationDefinition {
 				if (anim != null) {
 					writer.write("\tcase " + index + ":");
 					writer.newLine();
-					writer.write("\t\tanim.anInt352 = " + anim.anInt352 + ";");
+					writer.write("\t\tanim.anInt352 = " + anim.frameCount + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt356 = " + anim.anInt356 + ";");
+					writer.write("\t\tanim.anInt356 = " + anim.loopOffset + ";");
 					writer.newLine();
-					writer.write("\t\tanim.aBoolean358 = " + anim.aBoolean358 + ";");
+					writer.write("\t\tanim.aBoolean358 = " + anim.stretches + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt359 = " + anim.anInt359 + ";");
+					writer.write("\t\tanim.anInt359 = " + anim.priority + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt360 = " + anim.anInt360 + ";");
+					writer.write("\t\tanim.anInt360 = " + anim.leftHandItemID + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt361 = " + anim.anInt361 + ";");
+					writer.write("\t\tanim.anInt361 = " + anim.rightHandItemID + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt362 = " + anim.anInt362 + ";");
+					writer.write("\t\tanim.anInt362 = " + anim.replayCount + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt363 = " + anim.anInt363 + ";");
+					writer.write("\t\tanim.anInt363 = " + anim.precedenceAnimating + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt364 = " + anim.anInt364 + ";");
+					writer.write("\t\tanim.anInt364 = " + anim.precedenceWalking + ";");
 					writer.newLine();
-					writer.write("\t\tanim.anInt352 = " + anim.anInt352 + ";");
+					writer.write("\t\tanim.anInt352 = " + anim.frameCount + ";");
 					writer.newLine();
-					writeArray(writer, "anIntArray353", anim.anIntArray353);
-					writeArray(writer, "anIntArray354", anim.anIntArray354);
+					writeArray(writer, "anIntArray353", anim.primaryFrameIds);
+					writeArray(writer, "anIntArray354", anim.secondaryFrameIds);
 					writeArray(writer, "frameLengths", anim.frameLengths);
 					writeArray(writer, "anIntArray357", anim.anIntArray357);
 					writeArray(writer, "class36Ids", anim.getClass36Ids());
@@ -268,7 +268,7 @@ public final class AnimationDefinition {
 
 	private int[] getClass36Ids() {
 		List<Integer> ids = Lists.newArrayList();
-		for (int frameId : anIntArray353) {
+		for (int frameId : primaryFrameIds) {
 			if (!ids.contains(Class36.getClass36Id(frameId))) {
 				ids.add(Class36.getClass36Id(frameId));
 			}

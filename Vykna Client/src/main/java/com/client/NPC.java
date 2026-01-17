@@ -12,16 +12,16 @@ public final class NPC extends Entity {
 
 	private Model method450() {
 		if (super.anim >= 0 && super.anInt1529 == 0) {
-			int k = AnimationDefinition.anims[super.anim].anIntArray353[super.animFrameIndex];
+			int k = AnimationDefinition.anims[super.anim].primaryFrameIds[super.animFrameIndex];
 			int i1 = -1;
 			if (super.anInt1517 >= 0 && super.anInt1517 != super.anInt1511)
-				i1 = AnimationDefinition.anims[super.anInt1517].anIntArray353[super.anInt1518];
+				i1 = AnimationDefinition.anims[super.anInt1517].primaryFrameIds[super.anInt1518];
 			return desc.method164(i1, k,
 					AnimationDefinition.anims[super.anim].anIntArray357);
 		}
 		int l = -1;
 		if (super.anInt1517 >= 0)
-			l = AnimationDefinition.anims[super.anInt1517].anIntArray353[super.anInt1518];
+			l = AnimationDefinition.anims[super.anInt1517].primaryFrameIds[super.anInt1518];
 		return desc.method164(-1, l, null);
 	}
 
@@ -37,7 +37,7 @@ public final class NPC extends Entity {
 			GraphicsDefinition spotAnim = GraphicsDefinition.cache[super.anInt1520];
 			Model model_1 = spotAnim.getModel();
 			if (model_1 != null) {
-				int j = spotAnim.aAnimation_407.anIntArray353[super.anInt1521];
+				int j = spotAnim.aAnimation_407.primaryFrameIds[super.anInt1521];
 				Model model_2 = new Model(true, Class36.method532(j), false, model_1);
 				model_2.method475(0, -super.anInt1524, 0);
 				model_2.method469();

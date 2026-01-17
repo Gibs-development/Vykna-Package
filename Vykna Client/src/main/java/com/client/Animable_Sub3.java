@@ -29,7 +29,7 @@ final class Animable_Sub3 extends Renderable {
 		if (aSpotAnim_1568.aAnimation_407 == null) {
 			return model;
 		}
-		int j = aSpotAnim_1568.aAnimation_407.anIntArray353[anInt1569];
+		int j = aSpotAnim_1568.aAnimation_407.primaryFrameIds[anInt1569];
 		Model model_1 = new Model(true, Class36.method532(j), false, model);
 		if (!aBoolean1567) {
 			model_1.method469();
@@ -65,8 +65,8 @@ final class Animable_Sub3 extends Renderable {
 		for (anInt1570 += i; anInt1570 > aSpotAnim_1568.aAnimation_407.method258(anInt1569); ) {
 			anInt1570 -= aSpotAnim_1568.aAnimation_407.method258(anInt1569) + 1;
 			anInt1569++;
-			if (anInt1569 >= aSpotAnim_1568.aAnimation_407.anInt352
-					&& (anInt1569 < 0 || anInt1569 >= aSpotAnim_1568.aAnimation_407.anInt352)) {
+			if (anInt1569 >= aSpotAnim_1568.aAnimation_407.frameCount
+					&& (anInt1569 < 0 || anInt1569 >= aSpotAnim_1568.aAnimation_407.frameCount)) {
 				anInt1569 = 0;
 				aBoolean1567 = true;
 			}
