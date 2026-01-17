@@ -115,6 +115,7 @@ import io.xeros.content.bosses.godwars.GodwarsEquipment;
 import io.xeros.content.bosses.zulrah.Zulrah;
 import io.xeros.content.cheatprevention.RandomEventInterface;
 import io.xeros.content.collection_log.CollectionLog;
+import io.xeros.content.bossfactory.drop.BossLootChestContainer;
 import io.xeros.content.combat.CombatItems;
 import io.xeros.content.combat.Hitmark;
 import io.xeros.content.combat.death.PlayerDeath;
@@ -630,6 +631,8 @@ public class Player extends Entity {
 
     public Clan clan;
     private final CollectionBox collectionBox = new CollectionBox();
+    private final BossLootChestContainer bossLootChest = new BossLootChestContainer();
+    private boolean bossLootChestUnlocked;
 
     private final PerduLostPropertyShop perduLostPropertyShop = new PerduLostPropertyShop();
     private final FlowerPoker flowerPoker = new FlowerPoker(this);
@@ -6821,6 +6824,18 @@ public class Player extends Entity {
     private final ToaContainer toaContainer = new ToaContainer(this);
     public ToaContainer getToaContainer() {
         return toaContainer;
+    }
+
+    public BossLootChestContainer getBossLootChest() {
+        return bossLootChest;
+    }
+
+    public boolean isBossLootChestUnlocked() {
+        return bossLootChestUnlocked;
+    }
+
+    public void setBossLootChestUnlocked(boolean bossLootChestUnlocked) {
+        this.bossLootChestUnlocked = bossLootChestUnlocked;
     }
 
     public int nexVirusTimer;

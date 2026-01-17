@@ -13,6 +13,7 @@ import io.xeros.Server;
 import io.xeros.achievements.AchievementHandler;
 import io.xeros.achievements.AchievementList;
 import io.xeros.content.bosses.Vorkath;
+import io.xeros.content.bossfactory.instance.BossFactoryInstance;
 import io.xeros.content.bosses.kratos.KratosNpc;
 import io.xeros.content.combat.Hitmark;
 import io.xeros.content.combat.melee.CombatPrayer;
@@ -97,6 +98,9 @@ public class PlayerDeath {
 
     public static void applyDead(Player c) {
         beforeDeath(c);
+        if (c.getInstance() instanceof BossFactoryInstance) {
+            ((BossFactoryInstance) c.getInstance()).onPlayerDeath(c);
+        }
 
         MultiplayerSession session = Server.getMultiplayerSessionListener().getMultiplayerSession(c, MultiplayerSessionType.TRADE);
         if (session != null && Server.getMultiplayerSessionListener().inSession(c, MultiplayerSessionType.TRADE)) {
