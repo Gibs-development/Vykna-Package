@@ -914,6 +914,15 @@ public class Client extends RSApplet {
 		}
 	}
 
+	private void refreshShellResizableState() {
+		JFrame frame = ClientWindow.getFrame();
+		if (frame instanceof VyknaShell) {
+			VyknaShell shell = (VyknaShell) frame;
+			shell.updateResizableState(currentScreenMode, getUserSettings().getInterfaceStyle());
+			frame.setResizable(ClientWindow.isResizable());
+		}
+	}
+
 
 	/**
 	 * Width of the viewport into the game world, which doesn't include tab/chat/minimap interface area on fixed.
@@ -4092,10 +4101,6 @@ public class Client extends RSApplet {
 		if (HoverMenuManager.showMenu && HoverMenuManager.drawType() == 0) {
 			//HoverMenuManager.drawHintMenu();
 		}
-
-		if (getUserSettings().isInventoryContextMenu() && hintMenu) {
-			drawHintMenu(hintName, hintId, getUserSettings().getStartMenuColor());
-		}
 		if (fixedMode && loginScreenGraphicsBuffer == null && tabAreaGraphicsBuffer != null)
 			tabAreaGraphicsBuffer.drawGraphics(516, 168, super.graphics);
 
@@ -4534,7 +4539,7 @@ public class Client extends RSApplet {
 
 	public void resetLogout() {
 		logger.debug("being logged out.. from: "+new Throwable().getStackTrace()[1].toString());
-		logger.debug("Logging out..");
+		logger.debug("Logging out.. screenMode={}, size={}x{}", currentScreenMode, currentGameWidth, currentGameHeight);
 		// Vykna attrs: prevent stale per-slot attrs leaking across sessions
 		try {
 			com.client.attributes.ItemAttrStore.clearAll();
@@ -4571,7 +4576,8 @@ public class Client extends RSApplet {
 		experienceCounter = 0;
 		GameTimerHandler.getSingleton().stopAll();
 		Preferences.save();
-		setGameMode(ScreenMode.FIXED, false);
+		resetAllImageProducers(true);
+		logger.debug("Logout cleanup complete. screenMode={}, size={}x{}", currentScreenMode, currentGameWidth, currentGameHeight);
 	}
 
 	public void method45() {
@@ -9447,13 +9453,60 @@ public class Client extends RSApplet {
 		return mouseInvInterfaceIndex; // this is set to k2
 	}
 
+	private int getHoveredItemId() {
+		if (!shouldDrawAttrHover()) {
+			return -1;
+		}
+		RSInterface interfaceCache = RSInterface.interfaceCache[lastActiveInvInterface];
+		if (interfaceCache == null || interfaceCache.inventoryItemId == null) {
+			return -1;
+		}
+		int slot = mouseInvInterfaceIndex;
+		if (slot < 0 || slot >= interfaceCache.inventoryItemId.length) {
+			return -1;
+		}
+		int rawItemId = interfaceCache.inventoryItemId[slot];
+		if (rawItemId <= 0) {
+			return -1;
+		}
+		if (interfaceCache.id == 23231) {
+			return (rawItemId & 0x7FFF) - 1;
+		}
+		return rawItemId - 1;
+	}
+
+	private void drawAttrHoverOverlay() {
+		if (menuOpen) {
+			return;
+		}
+		if (!getUserSettings().isInventoryContextMenu()) {
+			return;
+		}
+		int hoveredItemId = getHoveredItemId();
+		if (hoveredItemId < 0) {
+			return;
+		}
+		ItemDefinition itemDef = ItemDefinition.forID(hoveredItemId);
+		if (itemDef == null) {
+			return;
+		}
+		DrawingArea.setDrawingArea(currentGameHeight, 0, currentGameWidth, 0);
+		drawHintMenu(itemDef.name, hoveredItemId, getUserSettings().getStartMenuColor());
+	}
+
+	private boolean isAttrHoverInterface(int interfaceId) {
+		return interfaceId == 3214
+				|| interfaceId == 1688
+				|| isBankContainer(interfaceId);
+	}
+
 	private static String rarityName(int rarityId) {
 		switch (rarityId) {
 			case 0: return "Common";
 			case 1: return "Uncommon";
 			case 2: return "Rare";
 			case 3: return "Epic";
-			case 4: return "Legendary";
+			case 4: return "Mythic";
 			case 5: return "Mythic";
 			default: return "Unknown(" + rarityId + ")";
 		}
@@ -9468,15 +9521,12 @@ public class Client extends RSApplet {
 				return;
 			}
 		}
-		if(toolTip.contains("Walk")||toolTip.contains("World")||!toolTip.contains("W")){
+		if (!shouldDrawAttrHover()) {
 			return;
 		}
 		//if(toolTip!=null){
 		//	return;
 		//}
-		if(openInterfaceID!=-1){
-			return;
-		}
 		if(currentScreenMode != ScreenMode.FIXED){
 			if(Client.instance.getMouseY() < worldViewportHeight - 450 && Client.instance.getMouseX() < worldViewportWidth - 200){
 				return;
@@ -9485,46 +9535,8 @@ public class Client extends RSApplet {
 			mouseY-=50;
 		}
 
-		if(controlIsDown){
-			drawStatMenu(itemName, itemId,color);
-			return;
-		}
-
-		if (menuActionRow < 2 && itemSelected == 0 && spellSelected == 0) {
-			return;
-		}
-		if(menuOpen){
-			return;
-		}
-		if(tabID!=3){
-			return;
-		}
-
-
-		if(currentScreenMode == ScreenMode.FIXED){
-			if(Client.instance.getMouseY() < 214 || Client.instance.getMouseX() < 561){
-				return;
-			}
-			mouseX-=516;
-			// mouseX-=491;
-			mouseY-=158;
-			if(Client.instance.getMouseX() > 600 && Client.instance.getMouseX() < 685) {
-				mouseX-=60;
-
-			}
-			if(Client.instance.getMouseX() > 685){
-				mouseX-=120;
-			}
-		}
-
-
-		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, 150, 36, 0x696969);
-		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, 150, 37, 0x000000,90);
-
-		Client.instance.newSmallFont.drawBasicString(itemName, mouseX + 150 / (12 +  Client.instance.newSmallFont.getTextWidth(itemName))+30 , mouseY + 17, color, 1);
-		Client.instance.newSmallFont.drawBasicString("Hold CTRL to view details", mouseX + 4, mouseY + 35, color, 1);
-
-
+		drawStatMenu(itemName, itemId, color);
+		return;
 
 	}
 	public void drawStatMenu(String itemName,int itemId, int color) {
@@ -9536,16 +9548,7 @@ public class Client extends RSApplet {
 				return;
 			}
 		}
-		//if(toolTip.contains("Walk")||toolTip.contains("Talk-to")||toolTip.contains("Bank")|| toolTip.contains("Steal")|| toolTip.contains("Attack")){
-		//	return;
-		//}/
-		if(toolTip.contains("Walk")||toolTip.contains("World")||!toolTip.contains("W")){
-			return;
-		}
 		if(menuOpen){
-			return;
-		}
-		if(tabID!=3){
 			return;
 		}
 		int mouseX = Client.instance.getMouseX();
@@ -9575,40 +9578,104 @@ public class Client extends RSApplet {
 		int interfaceId = lastActiveInvInterface;
 		int slot = mouseInvInterfaceIndex;
 		if (interfaceId <= 0 || slot < 0) return;
+		if (!isAttrHoverInterface(interfaceId)) return;
 
 
 // Pull attrs from the store (this only works once your packet is decoded)
 		com.client.attributes.ItemAttrStore.Attr attr =
 				com.client.attributes.ItemAttrStore.get(interfaceId, slot);
 
-		int boxH = 105;
-		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, 200, boxH, 0x696969);
-		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, 200, boxH + 1, 0x000000, 90);
+		int perkCount = 0;
+		if (attr != null) {
+			if (attr.perk1 > 0) {
+				perkCount++;
+			}
+			if (attr.perk2 > 0) {
+				perkCount++;
+			}
+		}
 
-// Title
-		Client.instance.newSmallFont.drawBasicString(itemName, mouseX + 6, mouseY + 18, color, 1);
+		int boxWidth = 240;
+		int perkBlockHeight = 46;
+		int boxH = perkCount > 0 ? 76 + perkBlockHeight : 80;
+		int screenWidth = currentScreenMode == ScreenMode.FIXED ? 765 : currentGameWidth;
+		int screenHeight = currentScreenMode == ScreenMode.FIXED ? 503 : currentGameHeight;
+		int boxX = mouseX + 12;
+		int boxY = mouseY + 12;
+		boxX = Math.max(0, Math.min(boxX, screenWidth - boxWidth));
+		boxY = Math.max(0, Math.min(boxY, screenHeight - boxH));
+		DrawingArea.drawBoxOutline(boxX, boxY + 5, boxWidth, boxH, 0x696969);
+		DrawingArea.drawTransparentBox(boxX + 1, boxY + 6, boxWidth, boxH + 1, 0x000000, 90);
 
-// If nothing found, show that clearly (this is your “are we receiving packets?” signal)
-		if (attr == null) {
-			Client.instance.newSmallFont.drawBasicString("No attributes received", mouseX + 6, mouseY + 35, 0xAAAAAA, 1);
-			Client.instance.newSmallFont.drawBasicString("iface=" + interfaceId + " slot=" + slot, mouseX + 6, mouseY + 50, 0xAAAAAA, 1);
-			Client.instance.newSmallFont.drawBasicString("Tip: check opcode decode + server send", mouseX + 6, mouseY + 65, 0xAAAAAA, 1);
+		Client.instance.newSmallFont.drawBasicString(itemName, boxX + 8, boxY + 18, color, 1);
+
+		String rarityLabel = attr == null ? "None" : rarityName(attr.rarityId);
+		int rarityColor = attr == null ? color : com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
+		if (rarityColor <= 0) {
+			rarityColor = color;
+		}
+		Client.instance.newSmallFont.drawBasicString("Rarity: " + rarityLabel, boxX + 8, boxY + 34, rarityColor, 1);
+		Sprite rarityIcon = attr == null ? null : com.client.attributes.ItemAttrStore.spriteForRarity(attr.rarityId);
+		if (rarityIcon != null) {
+			rarityIcon.drawSprite(boxX + boxWidth - rarityIcon.myWidth - 6, boxY + 10);
+		}
+
+		if (attr == null || perkCount == 0) {
+			Client.instance.newSmallFont.drawBasicString("No perks rolled", boxX + 8, boxY + 52, 0xAAAAAA, 1);
 			return;
 		}
 
-// Lines
-		String line1 = "Hash: " + attr.hash;
-		String line2 = "Rarity: " + rarityName(attr.rarityId) + " (" + attr.rarityId + ")";
-		String line3 = "Perk1: " + attr.perk1 + "  Rank: " + attr.perk1Rank;
-		String line4 = "Perk2: " + attr.perk2 + "  Rank: " + attr.perk2Rank;
-		String line5 = "iface=" + interfaceId + " slot=" + slot + " id=" + itemId;
+		int padding = 8;
+		int blockGap = 6;
+		int columns = perkCount > 1 ? 2 : 1;
+		int blockWidth = columns == 2 ? (boxWidth - (padding * 2) - blockGap) / 2 : (boxWidth - (padding * 2));
+		int blockY = boxY + 48;
 
-		Client.instance.newSmallFont.drawBasicString(line1, mouseX + 6, mouseY + 35, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line2, mouseX + 6, mouseY + 49, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line3, mouseX + 6, mouseY + 63, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line4, mouseX + 6, mouseY + 77, color, 1);
-		Client.instance.newSmallFont.drawBasicString(line5, mouseX + 6, mouseY + 91, 0xAAAAAA, 1);
+		if (attr.perk1 > 0) {
+			int blockX = boxX + padding;
+			drawPerkBlock(blockX, blockY, blockWidth, attr.perk1, attr.perk1Rank, color);
+		}
+		if (attr.perk2 > 0) {
+			int blockX = boxX + padding + blockWidth + blockGap;
+			if (columns == 1) {
+				blockX = boxX + padding;
+				blockY += perkBlockHeight + 6;
+			}
+			drawPerkBlock(blockX, blockY, blockWidth, attr.perk2, attr.perk2Rank, color);
+		}
 
+	}
+
+	private boolean shouldDrawAttrHover() {
+		return lastActiveInvInterface > 0
+				&& mouseInvInterfaceIndex >= 0
+				&& isAttrHoverInterface(lastActiveInvInterface);
+	}
+
+	private void drawPerkBlock(int x, int y, int width, int perkId, int perkRank, int textColor) {
+		com.client.attributes.PerkDefinitions.PerkDefinition perk =
+				com.client.attributes.PerkDefinitions.forId(perkId);
+		String perkName = perk == null ? ("Unknown Perk (" + perkId + ")") : perk.getName();
+		String perkDesc = perk == null ? "Unknown perk effect." : perk.getDescription();
+		Sprite icon = perk == null ? null : perk.getIcon(perkRank);
+
+		int iconSize = 24;
+		int iconX = x + 2;
+		int iconY = y + 4;
+		if (icon != null && icon.myWidth > 0) {
+			icon.drawSprite(iconX, iconY);
+			iconSize = icon.myWidth;
+		}
+
+		int textX = x + iconSize + 8;
+		int textWidth = Math.max(60, width - (textX - x) - 4);
+		Client.instance.newSmallFont.drawBasicString(perkName + " (Rank " + perkRank + ")", textX, y + 14, textColor, 1);
+		String[] descLines = Client.instance.newSmallFont.wrap(perkDesc, textWidth);
+		int descY = y + 28;
+		for (int i = 0; i < descLines.length && i < 2; i++) {
+			Client.instance.newSmallFont.drawBasicString(descLines[i], textX, descY, 0xCCCCCC, 1);
+			descY += 12;
+		}
 	}
 
 	private void buildChatAreaMenu(int j) {
@@ -10507,6 +10574,9 @@ public class Client extends RSApplet {
 			menuActionName[0] = "Cancel";
 			menuActionID[0] = 1107;
 			menuActionRow = 1;
+			lastActiveInvInterface = -1;
+			mouseInvInterfaceIndex = -1;
+			hintMenu = false;
 
 // Fullscreen modal interface: build menu only for the interface (never for world)
 			if (loadingStage == 2 && fullscreenInterfaceID != -1) {
@@ -11108,6 +11178,7 @@ public class Client extends RSApplet {
 
 				informationFile.write();
 				Preferences.getPreferences().updateScreenMode();
+				logger.debug("Post-login screen mode applied. screenMode={}, size={}x{}", currentScreenMode, currentGameWidth, currentGameHeight);
 				if (Client.currentScreenMode == ScreenMode.FIXED && getUserSettings().isStretchedMode()) {
 					StretchedModeMenu.updateStretchedMode(true);
 				}
@@ -13474,6 +13545,12 @@ public class Client extends RSApplet {
 		}
 	}
 
+	private boolean isBankContainer(int interfaceId) {
+		return interfaceId == 5064
+				|| interfaceId == 41583
+				|| (interfaceId >= 41573 && interfaceId <= 41581);
+	}
+
 	public void drawInterface(int scrollPosition, int xPosition, RSInterface rsInterface, int yPosition, boolean inheritDrawingArea) {
 		try {
 			if (rsInterface.type != 0 || rsInterface.children == null)
@@ -13638,17 +13715,9 @@ public class Client extends RSApplet {
 												&& j6 < DrawingArea.bottomY || activeInterfaceType != 0 && itemDraggingSlot == i3) {
 											int itemOutlineColor = 0;
 
-// keep the white outline when selected
+											// keep the white outline when selected
 											if (itemSelected == 1 && anInt1283 == i3 && anInt1284 == class9_1.id) {
 												itemOutlineColor = 0xffffff;
-											} else {
-												// otherwise, rarity outline tint (optional)
-												com.client.attributes.ItemAttrStore.Attr attr =
-														com.client.attributes.ItemAttrStore.get(class9_1.id, i3);
-												if (attr != null) {
-													int col = ItemAttrStore.rarityToColor(attr.rarityId);
-													if (col != -1) itemOutlineColor = col;
-												}
 											}
 
 
@@ -13747,20 +13816,21 @@ public class Client extends RSApplet {
 												 * Draws item sprite
 												 */
 													itemSprite.drawTransparentSprite(k5, j6, itemSpriteOpacity);
-												// Rarity outline / glow overlay (separate from "Use" highlight)
+												// Rarity outline (separate from "Use" highlight)
 												com.client.attributes.ItemAttrStore.Attr attr = com.client.attributes.ItemAttrStore.get(class9_1.id, i3);
-												if (attr != null && attr.rarityId > 0 && !(itemSelected == 1 && anInt1283 == i3 && anInt1284 == class9_1.id)) {
-													int col = com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
-													if (col != -1) {
-														//drawSpriteSilhouetteOutline(itemSprite, k5 + k6, j6 + j7, col);
-													}
-													if (attr != null && attr.rarityId > 0) {
-														Sprite raritySprite = ItemAttrStore.spriteForRarity(attr.rarityId);
-														if (raritySprite != null) {
-															raritySprite.drawSprite(k5 + k6+ 20, j6 + j7+18);
+												boolean isSelected = (itemSelected == 1 && anInt1283 == i3 && anInt1284 == class9_1.id);
+												if (attr != null && attr.rarityId >= 0 && !isSelected) {
+													boolean bankOpen = openInterfaceID == 5292;
+													if (bankOpen && isBankContainer(class9_1.id)) {
+														int col = com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
+														if (col != -1) {
+															drawSpriteSilhouetteOutline(itemSprite, k5 + k6, j6 + j7, col);
 														}
 													}
-
+													Sprite raritySprite = ItemAttrStore.spriteForRarity(attr.rarityId);
+													if (raritySprite != null) {
+														raritySprite.drawSprite(k5 + k6 + 20, j6 + j7 + 18);
+													}
 												}
 
 
@@ -15249,6 +15319,7 @@ public class Client extends RSApplet {
 		if (!menuOpen) {
 			processRightClick();
 			drawTopLeftTooltip();
+			drawAttrHoverOverlay();
 		} else if (menuScreenArea == 0) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 0 : 0, currentScreenMode == ScreenMode.FIXED ? 0 : 0);
 		}
@@ -21633,8 +21704,8 @@ public class Client extends RSApplet {
 		particles.add(particle);
 	}
 
-	public void resetAllImageProducers() {
-		if (super.fullGameScreen != null) {
+	public void resetAllImageProducers(boolean force) {
+		if (!force && super.fullGameScreen != null) {
 			return;
 		}
 		loginScreenGraphicsBuffer = null;

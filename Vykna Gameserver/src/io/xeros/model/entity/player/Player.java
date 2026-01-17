@@ -2074,6 +2074,8 @@ public class Player extends Entity {
                 }
             }
         }
+        getItems().sendInventoryAttrsNow();
+        getItems().sendEquipmentAttrsNow();
         for (int m = 0; m < activeMageArena2BossId.length; m++) {
             activeMageArena2BossId[m] = 0;
         }

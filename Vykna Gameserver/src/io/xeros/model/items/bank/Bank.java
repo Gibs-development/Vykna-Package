@@ -48,6 +48,7 @@ public class Bank {
 	public void onLogin() {
 		player.getPA().sendString(String.valueOf(getBankCapacity()), BANK_CAPACITY_STRING_ID);
 		openTab(0);
+		player.getItems().sendBankAttrsNow();
 	}
 
 	public void deleteAllItems() {
