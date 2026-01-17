@@ -3,12 +3,23 @@ import org.gradle.jvm.tasks.Jar
 
 plugins {
     java
+    application
 }
 
 java {
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(8))
     }
+}
+
+application {
+    // Gradle 7+ style
+    mainClass.set("com.client.Client")
+
+    // Optional but commonly needed for desktop clients
+    applicationDefaultJvmArgs = listOf(
+        "-Dfile.encoding=UTF-8"
+    )
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -105,8 +116,6 @@ tasks.register<Jar>("createStandardJar") {
             .map { zipTree(it) }
     })
 }
-
-
 
 tasks.register<ProGuardTask>("obfuscateStandard") {
     configuration("proguard.conf")
