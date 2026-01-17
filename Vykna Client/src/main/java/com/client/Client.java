@@ -12123,6 +12123,7 @@ public class Client extends RSApplet {
 				repackCacheAll();
 			}
 
+			packCustomMaps();
 			if (Configuration.dumpMaps) {
 				onDemandFetcher.dumpMaps();
 			}
@@ -18972,16 +18973,20 @@ public class Client extends RSApplet {
 					incomingPacket = -1;
 					return true;
 
-				/**
-				 * EntityTarget Update Packet
-				 */
 				case 222:
 					byte entityState = (byte) inStream.readUnsignedByte();
 					if (entityState != 0) {
 						short entityIndex = (short) inStream.readUShort();
 						short currentHealth = (short) inStream.readUShort();
 						short maximumHealth = (short) inStream.readUShort();
-						entityTarget = new EntityTarget(entityState, entityIndex, currentHealth, maximumHealth, newSmallFont);
+
+						if (entityTarget == null
+								|| entityTarget.getState() != entityState
+								|| entityTarget.getEntityIndex() != entityIndex) {
+							entityTarget = new EntityTarget(entityState, entityIndex, currentHealth, maximumHealth);
+						} else {
+							entityTarget.update(currentHealth, maximumHealth);
+						}
 					} else {
 						if (entityTarget != null) {
 							entityTarget.stop();
@@ -18990,6 +18995,7 @@ public class Client extends RSApplet {
 					}
 					incomingPacket = -1;
 					return true;
+
 
 				/**
 				 * Timer Update Packet
