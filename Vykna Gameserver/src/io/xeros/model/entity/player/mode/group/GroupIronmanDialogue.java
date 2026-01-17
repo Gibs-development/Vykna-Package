@@ -422,7 +422,7 @@ public class GroupIronmanDialogue extends DialogueBuilder {
             if (remaining.isPresent() && dryRun)
                 return remaining;
             if (!dryRun)
-                player.getItems().removeFromAnyTabWithoutAdding(gameItem.getId(), gameItem.getAmount(), false);
+                player.getItems().removeFromAnyTabWithoutAdding(gameItem, false);
         }
 
         if (!dryRun) {

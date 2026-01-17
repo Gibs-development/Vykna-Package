@@ -1073,8 +1073,44 @@ public class PlayerSave {
 
                             case 3:
                                 if (token.equals("character-equip")) {
-                                    p.playerEquipment[Integer.parseInt(token3[0])] = Integer.parseInt(token3[1]);
-                                    p.playerEquipmentN[Integer.parseInt(token3[0])] = Integer.parseInt(token3[2]);
+                                    int slot = Integer.parseInt(token3[0]);
+                                    p.playerEquipment[slot] = Integer.parseInt(token3[1]);
+                                    p.playerEquipmentN[slot] = Integer.parseInt(token3[2]);
+
+                                    byte rarityId = 0;
+                                    short perk1 = 0;
+                                    byte perk1Rank = 0;
+                                    short perk2 = 0;
+                                    byte perk2Rank = 0;
+                                    if (token3.length >= 4) {
+                                        rarityId = Byte.parseByte(token3[3]);
+                                    }
+                                    if (token3.length >= 5) {
+                                        perk1 = Short.parseShort(token3[4]);
+                                    }
+                                    if (token3.length >= 6) {
+                                        perk1Rank = Byte.parseByte(token3[5]);
+                                    }
+                                    if (token3.length >= 7) {
+                                        perk2 = Short.parseShort(token3[6]);
+                                    }
+                                    if (token3.length >= 8) {
+                                        perk2Rank = Byte.parseByte(token3[7]);
+                                    }
+
+                                    if (rarityId != 0 || perk1 != 0 || perk2 != 0) {
+                                        ItemAttributes attrs = new ItemAttributes();
+                                        attrs.rarityId = rarityId;
+                                        attrs.perk1 = perk1;
+                                        attrs.perk1Rank = perk1Rank;
+                                        attrs.perk2 = perk2;
+                                        attrs.perk2Rank = perk2Rank;
+                                        p.playerEquipmentAttrs[slot] = attrs;
+                                        p.playerEquipmentAttrHash[slot] = attrs.computeHash();
+                                    } else {
+                                        p.playerEquipmentAttrs[slot] = null;
+                                        p.playerEquipmentAttrHash[slot] = 0;
+                                    }
                                 }
                                 break;
                             case 4:
@@ -1100,13 +1136,33 @@ public class PlayerSave {
 
                                     // optional rarity field (backwards compatible)
                                     byte rarityId = 0;
+                                    short perk1 = 0;
+                                    byte perk1Rank = 0;
+                                    short perk2 = 0;
+                                    byte perk2Rank = 0;
                                     if (token3.length >= 4) {
                                         rarityId = Byte.parseByte(token3[3]);
                                     }
+                                    if (token3.length >= 5) {
+                                        perk1 = Short.parseShort(token3[4]);
+                                    }
+                                    if (token3.length >= 6) {
+                                        perk1Rank = Byte.parseByte(token3[5]);
+                                    }
+                                    if (token3.length >= 7) {
+                                        perk2 = Short.parseShort(token3[6]);
+                                    }
+                                    if (token3.length >= 8) {
+                                        perk2Rank = Byte.parseByte(token3[7]);
+                                    }
 
-                                    if (rarityId != 0) {
+                                    if (rarityId != 0 || perk1 != 0 || perk2 != 0) {
                                         ItemAttributes attrs = new ItemAttributes();
                                         attrs.rarityId = rarityId;
+                                        attrs.perk1 = perk1;
+                                        attrs.perk1Rank = perk1Rank;
+                                        attrs.perk2 = perk2;
+                                        attrs.perk2Rank = perk2Rank;
                                         p.playerItemAttrs[slot] = attrs;
                                         p.playerItemAttrHash[slot] = attrs.computeHash();
                                     } else {
@@ -2490,6 +2546,28 @@ public class PlayerSave {
                     characterfile.write("\t", 0, 1);
                     characterfile.write(Integer.toString(p.playerEquipmentN[i]), 0, Integer.toString(p.playerEquipmentN[i]).length());
                     characterfile.write("\t", 0, 1);
+                    byte rarityId = 0;
+                    short perk1 = 0;
+                    byte perk1Rank = 0;
+                    short perk2 = 0;
+                    byte perk2Rank = 0;
+                    if (p.playerEquipmentAttrHash[i] != 0 && p.playerEquipmentAttrs[i] != null) {
+                        ItemAttributes a = p.playerEquipmentAttrs[i];
+                        rarityId = a.rarityId;
+                        perk1 = a.perk1;
+                        perk1Rank = a.perk1Rank;
+                        perk2 = a.perk2;
+                        perk2Rank = a.perk2Rank;
+                    }
+                    characterfile.write(Byte.toString(rarityId), 0, Byte.toString(rarityId).length());
+                    characterfile.write("\t", 0, 1);
+                    characterfile.write(Short.toString(perk1), 0, Short.toString(perk1).length());
+                    characterfile.write("\t", 0, 1);
+                    characterfile.write(Byte.toString(perk1Rank), 0, Byte.toString(perk1Rank).length());
+                    characterfile.write("\t", 0, 1);
+                    characterfile.write(Short.toString(perk2), 0, Short.toString(perk2).length());
+                    characterfile.write("\t", 0, 1);
+                    characterfile.write(Byte.toString(perk2Rank), 0, Byte.toString(perk2Rank).length());
                     characterfile.newLine();
                 }
                 characterfile.newLine();
@@ -2535,10 +2613,30 @@ public class PlayerSave {
                         int hash = p.playerItemAttrHash[i];
                         if (hash != 0 && p.playerItemAttrs[i] != null) {
                             characterfile.write("\t", 0, 1);
-                            String rarity = Byte.toString(p.playerItemAttrs[i].rarityId);
+                            ItemAttributes a = p.playerItemAttrs[i];
+                            String rarity = Byte.toString(a.rarityId);
+                            String perk1 = Short.toString(a.perk1);
+                            String perk1Rank = Byte.toString(a.perk1Rank);
+                            String perk2 = Short.toString(a.perk2);
+                            String perk2Rank = Byte.toString(a.perk2Rank);
                             characterfile.write(rarity, 0, rarity.length());
-
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write(perk1, 0, perk1.length());
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write(perk1Rank, 0, perk1Rank.length());
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write(perk2, 0, perk2.length());
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write(perk2Rank, 0, perk2Rank.length());
                         } else {
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write("0", 0, 1);
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write("0", 0, 1);
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write("0", 0, 1);
+                            characterfile.write("\t", 0, 1);
+                            characterfile.write("0", 0, 1);
                             characterfile.write("\t", 0, 1);
                             characterfile.write("0", 0, 1);
                         }
