@@ -14,6 +14,7 @@ import io.xeros.model.cycleevent.CycleEventContainer;
 import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.entity.npc.NPC;
 import io.xeros.model.entity.player.Boundary;
+import io.xeros.model.entity.player.ClientGameTimer;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.Position;
 
@@ -60,6 +61,13 @@ public class BossFactoryInstance extends InstancedArea {
         add(player);
         player.moveTo(resolve(TELEPORT_POSITION));
         sendTimeMessage(player, remainingMs());
+        sendInstanceTimer(player);
+    }
+
+    @Override
+    public void remove(Player player) {
+        super.remove(player);
+        clearInstanceTimer(player);
     }
 
     public boolean isOwnerInside() {
@@ -67,16 +75,19 @@ public class BossFactoryInstance extends InstancedArea {
     }
 
     public void onPlayerDeath(Player player) {
+        clearInstanceTimer(player);
         cleanupBoss(BossCleanupReason.PLAYER_DEATH);
     }
 
     public void onPlayerTeleport(Player player) {
+        clearInstanceTimer(player);
         cleanupBoss(BossCleanupReason.TELEPORT);
     }
 
     @Override
     public void onDispose() {
         CycleEventHandler.getSingleton().stopEvents(this);
+        clearInstanceTimerForPlayers();
         cleanupBoss(BossCleanupReason.INSTANCE_EXPIRED);
         BossFactoryInstanceManager.unregister(owner.getLoginNameLower());
     }
@@ -110,6 +121,7 @@ public class BossFactoryInstance extends InstancedArea {
                 if (remaining <= 0) {
                     expired = true;
                     broadcast("Your instance has expired and no further bosses will spawn.");
+                    clearInstanceTimerForPlayers();
                     if (bossNpc != null) {
                         bossNpc.getBehaviour().setRespawn(false);
                         bossNpc.needRespawn = false;
@@ -150,6 +162,19 @@ public class BossFactoryInstance extends InstancedArea {
 
     private void sendTimeMessage(Player player, long remaining) {
         player.sendMessage("Boss instance time remaining: " + formatRemaining(remaining));
+    }
+
+    private void sendInstanceTimer(Player player) {
+        int secondsRemaining = (int) Math.max(0, TimeUnit.MILLISECONDS.toSeconds(remainingMs()));
+        player.getPA().sendGameTimer(ClientGameTimer.BOSS_INSTANCE, TimeUnit.SECONDS, secondsRemaining);
+    }
+
+    private void clearInstanceTimer(Player player) {
+        player.getPA().sendGameTimer(ClientGameTimer.BOSS_INSTANCE, TimeUnit.SECONDS, 0);
+    }
+
+    private void clearInstanceTimerForPlayers() {
+        getPlayers().forEach(this::clearInstanceTimer);
     }
 
     private String formatRemaining(long remaining) {

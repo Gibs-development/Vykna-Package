@@ -17138,6 +17138,22 @@
     "rangeLevel": 1,
     "magicLevel": 1
   },
+  "3515": {
+    "name": "Goblin Necromancer",
+    "hitpoints": 320,
+    "combatLevel": 150,
+    "attackSpeed": 4,
+    "attackLevel": 125,
+    "strengthLevel": 125,
+    "defenceLevel": 115,
+    "rangeLevel": 85,
+    "magicLevel": 140,
+    "stabDef": 140,
+    "slashDef": 150,
+    "crushDef": 130,
+    "rangeDef": 160,
+    "magicDef": 180
+  },
   "3517": {
     "name": "Renegade Knight",
     "hitpoints": 48,

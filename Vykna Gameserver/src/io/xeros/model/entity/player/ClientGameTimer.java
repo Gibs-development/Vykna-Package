@@ -20,6 +20,7 @@ public enum ClientGameTimer {
 	DIVINE_MAGIC(Items.DIVINE_MAGIC_POTION4, true, true),
 	BONUS_XP(12, false, false),
 	BONUS_SKILLING_PET_RATE(13, false, false),
+	BOSS_INSTANCE(14, false, false),
 	BONUS_CLUES(2722, false, true),
 	;
 
