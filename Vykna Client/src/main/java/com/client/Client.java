@@ -4098,6 +4098,10 @@ public class Client extends RSApplet {
 			bars.drawStatusBars(xOffset, yOffset);//status bars
 		}
 
+		if (fixedMode) {
+			drawAttrHoverOverlay(true);
+		}
+
 		if (HoverMenuManager.showMenu && HoverMenuManager.drawType() == 0) {
 			//HoverMenuManager.drawHintMenu();
 		}
@@ -9476,6 +9480,10 @@ public class Client extends RSApplet {
 	}
 
 	private void drawAttrHoverOverlay() {
+		drawAttrHoverOverlay(false);
+	}
+
+	private void drawAttrHoverOverlay(boolean inTabArea) {
 		if (menuOpen) {
 			return;
 		}
@@ -9486,12 +9494,41 @@ public class Client extends RSApplet {
 		if (hoveredItemId < 0) {
 			return;
 		}
+		boolean tabAreaInterface = currentScreenMode == ScreenMode.FIXED
+				&& (lastActiveInvInterface == 3214 || lastActiveInvInterface == 1688);
+		if (!inTabArea && tabAreaInterface) {
+			return;
+		}
+		if (inTabArea && !tabAreaInterface) {
+			return;
+		}
 		ItemDefinition itemDef = ItemDefinition.forID(hoveredItemId);
 		if (itemDef == null) {
 			return;
 		}
-		DrawingArea.setDrawingArea(currentGameHeight, 0, currentGameWidth, 0);
-		drawHintMenu(itemDef.name, hoveredItemId, getUserSettings().getStartMenuColor());
+		int baseX = 0;
+		int baseY = 0;
+		int screenWidth = currentGameWidth;
+		int screenHeight = currentGameHeight;
+		if (inTabArea && currentScreenMode == ScreenMode.FIXED) {
+			baseX = 516;
+			baseY = 168;
+			if (tabAreaGraphicsBuffer != null) {
+				screenWidth = tabAreaGraphicsBuffer.width;
+				screenHeight = tabAreaGraphicsBuffer.height;
+			} else {
+				screenWidth = 249;
+				screenHeight = 335;
+			}
+		}
+		int mouseX = Client.instance.getMouseX() - baseX;
+		int mouseY = Client.instance.getMouseY() - baseY;
+		if (mouseX < 0 || mouseY < 0 || mouseX > screenWidth || mouseY > screenHeight) {
+			return;
+		}
+		DrawingArea.setDrawingArea(screenHeight, 0, screenWidth, 0);
+		drawHintMenu(itemDef.name, hoveredItemId, getUserSettings().getStartMenuColor(), mouseX, mouseY, screenWidth,
+				screenHeight);
 	}
 
 	private boolean isAttrHoverInterface(int interfaceId) {
@@ -9517,16 +9554,30 @@ public class Client extends RSApplet {
 		if (!shouldDrawAttrHover()) {
 			return;
 		}
-		drawStatMenu(itemName, itemId, color);
+		drawStatMenu(itemName, itemId, color, Client.instance.getMouseX(), Client.instance.getMouseY(), currentGameWidth,
+				currentGameHeight);
 		return;
 
 	}
+
+	private void drawHintMenu(String itemName, int itemId, int color, int mouseX, int mouseY, int screenWidth,
+			int screenHeight) {
+		if (!shouldDrawAttrHover()) {
+			return;
+		}
+		drawStatMenu(itemName, itemId, color, mouseX, mouseY, screenWidth, screenHeight);
+	}
+
 	public void drawStatMenu(String itemName,int itemId, int color) {
+		drawStatMenu(itemName, itemId, color, Client.instance.getMouseX(), Client.instance.getMouseY(), currentGameWidth,
+				currentGameHeight);
+	}
+
+	private void drawStatMenu(String itemName, int itemId, int color, int mouseX, int mouseY, int screenWidth,
+			int screenHeight) {
 		if(menuOpen){
 			return;
 		}
-		int mouseX = Client.instance.getMouseX();
-		int mouseY = Client.instance.getMouseY();
 		int interfaceId = lastActiveInvInterface;
 		int slot = mouseInvInterfaceIndex;
 		if (interfaceId <= 0 || slot < 0) return;
@@ -9553,8 +9604,6 @@ public class Client extends RSApplet {
 		int boxWidth = 240;
 		int perkBlockHeight = 46;
 		int boxH = perkCount > 0 ? 76 + perkBlockHeight : 80;
-		int screenWidth = currentScreenMode == ScreenMode.FIXED ? 765 : currentGameWidth;
-		int screenHeight = currentScreenMode == ScreenMode.FIXED ? 503 : currentGameHeight;
 		int boxX = mouseX + 12;
 		int boxY = mouseY + 12;
 		boxX = Math.max(0, Math.min(boxX, screenWidth - boxWidth));
