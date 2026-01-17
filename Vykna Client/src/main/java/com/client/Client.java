@@ -9630,13 +9630,33 @@ public class Client extends RSApplet {
 
 		int textX = x + iconSize + 8;
 		int textWidth = Math.max(60, width - (textX - x) - 4);
-		Client.instance.newSmallFont.drawBasicString(perkName + " (Rank " + perkRank + ")", textX, y + 14, textColor, 1);
+		Client.instance.newSmallFont.drawBasicString(
+				perkName + " " + toRoman(perkRank),
+				textX, y + 14, textColor, 1
+		);
+
 		String[] descLines = Client.instance.newSmallFont.wrap(perkDesc, textWidth);
 		int descY = y + 28;
 		for (int i = 0; i < descLines.length && i < 2; i++) {
 			Client.instance.newSmallFont.drawBasicString(descLines[i], textX, descY, 0xCCCCCC, 1);
 			descY += 12;
 		}
+	}
+	private static String toRoman(int n) {
+		if (n <= 0) return "";
+		if (n > 3999) return String.valueOf(n); // roman usually capped here
+
+		int[] values =    {1000, 900, 500, 400, 100,  90,  50,  40,  10,   9,   5,   4,   1};
+		String[] numerals={"M", "CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"};
+
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < values.length; i++) {
+			while (n >= values[i]) {
+				n -= values[i];
+				sb.append(numerals[i]);
+			}
+		}
+		return sb.toString();
 	}
 
 	private void buildChatAreaMenu(int j) {
