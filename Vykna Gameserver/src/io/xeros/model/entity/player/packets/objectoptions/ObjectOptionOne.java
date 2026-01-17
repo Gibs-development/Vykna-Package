@@ -25,22 +25,17 @@ import io.xeros.content.bosses.godwars.God;
 import io.xeros.content.bosses.hydra.AlchemicalHydra;
 import io.xeros.content.bosses.kratos.KratosNpc;
 import io.xeros.content.bosses.nex.Nex;
-import io.xeros.content.bosses.wildypursuit.FragmentOfSeren;
 import io.xeros.content.combat.Hitmark;
-import io.xeros.content.combat.weapon.WeaponDataConstants;
 import io.xeros.content.dialogue.DialogueBuilder;
 import io.xeros.content.dialogue.DialogueOption;
 import io.xeros.content.dialogue.impl.CrystalCaveEntryDialogue;
 import io.xeros.content.dialogue.impl.FireOfDestructionDialogue;
 import io.xeros.content.dialogue.impl.SkillingPortalDialogue;
 import io.xeros.content.dungeons.KaruulmDungeon;
-import io.xeros.content.event.eventcalendar.EventChallenge;
 import io.xeros.content.hs.NexHighscore;
-import io.xeros.content.hs.PKHighscore;
 import io.xeros.content.hs.XericHighscore;
 import io.xeros.content.item.lootable.impl.*;
 import io.xeros.content.leaderboards.LeaderboardInterface;
-import io.xeros.content.minigames.inferno.InfernoWaveData;
 import io.xeros.content.minigames.pest_control.PestControl;
 import io.xeros.content.minigames.pk_arena.Highpkarena;
 import io.xeros.content.minigames.pk_arena.Lowpkarena;
@@ -58,13 +53,12 @@ import io.xeros.content.skills.hunter.Hunter;
 import io.xeros.content.skills.runecrafting.Runecrafting;
 import io.xeros.content.skills.smithing.CannonballSmelting;
 import io.xeros.content.skills.thieving.Thieving.Stall;
-import io.xeros.content.bossfactory.bosses.GoblinNecromancerBoss;
+import io.xeros.content.bossfactory.bosses.MotherMadera;
 import io.xeros.content.bossfactory.instance.BossFactoryInstanceDialogue;
 import io.xeros.content.skills.woodcutting.Tree;
 import io.xeros.content.skills.woodcutting.Woodcutting;
 import io.xeros.content.tradingpost.Listing;
 import io.xeros.content.wilderness.SpiderWeb;
-import io.xeros.content.wogw.Wogw;
 import io.xeros.content.world_event.Tournament;
 import io.xeros.model.Items;
 import io.xeros.model.Npcs;
@@ -77,8 +71,6 @@ import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.entity.HealthStatus;
 import io.xeros.model.entity.npc.NPC;
 import io.xeros.model.entity.npc.NPCHandler;
-import io.xeros.model.entity.npc.NPCSpawning;
-import io.xeros.model.entity.npc.data.NpcMaxHit;
 import io.xeros.model.entity.player.*;
 import io.xeros.model.entity.player.mode.group.GroupIronmanBank;
 import io.xeros.model.entity.player.mode.group.GroupIronmanGroup;
@@ -210,7 +202,7 @@ public class ObjectOptionOne {
 		}
 		Location3D location = new Location3D(obX, obY, c.heightLevel);
 		switch (objectType) {
-			case GoblinNecromancerBoss.ENTRY_OBJECT_ID:
+			case MotherMadera.ENTRY_OBJECT_ID:
 				BossFactoryInstanceDialogue.open(c);
 				break;
 
