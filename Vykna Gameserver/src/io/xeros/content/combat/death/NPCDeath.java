@@ -374,8 +374,7 @@ public class NPCDeath {
             c.getNpcDeathTracker().add(NpcDef.forId(npcId).getName(), NpcDef.forId(npcId).getCombatLevel(), bossPoints);
         }
 
-        int finalAmountOfDrops = amountOfDrops;
-        Runnable dropAction = () -> Server.getDropManager().create(c, npc, location, finalAmountOfDrops, npcId);
+        Runnable dropAction = () -> Server.getDropManager().create(c, npc, location, amountOfDrops, npcId);
         if (BossFactoryRegistry.isBossId(npcId) && c.isBossLootChestUnlocked()) {
             BossDropContext.runWithReceiver(new GlobalLootChestReceiver(), dropAction);
         } else {

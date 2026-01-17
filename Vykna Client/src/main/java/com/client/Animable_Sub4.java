@@ -28,6 +28,9 @@ final class Animable_Sub4 extends Renderable {
 
 	@Override
 	public Model getRotatedModel() {
+		if (aSpotAnim_1592 == null) {
+			return null;
+		}
 		Model model = aSpotAnim_1592.getModel();
 		if (model == null)
 			return null;
@@ -75,6 +78,9 @@ final class Animable_Sub4 extends Renderable {
 		aDouble1577 += aDouble1578 * i;
 		anInt1595 = (int) (Math.atan2(aDouble1574, aDouble1575) * 325.94900000000001D) + 1024 & 0x7ff;
 		anInt1596 = (int) (Math.atan2(aDouble1577, aDouble1576) * 325.94900000000001D) & 0x7ff;
+		if (aSpotAnim_1592 == null || aSpotAnim_1592.aAnimation_407 == null) {
+			return;
+		}
 		if (aSpotAnim_1592.aAnimation_407 != null)
 			for (anInt1594 += i; anInt1594 > aSpotAnim_1592.aAnimation_407
 					.method258(anInt1593);) {
