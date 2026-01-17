@@ -9514,67 +9514,19 @@ public class Client extends RSApplet {
 
 
 	public void drawHintMenu(String itemName,int itemId, int color) {
-		int mouseX = Client.instance.getMouseX();
-		int mouseY = Client.instance.getMouseY();
-		if(menuActionName[menuActionRow]!=null) {
-			if (menuActionName[menuActionRow].contains("Walk")) {
-				return;
-			}
-		}
 		if (!shouldDrawAttrHover()) {
 			return;
 		}
-		//if(toolTip!=null){
-		//	return;
-		//}
-		if(currentScreenMode != ScreenMode.FIXED){
-			if(Client.instance.getMouseY() < worldViewportHeight - 450 && Client.instance.getMouseX() < worldViewportWidth - 200){
-				return;
-			}
-			mouseX-=100;
-			mouseY-=50;
-		}
-
 		drawStatMenu(itemName, itemId, color);
 		return;
 
 	}
 	public void drawStatMenu(String itemName,int itemId, int color) {
-		if (menuActionRow < 2 && itemSelected == 0 && spellSelected == 0) {
-			return;
-		}
-		if(menuActionName[menuActionRow]!=null) {
-			if (menuActionName[menuActionRow].contains("Walk")) {
-				return;
-			}
-		}
 		if(menuOpen){
 			return;
 		}
 		int mouseX = Client.instance.getMouseX();
 		int mouseY = Client.instance.getMouseY();
-		if(currentScreenMode != ScreenMode.FIXED){
-			mouseX-=100;
-			mouseY-=50;
-		}
-		if(currentScreenMode == ScreenMode.FIXED){
-			if(Client.instance.getMouseY() < 214 || Client.instance.getMouseX() < 561){
-				return;
-			}
-			mouseX-=516;
-			// mouseX-=491;
-			mouseY-=158;
-			if(Client.instance.getMouseX() > 600 && Client.instance.getMouseX() < 685) {
-				mouseX-=60;
-
-			}
-			if(Client.instance.getMouseX() > 685){
-				mouseX-=120;
-			}
-			if(Client.instance.getMouseY() > 392){
-				mouseY-=130;
-			}
-		}
 		int interfaceId = lastActiveInvInterface;
 		int slot = mouseInvInterfaceIndex;
 		if (interfaceId <= 0 || slot < 0) return;
@@ -9584,6 +9536,9 @@ public class Client extends RSApplet {
 // Pull attrs from the store (this only works once your packet is decoded)
 		com.client.attributes.ItemAttrStore.Attr attr =
 				com.client.attributes.ItemAttrStore.get(interfaceId, slot);
+		if (attr == null || attr.rarityId < 0) {
+			return;
+		}
 
 		int perkCount = 0;
 		if (attr != null) {
@@ -9609,8 +9564,8 @@ public class Client extends RSApplet {
 
 		Client.instance.newSmallFont.drawBasicString(itemName, boxX + 8, boxY + 18, color, 1);
 
-		String rarityLabel = attr == null ? "None" : rarityName(attr.rarityId);
-		int rarityColor = attr == null ? color : com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
+		String rarityLabel = rarityName(attr.rarityId);
+		int rarityColor = com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
 		if (rarityColor <= 0) {
 			rarityColor = color;
 		}
@@ -19700,6 +19655,7 @@ public class Client extends RSApplet {
 									com.client.attributes.ItemAttrStore.Attr attr =
 											new com.client.attributes.ItemAttrStore.Attr();
 									attr.hash = hash;
+									attr.itemId = id2;
 									attr.rarityId = rarity;
 									attr.perk1 = perk1;
 									attr.perk1Rank = perk1Rank;

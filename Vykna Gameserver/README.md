@@ -46,7 +46,7 @@ Server.getDatabaseManager().execute((context, connection) -> {
     // We have to queue this because we aren't on the main thread and the player
     // will throw an exception for packets sent from outside that thread.
     // Note: this will sometimes require a locking mechanism to prevent the player from moving or leaving
-    // that isn't always neccesary though.
+    // that isn't always necessary though.
     player.addQueuedAction(plr -> {
         myStrings.forEach(it -> plr.sendMessage(it));
     });
