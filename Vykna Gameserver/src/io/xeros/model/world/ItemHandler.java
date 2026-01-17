@@ -68,6 +68,24 @@ public class ItemHandler {
 		return items.stream().filter(exists).findFirst().orElse(null);
 	}
 
+	private GroundItem getGroundItemForStacking(Player player, GameItem gameItem, int x, int y, int height) {
+		if (gameItem == null) return null;
+		Predicate<GroundItem> exists = (GroundItem i) -> i.getId() == gameItem.getId()
+				&& i.getX() == x && i.getY() == y && i.getHeight() == height;
+		if (player != null) {
+			exists = exists.and((GroundItem i) -> i.getInstance() == player.getInstance() && i.isViewable(player));
+		}
+
+		exists = exists.and((GroundItem i) -> {
+			if (gameItem.hasAttrs()) {
+				return i.getAttrsHash() == gameItem.getAttrsHash();
+			}
+			return i.getAttrsHash() == 0;
+		});
+
+		return items.stream().filter(exists).findFirst().orElse(null);
+	}
+
 	/**
 	 * Item amount
 	 **/
@@ -178,16 +196,110 @@ public class ItemHandler {
 		}
 	}
 
+	public void createGroundItemFromDrop(Player player, GameItem gameItem, int itemX, int itemY, int height, int playerId) {
+		if (gameItem == null) {
+			return;
+		}
+		boolean newPlayer = player.hasNewPlayerRestriction();
+		boolean inWild = Boundary.isIn(player, Boundary.WILDERNESS_PARAMETERS);
+		boolean global = !player.hasNewPlayerRestriction();
+		createGroundItem(player, gameItem, itemX, itemY, height, gameItem.getAmount(), playerId, global, inWild ? 3 : getGlobalisationTicks());
+		if (newPlayer) {
+			player.sendMessage("The dropped item won't become global because you haven't played for " + Configuration.NEW_PLAYER_RESTRICT_TIME_MIN + " minutes.");
+		}
+	}
+
 	public void createGroundItem(Player player, GameItem gameItem, Position position, int hideTicks) {
-		createGroundItem(player, gameItem.getId(), position.getX(), position.getY(), position.getHeight(), gameItem.getAmount(), player.getIndex(), true, hideTicks);
+		createGroundItem(player, gameItem, position.getX(), position.getY(), position.getHeight(), gameItem.getAmount(), player.getIndex(), true, hideTicks);
 	}
 
 	public void createGroundItem(Player player, GameItem gameItem, Position position) {
-		createGroundItem(player, gameItem.getId(), position.getX(), position.getY(), position.getHeight(), gameItem.getAmount(), player.getIndex());
+		createGroundItem(player, gameItem, position.getX(), position.getY(), position.getHeight(), gameItem.getAmount(), player.getIndex(), true, getGlobalisationTicks());
 	}
 
 	public void createGroundItem(Player player, int itemId, int itemX, int itemY, int height, int itemAmount, int playerId) {
 		createGroundItem(player, itemId, itemX, itemY, height, itemAmount, playerId, true, getGlobalisationTicks());
+	}
+
+	public void createGroundItem(Player player, GameItem gameItem, int itemX, int itemY, int height, int itemAmount, int playerId, boolean globalise, int hideTicks) {
+		if (gameItem == null) {
+			return;
+		}
+		int itemId = gameItem.getId();
+		if (playerId < 0 || playerId > PlayerHandler.players.length - 1) {
+			return;
+		}
+		Player owner = PlayerHandler.players[playerId];
+		if (owner == null) {
+			return;
+		}
+		if (itemId > 0 && itemAmount > 0) {
+			/**
+			 * Lootvalue
+			 */
+			if (player.lootValue > 0) {
+				if (ShopAssistant.getItemShopValue(itemId) >= player.lootValue) {
+					player.getPA().stillGfx(1177, itemX, itemY, height, 5);
+					player.sendMessage("@red@Your lootvalue senses a drop valued at or over "
+							+ Misc.getValueWithoutRepresentation(player.lootValue) + " coins.");
+				}
+			}
+			/**
+			 * Bone crusher
+			 */
+			boolean crusher = player.getItems().playerHasItem(13116) || player.playerEquipment[Player.playerAmulet] == 22986 ;
+
+			Optional<Bone> boneOptional = Prayer.isOperableBone(itemId);
+			if (crusher && boneOptional.isPresent()) {
+				Bone bone = boneOptional.get();
+
+				double experience = player.getRechargeItems().hasItem(13114) ? 0.75 : player.getRechargeItems().hasItem(13115) ? 1 : player.getDiaryManager().getMorytaniaDiary().hasCompleted("ELITE") ?  1 : 0.50 ;
+				if (itemId == bone.getItemId()) {
+					player.getPrayer().onBonesBuriedOrCrushed(bone, true);
+					player.getPA().addSkillXPMultiplied((int) (bone.getExperience() * experience),
+							Skill.PRAYER.getId(), true);
+					return;
+				}
+			}
+
+			if (!ItemDef.forId(itemId).isStackable()) {
+				if (itemAmount > 28) {
+					itemAmount = 28;
+				}
+				for (int j = 0; j < itemAmount; j++) {
+					GroundItem item = new GroundItem(itemId, itemX, itemY, height, 1, hideTicks, owner.getLoginNameLower());
+					if (gameItem.hasAttrs()) {
+						item.setAttrs(gameItem.getAttrs());
+					}
+					player.getItems().createGroundItem(item);
+					item.setGlobalise(globalise);
+					item.setInstance(player.getInstance());
+					items.add(item);
+					logger.debug("Added ground item: " + item);
+				}
+			} else {
+				GroundItem current = getGroundItemForStacking(player, gameItem, itemX, itemY, height);
+				int existingAmount = 0;
+				if (current != null) {
+					existingAmount += current.getAmount();
+					player.getItems().removeGroundItem(current, true);
+					removeGroundItem(player, current, false);
+				}
+				int newAmount = (int) Math.min(Integer.MAX_VALUE, (long) itemAmount + existingAmount);
+				if (newAmount <= 0) {
+					return;
+				}
+				GroundItem item = new GroundItem(itemId, itemX, itemY, height, newAmount, hideTicks, owner.getLoginNameLower());
+				if (gameItem.hasAttrs()) {
+					item.setAttrs(gameItem.getAttrs());
+				}
+				player.getItems().createGroundItem(item);
+				item.setGlobalise(globalise);
+				item.setInstance(player.getInstance());
+				items.add(item);
+				logger.debug("Added ground item: " + item);
+			}
+		}
 	}
 
 	/**
@@ -202,6 +314,7 @@ public class ItemHandler {
 			return;
 		}
 		if (itemId > 0 && itemAmount > 0) {
+			GameItem incoming = new GameItem(itemId, itemAmount);
 			/**
 			 * Lootvalue
 			 */
@@ -243,7 +356,7 @@ public class ItemHandler {
 					logger.debug("Added ground item: " + item);
 				}
 			} else {
-				GroundItem current = getGroundItem(player, itemId, itemX, itemY, height);
+				GroundItem current = getGroundItemForStacking(player, incoming, itemX, itemY, height);
 				int existingAmount = 0;
 				if (current != null) {
 					existingAmount += current.getAmount();
@@ -267,6 +380,7 @@ public class ItemHandler {
 
 	public void createGroundItem(Player player, int itemId, int itemX, int itemY, int height, int itemAmount) {
 		if (itemId > 0 && itemAmount > 0) {
+			GameItem incoming = new GameItem(itemId, itemAmount);
 			if (!ItemDef.forId(itemId).isStackable()) {
 				if (itemAmount > 28) {
 					itemAmount = 28;
@@ -282,7 +396,7 @@ public class ItemHandler {
 				if (itemId == 11849 && Boundary.isIn(player, Boundary.ROOFTOP_COURSES)) {
 					player.getItems().addItemUnderAnyCircumstance(11849, 1);
 				} else {
-					GroundItem current = getGroundItem(player, itemId, itemX, itemY, height);
+					GroundItem current = getGroundItemForStacking(player, incoming, itemX, itemY, height);
 					int existingAmount = 0;
 					if (current != null) {
 						existingAmount += current.getAmount();
@@ -320,7 +434,9 @@ public class ItemHandler {
 			return;
 		}
 
-		if (c.getPosition().inWild() && c.getItems().playerHasItem(LootingBag.LOOTING_BAG_OPEN)
+		if (!i.hasAttrs()
+				&& c.getPosition().inWild()
+				&& c.getItems().playerHasItem(LootingBag.LOOTING_BAG_OPEN)
 				&& c.getLootingBag().getLootingBagContainer().deposit(i.getId(), i.getAmount(), false)) {
 			logPickup(c, i);
 			sendRemovedGroundItem(i);
@@ -329,7 +445,13 @@ public class ItemHandler {
 		}
 
 		if (c.getItems().hasRoomInInventory(i.getId(), i.getAmount())) {
-			c.getItems().addItem(i.getId(), i.getAmount());
+			if (i.hasAttrs()) {
+				GameItem item = new GameItem(i.getId(), i.getAmount());
+				item.setAttrs(i.getAttrs());
+				c.getItems().addItem(item, true);
+			} else {
+				c.getItems().addItem(i.getId(), i.getAmount());
+			}
 			logPickup(c, i);
 			sendRemovedGroundItem(i);
 			items.remove(i);
@@ -338,7 +460,11 @@ public class ItemHandler {
 
 	private void logPickup(Player player, GroundItem groundItem) {
 		ItemDef def = ItemDef.forId(groundItem.getId());
-		Server.getLogging().write(new ItemPickupLog(player, new GameItem(groundItem.getId(), groundItem.getAmount()), groundItem.getPosition(), groundItem.getOwnerName()));
+		GameItem logged = new GameItem(groundItem.getId(), groundItem.getAmount());
+		if (groundItem.hasAttrs()) {
+			logged.setAttrs(groundItem.getAttrs());
+		}
+		Server.getLogging().write(new ItemPickupLog(player, logged, groundItem.getPosition(), groundItem.getOwnerName()));
 		if (def.getShopValue() > 30_000 || def.getShopValue() < 2) {
 			Discord.writePickupMessage("[Pickup]: " + player.getDisplayName() +
 					" picked up " + def.getName() +

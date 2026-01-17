@@ -102,6 +102,10 @@ public class ItemAssistant {
 		player.getPA().sendInventoryAttrDbg(player, 5064);
 	}
 
+	public void sendBankAttrsNow() {
+		sendBankAttrs();
+	}
+
 
 	public void addContainerUpdate(ContainerUpdate containerUpdate) {
 		if (!containerUpdates.contains(containerUpdate)) {
@@ -175,9 +179,15 @@ public class ItemAssistant {
 
 	public List<GameItem> getBankItems() {
 		List<GameItem> bankItems = new ArrayList<>();
-		for (BankTab tab : player.getBank().getBankTab())
-			for (BankItem bankItem : tab.getItems())
-				bankItems.add(new GameItem(bankItem.getId() - 1, bankItem.getAmount())); // :(
+		for (BankTab tab : player.getBank().getBankTab()) {
+			for (BankItem bankItem : tab.getItems()) {
+				GameItem item = new GameItem(bankItem.getId() - 1, bankItem.getAmount());
+				if (bankItem.hasAttrs() && bankItem.getAttrs() != null) {
+					item.setAttrs(bankItem.getAttrs().copy());
+				}
+				bankItems.add(item);
+			}
+		}
 		return bankItems;
 	}
 
@@ -703,6 +713,26 @@ public class ItemAssistant {
 		return updateStackableInventoryItemAmount(incoming);
 	}
 
+	private int getMatchingStackAmount(GameItem incoming) {
+		for (int i = 0; i < player.playerItems.length; i++) {
+			GameItem existing = getItemInInventorySlot(i);
+			if (existing != null && existing.stacksWith(incoming)) {
+				return existing.getAmount();
+			}
+		}
+		return 0;
+	}
+
+	private boolean hasMatchingStack(GameItem incoming) {
+		for (int i = 0; i < player.playerItems.length; i++) {
+			GameItem existing = getItemInInventorySlot(i);
+			if (existing != null && existing.stacksWith(incoming)) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private void clearInventorySlot(int slot) {
 		player.playerItems[slot] = 0;
 		player.playerItemsN[slot] = 0;
@@ -758,9 +788,10 @@ public class ItemAssistant {
 		if (amount <= 0)
 			return false;
 		GameItem gameItem = new GameItem(item, amount);
-		int currentAmount = getItemAmount(item);
+		int currentAmount = getMatchingStackAmount(gameItem);
+		boolean hasMatchingStack = hasMatchingStack(gameItem);
 
-		if (gameItem.getDef().isStackable() && currentAmount > 0) {
+		if (gameItem.getDef().isStackable() && hasMatchingStack) {
 			if ((long) currentAmount + (long) amount > Integer.MAX_VALUE) {
 				player.sendMessageIf(sendMessage, "Not enough space in your inventory.");
 				return false;
@@ -771,6 +802,10 @@ public class ItemAssistant {
 			return true;
 		} else {
 			if (gameItem.isStackable()) {
+				if (freeSlots() <= 0) {
+					player.sendMessageIf(sendMessage, "Not enough space in your inventory.");
+					return false;
+				}
 				return addInventoryItemToFreeSlot(gameItem);
 			} else {
 				if (freeSlots() < gameItem.getAmount()) {
@@ -789,11 +824,11 @@ public class ItemAssistant {
 		if (gameItem == null || gameItem.getAmount() <= 0)
 			return false;
 
-		int item = gameItem.getId();
 		int amount = gameItem.getAmount();
-		int currentAmount = getItemAmount(item);
+		int currentAmount = getMatchingStackAmount(gameItem);
+		boolean hasMatchingStack = hasMatchingStack(gameItem);
 
-		if (gameItem.getDef().isStackable() && currentAmount > 0) {
+		if (gameItem.getDef().isStackable() && hasMatchingStack) {
 			if ((long) currentAmount + (long) amount > Integer.MAX_VALUE) {
 				player.sendMessageIf(sendMessage, "Not enough space in your inventory.");
 				return false;
@@ -804,6 +839,10 @@ public class ItemAssistant {
 			return true;
 		} else {
 			if (gameItem.isStackable()) {
+				if (freeSlots() <= 0) {
+					player.sendMessageIf(sendMessage, "Not enough space in your inventory.");
+					return false;
+				}
 				return addInventoryItemToFreeSlot(gameItem);
 			} else {
 				if (freeSlots() < gameItem.getAmount()) {
@@ -2000,6 +2039,83 @@ public class ItemAssistant {
 		return true;
 	}
 
+	/**
+	 * Remove a specific bank stack (id + attrsHash) from any tab.
+	 * This is attrs-safe and deterministic.
+	 */
+	public boolean removeFromAnyTabWithoutAdding(GameItem item, boolean updateView) {
+		if (item == null || item.getAmount() <= 0) return false;
+
+		BankItem target = new BankItem(item.getId() + 1, item.getAmount());
+		if (item.hasAttrs()) {
+			target.setAttrs(item.getAttrs());
+		}
+
+		for (BankTab tab : player.getBank().getBankTab()) {
+			if (tab == null || tab.size() == 0) continue;
+			for (int slot = 0; slot < tab.size(); slot++) {
+				BankItem bankItem = tab.getItem(slot);
+				if (bankItem != null && bankItem.stacksWith(target)) {
+					tab.remove(target, 0, player.placeHolders);
+					if (tab.size() == 0) {
+						player.getBank().setCurrentBankTab(player.getBank().getBankTab(0));
+					}
+					if (updateView) queueBankContainerUpdate();
+					player.getItems().sendInventoryInterface(5064);
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Legacy helper for presets/etc: remove by item id, preferring non-augmented stacks first.
+	 * This is deterministic and avoids wiping augmented stacks if a normal stack exists.
+	 */
+	public boolean removeFromAnyTabPreferNonAugmented(int itemId, int itemAmount, boolean updateView) {
+		if (itemId <= 0 || itemAmount <= 0) return false;
+
+		BankItem nonAugmentedTarget = new BankItem(itemId + 1, itemAmount);
+		BankItem fallback = null;
+
+		for (BankTab tab : player.getBank().getBankTab()) {
+			if (tab == null || tab.size() == 0) continue;
+			for (int slot = 0; slot < tab.size(); slot++) {
+				BankItem bankItem = tab.getItem(slot);
+				if (bankItem == null || bankItem.getId() != itemId + 1) continue;
+				if (!bankItem.hasAttrs() || bankItem.getAttrsHash() == 0) {
+					tab.remove(nonAugmentedTarget, 0, player.placeHolders);
+					if (updateView) queueBankContainerUpdate();
+					player.getItems().sendInventoryInterface(5064);
+					return true;
+				}
+				if (fallback == null) {
+					fallback = bankItem;
+				}
+			}
+		}
+
+		if (fallback != null) {
+			BankItem toRemove = new BankItem(fallback.getId(), itemAmount);
+			if (fallback.hasAttrs()) {
+				toRemove.setAttrs(fallback.getAttrs());
+			}
+			for (BankTab tab : player.getBank().getBankTab()) {
+				if (tab == null) continue;
+				if (tab.getItem(toRemove) != null) {
+					tab.remove(toRemove, 0, player.placeHolders);
+					if (updateView) queueBankContainerUpdate();
+					player.getItems().sendInventoryInterface(5064);
+					return true;
+				}
+			}
+		}
+
+		return false;
+	}
+
 
 	public void removeFromBank(BankTab tab, int itemId, int itemAmount, boolean updateView) {
 		// Legacy withdraw call (no slot given). Prefer removeFromBankSlot(...).
@@ -2259,6 +2375,11 @@ public class ItemAssistant {
 			return false;
 		BankTab tab = player.getBank().getCurrentBankTab();
 		BankItem item = new BankItem(itemId + 1, amount);
+		ItemAttributes equipAttrs = player.playerEquipmentAttrs[slot];
+		int equipHash = player.playerEquipmentAttrHash[slot];
+		if (equipAttrs != null && equipHash != 0) {
+			item.setAttrs(equipAttrs.copy());
+		}
 		if (ItemDef.forId(itemId).isNoted()) {
 			item = new BankItem(Server.itemHandler.getCounterpart(itemId) + 1, amount);
 		}
@@ -2301,6 +2422,7 @@ public class ItemAssistant {
 		if (player.playerEquipmentN[slot] <= 0) {
 			player.playerEquipmentN[slot] = -1;
 			player.playerEquipment[slot] = -1;
+			clearEquipmentSlotAttrs(slot);
 		}
 		tab.add(item);
 		if (updateView) {
@@ -3021,6 +3143,7 @@ public class ItemAssistant {
 			player.isBanking = true;
 			player.getItems().sendInventoryInterface(5064);
 			player.getItems().updateBankContainer();
+			player.getItems().sendBankAttrsNow();
 			player.getItems().resetTempItems();
 			player.getOutStream().createFrame(248);
 			player.getOutStream().writeWordA(Bank.INTERFACE_ID);
