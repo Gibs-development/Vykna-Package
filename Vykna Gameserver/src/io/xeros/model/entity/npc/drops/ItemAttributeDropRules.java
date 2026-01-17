@@ -14,7 +14,7 @@ import io.xeros.util.Misc;
 
 /**
  * Rules engine for applying ItemAttributes to NPC drops.
- * Configure eligible items, rarity chances, and perk pools per NPC or via a default rule.
+ * Configure eligible items and rarity/perk pools per item (or via a default rule).
  */
 public final class ItemAttributeDropRules {
 
@@ -26,7 +26,7 @@ public final class ItemAttributeDropRules {
 
 	private final Set<Integer> eligibleItems = new HashSet<>();
 	private final Set<Integer> blockedItems = new HashSet<>();
-	private final Map<Integer, Rule> npcRules = new HashMap<>();
+	private final Map<Integer, Rule> itemRules = new HashMap<>();
 	private final Rule defaultRule = new Rule();
 
 	private ItemAttributeDropRules() {
@@ -41,7 +41,7 @@ public final class ItemAttributeDropRules {
 	 * <pre>
 	 * ItemAttributeDropRules rules = ItemAttributeDropRules.getInstance();
 	 * rules.allowItems(Items.ABYSSAL_WHIP, Items.DRAGON_SCIMITAR);
-	 * rules.ruleForNpc(Npcs.ABYSSAL_SIRE)
+	 * rules.ruleForItem(Items.ABYSSAL_WHIP)
 	 *     .addRarityChance(1, 0.20) // uncommon 20%
 	 *     .addRarityChance(2, 0.05) // rare 5%
 	 *     .addPerkPool(0.10, 1, 3, 100, 101, 102); // 10% to roll a perk in this pool
@@ -52,8 +52,8 @@ public final class ItemAttributeDropRules {
 		// Intentionally left empty: copy the snippet above into your startup config.
 	}
 
-	public Rule ruleForNpc(int npcId) {
-		return npcRules.computeIfAbsent(npcId, id -> new Rule());
+	public Rule ruleForItem(int itemId) {
+		return itemRules.computeIfAbsent(itemId, id -> new Rule());
 	}
 
 	public void allowItems(int... itemIds) {
@@ -68,20 +68,24 @@ public final class ItemAttributeDropRules {
 		}
 	}
 
-	public GameItem applyAttributes(int npcId, GameItem item) {
+	public GameItem applyAttributes(GameItem item) {
 		if (item == null) return null;
 		GameItem copy = item.copy();
-		Optional<ItemAttributes> attrs = rollForDrop(npcId, item.getId());
+		Optional<ItemAttributes> attrs = rollForDrop(item.getId());
 		attrs.ifPresent(copy::setAttrs);
 		return copy;
 	}
 
-	public Optional<ItemAttributes> rollForDrop(int npcId, int itemId) {
+	public GameItem applyAttributes(int npcId, GameItem item) {
+		return applyAttributes(item);
+	}
+
+	public Optional<ItemAttributes> rollForDrop(int itemId) {
 		if (!eligibleItems.contains(itemId) || blockedItems.contains(itemId)) {
 			return Optional.empty();
 		}
 
-		Rule rule = npcRules.getOrDefault(npcId, defaultRule);
+		Rule rule = itemRules.getOrDefault(itemId, defaultRule);
 		if (!rule.enabled) {
 			return Optional.empty();
 		}

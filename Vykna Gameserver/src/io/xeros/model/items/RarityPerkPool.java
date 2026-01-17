@@ -1,13 +1,11 @@
 package io.xeros.model.items;
 
 import io.xeros.util.Misc;
-import lombok.Getter;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-@Getter
 public enum RarityPerkPool {
     COMMON(0, new Option[] {
             option(PerkModule.BITING, 1, 2, 3),
@@ -57,6 +55,14 @@ public enum RarityPerkPool {
         List<Option> list = new ArrayList<>();
         Collections.addAll(list, options);
         this.options = Collections.unmodifiableList(list);
+    }
+
+    public int getRarityId() {
+        return rarityId;
+    }
+
+    public List<Option> getOptions() {
+        return options;
     }
 
     public static RarityPerkPool forRarity(int rarityId) {

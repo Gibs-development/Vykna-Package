@@ -4543,7 +4543,7 @@ public class Client extends RSApplet {
 
 	public void resetLogout() {
 		logger.debug("being logged out.. from: "+new Throwable().getStackTrace()[1].toString());
-		logger.debug("Logging out..");
+		logger.debug("Logging out.. screenMode={}, size={}x{}", currentScreenMode, currentGameWidth, currentGameHeight);
 		// Vykna attrs: prevent stale per-slot attrs leaking across sessions
 		try {
 			com.client.attributes.ItemAttrStore.clearAll();
@@ -4580,9 +4580,8 @@ public class Client extends RSApplet {
 		experienceCounter = 0;
 		GameTimerHandler.getSingleton().stopAll();
 		Preferences.save();
-		setGameMode(ScreenMode.FIXED, false);
 		resetAllImageProducers(true);
-		refreshShellResizableState();
+		logger.debug("Logout cleanup complete. screenMode={}, size={}x{}", currentScreenMode, currentGameWidth, currentGameHeight);
 	}
 
 	public void method45() {
@@ -9458,6 +9457,12 @@ public class Client extends RSApplet {
 		return mouseInvInterfaceIndex; // this is set to k2
 	}
 
+	private boolean isAttrHoverInterface(int interfaceId) {
+		return interfaceId == 3214
+				|| interfaceId == 1688
+				|| isBankContainer(interfaceId);
+	}
+
 	private static String rarityName(int rarityId) {
 		switch (rarityId) {
 			case 0: return "Common";
@@ -9479,15 +9484,12 @@ public class Client extends RSApplet {
 				return;
 			}
 		}
-		if(toolTip.contains("Walk")||toolTip.contains("World")||!toolTip.contains("W")){
+		if (!shouldDrawAttrHover()) {
 			return;
 		}
 		//if(toolTip!=null){
 		//	return;
 		//}
-		if(openInterfaceID!=-1){
-			return;
-		}
 		if(currentScreenMode != ScreenMode.FIXED){
 			if(Client.instance.getMouseY() < worldViewportHeight - 450 && Client.instance.getMouseX() < worldViewportWidth - 200){
 				return;
@@ -9509,16 +9511,7 @@ public class Client extends RSApplet {
 				return;
 			}
 		}
-		//if(toolTip.contains("Walk")||toolTip.contains("Talk-to")||toolTip.contains("Bank")|| toolTip.contains("Steal")|| toolTip.contains("Attack")){
-		//	return;
-		//}/
-		if(toolTip.contains("Walk")||toolTip.contains("World")||!toolTip.contains("W")){
-			return;
-		}
 		if(menuOpen){
-			return;
-		}
-		if(tabID!=3){
 			return;
 		}
 		int mouseX = Client.instance.getMouseX();
@@ -9548,6 +9541,7 @@ public class Client extends RSApplet {
 		int interfaceId = lastActiveInvInterface;
 		int slot = mouseInvInterfaceIndex;
 		if (interfaceId <= 0 || slot < 0) return;
+		if (!isAttrHoverInterface(interfaceId)) return;
 
 
 // Pull attrs from the store (this only works once your packet is decoded)
@@ -9569,26 +9563,28 @@ public class Client extends RSApplet {
 		int boxH = perkCount > 0 ? 76 + perkBlockHeight : 80;
 		int screenWidth = currentScreenMode == ScreenMode.FIXED ? 765 : currentGameWidth;
 		int screenHeight = currentScreenMode == ScreenMode.FIXED ? 503 : currentGameHeight;
-		mouseX = Math.max(0, Math.min(mouseX, screenWidth - boxWidth));
-		mouseY = Math.max(0, Math.min(mouseY, screenHeight - boxH));
-		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, boxWidth, boxH, 0x696969);
-		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, boxWidth, boxH + 1, 0x000000, 90);
+		int boxX = mouseX + 12;
+		int boxY = mouseY + 12;
+		boxX = Math.max(0, Math.min(boxX, screenWidth - boxWidth));
+		boxY = Math.max(0, Math.min(boxY, screenHeight - boxH));
+		DrawingArea.drawBoxOutline(boxX, boxY + 5, boxWidth, boxH, 0x696969);
+		DrawingArea.drawTransparentBox(boxX + 1, boxY + 6, boxWidth, boxH + 1, 0x000000, 90);
 
-		Client.instance.newSmallFont.drawBasicString(itemName, mouseX + 8, mouseY + 18, color, 1);
+		Client.instance.newSmallFont.drawBasicString(itemName, boxX + 8, boxY + 18, color, 1);
 
 		String rarityLabel = attr == null ? "None" : rarityName(attr.rarityId);
 		int rarityColor = attr == null ? color : com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);
 		if (rarityColor <= 0) {
 			rarityColor = color;
 		}
-		Client.instance.newSmallFont.drawBasicString("Rarity: " + rarityLabel, mouseX + 8, mouseY + 34, rarityColor, 1);
+		Client.instance.newSmallFont.drawBasicString("Rarity: " + rarityLabel, boxX + 8, boxY + 34, rarityColor, 1);
 		Sprite rarityIcon = attr == null ? null : com.client.attributes.ItemAttrStore.spriteForRarity(attr.rarityId);
 		if (rarityIcon != null) {
-			rarityIcon.drawSprite(mouseX + boxWidth - rarityIcon.myWidth - 6, mouseY + 10);
+			rarityIcon.drawSprite(boxX + boxWidth - rarityIcon.myWidth - 6, boxY + 10);
 		}
 
 		if (attr == null || perkCount == 0) {
-			Client.instance.newSmallFont.drawBasicString("No perks rolled", mouseX + 8, mouseY + 52, 0xAAAAAA, 1);
+			Client.instance.newSmallFont.drawBasicString("No perks rolled", boxX + 8, boxY + 52, 0xAAAAAA, 1);
 			return;
 		}
 
@@ -9596,21 +9592,27 @@ public class Client extends RSApplet {
 		int blockGap = 6;
 		int columns = perkCount > 1 ? 2 : 1;
 		int blockWidth = columns == 2 ? (boxWidth - (padding * 2) - blockGap) / 2 : (boxWidth - (padding * 2));
-		int blockY = mouseY + 48;
+		int blockY = boxY + 48;
 
 		if (attr.perk1 > 0) {
-			int blockX = mouseX + padding;
+			int blockX = boxX + padding;
 			drawPerkBlock(blockX, blockY, blockWidth, attr.perk1, attr.perk1Rank, color);
 		}
 		if (attr.perk2 > 0) {
-			int blockX = mouseX + padding + blockWidth + blockGap;
+			int blockX = boxX + padding + blockWidth + blockGap;
 			if (columns == 1) {
-				blockX = mouseX + padding;
+				blockX = boxX + padding;
 				blockY += perkBlockHeight + 6;
 			}
 			drawPerkBlock(blockX, blockY, blockWidth, attr.perk2, attr.perk2Rank, color);
 		}
 
+	}
+
+	private boolean shouldDrawAttrHover() {
+		return lastActiveInvInterface > 0
+				&& mouseInvInterfaceIndex >= 0
+				&& isAttrHoverInterface(lastActiveInvInterface);
 	}
 
 	private void drawPerkBlock(int x, int y, int width, int perkId, int perkRank, int textColor) {
@@ -9630,33 +9632,13 @@ public class Client extends RSApplet {
 
 		int textX = x + iconSize + 8;
 		int textWidth = Math.max(60, width - (textX - x) - 4);
-		Client.instance.newSmallFont.drawBasicString(
-				perkName + " " + toRoman(perkRank),
-				textX, y + 14, textColor, 1
-		);
-
+		Client.instance.newSmallFont.drawBasicString(perkName + " (Rank " + perkRank + ")", textX, y + 14, textColor, 1);
 		String[] descLines = Client.instance.newSmallFont.wrap(perkDesc, textWidth);
 		int descY = y + 28;
 		for (int i = 0; i < descLines.length && i < 2; i++) {
 			Client.instance.newSmallFont.drawBasicString(descLines[i], textX, descY, 0xCCCCCC, 1);
 			descY += 12;
 		}
-	}
-	private static String toRoman(int n) {
-		if (n <= 0) return "";
-		if (n > 3999) return String.valueOf(n); // roman usually capped here
-
-		int[] values =    {1000, 900, 500, 400, 100,  90,  50,  40,  10,   9,   5,   4,   1};
-		String[] numerals={"M", "CM","D","CD","C","XC","L","XL","X","IX","V","IV","I"};
-
-		StringBuilder sb = new StringBuilder();
-		for (int i = 0; i < values.length; i++) {
-			while (n >= values[i]) {
-				n -= values[i];
-				sb.append(numerals[i]);
-			}
-		}
-		return sb.toString();
 	}
 
 	private void buildChatAreaMenu(int j) {
@@ -11156,6 +11138,7 @@ public class Client extends RSApplet {
 
 				informationFile.write();
 				Preferences.getPreferences().updateScreenMode();
+				logger.debug("Post-login screen mode applied. screenMode={}, size={}x{}", currentScreenMode, currentGameWidth, currentGameHeight);
 				if (Client.currentScreenMode == ScreenMode.FIXED && getUserSettings().isStretchedMode()) {
 					StretchedModeMenu.updateStretchedMode(true);
 				}

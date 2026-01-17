@@ -638,7 +638,7 @@ public class DropManager {
             double modifier = getModifier(player);
             List<GameItem> drops = g.access(player, npc, modifier, repeats, npcId);
             for (GameItem item : drops) {
-                GameItem dropItem = attributeDropRules.applyAttributes(npcId, item);
+                GameItem dropItem = attributeDropRules.applyAttributes(item);
 
                 if (player.getItems().isWearingItem(21126) && Misc.random(100) == 1) { // Hazelmere signut author C.T
                     player.sendMessage("<col=ff7000>The power of Hazelmere blesses your " + dropItem.getDef().getName() + ", doubling it before your very eyes!</col>");
