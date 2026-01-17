@@ -11,6 +11,8 @@ import java.util.function.Predicate;
 import io.xeros.Configuration;
 import io.xeros.Server;
 import io.xeros.content.instances.InstancedArea;
+import io.xeros.content.bossfactory.drop.BossDropContext;
+import io.xeros.content.bossfactory.drop.DropReceiver;
 import io.xeros.content.lootbag.LootingBag;
 import io.xeros.content.skills.Skill;
 import io.xeros.content.skills.prayer.Bone;
@@ -225,6 +227,11 @@ public class ItemHandler {
 		if (gameItem == null) {
 			return;
 		}
+		DropReceiver receiver = BossDropContext.getReceiver();
+		if (receiver != null) {
+			receiver.receive(player, gameItem, new Position(itemX, itemY, height));
+			return;
+		}
 		int itemId = gameItem.getId();
 		if (playerId < 0 || playerId > PlayerHandler.players.length - 1) {
 			return;
@@ -307,6 +314,11 @@ public class ItemHandler {
 	 */
 	public void createGroundItem(Player player, int itemId, int itemX, int itemY, int height, int itemAmount, int playerId, boolean globalise, int hideTicks) {
 		if (playerId < 0 || playerId > PlayerHandler.players.length - 1) {
+			return;
+		}
+		DropReceiver receiver = BossDropContext.getReceiver();
+		if (receiver != null) {
+			receiver.receive(player, new GameItem(itemId, itemAmount), new Position(itemX, itemY, height));
 			return;
 		}
 		Player owner = PlayerHandler.players[playerId];
