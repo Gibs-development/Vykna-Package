@@ -9464,7 +9464,7 @@ public class Client extends RSApplet {
 			case 1: return "Uncommon";
 			case 2: return "Rare";
 			case 3: return "Epic";
-			case 4: return "Legendary";
+			case 4: return "Mythic";
 			case 5: return "Mythic";
 			default: return "Unknown(" + rarityId + ")";
 		}
@@ -9567,6 +9567,10 @@ public class Client extends RSApplet {
 		int boxWidth = 240;
 		int perkBlockHeight = 46;
 		int boxH = perkCount > 0 ? 76 + perkBlockHeight : 80;
+		int screenWidth = currentScreenMode == ScreenMode.FIXED ? 765 : currentGameWidth;
+		int screenHeight = currentScreenMode == ScreenMode.FIXED ? 503 : currentGameHeight;
+		mouseX = Math.max(0, Math.min(mouseX, screenWidth - boxWidth));
+		mouseY = Math.max(0, Math.min(mouseY, screenHeight - boxH));
 		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, boxWidth, boxH, 0x696969);
 		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, boxWidth, boxH + 1, 0x000000, 90);
 
@@ -9578,6 +9582,10 @@ public class Client extends RSApplet {
 			rarityColor = color;
 		}
 		Client.instance.newSmallFont.drawBasicString("Rarity: " + rarityLabel, mouseX + 8, mouseY + 34, rarityColor, 1);
+		Sprite rarityIcon = attr == null ? null : com.client.attributes.ItemAttrStore.spriteForRarity(attr.rarityId);
+		if (rarityIcon != null) {
+			rarityIcon.drawSprite(mouseX + boxWidth - rarityIcon.myWidth - 6, mouseY + 10);
+		}
 
 		if (attr == null || perkCount == 0) {
 			Client.instance.newSmallFont.drawBasicString("No perks rolled", mouseX + 8, mouseY + 52, 0xAAAAAA, 1);
@@ -13768,7 +13776,7 @@ public class Client extends RSApplet {
 												// Rarity outline (separate from "Use" highlight)
 												com.client.attributes.ItemAttrStore.Attr attr = com.client.attributes.ItemAttrStore.get(class9_1.id, i3);
 												boolean isSelected = (itemSelected == 1 && anInt1283 == i3 && anInt1284 == class9_1.id);
-												if (attr != null && attr.rarityId > 0 && !isSelected) {
+												if (attr != null && attr.rarityId >= 0 && !isSelected) {
 													boolean bankOpen = openInterfaceID == 5292;
 													if (bankOpen && isBankContainer(class9_1.id)) {
 														int col = com.client.attributes.ItemAttrStore.rarityToColor(attr.rarityId);

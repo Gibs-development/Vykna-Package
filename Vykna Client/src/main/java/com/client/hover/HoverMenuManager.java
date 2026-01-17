@@ -303,21 +303,10 @@ public class HoverMenuManager {
 			int height = (text.length * 12) + (menu.items != null ? 40 : 0);
 
 			int width = (16 + text[0].length() * 5) + (menu.items != null ? 30 : 0);
-			if (Client.currentScreenMode == ScreenMode.FIXED) {
-				if (drawType() == 1) {
-					if (width + mouseX > 500) {
-						mouseX = 500 - width;
-					}
-				} else {
-					if (width + mouseX > 250) {
-						mouseX = 245 - width;
-					}
-
-					if (height + mouseY > 250) {
-						mouseY = 250 - height;
-					}
-				}
-			}
+			int screenWidth = Client.currentScreenMode == ScreenMode.FIXED ? 765 : Client.currentGameWidth;
+			int screenHeight = Client.currentScreenMode == ScreenMode.FIXED ? 503 : Client.currentGameHeight;
+			mouseX = Math.max(0, Math.min(mouseX, screenWidth - (width + 4)));
+			mouseY = Math.max(0, Math.min(mouseY, screenHeight - (26 + height)));
 			DrawingArea.drawBoxOutline(mouseX, mouseY + 5, width + 4, 26 + height, 0x696969);
 			DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, width + 2, 24 + height, 0x000000, 150);
 
@@ -370,8 +359,14 @@ public class HoverMenuManager {
 			return;
 		}
 
-		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, 150, 36, 0x696969);
-		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, 150, 35, 0x000000, 90);
+		int defaultWidth = 150;
+		int defaultHeight = 36;
+		int screenWidth = Client.currentScreenMode == ScreenMode.FIXED ? 765 : Client.currentGameWidth;
+		int screenHeight = Client.currentScreenMode == ScreenMode.FIXED ? 503 : Client.currentGameHeight;
+		mouseX = Math.max(0, Math.min(mouseX, screenWidth - defaultWidth));
+		mouseY = Math.max(0, Math.min(mouseY, screenHeight - defaultHeight));
+		DrawingArea.drawBoxOutline(mouseX, mouseY + 5, defaultWidth, defaultHeight, 0x696969);
+		DrawingArea.drawTransparentBox(mouseX + 1, mouseY + 6, defaultWidth, defaultHeight - 1, 0x000000, 90);
 
 		Client.instance.newSmallFont.drawBasicString("@lre@" + hintName, mouseX + 4, mouseY + 18, BACKGROUND_COLOUR, 1);
 		Client.instance.newSmallFont.drawBasicString("Press CTRL to view the stats", mouseX + 4, mouseY + 35,

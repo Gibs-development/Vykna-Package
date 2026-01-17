@@ -49,7 +49,7 @@ public final class ItemAttributes {
             case 3:
                 return "Epic";
             case 4:
-                return "Legendary";
+                return "Mythic";
             case 5:
                 return "Mythic";
             default:

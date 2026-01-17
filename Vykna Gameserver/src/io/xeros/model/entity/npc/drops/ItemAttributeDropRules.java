@@ -95,7 +95,7 @@ public final class ItemAttributeDropRules {
 			rolled = true;
 		}
 
-		List<PerkSelection> perks = rule.rollPerks();
+		List<PerkSelection> perks = rule.rollPerks(rarity);
 		if (!perks.isEmpty()) {
 			PerkSelection first = perks.get(0);
 			attrs.perk1 = (short) first.perkId;
@@ -123,6 +123,7 @@ public final class ItemAttributeDropRules {
 		private boolean enabled = true;
 		private boolean forceAttributes = false;
 		private int forceRarityId = 0;
+		private boolean useRarityPerkPool = false;
 		private int maxPerks = 2;
 		private final List<RarityChance> rarityChances = new ArrayList<>();
 		private final List<PerkPool> perkPools = new ArrayList<>();
@@ -140,6 +141,11 @@ public final class ItemAttributeDropRules {
 
 		public Rule setMaxPerks(int maxPerks) {
 			this.maxPerks = Math.max(0, maxPerks);
+			return this;
+		}
+
+		public Rule useRarityPerkPool(boolean useRarityPerkPool) {
+			this.useRarityPerkPool = useRarityPerkPool;
 			return this;
 		}
 
@@ -162,7 +168,16 @@ public final class ItemAttributeDropRules {
 			return 0;
 		}
 
-		private List<PerkSelection> rollPerks() {
+		private List<PerkSelection> rollPerks(int rarityId) {
+			if (useRarityPerkPool) {
+				List<PerkSelection> selections = new ArrayList<>();
+				List<io.xeros.model.items.RarityPerkPool.PerkRoll> rolls =
+						io.xeros.model.items.RarityPerkPool.rollPerks(rarityId, maxPerks);
+				for (io.xeros.model.items.RarityPerkPool.PerkRoll roll : rolls) {
+					selections.add(new PerkSelection(roll.perkId, roll.rank));
+				}
+				return selections;
+			}
 			List<PerkSelection> selections = new ArrayList<>();
 			for (PerkPool pool : perkPools) {
 				if (selections.size() >= maxPerks) {

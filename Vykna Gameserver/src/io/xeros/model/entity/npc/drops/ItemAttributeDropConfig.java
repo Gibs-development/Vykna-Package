@@ -2,7 +2,6 @@ package io.xeros.model.entity.npc.drops;
 
 import io.xeros.model.Items;
 import io.xeros.model.Npcs;
-import io.xeros.model.items.PerkModule;
 
 public final class ItemAttributeDropConfig {
 
@@ -30,7 +29,8 @@ public final class ItemAttributeDropConfig {
                     .addRarityChance(2, 0.12)
                     .addRarityChance(3, 0.04)
                     .addRarityChance(4, 0.01)
-                    .addPerkPool(0.20, 1, 3, PerkModule.perkIds())
+                    .setMaxPerks(2)
+                    .useRarityPerkPool(true)
                     .forceAttributes(1);
         }
     }

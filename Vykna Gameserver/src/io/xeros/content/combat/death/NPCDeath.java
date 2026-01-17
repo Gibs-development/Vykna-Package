@@ -362,27 +362,43 @@ public class NPCDeath {
     }
 
     public static void announceKc(Player player, GameItem item, int kc) {
-        String rarityLabel = ItemAttributes.rarityLabel(item.getAttrs());
-        PlayerHandler.executeGlobalMessage("@pur@" + player.getDisplayNameFormatted() + " received a drop" + rarityLabel + ": " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at <col=E9362B>" + kc + "</col>@pur@ kills.");
-
-        Discord.writeDropsSyncMessage("" + player.getLoginName() + " received a drop" + rarityLabel + ": " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " at " + kc + " kills.");
+        String message = buildDropAnnouncement(player, item, null, kc);
+        PlayerHandler.executeGlobalMessage(message);
+        Discord.writeDropsSyncMessage(stripTags(message));
     }
 
     private static void announceNpcDrop(Player player, GameItem item, int npcId, int kc) {
-        String npcName = NpcDef.forId(npcId).getName();
-        String rarityLabel = ItemAttributes.rarityLabel(item.getAttrs());
-        PlayerHandler.executeGlobalMessage("@pur@" + player.getDisplayNameFormatted() + " received a drop" + rarityLabel + ": " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " from " + npcName
-                + " at <col=E9362B>" + kc + "</col>@pur@ kills.");
-
-        Discord.writeDropsSyncMessage("" + player.getLoginName() + " received a drop" + rarityLabel + ": " +
-                "" + ItemDef.forId(item.getId()).getName() + " x " + item.getAmount() + " from " + npcName
-                + " at " + kc + " kills.");
+        String message = buildDropAnnouncement(player, item, NpcDef.forId(npcId).getName(), kc);
+        PlayerHandler.executeGlobalMessage(message);
+        Discord.writeDropsSyncMessage(stripTags(message));
     }
 
     public static boolean isDoubleDrops() {
         return (Configuration.DOUBLE_DROPS_TIMER > 0 || Configuration.DOUBLE_DROPS);
+    }
+
+    private static String buildDropAnnouncement(Player player, GameItem item, String npcName, int kc) {
+        String rarityText = "";
+        if (item != null && item.getAttrs() != null) {
+            rarityText = ItemAttributes.rarityName(item.getAttrs().rarityId).toUpperCase() + " ";
+        }
+        StringBuilder builder = new StringBuilder();
+        builder.append("@pur@")
+                .append(player.getDisplayNameFormatted())
+                .append(" received a ")
+                .append(rarityText)
+                .append("drop: ")
+                .append(ItemDef.forId(item.getId()).getName())
+                .append(" x ")
+                .append(item.getAmount());
+        if (npcName != null && !npcName.isEmpty()) {
+            builder.append(" from ").append(npcName);
+        }
+        builder.append(" at <col=E9362B>").append(kc).append("</col>@pur@ kills.");
+        return builder.toString();
+    }
+
+    private static String stripTags(String text) {
+        return text.replaceAll("<[^>]+>", "").replaceAll("@[a-zA-Z0-9]+@", "");
     }
 }
