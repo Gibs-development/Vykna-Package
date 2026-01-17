@@ -1082,6 +1082,33 @@ public class Commands implements PacketType {
                         + (attrs.perk2 > 0 ? (" " + attrs.perk2 + ":" + attrs.perk2Rank) : ""));
             }
 
+            if (playerCommand.startsWith("attrroll")) {
+                if (!isManagment) {
+                    c.sendMessage(NO_ACCESS);
+                    return;
+                }
+                String[] args = playerCommand.split(" ");
+                int rarityId = args.length > 1 ? Integer.parseInt(args[1]) : 2;
+                List<io.xeros.model.items.RarityPerkPool.PerkRoll> rolls =
+                        io.xeros.model.items.RarityPerkPool.rollPerks(rarityId, 2);
+                ItemAttributes attrs = new ItemAttributes();
+                attrs.rarityId = (byte) rarityId;
+                if (!rolls.isEmpty()) {
+                    attrs.perk1 = (short) rolls.get(0).perkId;
+                    attrs.perk1Rank = (byte) rolls.get(0).rank;
+                }
+                if (rolls.size() > 1) {
+                    attrs.perk2 = (short) rolls.get(1).perkId;
+                    attrs.perk2Rank = (byte) rolls.get(1).rank;
+                }
+                GameItem item = new GameItem(4151, 1);
+                item.setAttrs(attrs);
+                c.getItems().addItem(item, true);
+                c.sendMessage("[ATTRROLL] Added whip with rarity " + rarityId
+                        + " perks=" + attrs.perk1 + ":" + attrs.perk1Rank
+                        + (attrs.perk2 > 0 ? (" " + attrs.perk2 + ":" + attrs.perk2Rank) : ""));
+            }
+
 
 
             if (playerCommand.startsWith("resettask")) {

@@ -4101,10 +4101,6 @@ public class Client extends RSApplet {
 		if (HoverMenuManager.showMenu && HoverMenuManager.drawType() == 0) {
 			//HoverMenuManager.drawHintMenu();
 		}
-
-		if (getUserSettings().isInventoryContextMenu() && hintMenu) {
-			drawHintMenu(hintName, hintId, getUserSettings().getStartMenuColor());
-		}
 		if (fixedMode && loginScreenGraphicsBuffer == null && tabAreaGraphicsBuffer != null)
 			tabAreaGraphicsBuffer.drawGraphics(516, 168, super.graphics);
 
@@ -9457,6 +9453,47 @@ public class Client extends RSApplet {
 		return mouseInvInterfaceIndex; // this is set to k2
 	}
 
+	private int getHoveredItemId() {
+		if (!shouldDrawAttrHover()) {
+			return -1;
+		}
+		RSInterface interfaceCache = RSInterface.interfaceCache[lastActiveInvInterface];
+		if (interfaceCache == null || interfaceCache.inventoryItemId == null) {
+			return -1;
+		}
+		int slot = mouseInvInterfaceIndex;
+		if (slot < 0 || slot >= interfaceCache.inventoryItemId.length) {
+			return -1;
+		}
+		int rawItemId = interfaceCache.inventoryItemId[slot];
+		if (rawItemId <= 0) {
+			return -1;
+		}
+		if (interfaceCache.id == 23231) {
+			return (rawItemId & 0x7FFF) - 1;
+		}
+		return rawItemId - 1;
+	}
+
+	private void drawAttrHoverOverlay() {
+		if (menuOpen) {
+			return;
+		}
+		if (!getUserSettings().isInventoryContextMenu()) {
+			return;
+		}
+		int hoveredItemId = getHoveredItemId();
+		if (hoveredItemId < 0) {
+			return;
+		}
+		ItemDefinition itemDef = ItemDefinition.forID(hoveredItemId);
+		if (itemDef == null) {
+			return;
+		}
+		DrawingArea.setDrawingArea(currentGameHeight, 0, currentGameWidth, 0);
+		drawHintMenu(itemDef.name, hoveredItemId, getUserSettings().getStartMenuColor());
+	}
+
 	private boolean isAttrHoverInterface(int interfaceId) {
 		return interfaceId == 3214
 				|| interfaceId == 1688
@@ -10537,6 +10574,9 @@ public class Client extends RSApplet {
 			menuActionName[0] = "Cancel";
 			menuActionID[0] = 1107;
 			menuActionRow = 1;
+			lastActiveInvInterface = -1;
+			mouseInvInterfaceIndex = -1;
+			hintMenu = false;
 
 // Fullscreen modal interface: build menu only for the interface (never for world)
 			if (loadingStage == 2 && fullscreenInterfaceID != -1) {
@@ -15279,6 +15319,7 @@ public class Client extends RSApplet {
 		if (!menuOpen) {
 			processRightClick();
 			drawTopLeftTooltip();
+			drawAttrHoverOverlay();
 		} else if (menuScreenArea == 0) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 0 : 0, currentScreenMode == ScreenMode.FIXED ? 0 : 0);
 		}
