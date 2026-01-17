@@ -4378,78 +4378,145 @@ interfaceId+=5000;
 
 	public static void achievementInterface(TextDrawingArea[] TDA) {
 		RSInterface rsi = addTabInterface(35000);
-		addSprite(35001, 517, "Interfaces/newachievements/IMAGE");
-		addHoverButton(35002,"Interfaces/newachievements/IMAGE", 17, 15, 15, "Close", 250, 35003, 3);
-		addHoveredButton(35003,"Interfaces/newachievements/IMAGE", 18, 15, 15, 35004);
-		addText(35005, ""+Configuration.CLIENT_TITLE+" Achievements", TDA, 2, 0xF7AA25, true, true);
-		addText(35006, "{ ACHIEVEMENT NAME }", TDA, 2, 0xBF7D0A, true, true);
-		addText(35007, "Description:", TDA, 1, 0xF7AA25, false, true);
-		addText(35008, "{ DESCRIPTION HERE }", TDA, 0, 0xD19732, false, true);
-		addText(35009, "Difficulty:", TDA, 1, 0xF7AA25, false, true);
-		addText(35010, "{ DIFFICULTY HERE }", TDA, 0, 0xD19732, false, true);
-		addText(35011, "Progress:", TDA, 1, 0xF7AA25, false, true);
-		addText(35012, "{ PROGRESS HERE }", TDA, 0, 0xD19732, false, true);
-		addText(35013, "Reward:", TDA, 1, 0xF7AA25, false, true);
-		addText(35014, "{ REWARD HERE }", TDA, 0, 0xD19732, false, true);
-		addText(36000, "Other rewards:", TDA, 1, 0xff9040, false, true);
-		addText(35015, "Completed: 3/10", TDA, 0, 0xBF7D0A, true, true);
-		addText(35016, "Points: 12", TDA, 0, 0xBF7D0A, true, true);
+		addBox(35001, 0x0F141C, 0x0F141C, 110, 494, 317);
+		addBox(35002, 0x1B232D, 0x1B232D, 70, 486, 32);
+		addHoverButton(35003, "Interfaces/newachievements/IMAGE", 17, 15, 15, "Close", 250, 35004, 3);
+		addHoveredButton(35004, "Interfaces/newachievements/IMAGE", 18, 15, 15, 35005);
+		addText(35006, Configuration.CLIENT_TITLE + " Achievements", TDA, 2, 0xF7AA25, true, true);
+		addText(35007, "Overall Completion", TDA, 1, 0xE6E0D0, false, true);
+		RSInterface.addProgressBar2021(35008, 260, 12, 0x1B232D);
+		RSInterface.get(35008).progressBar2021Percentage = 0.62;
+		addText(35009, "62% (1,240 pts)", TDA, 0, 0xB7F0FF, false, true);
+		addBox(35010, 0x18212B, 0x18212B, 120, 150, 205);
+		addBox(35011, 0x18212B, 0x18212B, 110, 330, 205);
+		addBox(35012, 0x141A22, 0x141A22, 130, 314, 112);
+		addBox(35013, 0x141A22, 0x141A22, 130, 314, 74);
+		addBox(35014, 0x1E2833, 0x1E2833, 80, 48, 48);
+		addText(35015, "SPRITE", TDA, 0, 0x7A8AA1, true, true);
+		addText(35016, "Mastery of the Gods", TDA, 1, 0xF7AA25, false, true);
+		addText(35017, "Complete 100 boss achievements without taking unavoidable damage.", TDA, 0, 0xC9C2B4, false, true);
+		addText(35018, "Rewards", TDA, 1, 0xE6E0D0, false, true);
+		addText(35019, "Master of Masters cape, 250 pts, title: \"Godslayer\"", TDA, 0, 0xB7F0FF, false, true);
+		addText(35020, "Points", TDA, 1, 0xE6E0D0, false, true);
+		addText(35021, "Mastery: 250 pts", TDA, 0, 0xB7F0FF, false, true);
+		addHoverText(35022, "General", "View general achievements", TDA, 1, 0xF7AA25, false, true, 110, 16);
+		addHoverText(35023, "Combat", "View combat achievements", TDA, 1, 0xF7AA25, false, true, 110, 16);
+		addHoverText(35024, "Mastery", "View mastery achievements", TDA, 1, 0xF7AA25, false, true, 110, 16);
+		addText(35025, "General", TDA, 0, 0xC9C2B4, false, true);
+		RSInterface.addProgressBar2021(35026, 120, 10, 0x1B232D);
+		RSInterface.get(35026).progressBar2021Percentage = 0.78;
+		addText(35027, "Combat", TDA, 0, 0xC9C2B4, false, true);
+		RSInterface.addProgressBar2021(35028, 120, 10, 0x1B232D);
+		RSInterface.get(35028).progressBar2021Percentage = 0.55;
+		addText(35029, "Mastery", TDA, 0, 0xC9C2B4, false, true);
+		RSInterface.addProgressBar2021(35030, 120, 10, 0x1B232D);
+		RSInterface.get(35030).progressBar2021Percentage = 0.34;
+		addText(35031, "Achievement Feed", TDA, 1, 0xE6E0D0, false, true);
+		addText(35032, "Selected Achievement", TDA, 1, 0xE6E0D0, false, true);
+		rsi.totalChildren(33);
+		rsi.child(0, 35001, 8, 8);
+		rsi.child(1, 35002, 12, 12);
+		rsi.child(2, 35003, 474, 18);
+		rsi.child(3, 35004, 474, 18);
+		rsi.child(4, 35006, 255, 20);
+		rsi.child(5, 35007, 20, 54);
+		rsi.child(6, 35008, 150, 56);
+		rsi.child(7, 35009, 420, 54);
+		rsi.child(8, 35010, 12, 118);
+		rsi.child(9, 35011, 168, 118);
+		rsi.child(10, 35012, 176, 126);
+		rsi.child(11, 35013, 176, 244);
+		rsi.child(12, 35014, 182, 250);
+		rsi.child(13, 35015, 206, 266);
+		rsi.child(14, 35016, 238, 246);
+		rsi.child(15, 35017, 238, 262);
+		rsi.child(16, 35018, 238, 282);
+		rsi.child(17, 35019, 238, 296);
+		rsi.child(18, 35020, 238, 306);
+		rsi.child(19, 35021, 238, 314);
+		rsi.child(20, 35022, 22, 124);
+		rsi.child(21, 35023, 22, 142);
+		rsi.child(22, 35024, 22, 160);
+		rsi.child(23, 35025, 22, 76);
+		rsi.child(24, 35026, 104, 78);
+		rsi.child(25, 35027, 240, 76);
+		rsi.child(26, 35028, 304, 78);
+		rsi.child(27, 35029, 372, 76);
+		rsi.child(28, 35030, 436, 78);
+		rsi.child(29, 35031, 182, 126);
+		rsi.child(30, 35032, 182, 230);
+		rsi.child(31, 35080, 16, 176);
+		rsi.child(32, 35100, 182, 138);
 
-		addItemContainer(36002, 2, 10, 0, 0, false);
-		addHoverButton(35017,"Interfaces/newachievements/IMAGE", 513, 37, 25, "Easy", -1, 35018, 1);
-		addHoveredButton(35018, "Interfaces/newachievements/IMAGE",514, 37, 25, 35019);
-		addHoverButton(35020,"Interfaces/newachievements/IMAGE", 513, 37, 25, "Medium", -1, 35021, 1);
-		addHoveredButton(35021,"Interfaces/newachievements/IMAGE", 514, 37, 25, 35022);
-		addHoverButton(35023,"Interfaces/newachievements/IMAGE", 513, 37, 25, "Hard", -1, 35024, 1);
-		addHoveredButton(35024,"Interfaces/newachievements/IMAGE", 514, 37, 25, 35025);
-		addText(35026, "Easy", TDA, 0, 0xBF7D0A, true, true);
-		addText(35027, "Med", TDA, 0, 0xBF7D0A, true, true);
-		addText(35028, "Hard", TDA, 0, 0xBF7D0A, true, true);
-		addConfigSpriteNew(35029,"Interfaces/newachievements/IMAGE", 518, 519, 0, 694);
-		rsi.totalChildren(28);
-		rsi.child(0, 35001, 14, 18);
-		rsi.child(1, 35002, 470, 30);
-		rsi.child(2, 35003, 470, 30);
-		rsi.child(3, 35005, 270, 31);
-		rsi.child(4, 35006, 340, 75);
-		rsi.child(5, 35007, 200, 100);
-		rsi.child(6, 35008, 210, 120);
-		rsi.child(7, 35009, 200, 140);
-		rsi.child(8, 35010, 210, 160);
-		rsi.child(9, 35011, 200, 180);
-		rsi.child(10, 35012, 210, 200);
-		rsi.child(11, 35013, 200, 220);
-		rsi.child(12, 35014, 210, 240);
-		rsi.child(13, 35030, 22, 91);
-		rsi.child(14, 35015, 260, 286);
-		rsi.child(15, 35016, 420, 286);
-		rsi.child(16, 35017, 40, 64);
-		rsi.child(17, 35018, 40, 64);
-		rsi.child(18, 35020, 83, 64);
-		rsi.child(19, 35021, 83, 64);
-		rsi.child(20, 35023, 125, 64);
-		rsi.child(21, 35024, 125, 64);
-		rsi.child(22, 35026, 57, 71);
-		rsi.child(23, 35027, 101, 71);
-		rsi.child(24, 35028, 142, 71);
-		rsi.child(25, 35029, 463, 65);
-
-		rsi.child(26, 36000, 380, 206);
-		rsi.child(27, 36002, 408, 229);//365 229
-		RSInterface scrollInterface = addTabInterface(35030);
-		scrollInterface.scrollPosition = 0;
-		scrollInterface.contentType = 0;
-		scrollInterface.width = 138;
-		scrollInterface.height = 218;
-		scrollInterface.scrollMax = 500;
-		int x = 7, y = 9;
-		int amountOfLines = 50;
-		scrollInterface.totalChildren(amountOfLines);
-		for (int i = 0; i < amountOfLines; i++) {
-			addHoverText(35031 + i, "", "View achievement", TDA, 0, 0xff0000, false, true, 168);
-			scrollInterface.child(i, 35031 + i, x, y);
-			y += 18;
+		RSInterface leftScroll = addTabInterface(35080);
+		leftScroll.width = 138;
+		leftScroll.height = 148;
+		leftScroll.scrollMax = 420;
+		int leftChild = 0;
+		leftScroll.totalChildren(26);
+		int leftY = 2;
+		String[] leftItems = {
+				"General Overview",
+				"Combat Overview",
+				"Mastery Overview",
+				" ",
+				"Combat: Difficulties",
+				"Easy (0/120)",
+				"Medium (0/90)",
+				"Hard (0/60)",
+				"Master (0/40)",
+				"Grandmaster (0/20)",
+				" ",
+				"Combat: Bosses",
+				"Araxxor",
+				"Kerapac",
+				"Zamorak",
+				"Raksha",
+				"Telos",
+				"Zuk",
+				" ",
+				"Mastery Milestones",
+				"Master Quest Cape",
+				"Completionist Cape",
+				"Completionist (t)",
+				"Max Cape",
+				"Master of Masters",
+				"200M All Skills"
+		};
+		for (int i = 0; i < leftItems.length; i++) {
+			int id = 35081 + i;
+			String label = leftItems[i];
+			boolean isSpacer = label.trim().isEmpty();
+			boolean isHeading = label.contains(":") || label.equals("Mastery Milestones");
+			int color = isHeading ? 0x9FB3C8 : 0xC9C2B4;
+			String tooltip = isSpacer ? "" : "Select " + label.trim();
+			addHoverText(id, label, tooltip, TDA, 0, color, false, true, 130, 16);
+			leftScroll.child(leftChild++, id, 4, leftY);
+			leftY += 16;
 		}
+
+		RSInterface rightScroll = addTabInterface(35100);
+		rightScroll.width = 304;
+		rightScroll.height = 104;
+		rightScroll.scrollMax = 180;
+		int entryCount = 6;
+		rightScroll.totalChildren(entryCount * 5);
+		for (int i = 0; i < entryCount; i++) {
+			int baseId = 35110 + (i * 5);
+			addBox(baseId, 0x1B232D, 0x1B232D, 90, 300, 24);
+			addText(baseId + 1, "Kill boss " + (i + 1) + " under 1 minute", TDA, 0, 0xE6E0D0, false, true);
+			RSInterface.addProgressBar2021(baseId + 2, 120, 8, 0x11161D);
+			RSInterface.get(baseId + 2).progressBar2021Percentage = Math.min(0.2 + (i * 0.12), 1.0);
+			addText(baseId + 3, (10 + i * 15) + "%", TDA, 0, 0x9FB3C8, false, true);
+			addBox(baseId + 4, 0x29333F, 0x29333F, 60, 18, 18);
+			int baseY = 2 + (i * 28);
+			rightScroll.child(i * 5, baseId, 2, baseY);
+			rightScroll.child(i * 5 + 1, baseId + 1, 8, baseY + 5);
+			rightScroll.child(i * 5 + 2, baseId + 2, 160, baseY + 9);
+			rightScroll.child(i * 5 + 3, baseId + 3, 262, baseY + 4);
+			rightScroll.child(i * 5 + 4, baseId + 4, 276, baseY + 3);
+		}
+
 	}
 
 	public static void playerProfiler(TextDrawingArea[] TDA) {
