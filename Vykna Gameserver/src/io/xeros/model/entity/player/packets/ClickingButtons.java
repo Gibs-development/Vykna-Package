@@ -11,6 +11,7 @@ import io.xeros.Server;
 import io.xeros.achievements.*;
 import io.xeros.content.*;
 import io.xeros.content.SigilSystem1.tier1Sigils;
+import io.xeros.content.achievement.CombatAchievementsHandler;
 import io.xeros.content.achievement_diary.impl.ArdougneDiaryEntry;
 import io.xeros.content.achievement_diary.impl.KandarinDiaryEntry;
 import io.xeros.content.cheatprevention.CheatEngineBlock;
@@ -430,30 +431,10 @@ public class ClickingButtons implements PacketType {
 
 			/* New Achievement */
 			case 74167://To view the new achievements
-				InterfaceHandler.writeText(new AchievementInterface(c, AchievementHandler.AchievementDifficulty.EASY));
-				AchievementInterface.sendInterfaceForAchievement(c, AchievementList.ANSWER_15_TRIVIABOTS_CORRECTLY);
-				c.setAchievement(AchievementHandler.AchievementDifficulty.EASY);
-				c.getPA().showInterface(35_000);
-				//c.sendMessage("@red@Coming soon to runerogue.");
-				break;
-
 			case 136201:
-				InterfaceHandler.writeText(new AchievementInterface(c, AchievementHandler.AchievementDifficulty.EASY));
-				AchievementInterface.sendInterfaceForAchievement(c, AchievementList.ANSWER_15_TRIVIABOTS_CORRECTLY);
-				c.setAchievement(AchievementHandler.AchievementDifficulty.EASY);
-				c.getPA().showInterface(35_000);
-				break;
 			case 136204:
-				InterfaceHandler.writeText(new AchievementInterface(c, AchievementHandler.AchievementDifficulty.MEDIUM));
-				AchievementInterface.sendInterfaceForAchievement(c, AchievementList.BURN_200_LOGS);
-				c.setAchievement(AchievementHandler.AchievementDifficulty.MEDIUM);
-				c.getPA().showInterface(35_000);
-				break;
 			case 136207:
-				InterfaceHandler.writeText(new AchievementInterface(c, AchievementHandler.AchievementDifficulty.HARD));
-				AchievementInterface.sendInterfaceForAchievement(c, AchievementList.ANSWER_80_TRIVIABOTS_CORRECTLY);
-				c.setAchievement(AchievementHandler.AchievementDifficulty.HARD);
-				c.getPA().showInterface(35_000);
+				CombatAchievementsHandler.openInterface(c);
 				break;
 
 			case 2204:
