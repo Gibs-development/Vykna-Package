@@ -920,19 +920,6 @@ public class Commands implements PacketType {
       //      }
 
 
-            if (playerCommand.startsWith("proj")) {
-                if (!isManagment) {
-                    c.sendMessage(NO_ACCESS);
-                    return;
-                }
-                /*new ProjectileBaseBuilder().setProjectileId(1435).setSpeed(100).setScale(0).setCurve(16).setSendDelay(1).createProjectileBase()
-                        .createTargetedProjectile(c, c.getPosition()).send(c.getInstance());*/
-                //int angle = Integer.parseInt(args[1]);
-                int scale = Integer.parseInt(args[1]);
-                c.getPA().createProjectile(c.absX, c.absY, 1, 1, 41, 400, scale,
-                        130, 1435, 200, 0, 0, 50);
-            }
-
             if (playerCommand.startsWith("attrtest")) {
                 if (!isManagment) {
                     c.sendMessage(NO_ACCESS);
@@ -941,36 +928,61 @@ public class Commands implements PacketType {
 
                 final int ITEM_ID = 4151; // abyssal whip
 
-                // A: rarity 1 + perk1 biting rank 1
                 ItemAttributes attrsA = new ItemAttributes();
-                attrsA.rarityId = 1;
+                attrsA.rarityId = 0;
                 attrsA.perk1 = io.xeros.model.items.PerkModule.BITING;
                 attrsA.perk1Rank = 1;
 
-                // B: rarity 4 + same perk (different hash due to rarity)
                 ItemAttributes attrsB = new ItemAttributes();
-                attrsB.rarityId = 4;
+                attrsB.rarityId = 1;
                 attrsB.perk1 = io.xeros.model.items.PerkModule.BITING;
                 attrsB.perk1Rank = 1;
 
-                // C: same as A (should match hash)
                 ItemAttributes attrsC = new ItemAttributes();
-                attrsC.rarityId = 1;
+                attrsC.rarityId = 2;
                 attrsC.perk1 = io.xeros.model.items.PerkModule.BITING;
                 attrsC.perk1Rank = 1;
+
+                ItemAttributes attrsD = new ItemAttributes();
+                attrsD.rarityId = 3;
+                attrsD.perk1 = io.xeros.model.items.PerkModule.BITING;
+                attrsD.perk1Rank = 1;
+
+                ItemAttributes attrsE = new ItemAttributes();
+                attrsE.rarityId = 4;
+                attrsE.perk1 = io.xeros.model.items.PerkModule.BITING;
+                attrsE.perk1Rank = 1;
 
                 int hashA = attrsA.computeHash();
                 int hashB = attrsB.computeHash();
                 int hashC = attrsC.computeHash();
+                int hashD = attrsD.computeHash();
+                int hashE = attrsE.computeHash();
 
-                c.sendMessage("[ATTRTEST] A attrs: rarity=" + attrsA.rarityId + " perk1=" + attrsA.perk1 + ":" + attrsA.perk1Rank
-                        + " perk2=" + attrsA.perk2 + ":" + attrsA.perk2Rank + " hash=" + hashA);
+                c.sendMessage("[ATTRTEST] A attrs: rarity=" + attrsA.rarityId
+                        + " perk1=" + attrsA.perk1 + ":" + attrsA.perk1Rank
+                        + " perk2=" + attrsA.perk2 + ":" + attrsA.perk2Rank
+                        + " hash=" + hashA);
 
-                c.sendMessage("[ATTRTEST] B attrs: rarity=" + attrsB.rarityId + " perk1=" + attrsB.perk1 + ":" + attrsB.perk1Rank
-                        + " perk2=" + attrsB.perk2 + ":" + attrsB.perk2Rank + " hash=" + hashB);
+                c.sendMessage("[ATTRTEST] B attrs: rarity=" + attrsB.rarityId
+                        + " perk1=" + attrsB.perk1 + ":" + attrsB.perk1Rank
+                        + " perk2=" + attrsB.perk2 + ":" + attrsB.perk2Rank
+                        + " hash=" + hashB);
 
-                c.sendMessage("[ATTRTEST] C attrs: rarity=" + attrsC.rarityId + " perk1=" + attrsC.perk1 + ":" + attrsC.perk1Rank
-                        + " perk2=" + attrsC.perk2 + ":" + attrsC.perk2Rank + " hash=" + hashC + " (should match A)");
+                c.sendMessage("[ATTRTEST] C attrs: rarity=" + attrsC.rarityId
+                        + " perk1=" + attrsC.perk1 + ":" + attrsC.perk1Rank
+                        + " perk2=" + attrsC.perk2 + ":" + attrsC.perk2Rank
+                        + " hash=" + hashC);
+
+                c.sendMessage("[ATTRTEST] D attrs: rarity=" + attrsD.rarityId
+                        + " perk1=" + attrsD.perk1 + ":" + attrsD.perk1Rank
+                        + " perk2=" + attrsD.perk2 + ":" + attrsD.perk2Rank
+                        + " hash=" + hashD);
+
+                c.sendMessage("[ATTRTEST] E attrs: rarity=" + attrsE.rarityId
+                        + " perk1=" + attrsE.perk1 + ":" + attrsE.perk1Rank
+                        + " perk2=" + attrsE.perk2 + ":" + attrsE.perk2Rank
+                        + " hash=" + hashE);
 
                 GameItem itemA = new GameItem(ITEM_ID, 1);
                 itemA.setAttrs(attrsA);
@@ -981,11 +993,19 @@ public class Commands implements PacketType {
                 GameItem itemC = new GameItem(ITEM_ID, 1);
                 itemC.setAttrs(attrsC);
 
+                GameItem itemD = new GameItem(ITEM_ID, 1);
+                itemD.setAttrs(attrsD);
+
+                GameItem itemE = new GameItem(ITEM_ID, 1);
+                itemE.setAttrs(attrsE);
+
                 boolean addA = c.getItems().addItem(itemA, true);
                 boolean addB = c.getItems().addItem(itemB, true);
                 boolean addC = c.getItems().addItem(itemC, true);
+                boolean addD = c.getItems().addItem(itemD, true);
+                boolean addE = c.getItems().addItem(itemE, true);
 
-                c.sendMessage("[ATTRTEST] add results: A=" + addA + " B=" + addB + " C=" + addC);
+                c.sendMessage("[ATTRTEST] add results: A=" + addA + " B=" + addB + " C=" + addC + " D=" + addD + " E=" + addE);
 
                 // Dump inventory slots containing the whips after add
                 for (int s = 0; s < c.playerItems.length; s++) {
@@ -1006,63 +1026,35 @@ public class Commands implements PacketType {
 
                         c.sendMessage("[ATTRTEST] inv slot=" + s + " id=" + ITEM_ID + " amt=" + amt
                                 + " storedHash=" + slotHash + " " + slotSummary);
-                        c.getPA().sendClientCommand(":attrdbg: begin");
-                        for (int slot = 0; slot < 28; slot++) {
-                            int id = c.playerItems[slot] - 1;
-                            if (id <= 0) continue;
-
-                            ItemAttributes a = c.playerItemAttrs[slot];
-                            int h = c.playerItemAttrHash[slot];
-
-                            int rarity = (a == null ? 0 : a.rarityId);
-                            int perk1 = (a == null ? 0 : a.perk1);
-                            int perk1Rank = (a == null ? 0 : a.perk1Rank);
-                            int perk2 = (a == null ? 0 : a.perk2);
-                            int perk2Rank = (a == null ? 0 : a.perk2Rank);
-
-                            c.getPA().sendClientCommand(":attrdbg: slot=" + slot
-                                    + " id=" + id
-                                    + " hash=" + h
-                                    + " r=" + rarity
-                                    + " p1=" + perk1 + ":" + perk1Rank
-                                    + " p2=" + perk2 + ":" + perk2Rank);
-                        }
-                        c.getPA().sendClientCommand(":attrdbg: end");
-
-
-                        c.sendMessage("[ATTRTEST] Sent attrs packets for inv/equip.");
-
                     }
                 }
-            }
 
-            if (playerCommand.startsWith("attrroll")) {
-                if (!isManagment) {
-                    c.sendMessage(NO_ACCESS);
-                    return;
-                }
-                String[] args = playerCommand.split(" ");
-                int rarityId = args.length > 1 ? Integer.parseInt(args[1]) : 2;
-                List<io.xeros.model.items.RarityPerkPool.PerkRoll> rolls =
-                        io.xeros.model.items.RarityPerkPool.rollPerks(rarityId, 2);
-                ItemAttributes attrs = new ItemAttributes();
-                attrs.rarityId = (byte) rarityId;
-                if (!rolls.isEmpty()) {
-                    attrs.perk1 = (short) rolls.get(0).perkId;
-                    attrs.perk1Rank = (byte) rolls.get(0).rank;
-                }
-                if (rolls.size() > 1) {
-                    attrs.perk2 = (short) rolls.get(1).perkId;
-                    attrs.perk2Rank = (byte) rolls.get(1).rank;
-                }
-                GameItem item = new GameItem(4151, 1);
-                item.setAttrs(attrs);
-                c.getItems().addItem(item, true);
-                c.sendMessage("[ATTRROLL] Added whip with rarity " + rarityId
-                        + " perks=" + attrs.perk1 + ":" + attrs.perk1Rank
-                        + (attrs.perk2 > 0 ? (" " + attrs.perk2 + ":" + attrs.perk2Rank) : ""));
-            }
+                // Client debug dump for all inv slots
+                c.getPA().sendClientCommand(":attrdbg: begin");
+                for (int slot = 0; slot < 28; slot++) {
+                    int id = c.playerItems[slot] - 1;
+                    if (id < 0) continue; // allow id=0 etc depending on your conventions
 
+                    ItemAttributes a = c.playerItemAttrs[slot];
+                    int h = c.playerItemAttrHash[slot];
+
+                    int rarity = (a == null ? 0 : a.rarityId);
+                    int perk1 = (a == null ? 0 : a.perk1);
+                    int perk1Rank = (a == null ? 0 : a.perk1Rank);
+                    int perk2 = (a == null ? 0 : a.perk2);
+                    int perk2Rank = (a == null ? 0 : a.perk2Rank);
+
+                    c.getPA().sendClientCommand(":attrdbg: slot=" + slot
+                            + " id=" + id
+                            + " hash=" + h
+                            + " r=" + rarity
+                            + " p1=" + perk1 + ":" + perk1Rank
+                            + " p2=" + perk2 + ":" + perk2Rank);
+                }
+                c.getPA().sendClientCommand(":attrdbg: end");
+
+                c.sendMessage("[ATTRTEST] Sent attrs packets for inv/equip.");
+            }
 
 
             if (playerCommand.startsWith("resettask")) {
