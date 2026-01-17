@@ -14,8 +14,6 @@ import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import javax.swing.plaf.basic.BasicComboBoxUI;
-import javax.swing.plaf.basic.BasicSliderUI;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -28,11 +26,17 @@ final class SettingsPanel extends JPanel {
     private final VyknaShell shell;
 
     private JTextField search;
+    private final List<SettingsSection> sections = new ArrayList<>();
     private final List<FilterItem> filterItems = new ArrayList<>();
+    private SettingsSection currentSection;
 
     private JToggleButton rs3EditModeToggle;
     private JButton rs3ResetLayoutButton;
     private JComboBox<String> rs3PanelBackgroundDropdown;
+    private JTextField presetNameField;
+    private JToggleButton loadPresetToggle;
+    private JButton savePresetButton;
+    private JButton loadPresetButton;
 
     SettingsPanel(VyknaShell shell) {
         super(new BorderLayout());
@@ -51,8 +55,12 @@ final class SettingsPanel extends JPanel {
         body.add(new VyknaShell.SectionTitle("Settings"));
         body.add(searchBar());
 
+        // --- Presets & Profiles ---
+        addSection("Presets & Profiles", "\uD83D\uDCBE");
+        addPresetControls(settings);
+
         // --- Graphics ---
-        addHeader("Graphics");
+        addSection("Graphics", "\uD83D\uDDA5");
         addSettingToggle(SettingsInterface.ANTI_ALIASING, settings.isAntiAliasing());
         addSettingToggle(SettingsInterface.FOG, settings.isFog());
         addSettingToggle(SettingsInterface.SMOOTH_SHADING, settings.isSmoothShading());
@@ -67,7 +75,7 @@ final class SettingsPanel extends JPanel {
         });
 
         // --- Interface ---
-        addHeader("Interface");
+        addSection("Interface", "\uD83E\uDDE9");
         addSettingDropdown(SettingsInterface.INTERFACE_STYLE, interfaceStyleIndex(settings.getInterfaceStyle()));
 
         // “RS3 Gameframe” row: toggle + gear (your end-goal UX)
@@ -85,13 +93,13 @@ final class SettingsPanel extends JPanel {
         addRs3PanelBackgroundSetting(settings);
 
         // --- Gameplay ---
-        addHeader("Gameplay");
+        addSection("Gameplay", "\u2694");
         addSettingToggle(SettingsInterface.BOUNTY_HUNTER, settings.isBountyHunter());
         addSettingToggle(SettingsInterface.ENTITY_TARGET, settings.isShowEntityTarget());
         addSettingDropdown(SettingsInterface.DRAG, dragTimeIndex());
 
         // --- Misc ---
-        addHeader("Misc");
+        addSection("Misc", "\u2699");
         addSettingToggle(SettingsInterface.ROOF, !isRemoveRoofsEnabled());
         addSettingToggle(SettingsInterface.PVP_TAB, false);
 
@@ -106,12 +114,79 @@ final class SettingsPanel extends JPanel {
     private static final class FilterItem {
         final String key;      // lowercased searchable text
         final JComponent comp;
-        final boolean header;
+        final SettingsSection section;
 
-        FilterItem(String key, JComponent comp, boolean header) {
+        FilterItem(String key, JComponent comp, SettingsSection section) {
             this.key = key;
             this.comp = comp;
-            this.header = header;
+            this.section = section;
+        }
+    }
+
+    private static final class SettingsSection {
+        final String title;
+        final JPanel container;
+        final JPanel header;
+        final JPanel content;
+        final JToggleButton toggle;
+        final List<FilterItem> items = new ArrayList<>();
+        boolean collapsed = false;
+
+        SettingsSection(String title, String icon) {
+            this.title = title;
+            this.container = new JPanel(new BorderLayout());
+            this.container.setOpaque(true);
+            this.container.setBackground(VyknaShell.BG);
+
+            this.header = new JPanel(new BorderLayout());
+            this.header.setOpaque(true);
+            this.header.setBackground(VyknaShell.BG);
+            this.header.setBorder(new EmptyBorder(10, 2, 6, 2));
+
+            JPanel left = new JPanel(new FlowLayout(FlowLayout.LEFT, 6, 0));
+            left.setOpaque(false);
+            JLabel iconLabel = new JLabel(icon);
+            iconLabel.setForeground(VyknaShell.TEXT_DIM);
+            iconLabel.setFont(iconLabel.getFont().deriveFont(12f));
+            JLabel titleLabel = new JLabel(title);
+            titleLabel.setForeground(VyknaShell.TEXT_DIM);
+            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD, 12f));
+            left.add(iconLabel);
+            left.add(titleLabel);
+            header.add(left, BorderLayout.WEST);
+
+            toggle = new JToggleButton("\u25BE");
+            toggle.setFocusable(false);
+            toggle.setOpaque(false);
+            toggle.setBorder(new EmptyBorder(0, 6, 0, 6));
+            toggle.setForeground(VyknaShell.TEXT_DIM);
+            toggle.setSelected(true);
+            header.add(toggle, BorderLayout.EAST);
+
+            content = new JPanel();
+            content.setOpaque(false);
+            content.setLayout(new BoxLayout(content, BoxLayout.Y_AXIS));
+            content.setBorder(new EmptyBorder(0, 0, 8, 0));
+
+            container.add(header, BorderLayout.NORTH);
+            container.add(content, BorderLayout.CENTER);
+            container.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, new Color(24, 26, 29)));
+        }
+
+        void setCollapsed(boolean collapsed) {
+            this.collapsed = collapsed;
+            content.setVisible(!collapsed);
+            toggle.setSelected(!collapsed);
+            toggle.setText(collapsed ? "\u25B8" : "\u25BE");
+        }
+
+        void setExpandedForFilter(boolean expanded) {
+            content.setVisible(expanded);
+            if (expanded) {
+                toggle.setText("\u25BE");
+            } else {
+                toggle.setText(collapsed ? "\u25B8" : "\u25BE");
+            }
         }
     }
 
@@ -141,74 +216,124 @@ final class SettingsPanel extends JPanel {
         return p;
     }
 
-    private void addHeader(String title) {
-        JComponent h = sectionHeader(title);
-        filterItems.add(new FilterItem(title.toLowerCase(), h, true));
-        body.add(h);
+    private void addSection(String title, String icon) {
+        SettingsSection section = new SettingsSection(title, icon);
+        section.toggle.addActionListener(e -> section.setCollapsed(!section.collapsed));
+        section.header.addMouseListener(new MouseAdapter() {
+            @Override public void mouseClicked(MouseEvent e) {
+                section.setCollapsed(!section.collapsed);
+            }
+        });
+        section.setCollapsed(false);
+        sections.add(section);
+        currentSection = section;
+        body.add(section.container);
     }
 
     private void addRowItem(String label, JComponent row) {
-        filterItems.add(new FilterItem(label.toLowerCase(), row, false));
-        body.add(row);
+        if (currentSection == null) {
+            return;
+        }
+        FilterItem item = new FilterItem(label.toLowerCase(), row, currentSection);
+        currentSection.items.add(item);
+        filterItems.add(item);
+        currentSection.content.add(row);
+    }
+
+    private void addPresetControls(Settings settings) {
+        presetNameField = new JTextField(settings.getActivePresetName());
+        presetNameField.getDocument().addDocumentListener(new DocumentListener() {
+            private void update() {
+                Settings current = Client.getUserSettings();
+                if (current != null) {
+                    current.setActivePresetName(presetNameField.getText());
+                    persistSettings();
+                }
+            }
+            @Override public void insertUpdate(DocumentEvent e) { update(); }
+            @Override public void removeUpdate(DocumentEvent e) { update(); }
+            @Override public void changedUpdate(DocumentEvent e) { update(); }
+        });
+
+        savePresetButton = new JButton("Save Preset");
+        savePresetButton.addActionListener(e -> {
+            Settings current = Client.getUserSettings();
+            if (current == null) {
+                return;
+            }
+            String presetName = presetNameField.getText();
+            current.setActivePresetName(presetName);
+            try {
+                SettingsManager.savePreset(current, presetName);
+                persistSettings();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        });
+
+        loadPresetButton = new JButton("Load Preset");
+        loadPresetButton.addActionListener(e -> {
+            String presetName = presetNameField.getText();
+            Settings preset = SettingsManager.loadPreset(presetName);
+            if (preset == null) {
+                return;
+            }
+            Settings current = Client.getUserSettings();
+            boolean loadOnLogin = current != null && current.isLoadPresetOnLogin();
+            preset.setActivePresetName(presetName);
+            preset.setLoadPresetOnLogin(loadOnLogin);
+            Client.setUserSettings(preset);
+            Client instance = Client.getInstance();
+            if (instance != null) {
+                instance.getPanelManager().reloadLayoutFromSettings(instance);
+            }
+            persistSettings();
+            refreshRs3Controls();
+            if (loadPresetToggle != null) {
+                loadPresetToggle.setSelected(loadOnLogin);
+                syncToggleVisual(loadPresetToggle);
+            }
+        });
+
+        loadPresetToggle = pillToggle(settings.isLoadPresetOnLogin());
+        loadPresetToggle.addActionListener(e -> {
+            Settings current = Client.getUserSettings();
+            if (current != null) {
+                current.setLoadPresetOnLogin(loadPresetToggle.isSelected());
+                persistSettings();
+                syncToggleVisual(loadPresetToggle);
+            }
+        });
+
+        addRowItem("Preset Name", row("Preset Name", presetNameField, null));
+        addRowItem("Save Preset", row("Save Preset", savePresetButton, null));
+        addRowItem("Load Preset", row("Load Preset", loadPresetButton, null));
+        addRowItem("Load Preset on Login", row("Load Preset on Login", loadPresetToggle, null));
     }
 
     private void applyFilter(String q) {
         String query = (q == null) ? "" : q.trim().toLowerCase();
         boolean anyQuery = !query.isEmpty();
 
-        body.removeAll();
-        body.add(new VyknaShell.SectionTitle("Settings"));
-        body.add(searchBar());
-
-        JComponent pendingHeader = null;
-        boolean headerHasMatch = false;
-
-        for (FilterItem item : filterItems) {
-            if (item.header) {
-                // flush previous header if it had matches (or no query)
-                if (pendingHeader != null && (!anyQuery || headerHasMatch)) {
-                    body.add(pendingHeader);
+        for (SettingsSection section : sections) {
+            section.content.removeAll();
+            boolean hasMatch = false;
+            for (FilterItem item : section.items) {
+                boolean match = !anyQuery || item.key.contains(query);
+                if (match) {
+                    hasMatch = true;
+                    section.content.add(item.comp);
                 }
-                pendingHeader = item.comp;
-                headerHasMatch = false;
-                continue;
             }
-
-            boolean match = !anyQuery || item.key.contains(query);
-            if (match) {
-                headerHasMatch = true;
-                if (pendingHeader != null && !isAlreadyAdded(body, pendingHeader)) {
-                    body.add(pendingHeader);
-                }
-                body.add(item.comp);
-            }
+            section.container.setVisible(!anyQuery || hasMatch);
+            section.setExpandedForFilter(anyQuery ? hasMatch : !section.collapsed);
         }
 
         body.revalidate();
         body.repaint();
     }
 
-    private boolean isAlreadyAdded(JPanel panel, JComponent comp) {
-        for (Component c : panel.getComponents()) {
-            if (c == comp) return true;
-        }
-        return false;
-    }
-
     // ---------------- UI pieces ----------------
-
-    private JPanel sectionHeader(String title) {
-        JPanel p = new JPanel(new BorderLayout());
-        p.setOpaque(true);
-        p.setBackground(VyknaShell.BG);
-        p.setBorder(new EmptyBorder(10, 0, 2, 0));
-
-        JLabel label = new JLabel(title);
-        label.setForeground(VyknaShell.TEXT_DIM);
-        label.setFont(label.getFont().deriveFont(Font.BOLD, 12f));
-        p.add(label, BorderLayout.WEST);
-        return p;
-    }
 
     private JPanel row(String label, JComponent control, JButton gearOrNull) {
         JPanel row = new JPanel(new BorderLayout());
@@ -303,9 +428,8 @@ final class SettingsPanel extends JPanel {
 
         int initial = (int) Math.round(initialValue);
         JSlider slider = new JSlider(min, max, initial);
-        slider.setOpaque(false);
         slider.setPreferredSize(new Dimension(150, 20));
-        slider.setUI(new BasicSliderUI(slider)); // your global theme pass can still override if desired
+        VyknaShell.styleSlider(slider);
         slider.addChangeListener(e -> {
             if (!slider.getValueIsAdjusting()) {
                 onChange.accept(slider.getValue());
@@ -335,62 +459,6 @@ final class SettingsPanel extends JPanel {
         t.setText(on ? "ON" : "OFF");
         t.setForeground(on ? VyknaShell.TEXT : VyknaShell.TEXT_DIM);
         t.setBackground(on ? new Color(24, 26, 28) : new Color(16, 17, 19));
-    }
-
-    // ---------------- Combo styling (fix white-on-white popup + arrow) ----------------
-
-    private void styleCombo(JComboBox<String> combo) {
-        combo.setFocusable(false);
-        combo.setOpaque(true);
-        combo.setBackground(new Color(16, 17, 19));
-        combo.setForeground(VyknaShell.TEXT);
-        combo.setBorder(BorderFactory.createLineBorder(VyknaShell.BORDER));
-
-        combo.setUI(new BasicComboBoxUI() {
-            @Override protected JButton createArrowButton() {
-                JButton b = new JButton("▾");
-                b.setFocusable(false);
-                b.setBorder(BorderFactory.createEmptyBorder(0, 8, 0, 8));
-                b.setOpaque(true);
-                b.setBackground(new Color(16, 17, 19));
-                b.setForeground(VyknaShell.TEXT_DIM);
-                b.addMouseListener(new MouseAdapter() {
-                    @Override public void mouseEntered(MouseEvent e) { b.setForeground(VyknaShell.TEXT); }
-                    @Override public void mouseExited(MouseEvent e) { b.setForeground(VyknaShell.TEXT_DIM); }
-                });
-                return b;
-            }
-        });
-
-        combo.setRenderer(new DefaultListCellRenderer() {
-            @Override
-            public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                          boolean isSelected, boolean cellHasFocus) {
-                JLabel c = (JLabel) super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-                c.setOpaque(true);
-                c.setBorder(new EmptyBorder(6, 8, 6, 8));
-                c.setForeground(isSelected ? VyknaShell.TEXT : VyknaShell.TEXT_DIM);
-                c.setBackground(isSelected ? new Color(30, 32, 35) : new Color(16, 17, 19));
-                list.setBackground(new Color(16, 17, 19));
-                list.setSelectionBackground(new Color(30, 32, 35));
-                list.setSelectionForeground(VyknaShell.TEXT);
-                return c;
-            }
-        });
-
-        // Force popup menu background/border to dark too
-        combo.addPopupMenuListener(new javax.swing.event.PopupMenuListener() {
-            @Override public void popupMenuWillBecomeVisible(javax.swing.event.PopupMenuEvent e) {
-                Object child = combo.getUI().getAccessibleChild(combo, 0);
-                if (child instanceof JPopupMenu) {
-                    JPopupMenu popup = (JPopupMenu) child;
-                    popup.setBorder(BorderFactory.createLineBorder(VyknaShell.BORDER));
-                    popup.setBackground(new Color(16, 17, 19));
-                }
-            }
-            @Override public void popupMenuWillBecomeInvisible(javax.swing.event.PopupMenuEvent e) {}
-            @Override public void popupMenuCanceled(javax.swing.event.PopupMenuEvent e) {}
-        });
     }
 
     // ---------------- Gear + advanced dialogs ----------------
@@ -512,7 +580,7 @@ final class SettingsPanel extends JPanel {
     private void addRs3PanelBackgroundSetting(Settings settings) {
         String[] options = { "Dark", "Slate", "Blue", "Crimson" };
         rs3PanelBackgroundDropdown = new JComboBox<>(options);
-        styleCombo(rs3PanelBackgroundDropdown);
+        VyknaShell.styleComboBox(rs3PanelBackgroundDropdown);
 
         rs3PanelBackgroundDropdown.setSelectedIndex(rs3PanelBackgroundIndex(settings.getRs3PanelBackgroundColor()));
         rs3PanelBackgroundDropdown.addActionListener(e -> {
