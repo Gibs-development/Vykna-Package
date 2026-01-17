@@ -10,6 +10,7 @@ public final class ItemAttrStore {
     private static final Map<Integer, Integer> lastItemId = new HashMap<>();
     public static final class Attr {
         public int hash;
+        public int itemId;
         public int rarityId;
         public int perk1, perk1Rank;
         public int perk2, perk2Rank;
@@ -86,12 +87,18 @@ public final class ItemAttrStore {
     public static void onSlotItemSet(int interfaceId, int slot, int newItemId) {
         int k = key(interfaceId, slot);
         Integer old = lastItemId.get(k);
+        Attr existing = map.get(k);
 
         // Normalize: empty slot is -1 or 0 depending on interface code; treat <=0 as empty
         if (newItemId <= 0) {
             // slot cleared -> clear attrs too
             lastItemId.remove(k);
             map.remove(k);
+            return;
+        }
+
+        if (existing != null && existing.itemId == newItemId) {
+            lastItemId.put(k, newItemId);
             return;
         }
 
