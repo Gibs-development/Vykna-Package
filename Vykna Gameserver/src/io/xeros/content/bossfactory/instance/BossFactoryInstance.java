@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit;
 import io.xeros.content.bossfactory.BossCleanupReason;
 import io.xeros.content.bossfactory.BossFactoryRegistry;
 import io.xeros.content.bossfactory.BossMechanicToggle;
-import io.xeros.content.bossfactory.bosses.GoblinNecromancerBoss;
+import io.xeros.content.bossfactory.bosses.MotherMadera;
 import io.xeros.content.instances.InstancedArea;
 import io.xeros.content.instances.InstanceConfiguration;
 import io.xeros.content.instances.InstanceConfigurationBuilder;
@@ -30,7 +30,7 @@ public class BossFactoryInstance extends InstancedArea {
     private NPC bossNpc;
 
     public BossFactoryInstance(Player owner, BossFactoryInstanceConfig config) {
-        super(CONFIGURATION, GoblinNecromancerBoss.ARENA_BOUNDARY);
+        super(CONFIGURATION, MotherMadera.ARENA_BOUNDARY);
         this.owner = owner;
         this.config = config;
         this.expiryTime = System.currentTimeMillis() + DURATION_MS;
@@ -53,7 +53,7 @@ public class BossFactoryInstance extends InstancedArea {
 
     public void enter(Player player) {
         add(player);
-        player.moveTo(resolve(GoblinNecromancerBoss.TELEPORT_POSITION));
+        player.moveTo(resolve(MotherMadera.TELEPORT_POSITION));
         sendTimeMessage(player, remainingMs());
         sendInstanceTimer(player);
         sendBossTarget(player);
@@ -92,7 +92,7 @@ public class BossFactoryInstance extends InstancedArea {
     }
 
     private void spawnBoss() {
-        bossNpc = new NPC(GoblinNecromancerBoss.NPC_ID, resolve(GoblinNecromancerBoss.BOSS_SPAWN));
+        bossNpc = new NPC(MotherMadera.NPC_ID, resolve(MotherMadera.BOSS_SPAWN));
         add(bossNpc);
         if (BossFactoryRegistry.isBoss(bossNpc)) {
             io.xeros.content.bossfactory.BossController controller = BossFactoryRegistry.getOrCreate(bossNpc);
