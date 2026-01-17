@@ -9,6 +9,8 @@ import io.xeros.Configuration;
 import io.xeros.Server;
 import io.xeros.content.bosses.Skotizo;
 import io.xeros.content.bosses.wildypursuit.FragmentOfSeren;
+import io.xeros.content.bossfactory.BossCleanupReason;
+import io.xeros.content.bossfactory.BossFactoryRegistry;
 import io.xeros.content.combat.CombatHit;
 import io.xeros.content.combat.Hitmark;
 import io.xeros.content.combat.npc.NPCAutoAttack;
@@ -422,6 +424,7 @@ public class NPC extends Entity {
 	 */
 	public boolean processDeregistration() {
 		if (isUnregister() && getIndex() > 0) {
+			BossFactoryRegistry.cleanupIfBoss(this, BossCleanupReason.GENERIC);
 			CycleEventHandler.getSingleton().stopEvents(this);
 			NPCHandler.npcs[getIndex()] = null;
 			setIndex(0);
@@ -436,6 +439,7 @@ public class NPC extends Entity {
 	}
 
 	public void resetAttack() {
+		BossFactoryRegistry.cleanupIfBoss(this, BossCleanupReason.RESET);
 		setPlayerAttackingIndex(0);
 		facePlayer(0);
 		underAttack = false;
@@ -477,6 +481,10 @@ public class NPC extends Entity {
 	}
 
 	public void selectAutoAttack(Entity entity) {
+		if (BossFactoryRegistry.isBoss(this)) {
+			currentAttack = BossFactoryRegistry.getOrCreate(this).selectAutoAttack(entity);
+			return;
+		}
 		Preconditions.checkState(!npcAutoAttacks.isEmpty(), "No auto attacks present!");
 		List<NPCAutoAttack> viable = npcAutoAttacks.stream().filter(autoAttack -> autoAttack.getSelectAutoAttack() == null
 				|| autoAttack.getSelectAutoAttack().apply(new NPCCombatAttack(this, entity))).collect(Collectors.toList());
@@ -1160,6 +1168,9 @@ public class NPC extends Entity {
 	}
 
 	public void setDead(boolean dead) {
+		if (dead && !isDead) {
+			BossFactoryRegistry.cleanupIfBoss(this, BossCleanupReason.DEATH);
+		}
 		isDead = dead;
 	}
 
