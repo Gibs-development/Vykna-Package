@@ -496,7 +496,7 @@ public class PresetManager {
 					PresetItem item = new PresetItem(preset.getInventory().get(j).getItemId(), preset.getInventory().get(j).getAmount());
 
 					if (findItemInBank(player, item)) {
-						player.getItems().removeFromAnyTabWithoutAdding(item.getItemId(), item.getAmount(), false);
+						player.getItems().removeFromAnyTabPreferNonAugmented(item.getItemId(), item.getAmount(), false);
 						player.getItems().addItem(item.getItemId(), item.getAmount());
 					}
 				}
@@ -566,7 +566,7 @@ public class PresetManager {
 
 				for(int i = 0; i < equipmentItemsFound.length; i++) {
 					if (equipmentItemsFound[i] != null) {
-						player.getItems().removeFromAnyTabWithoutAdding(equipmentItemsFound[i].getItemId(), equipmentItemsFound[i].getAmount(), false);
+						player.getItems().removeFromAnyTabPreferNonAugmented(equipmentItemsFound[i].getItemId(), equipmentItemsFound[i].getAmount(), false);
 						player.getItems().equipItem(equipmentItemsFound[i].getItemId(), equipmentItemsFound[i].getAmount(), i);
 						player.getItems().sendInventoryInterface(3823);
 					}

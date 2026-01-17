@@ -371,14 +371,17 @@ public class DropItem implements PacketType {
 		if (!c.getItems().isItemInInventorySlot(itemId, itemSlot) || c.isDead)
 			return;
 
-		Server.getLogging().write(new ItemDroppedLog(c, new GameItem(itemId, c.playerItemsN[itemSlot]), c.getPosition()));
-		Server.itemHandler.createGroundItemFromDrop(c, itemId, c.absX, c.absY, c.heightLevel,
-				c.playerItemsN[itemSlot], c.getIndex());
-		c.getItems().deleteItem(itemId, itemSlot, c.playerItemsN[itemSlot]);
+		GameItem invItem = c.getItems().getItemInInventorySlot(itemSlot);
+		if (invItem == null) {
+			return;
+		}
+		Server.getLogging().write(new ItemDroppedLog(c, invItem.copy(), c.getPosition()));
+		Server.itemHandler.createGroundItemFromDrop(c, invItem, c.absX, c.absY, c.heightLevel, c.getIndex());
+		c.getItems().deleteItem(itemId, itemSlot, invItem.getAmount());
 		c.getPA().removeAllWindows();
 		c.getPA().sendSound(2739);
 
 		// Gim drop log
-		GroupIronmanRepository.getGroupForOnline(c).ifPresent(group -> group.addDropItemLog(c, new GameItem(itemId, itemSlot)));
+		GroupIronmanRepository.getGroupForOnline(c).ifPresent(group -> group.addDropItemLog(c, invItem.copy()));
 	}
 }
