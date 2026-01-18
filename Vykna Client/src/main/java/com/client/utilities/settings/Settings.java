@@ -261,7 +261,7 @@ public class Settings implements Serializable {
 	}
 
 	public String getActivePresetName() {
-		return activePresetName == null || activePresetName.isBlank() ? "Default" : activePresetName;
+		return activePresetName == null || activePresetName.trim().isEmpty() ? "Default" : activePresetName;
 	}
 
 	public void setActivePresetName(String activePresetName) {
