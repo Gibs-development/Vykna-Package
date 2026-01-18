@@ -2571,7 +2571,7 @@ public class Client extends RSApplet {
 		if (class9 == null) {
 			return;
 		}
-
+		hoverId = -1;
 		if (class9.type != 0 || class9.children == null || class9.isMouseoverTriggered)
 			return;
 		if (mouseX < xPosition || mouseY < yPosition || mouseX > xPosition + class9.width || mouseY > yPosition + class9.height)
@@ -14008,11 +14008,15 @@ public class Client extends RSApplet {
 							}
 						} else if (class9_1.type == 5) {
 							Sprite sprite;
-							if(interfaceIsSelected(class9_1) || class9_1.active) {
+
+							boolean hovered = (hoverId == class9_1.id);
+
+							if (hovered || interfaceIsSelected(class9_1) || class9_1.active) {
 								sprite = class9_1.sprite2;
 							} else {
 								sprite = class9_1.sprite1;
 							}
+
 
 
 
