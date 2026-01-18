@@ -2728,14 +2728,12 @@ public class Client extends RSApplet {
 				if (class9_1.type == 9 && mouseX >= drawX && mouseY >= drawY && mouseX < drawX + class9_1.width && mouseY < drawY + class9_1.height) {
 					anInt1315 = class9_1.id;
 				}
-				if (class9_1.type == 5
-						&& class9_1.atActionType != 0
-						&& class9_1.sprite2 != null
+				if ((class9_1.type == 5 || class9_1.type == 17)
 						&& mouseX >= drawX && mouseY >= drawY
-						&& mouseX < drawX + class9_1.width
-						&& mouseY < drawY + class9_1.height) {
+						&& mouseX < drawX + class9_1.width && mouseY < drawY + class9_1.height) {
 					hoverId = class9_1.id;
 				}
+
 
 
 				if (class9_1.type == 0) {
@@ -14317,7 +14315,59 @@ public class Client extends RSApplet {
 							if (slider != null) {
 								slider.draw(_x, _y, 255);
 							}
-						} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
+						} else if (class9_1.type == 17) {
+
+							if (class9_1.sprite1 == null) {
+								continue;
+							}
+
+							// defId from config (server sets), fallback to valueIndex
+							int defId = (class9_1.configId >= 0) ? variousSettings[class9_1.configId] : class9_1.valueIndex;
+							if (class9_1.configId >= 0) {
+								// CHANGE THIS to your actual config/varp array name
+								defId = variousSettings[class9_1.configId];
+							}
+							if (defId < 0) defId = 0;
+
+							// resolve to definition -> spriteIndex
+							com.client.achievements.AchievementDefinitions.AchievementDefinition def =
+									com.client.achievements.AchievementDefinitions.getById(defId);
+
+							int index = def.spriteIndex;
+
+							int size = class9_1.gridCellSize;
+							int cols = class9_1.gridCols;
+							if (size <= 0 || cols <= 0) continue;
+
+							int maxIcons = (class9_1.sprite1.myWidth / size) * (class9_1.sprite1.myHeight / size);
+							if (maxIcons <= 0) continue;
+
+							if (index < 0 || index >= maxIcons) index = 0;
+
+							// cache crops
+							if (class9_1.gridSpriteCache == null || class9_1.gridSpriteCache.length != maxIcons) {
+								class9_1.gridSpriteCache = new Sprite[maxIcons];
+							}
+
+							Sprite icon = class9_1.gridSpriteCache[index];
+							if (icon == null) {
+								int col = index % cols;
+								int row = index / cols;
+								int sx = col * size;
+								int sy = row * size;
+								icon = class9_1.sprite1.getSubSprite(sx, sy, size, size);
+								class9_1.gridSpriteCache[index] = icon;
+							}
+
+							if (icon != null) {
+								icon.drawSprite(_x, _y);
+							}
+
+							// tooltip if hovered
+							if (hoverId == class9_1.id && defId != 0) {
+								drawAchievementTooltip(def.name, def.description, super.getMouseX(), super.getMouseY());
+							}
+				} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
 
 							DropdownMenu d = class9_1.dropdown;
 
@@ -15850,6 +15900,29 @@ public class Client extends RSApplet {
 		} catch (Exception _ex) {
 			return -1;
 		}
+	}
+	private void drawAchievementTooltip(String title, String desc, int mx, int my) {
+		if (title == null) title = "";
+		if (desc == null) desc = "";
+
+		int pad = 6;
+		int titleW = newRegularFont.getTextWidth(title);
+		int descW = newSmallFont.getTextWidth(desc);
+		int w = Math.max(titleW, descW) + pad * 2;
+		int h = 36;
+
+		int x = mx + 12;
+		int y = my + 12;
+
+		// clamp to screen
+		if (x + w > DrawingArea.bottomX) x = mx - w - 12;
+		if (y + h > DrawingArea.bottomY) y = my - h - 12;
+
+		DrawingArea.drawAlphaBox(x, y, w, h, 0x0b0b0b, 180);
+		DrawingArea.drawBorder(x, y, w, h, 0x6b5a3a);
+
+		newRegularFont.drawBasicString(title, x + pad, y + 14, 0xFFFAE5, 0);
+		newSmallFont.drawBasicString(desc, x + pad, y + 28, 0xC9C1A6, 0);
 	}
 
 	public void drawTopLeftTooltip() {

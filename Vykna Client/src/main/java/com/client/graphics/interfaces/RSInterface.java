@@ -21,12 +21,16 @@ public class RSInterface {
 	public static final int YELLOW_COLOR = 0xFFFF00;
 	public static final int WHITE_COLOR = 0xFFFFFF;
 	public static final int RED_COLOR = 0xE11010;
+	public transient Sprite[] gridSpriteCache;
 
 	public static int emptyInterface = 24_470;
 	public static boolean showIds = false;
 	public static RSFont[] newFonts;
 
-
+	public int gridCols;
+	public int gridRows;
+	public int gridCellSize;
+	public int valueIndex; // which icon index to use (set by server/client)
 
     public static void printEmptyInterfaceSections() {
 		int count = 0;
@@ -3708,6 +3712,16 @@ public class RSInterface {
 		tab.tooltip = tooltip;
 		tab.actions = new String[] { "Select" };
 	}
+	public static void addConfigSpriteGrid(int id, String sprite, int cols, int rows, int iconSize) {
+		RSInterface r = addInterface(id);
+		r.type = 17; // custom: grid sprite
+		r.sprite1 = imageLoader(0, sprite);
+		r.gridCols = cols;
+		r.gridRows = rows;
+		r.gridCellSize = iconSize;
+		r.width = iconSize;
+		r.height = iconSize;
+	}
 
 	public static void addHoverImage(int i, int j, int k, String name) {
 		RSInterface tab = addTabInterface(i);
@@ -4012,9 +4026,11 @@ public class RSInterface {
 	public static final int TYPE_PROGRESS_BAR_2021 = 23;
 	public static final int TYPE_DRAW_BOX = 24;
 	public static final int TYPE_HORIZONTAL_STRING_CONTAINER = 25;
-
+	public int configId = -1;
 	public static final int AT_ACTION_TYPE_OPTION_DROPDOWN = 7;
 	public static final int AT_ACTION_TYPE_AUTOCAST = 50;
+
+
 
 	public int hoverInterfaceId;
 	public long hoverInterfaceDelay;
@@ -4158,6 +4174,28 @@ public class RSInterface {
 		}
 		component.sprite1 = component.backgroundSprites[0];
 	}
+	public static void addSpriteGridConfig(int id, String atlasSprite, int cols, int rows, int cellSize, int configId) {
+		RSInterface r = addInterface(id);
+		r.id = id;
+		r.type = 17; // your new draw type
+		r.atActionType = 0;
+		r.contentType = 0;
+
+		r.sprite1 = imageLoader(0, atlasSprite); // big atlas
+		r.sprite2 = null;
+
+		r.gridCols = cols;
+		r.gridRows = rows;
+		r.gridCellSize = cellSize;
+		r.configId = configId;
+
+		r.width = cellSize;
+		r.height = cellSize;
+
+		r.tooltip = ""; // not used, we custom tooltip
+	}
+
+
 
 	public static void addClickableSprites(int id, String tooltip, String path, int... spriteIds) {
 		addSprites(id, path, spriteIds);
