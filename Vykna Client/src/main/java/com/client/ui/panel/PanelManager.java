@@ -29,6 +29,10 @@ public class PanelManager {
 	private static final int DOCK_SNAP_THRESHOLD = 12;
 	private static final int GROUP_SNAP_THRESHOLD = 8;
 	private static final int GROUP_UNDOCK_THRESHOLD = 6;
+	private static final int EQUIPMENT_TAB_INTERFACE_ID = 1644;
+	private static final int EQUIPMENT_MODEL_CONTENT_TYPE = 328;
+	private static final int EQUIPMENT_SLOT_MAX_SIZE = 40;
+	private static final int EQUIPMENT_SLOT_PADDING = 4;
 	public static final int PANEL_ID_INVENTORY = 1;
 	public static final int PANEL_ID_PRAYER = 2;
 	public static final int PANEL_ID_MAGIC = 3;
@@ -1480,6 +1484,9 @@ public class PanelManager {
 		protected void updateInterfaceLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
 			rsInterface.width = bounds.width;
 			rsInterface.height = bounds.height;
+			if (rsInterface.id == EQUIPMENT_TAB_INTERFACE_ID) {
+				applyEquipmentLayout(rsInterface, bounds);
+			}
 		}
 
 		protected int getContentPadding(Client client, Rectangle bounds) {
@@ -1819,6 +1826,11 @@ public class PanelManager {
 				applyInventoryLayout(client, rsInterface, bounds);
 				return;
 			}
+			if (activeTabIndex == 4 && rsInterface.id == EQUIPMENT_TAB_INTERFACE_ID) {
+				applyEquipmentLayout(rsInterface, bounds);
+				rsInterface.scrollMax = Math.max(rsInterface.height, getInterfaceContentHeight(rsInterface));
+				return;
+			}
 			if (activeTabIndex == 5 || activeTabIndex == 6) {
 				applyIconGridLayout(rsInterface, bounds);
 			}
@@ -1944,6 +1956,117 @@ public class PanelManager {
 				this.tabIndex = tabIndex;
 			}
 		}
+	}
+
+	private static void applyEquipmentLayout(RSInterface rsInterface, Rectangle bounds) {
+		if (rsInterface.children == null) {
+			return;
+		}
+		List<Integer> slotIndices = new ArrayList<>();
+		int slotSize = 0;
+		int modelIndex = -1;
+		for (int index = 0; index < rsInterface.children.length; index++) {
+			RSInterface child = RSInterface.interfaceCache[rsInterface.children[index]];
+			if (child == null) {
+				continue;
+			}
+			if (child.type == 6 && child.contentType == EQUIPMENT_MODEL_CONTENT_TYPE) {
+				modelIndex = index;
+			}
+			if (isEquipmentSlot(child)) {
+				slotIndices.add(index);
+				slotSize = Math.max(slotSize, Math.max(child.width, child.height));
+			}
+		}
+		if (slotIndices.isEmpty()) {
+			return;
+		}
+		if (slotSize <= 0) {
+			slotSize = 32;
+		}
+
+		boolean usedRs3Layout = false;
+		int padding = EQUIPMENT_SLOT_PADDING;
+		if (modelIndex != -1) {
+			RSInterface model = RSInterface.interfaceCache[rsInterface.children[modelIndex]];
+			int modelWidth = model != null && model.width > 0 ? model.width : 136;
+			int modelHeight = model != null && model.height > 0 ? model.height : 168;
+			int centerX = bounds.width / 2;
+			int centerY = bounds.height / 2;
+			int modelLeft = centerX - modelWidth / 2;
+			int modelTop = centerY - modelHeight / 2;
+			int modelRight = modelLeft + modelWidth;
+			int modelBottom = modelTop + modelHeight;
+			int sideSlotsCount = Math.max(0, slotIndices.size() - 2);
+			int sideRows = sideSlotsCount == 0 ? 0 : (int) Math.ceil(sideSlotsCount / 2.0);
+			int sideColumnHeight = sideRows * slotSize + Math.max(0, sideRows - 1) * padding;
+			int sideStartY = centerY - sideColumnHeight / 2;
+			int leftX = modelLeft - slotSize - padding;
+			int rightX = modelRight + padding;
+			int topY = modelTop - slotSize - padding;
+			int bottomY = modelBottom + padding;
+			boolean fits = leftX >= padding
+					&& rightX + slotSize <= bounds.width - padding
+					&& topY >= padding
+					&& bottomY + slotSize <= bounds.height - padding
+					&& (sideRows == 0 || (sideStartY >= padding && sideStartY + sideColumnHeight <= bounds.height - padding));
+			if (fits) {
+				rsInterface.childX[modelIndex] = modelLeft;
+				rsInterface.childY[modelIndex] = modelTop;
+				int slotPointer = 0;
+				rsInterface.childX[slotIndices.get(slotPointer)] = centerX - slotSize / 2;
+				rsInterface.childY[slotIndices.get(slotPointer)] = topY;
+				slotPointer++;
+				for (int row = 0; row < sideRows && slotPointer < slotIndices.size() - 1; row++) {
+					int y = sideStartY + row * (slotSize + padding);
+					rsInterface.childX[slotIndices.get(slotPointer)] = leftX;
+					rsInterface.childY[slotIndices.get(slotPointer)] = y;
+					slotPointer++;
+					if (slotPointer >= slotIndices.size() - 1) {
+						break;
+					}
+					rsInterface.childX[slotIndices.get(slotPointer)] = rightX;
+					rsInterface.childY[slotIndices.get(slotPointer)] = y;
+					slotPointer++;
+				}
+				if (slotPointer < slotIndices.size()) {
+					rsInterface.childX[slotIndices.get(slotPointer)] = centerX - slotSize / 2;
+					rsInterface.childY[slotIndices.get(slotPointer)] = bottomY;
+				}
+				usedRs3Layout = true;
+			}
+		}
+
+		if (!usedRs3Layout) {
+			if (modelIndex != -1) {
+				rsInterface.childX[modelIndex] = bounds.width + 1000;
+				rsInterface.childY[modelIndex] = bounds.height + 1000;
+			}
+			int columns = Math.max(1, (bounds.width - padding * 2) / (slotSize + padding));
+			columns = Math.min(columns, slotIndices.size());
+			int rows = (int) Math.ceil(slotIndices.size() / (double) columns);
+			int gridWidth = columns * slotSize + Math.max(0, columns - 1) * padding;
+			int gridHeight = rows * slotSize + Math.max(0, rows - 1) * padding;
+			int startX = Math.max(padding, (bounds.width - gridWidth) / 2);
+			int startY = Math.max(padding, (bounds.height - gridHeight) / 2);
+			for (int idx = 0; idx < slotIndices.size(); idx++) {
+				int row = idx / columns;
+				int col = idx % columns;
+				rsInterface.childX[slotIndices.get(idx)] = startX + col * (slotSize + padding);
+				rsInterface.childY[slotIndices.get(idx)] = startY + row * (slotSize + padding);
+			}
+		}
+		rsInterface.scrollMax = bounds.height;
+	}
+
+	private static boolean isEquipmentSlot(RSInterface child) {
+		if (child == null || child.type != 5) {
+			return false;
+		}
+		if (child.width <= 0 || child.height <= 0) {
+			return false;
+		}
+		return child.width <= EQUIPMENT_SLOT_MAX_SIZE && child.height <= EQUIPMENT_SLOT_MAX_SIZE;
 	}
 
 	private void drawPanelBackground(Client client, UiPanel panel) {
