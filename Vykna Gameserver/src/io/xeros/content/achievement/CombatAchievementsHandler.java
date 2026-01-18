@@ -264,7 +264,8 @@ public final class CombatAchievementsHandler {
 		player.getPA().sendFrame126("</col>Completed: <col=65280>" + completed + "</col>/" + total, COMPLETED_TEXT_ID);
 		player.getPA().sendFrame126("</col>Points: <col=65280>" + player.getAchievementsPoints(), POINTS_TEXT_ID);
 		int percent = total == 0 ? 0 : (int) Math.round((completed * 100.0) / total);
-		player.getPA().sendFrame126(percent + \"%\", 35009);
+		player.getPA().sendFrame126(percent + "%", 35009);
+
 	}
 
 	private static void updateHighlights(Player player) {
