@@ -880,7 +880,7 @@ public class PanelManager {
 			panels.add(new TabPanel(PANEL_ID_SKILLS, 2, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Skills", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
 			panels.add(new InventoryPanel(PANEL_ID_INVENTORY, new Rectangle(baseX, inventoryY, PANEL_WIDTH, PANEL_HEIGHT)));
 			panels.add(new TabPanel(PANEL_ID_EQUIPMENT, 4, new Rectangle(baseX, inventoryY, PANEL_WIDTH, PANEL_HEIGHT), "Equipment", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
-			panels.add(new TabPanel(PANEL_ID_PRAYER, 5, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Prayer", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
+			panels.add(new PrayerPanel(PANEL_ID_PRAYER, 5, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Prayer"));
 			panels.add(new TabPanel(PANEL_ID_MAGIC, 6, new Rectangle(baseX, magicY, PANEL_WIDTH, PANEL_HEIGHT), "Magic", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
 			panels.add(new TabPanel(PANEL_ID_CLAN, 7, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Clan", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
 			panels.add(new TabPanel(PANEL_ID_FRIENDS, 8, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Friends", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
@@ -1332,7 +1332,7 @@ public class PanelManager {
 
 	static class TabPanel extends BasePanel {
 		private final int tabIndex;
-		private int scrollOffset;
+		protected int scrollOffset;
 
 		private TabPanel(int id, int tabIndex, Rectangle bounds, String title, boolean visible) {
 			super(id, bounds, visible, true, title);
@@ -1454,7 +1454,7 @@ public class PanelManager {
 			return maxHeight;
 		}
 
-		private int getScrollPosition(RSInterface rsInterface, Rectangle bounds) {
+		protected int getScrollPosition(RSInterface rsInterface, Rectangle bounds) {
 			if (!needsScroll(rsInterface, bounds)) {
 				scrollOffset = 0;
 				return 0;
