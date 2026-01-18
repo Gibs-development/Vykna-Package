@@ -2673,24 +2673,10 @@ interfaceId+=5000;
 		tab.totalChildren(10);
 		RSInterface prayerBook = interfaceCache[5608];
 
-		// Switches the Chivalry & Piety positions.
-		/** Chivalry **/
-		int xMinus = 1;
-		int minusX = 37;
-		prayerBook.childX[50] = 41 - minusX;
-		prayerBook.childY[50] = 195 - xMinus;
-		prayerBook.childX[51] = 48 - minusX;
-		prayerBook.childY[51] = 197 - xMinus;
-		prayerBook.childX[63] = 41 - minusX;
-		prayerBook.childY[63] = 200 - xMinus;
-
-		/** Piety **/
-		prayerBook.childX[52] = 41;
-		prayerBook.childY[52] = 195 - xMinus;
-		prayerBook.childX[53] = 43;
-		prayerBook.childY[53] = 206 - xMinus;
-		prayerBook.childX[64] = 48;
-		prayerBook.childY[64] = 197 - xMinus;
+		// Switches the Chivalry & Piety positions without hardcoding offsets.
+		swapPrayerChildPositions(prayerBook, 50, 52);
+		swapPrayerChildPositions(prayerBook, 51, 53);
+		swapPrayerChildPositions(prayerBook, 63, 64);
 
 		addPrayer(39401, 0, 708, 55, 26, "Preserve");
 		addPrayer(39404, 0, 710, 74, 27, "Rigour");
@@ -2701,16 +2687,36 @@ interfaceId+=5000;
 		addPrayerHover(tda, 1, 39406,
 				"Level 74\\nRigour\\nIncreases your Ranged attack\\nby 20% and damage by 23%,\\nand your defence by 25%",
 				-70, -100);
-		setBounds(39401, 152, 158 - xMinus, 0, tab);
-		setBounds(39404, 78, 195 - xMinus, 1, tab);
-		setBounds(39407, 115, 195 - xMinus, 2, tab);
+		int xMinus = 1;
+		setBounds(39401, 152, 158, 0, tab);
+		setBounds(39404, 78, 195, 1, tab);
+		setBounds(39407, 115, 195, 2, tab);
 		setBounds(39402, 154, 158 - xMinus, 3, tab);
 		setBounds(39405, 81, 198 - xMinus, 4, tab);
 		setBounds(39408, 118, 198 - xMinus, 5, tab);
-		setBounds(5608, 0, 0 - xMinus, 6, tab);
-		setBounds(39403, 154, 158 - xMinus, 7, tab);
-		setBounds(39406, 84, 198 - xMinus, 8, tab);
-		setBounds(39409, 120, 198 - xMinus, 9, tab);
+		setBounds(5608, 0, 0, 6, tab);
+		setBounds(39403, 154, 158, 7, tab);
+		setBounds(39406, 84, 198, 8, tab);
+		setBounds(39409, 120, 198, 9, tab);
+	}
+
+	private static void swapPrayerChildPositions(RSInterface prayerBook, int indexA, int indexB) {
+		if (prayerBook == null || prayerBook.childX == null || prayerBook.childY == null) {
+			return;
+		}
+		if (indexA < 0 || indexB < 0) {
+			return;
+		}
+		int maxIndex = Math.max(indexA, indexB);
+		if (maxIndex >= prayerBook.childX.length || maxIndex >= prayerBook.childY.length) {
+			return;
+		}
+		int x = prayerBook.childX[indexA];
+		int y = prayerBook.childY[indexA];
+		prayerBook.childX[indexA] = prayerBook.childX[indexB];
+		prayerBook.childY[indexA] = prayerBook.childY[indexB];
+		prayerBook.childX[indexB] = x;
+		prayerBook.childY[indexB] = y;
 	}
 
 	public static void ancients(TextDrawingArea[] tda) {
