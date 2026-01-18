@@ -7814,6 +7814,7 @@ public class Client extends RSApplet {
 		setDropDown(SettingsInterface.ENTITY_TARGET, getUserSettings().isShowEntityTarget());
 		setDropDown(SettingsInterface.CHAT_EFFECT, getUserSettings().getChatColor());
 		setDropDown(SettingsInterface.INVENTORY_MENU, getUserSettings().isInventoryContextMenu() ? 1 : 0);
+		setDropDown(SettingsInterface.PRAYER_FILTER_MODE, getUserSettings().isPrayerFilterMode());
 		setDropDown(SettingsInterface.STRETCHED_MODE, getUserSettings().isStretchedMode());
 
 		// Draw distance
