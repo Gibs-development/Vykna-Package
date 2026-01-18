@@ -362,6 +362,18 @@ public class PanelManager {
 		ensureRs3Layout(client);
 	}
 
+	public void reloadLayoutFromSettings(Client client) {
+		activePanel = null;
+		dragging = false;
+		resizing = false;
+		mouseDownLastFrame = false;
+		layoutWidth = -1;
+		layoutHeight = -1;
+		panels.clear();
+		preferredBounds.clear();
+		ensureRs3Layout(client);
+	}
+
 	public void saveLayout(Client client) {
 		saveLayoutToSettings(client);
 	}
@@ -539,8 +551,8 @@ public class PanelManager {
 		private static final int TELEPORT_HEIGHT = 20;
 		private static final int XP_PANEL_WIDTH = 130;
 		private static final int XP_PANEL_HEIGHT = 28;
-		private static final int ACTION_BAR_WIDTH = 420;
-		private static final int ACTION_BAR_HEIGHT = 70;
+		private static final int ACTION_BAR_WIDTH = 520;
+		private static final int ACTION_BAR_HEIGHT = 96;
 		private static final int CHAT_PANEL_WIDTH = 516;
 		private static final int CHAT_PANEL_HEIGHT = 165 + PANEL_HEADER_HEIGHT;
 		private static final int TAB_BAR_PANEL_WIDTH = 76;
@@ -587,8 +599,6 @@ public class PanelManager {
 			int orbsContentY = minimapY + MINIMAP_PANEL_HEIGHT + PANEL_PADDING + PANEL_HEADER_HEIGHT;
 			int chatX = PANEL_MARGIN;
 			int chatY = Math.max(PANEL_MARGIN, Client.currentGameHeight - CHAT_PANEL_HEIGHT - PANEL_MARGIN);
-			int tabBarX = Math.max(PANEL_MARGIN, minimapX - TAB_BAR_PANEL_WIDTH - PANEL_PADDING);
-			int tabBarY = minimapY;
 			panels.add(new MinimapBasePanel(PANEL_ID_MINIMAP_BASE, new Rectangle(minimapX, minimapY, MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)));
 			panels.add(new CompassPanel(PANEL_ID_COMPASS, new Rectangle(minimapX + 6, minimapY + PANEL_HEADER_HEIGHT + 6, COMPASS_SIZE, COMPASS_SIZE)));
 			panels.add(new HpOrbPanel(PANEL_ID_HP_ORB, new Rectangle(orbsX + 7, orbsContentY + 41, ORB_SIZE, ORB_SIZE)));
@@ -604,6 +614,8 @@ public class PanelManager {
 					Math.max(PANEL_MARGIN, (Client.currentGameWidth - ACTION_BAR_WIDTH) / 2),
 					Math.max(PANEL_MARGIN, Client.currentGameHeight - ACTION_BAR_HEIGHT - PANEL_MARGIN),
 					ACTION_BAR_WIDTH, ACTION_BAR_HEIGHT)));
+			int tabBarX = Math.max(PANEL_MARGIN, minimapX - TAB_BAR_PANEL_WIDTH - PANEL_PADDING);
+			int tabBarY = minimapY;
 			panels.add(new ChatPanel(PANEL_ID_CHAT, new Rectangle(chatX, chatY, CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT)));
 			panels.add(new TabBarPanel(PANEL_ID_TAB_BAR, new Rectangle(tabBarX, tabBarY, TAB_BAR_PANEL_WIDTH, TAB_BAR_PANEL_HEIGHT)));
 		}

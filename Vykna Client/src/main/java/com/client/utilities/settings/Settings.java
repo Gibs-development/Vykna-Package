@@ -24,6 +24,9 @@ public class Settings implements Serializable {
 		settings.rs3PanelBackgroundColor = 0x141414;
 		settings.rs3InterfaceTransparency = 0;
 		settings.oldGameframe = false;
+		settings.loadPresetOnLogin = false;
+		settings.activePresetName = "Default";
+		settings.minimapState = 0;
 		settings.gameTimers = true;
 		settings.antiAliasing = false;
 		settings.groundItemOverlay = true;
@@ -56,6 +59,9 @@ public class Settings implements Serializable {
 	private boolean bountyHunter;
 	private boolean showEntityTarget;
 	private int drawDistance;
+	private boolean loadPresetOnLogin;
+	private String activePresetName;
+	private int minimapState;
 	private boolean stretchedMode;
 	private Dimension stretchedModeDimensions;
 	private Rectangle rs3ViewportBounds;
@@ -214,6 +220,30 @@ public class Settings implements Serializable {
 
 	public void setDrawDistance(int drawDistance) {
 		this.drawDistance = drawDistance;
+	}
+
+	public boolean isLoadPresetOnLogin() {
+		return loadPresetOnLogin;
+	}
+
+	public void setLoadPresetOnLogin(boolean loadPresetOnLogin) {
+		this.loadPresetOnLogin = loadPresetOnLogin;
+	}
+
+	public String getActivePresetName() {
+		return activePresetName == null || activePresetName.isBlank() ? "Default" : activePresetName;
+	}
+
+	public void setActivePresetName(String activePresetName) {
+		this.activePresetName = activePresetName;
+	}
+
+	public int getMinimapState() {
+		return minimapState;
+	}
+
+	public void setMinimapState(int minimapState) {
+		this.minimapState = minimapState;
 	}
 
 	public boolean isStretchedMode() {
