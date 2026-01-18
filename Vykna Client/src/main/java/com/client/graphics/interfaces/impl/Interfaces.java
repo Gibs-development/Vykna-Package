@@ -2659,6 +2659,7 @@ interfaceId+=5000;
 		p.inventoryhover = true;
 		p.parentID = 5608;
 		p.type = 8;
+		p.atActionType = 0;
 		p.width = 40;
 		p.height = 32;
 		p.hoverText = p.message = hover;
@@ -2666,11 +2667,13 @@ interfaceId+=5000;
 		p.hoverXOffset = xOffset;
 		p.hoverYOffset = yOffset;
 		p.regularHoverBox = true;
+		p.hoverType = -1;
+		p.hoverInterfaceId = 0;
 	}
 
 	public static void prayerBook(TextDrawingArea[] tda) {
 		RSInterface tab = addTabInterface(15608);
-		tab.totalChildren(10);
+		tab.totalChildren(1);
 		RSInterface prayerBook = interfaceCache[5608];
 
 		// Switches the Chivalry & Piety positions without hardcoding offsets.
@@ -2687,17 +2690,8 @@ interfaceId+=5000;
 		addPrayerHover(tda, 1, 39406,
 				"Level 74\\nRigour\\nIncreases your Ranged attack\\nby 20% and damage by 23%,\\nand your defence by 25%",
 				-70, -100);
-		int xMinus = 1;
-		setBounds(39401, 152, 158, 0, tab);
-		setBounds(39404, 78, 195, 1, tab);
-		setBounds(39407, 115, 195, 2, tab);
-		setBounds(39402, 154, 158 - xMinus, 3, tab);
-		setBounds(39405, 81, 198 - xMinus, 4, tab);
-		setBounds(39408, 118, 198 - xMinus, 5, tab);
-		setBounds(5608, 0, 0, 6, tab);
-		setBounds(39403, 154, 158, 7, tab);
-		setBounds(39406, 84, 198, 8, tab);
-		setBounds(39409, 120, 198, 9, tab);
+		attachCustomPrayersToBook(prayerBook);
+		setBounds(5608, 0, 0, 0, tab);
 	}
 
 	private static void swapPrayerChildPositions(RSInterface prayerBook, int indexA, int indexB) {
@@ -2717,6 +2711,36 @@ interfaceId+=5000;
 		prayerBook.childY[indexA] = prayerBook.childY[indexB];
 		prayerBook.childX[indexB] = x;
 		prayerBook.childY[indexB] = y;
+	}
+
+	private static void attachCustomPrayersToBook(RSInterface prayerBook) {
+		if (prayerBook == null) {
+			return;
+		}
+		int xMinus = 1;
+		appendChildIfMissing(prayerBook, 39401, 152, 158);
+		appendChildIfMissing(prayerBook, 39404, 78, 195);
+		appendChildIfMissing(prayerBook, 39407, 115, 195);
+		appendChildIfMissing(prayerBook, 39402, 154, 158 - xMinus);
+		appendChildIfMissing(prayerBook, 39405, 81, 198 - xMinus);
+		appendChildIfMissing(prayerBook, 39408, 118, 198 - xMinus);
+		appendChildIfMissing(prayerBook, 39403, 154, 158);
+		appendChildIfMissing(prayerBook, 39406, 84, 198);
+		appendChildIfMissing(prayerBook, 39409, 120, 198);
+	}
+
+	private static void appendChildIfMissing(RSInterface parent, int childId, int x, int y) {
+		if (parent.children != null) {
+			for (int existingId : parent.children) {
+				if (existingId == childId) {
+					return;
+				}
+			}
+		}
+		int index = RSInterface.expandChildren(1, parent);
+		parent.children[index] = childId;
+		parent.childX[index] = x;
+		parent.childY[index] = y;
 	}
 
 	public static void ancients(TextDrawingArea[] tda) {

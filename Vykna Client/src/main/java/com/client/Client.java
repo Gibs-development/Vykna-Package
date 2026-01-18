@@ -2586,6 +2586,10 @@ public class Client extends RSApplet {
 				if (class9_1 == null) {
 					break;
 				}
+				if (class9_1.type == 8 && class9_1.atActionType == 0
+						&& (class9_1.inventoryhover || class9_1.regularHoverBox)) {
+					continue;
+				}
 				drawX += class9_1.anInt263;
 				drawY += class9_1.anInt265;
 
@@ -13358,6 +13362,10 @@ public class Client extends RSApplet {
 	private int pendingAchTipX;
 	private int pendingAchTipY;
 	private boolean pendingAchTipQueued;
+
+	public int getHoverId() {
+		return hoverId;
+	}
 
 	public void method104() {
 		Animable_Sub3 class30_sub2_sub4_sub3 = (Animable_Sub3) aClass19_1056.reverseGetFirst();
