@@ -3690,6 +3690,23 @@ public class RSInterface {
 		tab.totalChildren(1);
 		tab.child(0, IMAGEID, 0, 0);
 	}
+	public static void addHoverButtonNew(int id, String normalSprite, String hoverSprite,
+										 int width, int height, String tooltip,
+										 int contentType, int atActionType) {
+		RSInterface tab = addTabInterface(id);
+		tab.id = id;
+		tab.parentID = id;
+		tab.type = 5;
+		tab.atActionType = atActionType;
+		tab.contentType = contentType;
+		tab.aByte254 = 0;
+		tab.mOverInterToTrigger = 0; // not using separate hovered interface
+		tab.sprite1 = imageLoader(0, normalSprite);
+		tab.sprite2 = imageLoader(0, hoverSprite);
+		tab.width = width;
+		tab.height = height;
+		tab.tooltip = tooltip;
+	}
 
 	public static void addHoverImage(int i, int j, int k, String name) {
 		RSInterface tab = addTabInterface(i);
