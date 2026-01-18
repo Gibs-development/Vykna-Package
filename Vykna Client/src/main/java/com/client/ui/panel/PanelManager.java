@@ -880,8 +880,8 @@ public class PanelManager {
 			panels.add(new TabPanel(PANEL_ID_SKILLS, 2, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Skills", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
 			panels.add(new InventoryPanel(PANEL_ID_INVENTORY, new Rectangle(baseX, inventoryY, PANEL_WIDTH, PANEL_HEIGHT)));
 			panels.add(new TabPanel(PANEL_ID_EQUIPMENT, 4, new Rectangle(baseX, inventoryY, PANEL_WIDTH, PANEL_HEIGHT), "Equipment", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
-			panels.add(new TabPanel(PANEL_ID_PRAYER, 5, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Prayer", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
-			panels.add(new TabPanel(PANEL_ID_MAGIC, 6, new Rectangle(baseX, magicY, PANEL_WIDTH, PANEL_HEIGHT), "Magic", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
+			panels.add(new IconGridPanel(PANEL_ID_PRAYER, 5, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Prayer"));
+			panels.add(new IconGridPanel(PANEL_ID_MAGIC, 6, new Rectangle(baseX, magicY, PANEL_WIDTH, PANEL_HEIGHT), "Magic"));
 			panels.add(new TabPanel(PANEL_ID_CLAN, 7, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Clan", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
 			panels.add(new TabPanel(PANEL_ID_FRIENDS, 8, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Friends", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
 			panels.add(new TabPanel(PANEL_ID_SETTINGS, 9, new Rectangle(baseX, inventoryY, PANEL_WIDTH, PANEL_HEIGHT), "Settings", false, true, 160, 200 + PANEL_HEADER_HEIGHT));
