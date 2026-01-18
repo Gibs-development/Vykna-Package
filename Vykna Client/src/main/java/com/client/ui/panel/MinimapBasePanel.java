@@ -21,7 +21,25 @@ public class MinimapBasePanel extends PanelManager.BasePanel {
 
 		DrawingArea.setDrawingArea(bounds.y + bounds.height, bounds.x, bounds.x + bounds.width, bounds.y + headerHeight);
 		client.drawMinimapAt(bounds.x, bounds.y + headerHeight, bounds.width, bounds.height - headerHeight);
+		if (!client.isRs3EditModeActive()) {
+			drawFrame(bounds, headerHeight);
+		}
 		DrawingArea.setDrawingArea(clipBottom, clipLeft, clipRight, clipTop);
+	}
+
+	private void drawFrame(Rectangle bounds, int headerHeight) {
+		int frameX = bounds.x;
+		int frameY = bounds.y + headerHeight;
+		int frameWidth = bounds.width;
+		int frameHeight = Math.max(0, bounds.height - headerHeight);
+		if (frameWidth <= 0 || frameHeight <= 0) {
+			return;
+		}
+		int color = 0x2c2c2c;
+		DrawingArea.drawPixels(1, frameY, frameX, color, frameWidth);
+		DrawingArea.drawPixels(1, frameY + frameHeight - 1, frameX, color, frameWidth);
+		DrawingArea.drawPixels(frameHeight, frameY, frameX, color, 1);
+		DrawingArea.drawPixels(frameHeight, frameY, frameX + frameWidth - 1, color, 1);
 	}
 
 	@Override
