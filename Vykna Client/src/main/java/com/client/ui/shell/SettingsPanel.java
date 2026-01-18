@@ -84,6 +84,7 @@ final class SettingsPanel extends JPanel {
         addSettingToggleWithGear(SettingsInterface.OLD_GAMEFRAME, settings.isOldGameframe(), this::openGameframeAdvanced);
 
         addSettingDropdown(SettingsInterface.INVENTORY_MENU, inventoryMenuIndex());
+        addSettingToggle(SettingsInterface.PRAYER_FILTER_MODE, settings.isPrayerFilterMode());
         addSettingDropdown(SettingsInterface.CHAT_EFFECT, settings.getChatColor());
         addSettingToggle(SettingsInterface.GROUND_ITEM_NAMES, settings.isGroundItemOverlay());
         addSettingToggle(SettingsInterface.MENU_HOVERS, isMenuHoversEnabled());

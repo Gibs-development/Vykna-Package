@@ -43,6 +43,8 @@ public class Settings implements Serializable {
 		settings.showEntityTarget = true;
 		settings.drawDistance = 30;
 		settings.rightPanelTabIndex = 0;
+		settings.prayerFilterMode = false;
+		settings.filteredPrayerIndices = new java.util.HashSet<>();
 		return settings;
 	}
 
@@ -66,6 +68,8 @@ public class Settings implements Serializable {
 	private boolean bountyHunter;
 	private boolean showEntityTarget;
 	private int drawDistance;
+	private boolean prayerFilterMode;
+	private java.util.Set<Integer> filteredPrayerIndices;
 	private boolean loadPresetOnLogin;
 	private String activePresetName;
 	private int minimapState;
@@ -297,6 +301,25 @@ public class Settings implements Serializable {
 
 	public void setStretchedModeDimensions(Dimension stretchedModeDimensions) {
 		this.stretchedModeDimensions = stretchedModeDimensions;
+	}
+
+	public boolean isPrayerFilterMode() {
+		return prayerFilterMode;
+	}
+
+	public void setPrayerFilterMode(boolean prayerFilterMode) {
+		this.prayerFilterMode = prayerFilterMode;
+	}
+
+	public java.util.Set<Integer> getFilteredPrayerIndices() {
+		if (filteredPrayerIndices == null) {
+			filteredPrayerIndices = new java.util.HashSet<>();
+		}
+		return filteredPrayerIndices;
+	}
+
+	public void setFilteredPrayerIndices(java.util.Set<Integer> filteredPrayerIndices) {
+		this.filteredPrayerIndices = filteredPrayerIndices;
 	}
 
 	public Rectangle getRs3ViewportBounds() {
