@@ -97,7 +97,7 @@ public class SettingsManager {
 	}
 
 	private static String sanitizePresetName(String presetName) {
-		if (presetName == null || presetName.isEmpty()) {
+		if (presetName == null || presetName.isBlank()) {
 			return "Default";
 		}
 		return presetName.replaceAll("[^a-zA-Z0-9_-]", "_");
