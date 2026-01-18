@@ -13351,6 +13351,11 @@ public class Client extends RSApplet {
 	}
 
 	private int hoverId;
+	private String pendingAchTipTitle;
+	private String pendingAchTipBody;
+	private int pendingAchTipX;
+	private int pendingAchTipY;
+	private boolean pendingAchTipQueued;
 
 	public void method104() {
 		Animable_Sub3 class30_sub2_sub4_sub3 = (Animable_Sub3) aClass19_1056.reverseGetFirst();
@@ -14365,7 +14370,7 @@ public class Client extends RSApplet {
 
 							// tooltip if hovered
 							if (hoverId == class9_1.id && defId != 0) {
-								drawAchievementTooltip(def.name, def.description, super.getMouseX(), super.getMouseY());
+								queueAchievementTooltip(def.name, def.description, super.getMouseX(), super.getMouseY());
 							}
 				} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
 
@@ -15375,6 +15380,7 @@ public class Client extends RSApplet {
 		}
 
 		drawScreenBox();
+		flushAchievementTooltip();
 		devConsole.draw_console();
 	}
 
@@ -15901,6 +15907,25 @@ public class Client extends RSApplet {
 			return -1;
 		}
 	}
+	private void queueAchievementTooltip(String title, String desc, int mx, int my) {
+		pendingAchTipTitle = title;
+		pendingAchTipBody = desc;
+		pendingAchTipX = mx;
+		pendingAchTipY = my;
+		pendingAchTipQueued = true;
+	}
+
+	private void flushAchievementTooltip() {
+		if (!pendingAchTipQueued) {
+			return;
+		}
+		DrawingArea.setDrawingArea(currentGameHeight, 0, currentGameWidth, 0);
+		drawAchievementTooltip(pendingAchTipTitle, pendingAchTipBody, pendingAchTipX, pendingAchTipY);
+		pendingAchTipTitle = null;
+		pendingAchTipBody = null;
+		pendingAchTipQueued = false;
+	}
+
 	private void drawAchievementTooltip(String title, String desc, int mx, int my) {
 		if (title == null) title = "";
 		if (desc == null) desc = "";
