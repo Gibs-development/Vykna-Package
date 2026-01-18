@@ -26,7 +26,6 @@ public class Settings implements Serializable {
 		settings.oldGameframe = false;
 		settings.loadPresetOnLogin = false;
 		settings.activePresetName = "Default";
-		settings.rightPanelTabIndex = 3;
 		settings.minimapState = 0;
 		settings.gameTimers = true;
 		settings.antiAliasing = false;
@@ -62,7 +61,6 @@ public class Settings implements Serializable {
 	private int drawDistance;
 	private boolean loadPresetOnLogin;
 	private String activePresetName;
-	private int rightPanelTabIndex;
 	private int minimapState;
 	private boolean stretchedMode;
 	private Dimension stretchedModeDimensions;
@@ -238,14 +236,6 @@ public class Settings implements Serializable {
 
 	public void setActivePresetName(String activePresetName) {
 		this.activePresetName = activePresetName;
-	}
-
-	public int getRightPanelTabIndex() {
-		return rightPanelTabIndex;
-	}
-
-	public void setRightPanelTabIndex(int rightPanelTabIndex) {
-		this.rightPanelTabIndex = rightPanelTabIndex;
 	}
 
 	public int getMinimapState() {
