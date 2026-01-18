@@ -66,6 +66,7 @@ public class SettingsManager {
 
 	public static void savePreset(Settings settings, String presetName) throws IOException {
 		if (settings == null) {
+			log.warning("Attempted to save preset with null settings.");
 			return;
 		}
 		String safeName = sanitizePresetName(presetName);
@@ -73,6 +74,7 @@ public class SettingsManager {
 		try {
 			output.writeObject(settings);
 		} catch (Exception e) {
+			log.severe("Failed to save preset '" + safeName + "'.");
 			e.printStackTrace();
 		} finally {
 			output.flush();

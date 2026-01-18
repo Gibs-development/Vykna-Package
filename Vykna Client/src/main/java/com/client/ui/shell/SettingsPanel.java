@@ -37,6 +37,7 @@ final class SettingsPanel extends JPanel {
     private JToggleButton loadPresetToggle;
     private JButton savePresetButton;
     private JButton loadPresetButton;
+    private JSlider rs3TransparencySlider;
 
     SettingsPanel(VyknaShell shell) {
         super(new BorderLayout());
@@ -77,6 +78,7 @@ final class SettingsPanel extends JPanel {
         // --- Interface ---
         addSection("Interface", "\uD83E\uDDE9");
         addSettingDropdown(SettingsInterface.INTERFACE_STYLE, interfaceStyleIndex(settings.getInterfaceStyle()));
+        addRs3TransparencyControl(settings);
 
         // “RS3 Gameframe” row: toggle + gear (your end-goal UX)
         addSettingToggleWithGear(SettingsInterface.OLD_GAMEFRAME, settings.isOldGameframe(), this::openGameframeAdvanced);
@@ -263,10 +265,16 @@ final class SettingsPanel extends JPanel {
             }
             String presetName = presetNameField.getText();
             current.setActivePresetName(presetName);
+            Client instance = Client.getInstance();
+            if (instance != null) {
+                instance.getPanelManager().saveLayout(instance);
+                current.setMinimapState(instance.getMinimapState());
+            }
             try {
                 SettingsManager.savePreset(current, presetName);
                 persistSettings();
             } catch (Exception ex) {
+                System.err.println("[Settings] Failed to save preset: " + presetName);
                 ex.printStackTrace();
             }
         });
@@ -286,6 +294,7 @@ final class SettingsPanel extends JPanel {
             Client instance = Client.getInstance();
             if (instance != null) {
                 instance.getPanelManager().reloadLayoutFromSettings(instance);
+                instance.setMinimapState(preset.getMinimapState());
             }
             persistSettings();
             refreshRs3Controls();
@@ -309,6 +318,25 @@ final class SettingsPanel extends JPanel {
         addRowItem("Save Preset", row("Save Preset", savePresetButton, null));
         addRowItem("Load Preset", row("Load Preset", loadPresetButton, null));
         addRowItem("Load Preset on Login", row("Load Preset on Login", loadPresetToggle, null));
+    }
+
+    private void addRs3TransparencyControl(Settings settings) {
+        rs3TransparencySlider = new JSlider(0, 60, settings.getRs3InterfaceTransparency());
+        rs3TransparencySlider.setPreferredSize(new Dimension(150, 20));
+        VyknaShell.styleSlider(rs3TransparencySlider);
+        rs3TransparencySlider.addChangeListener(e -> {
+            if (rs3TransparencySlider.getValueIsAdjusting()) {
+                return;
+            }
+            Settings current = Client.getUserSettings();
+            if (current == null) {
+                return;
+            }
+            current.setRs3InterfaceTransparency(rs3TransparencySlider.getValue());
+            persistSettings();
+        });
+
+        addRowItem("Interface Transparency", row("Interface Transparency", rs3TransparencySlider, null));
     }
 
     private void applyFilter(String q) {
@@ -622,6 +650,11 @@ final class SettingsPanel extends JPanel {
         if (rs3PanelBackgroundDropdown != null) {
             rs3PanelBackgroundDropdown.setEnabled(rs3);
             rs3PanelBackgroundDropdown.setSelectedIndex(rs3PanelBackgroundIndex(settings.getRs3PanelBackgroundColor()));
+        }
+
+        if (rs3TransparencySlider != null) {
+            rs3TransparencySlider.setEnabled(rs3);
+            rs3TransparencySlider.setValue(settings.getRs3InterfaceTransparency());
         }
     }
 

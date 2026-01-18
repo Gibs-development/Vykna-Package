@@ -522,6 +522,11 @@ public class Client extends RSApplet {
 		worldViewportWidth = currentGameWidth;
 		worldViewportHeight = currentGameHeight;
 		minimapState = 0;
+		Settings settings = getUserSettings();
+		if (settings != null) {
+			settings.setRightPanelTabIndex(3);
+			settings.setMinimapState(0);
+		}
 	}
 
 	public void resetRs3InventoryLayout() {
@@ -5123,6 +5128,14 @@ public class Client extends RSApplet {
 
 	public PanelManager getPanelManager() {
 		return panelManager;
+	}
+
+	public int getMinimapState() {
+		return minimapState;
+	}
+
+	public void setMinimapState(int minimapState) {
+		this.minimapState = minimapState;
 	}
 
 	public Sprite getTabIconSprite(int tabIndex) {
@@ -12004,11 +12017,15 @@ public class Client extends RSApplet {
 
 		SettingsManager.loadSettings();
 		Settings initialSettings = getUserSettings();
+		if (initialSettings != null) {
+			setMinimapState(initialSettings.getMinimapState());
+		}
 		if (initialSettings != null && initialSettings.isLoadPresetOnLogin()) {
 			Settings preset = SettingsManager.loadPreset(initialSettings.getActivePresetName());
 			if (preset != null) {
 				preset.setLoadPresetOnLogin(initialSettings.isLoadPresetOnLogin());
 				Client.setUserSettings(preset);
+				setMinimapState(preset.getMinimapState());
 			}
 		}
 		enforceRs3ScreenMode();

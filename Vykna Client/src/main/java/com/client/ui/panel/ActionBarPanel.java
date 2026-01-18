@@ -98,14 +98,11 @@ public class ActionBarPanel extends PanelManager.BasePanel {
 	}
 
 	private void drawFrame(int x, int y, int width, int height) {
-		DrawingArea.drawPixels(height, y, x, 0x16181b, width);
-		DrawingArea.drawAlphaGradient(x, y, width, height, 0x2f3237, 0x0f1113, 120);
-		DrawingArea.drawPixels(1, y, x, 0x3d4148, width);
-		DrawingArea.drawPixels(1, y + height - 1, x, 0x1b1d20, width);
-		DrawingArea.drawPixels(height, y, x, 0x1f2125, 1);
-		DrawingArea.drawPixels(height, y, x + width - 1, 0x2b2f34, 1);
-		DrawingArea.drawPixels(1, y + 1, x + 1, 0x4b4f55, width - 2);
-		DrawingArea.drawPixels(1, y + height - 2, x + 1, 0x0b0c0e, width - 2);
+		DrawingArea.drawPixels(height, y, x, 0x1b1d20, width);
+		DrawingArea.drawPixels(1, y, x, 0x2c2f34, width);
+		DrawingArea.drawPixels(1, y + height - 1, x, 0x15171a, width);
+		DrawingArea.drawPixels(height, y, x, 0x2c2f34, 1);
+		DrawingArea.drawPixels(height, y, x + width - 1, 0x2c2f34, 1);
 	}
 
 	private void drawBar(int x, int y, int width, int height, int percent, int background, int fill) {
@@ -115,7 +112,6 @@ public class ActionBarPanel extends PanelManager.BasePanel {
 		if (fillWidth > 0) {
 			DrawingArea.drawPixels(height, y, x, fill, fillWidth);
 		}
-		DrawingArea.drawAlphaGradient(x, y, width, height, 0x4b4e54, 0x0f1113, 90);
 		DrawingArea.drawPixels(1, y, x, 0x1c1f22, width);
 		DrawingArea.drawPixels(1, y + height - 1, x, 0x141618, width);
 		DrawingArea.drawPixels(height, y, x, 0x1c1f22, 1);
@@ -137,10 +133,7 @@ public class ActionBarPanel extends PanelManager.BasePanel {
 
 	private void drawSlot(int x, int y, boolean disabled, boolean hovered, boolean active, int cooldownPercent) {
 		int base = disabled ? 0x131416 : 0x191b1e;
-		int highlight = disabled ? 0x24272b : 0x30343a;
-		int shadow = disabled ? 0x0d0f11 : 0x111316;
 		DrawingArea.drawPixels(SLOT_SIZE, y, x, base, SLOT_SIZE);
-		DrawingArea.drawAlphaGradient(x, y, SLOT_SIZE, SLOT_SIZE, highlight, shadow, 120);
 		DrawingArea.drawPixels(1, y, x, 0x3b3f45, SLOT_SIZE);
 		DrawingArea.drawPixels(1, y + SLOT_SIZE - 1, x, 0x0f1113, SLOT_SIZE);
 		DrawingArea.drawPixels(SLOT_SIZE, y, x, 0x2d3136, 1);
