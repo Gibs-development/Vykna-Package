@@ -196,7 +196,10 @@ public class PrayerPanel extends PanelManager.TabPanel {
 		anchors.sort(Comparator.comparingInt((Anchor anchor) -> anchor.baseY)
 				.thenComparingInt(anchor -> anchor.baseX));
 		for (int index = 0; index < rsInterface.children.length; index++) {
-			childAnchors[index] = resolveAnchorIndex(index);
+			RSInterface child = RSInterface.interfaceCache[rsInterface.children[index]];
+			if (shouldAttachToAnchor(child)) {
+				childAnchors[index] = resolveAnchorIndex(index);
+			}
 		}
 		padX = Math.max(0, resolvePadding(uniqueX, iconSize, 4));
 		padY = Math.max(0, resolvePadding(uniqueY, iconSize, 4));
@@ -239,6 +242,25 @@ public class PrayerPanel extends PanelManager.TabPanel {
 			return false;
 		}
 		return child.atActionType > 0;
+	}
+
+	private boolean shouldAttachToAnchor(RSInterface child) {
+		if (child == null) {
+			return false;
+		}
+		if (child.type != RSInterface.TYPE_SPRITE) {
+			return false;
+		}
+		if (child.width <= 0 || child.height <= 0) {
+			return false;
+		}
+		if (child.width > MAX_ICON_SIZE || child.height > MAX_ICON_SIZE) {
+			return false;
+		}
+		if (child.width < 20 && child.height < 20) {
+			return false;
+		}
+		return true;
 	}
 
 	private int resolveAnchorIndex(int childIndex) {

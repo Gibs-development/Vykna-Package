@@ -2691,7 +2691,8 @@ interfaceId+=5000;
 				"Level 74\\nRigour\\nIncreases your Ranged attack\\nby 20% and damage by 23%,\\nand your defence by 25%",
 				-70, -100);
 		attachCustomPrayersToBook(prayerBook);
-		offsetPrayerChild(prayerBook, 19826, 0, -2);
+		offsetPrayerChild(prayerBook, 19826, 0, -3);
+		offsetPrayerChild(prayerBook, 19828, 0, -9);
 		setBounds(5608, 0, 0, 0, tab);
 	}
 
