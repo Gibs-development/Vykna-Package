@@ -31,6 +31,7 @@ public class SettingsInterface extends RSInterface {
 
     public static final Setting INVENTORY_MENU = new Setting("Inventory Menu", 1, new InventoryHoverMenu(), "Off", "On (Magenta)", "On (Lime green)", "On (Cyan)", "On (Red)");
     public static final Setting PRAYER_FILTER_MODE = new Setting("Prayer Filter Mode", 1, new PrayerFilterMenu(), "On", "Off");
+    public static final Setting PRAYER_LAYOUT_DEBUG = new Setting("Prayer Layout Debug", 1, new PrayerLayoutDebugMenu(), "On", "Off");
     public static final Setting BOUNTY_HUNTER = new Setting("Bounty Hunter", 0, new BountyHunterMenu(), "On", "Off");
     public static final Setting ENTITY_TARGET = new Setting("Entity Target", 0, new EntityTargetOverlayMenu(), "On", "Off");
     public static final Setting CHAT_EFFECT = new Setting("Chat Effect", 0, new ChatEffectMenu(), "Yellow (default)", "Red","Green","Cyan","Purple","White","Flash 1","Flash 2", "Flash 3","Glow 1", "Glow 2","Glow 3");
@@ -69,7 +70,7 @@ public class SettingsInterface extends RSInterface {
 
         SettingsWidgetSection[] sections = {
                 new SettingsWidgetSection("RS3 Options", INTERFACE_STYLE, RS3_EDIT_MODE, RS3_INTERFACE_TRANSPARENCY),
-                new SettingsWidgetSection("Interface Options", OLD_GAMEFRAME, INVENTORY_MENU, PRAYER_FILTER_MODE, BOUNTY_HUNTER, ENTITY_TARGET, GAME_TIMERS, CHAT_EFFECT, GROUND_ITEM_NAMES, PM_NOTIFICATION),
+                new SettingsWidgetSection("Interface Options", OLD_GAMEFRAME, INVENTORY_MENU, PRAYER_FILTER_MODE, PRAYER_LAYOUT_DEBUG, BOUNTY_HUNTER, ENTITY_TARGET, GAME_TIMERS, CHAT_EFFECT, GROUND_ITEM_NAMES, PM_NOTIFICATION),
                 new SettingsWidgetSection("Graphics Options", STRETCHED_MODE, DRAW_DISTANCE, ANTI_ALIASING, FOG, SMOOTH_SHADING, TILE_BLENDING , STATUS_BARS , DRAG , PVP_TAB, ROOF, MENU_HOVERS, PLAYER_PROFILE),
         };
 

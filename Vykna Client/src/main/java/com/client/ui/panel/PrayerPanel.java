@@ -16,12 +16,14 @@ public class PrayerPanel extends PanelManager.TabPanel {
 	private static final int CONTENT_PADDING = 4;
 	private static final int MAX_ICON_SIZE = 40;
 	private static final int FILTERED_TRANSPARENCY = 140;
+	private static final int ANCHOR_DISTANCE_BUFFER = 6;
 
 	private int[] baseChildX;
 	private int[] baseChildY;
 	private boolean[] baseDrawsTransparent;
 	private int[] baseTransparency;
-	private List<Integer> iconOrder;
+	private List<Anchor> anchors;
+	private int[] childAnchors;
 	private int iconSize;
 	private int padX = 4;
 	private int padY = 4;
@@ -39,9 +41,6 @@ public class PrayerPanel extends PanelManager.TabPanel {
 	@Override
 	public boolean handleMouse(Client client, int mouseX, int mouseY) {
 		applyResponsiveLayout(client);
-		if (isFilterModeEnabled()) {
-			return true;
-		}
 		return super.handleMouse(client, mouseX, mouseY);
 	}
 
@@ -90,42 +89,62 @@ public class PrayerPanel extends PanelManager.TabPanel {
 			return;
 		}
 		cacheBaseLayout(prayerBook);
-		if (iconOrder == null || iconOrder.isEmpty() || iconSize == 0) {
+		if (anchors == null || anchors.isEmpty() || iconSize == 0) {
 			return;
 		}
 		boolean filterMode = isFilterModeEnabled();
-		java.util.Set<Integer> filtered = getFilteredPrayerIndices();
+		Set<Integer> filtered = getFilteredPrayerIndices();
 		prayerBook.width = bounds.width;
 		prayerBook.height = bounds.height;
 		int contentWidth = Math.max(1, bounds.width - CONTENT_PADDING * 2);
-		List<Integer> visibleIcons = new ArrayList<>();
-		for (int index : iconOrder) {
-			boolean isFiltered = filtered.contains(index);
-			RSInterface child = RSInterface.interfaceCache[prayerBook.children[index]];
-			if (child != null) {
-				child.interfaceHidden = !filterMode && isFiltered;
-				child.drawsTransparent = baseDrawsTransparent[index];
-				child.transparency = baseTransparency[index];
-				if (filterMode && isFiltered) {
-					child.drawsTransparent = true;
-					child.transparency = FILTERED_TRANSPARENCY;
-				}
-			}
-			if (filterMode || !isFiltered) {
-				visibleIcons.add(index);
+		List<Anchor> visibleAnchors = new ArrayList<>();
+		for (Anchor anchor : anchors) {
+			if (filterMode || !filtered.contains(anchor.childIndex)) {
+				visibleAnchors.add(anchor);
 			}
 		}
 		int columns = Math.max(1, (contentWidth + padX) / (iconSize + padX));
-		int rows = (int) Math.ceil(visibleIcons.size() / (double) columns);
-		for (int idx = 0; idx < visibleIcons.size(); idx++) {
-			int index = visibleIcons.get(idx);
+		int rows = (int) Math.ceil(visibleAnchors.size() / (double) columns);
+		for (int idx = 0; idx < visibleAnchors.size(); idx++) {
+			Anchor anchor = visibleAnchors.get(idx);
 			int row = idx / columns;
 			int col = idx % columns;
-			prayerBook.childX[index] = CONTENT_PADDING + col * (iconSize + padX);
-			prayerBook.childY[index] = CONTENT_PADDING + row * (iconSize + padY);
+			anchor.targetX = CONTENT_PADDING + col * (iconSize + padX);
+			anchor.targetY = CONTENT_PADDING + row * (iconSize + padY);
+		}
+		for (int index = 0; index < prayerBook.children.length; index++) {
+			int anchorIndex = childAnchors[index];
+			RSInterface child = RSInterface.interfaceCache[prayerBook.children[index]];
+			if (anchorIndex >= 0 && anchorIndex < anchors.size()) {
+				Anchor anchor = anchors.get(anchorIndex);
+				int dx = anchor.targetX - anchor.baseX;
+				int dy = anchor.targetY - anchor.baseY;
+				prayerBook.childX[index] = baseChildX[index] + dx;
+				prayerBook.childY[index] = baseChildY[index] + dy;
+				boolean anchorFiltered = filtered.contains(anchor.childIndex);
+				if (child != null) {
+					child.interfaceHidden = !filterMode && anchorFiltered;
+					if (child.type == RSInterface.TYPE_SPRITE) {
+						child.drawsTransparent = baseDrawsTransparent[index];
+						child.transparency = baseTransparency[index];
+						if (filterMode && anchorFiltered) {
+							child.drawsTransparent = true;
+							child.transparency = FILTERED_TRANSPARENCY;
+						}
+					}
+				}
+			} else if (child != null) {
+				child.interfaceHidden = false;
+			}
 		}
 		int requiredHeight = rows * iconSize + Math.max(0, rows - 1) * padY + CONTENT_PADDING * 2;
 		prayerBook.scrollMax = Math.max(bounds.height, Math.max(requiredHeight, getInterfaceContentHeight(prayerBook)));
+		rsInterface.scrollMax = prayerBook.scrollMax;
+		if (isDebugEnabled()) {
+			System.out.println("[PrayerLayout] bounds=" + bounds.width + "x" + bounds.height
+					+ " columns=" + columns + " rows=" + rows
+					+ " scrollMax=" + prayerBook.scrollMax + " visibleHeight=" + prayerBook.height);
+		}
 	}
 
 	private void cacheBaseLayout(RSInterface rsInterface) {
@@ -136,7 +155,11 @@ public class PrayerPanel extends PanelManager.TabPanel {
 		baseChildY = rsInterface.childY.clone();
 		baseDrawsTransparent = new boolean[rsInterface.children.length];
 		baseTransparency = new int[rsInterface.children.length];
-		iconOrder = new ArrayList<>();
+		anchors = new ArrayList<>();
+		childAnchors = new int[rsInterface.children.length];
+		for (int i = 0; i < childAnchors.length; i++) {
+			childAnchors[i] = -1;
+		}
 		iconSize = 0;
 		Set<Integer> uniqueX = new HashSet<>();
 		Set<Integer> uniqueY = new HashSet<>();
@@ -146,16 +169,19 @@ public class PrayerPanel extends PanelManager.TabPanel {
 				baseDrawsTransparent[index] = child.drawsTransparent;
 				baseTransparency[index] = child.transparency;
 			}
-			if (!shouldReflowChild(child)) {
+			if (!isPrayerAnchor(child)) {
 				continue;
 			}
-			iconOrder.add(index);
+			anchors.add(new Anchor(index, baseChildX[index], baseChildY[index]));
 			iconSize = Math.max(iconSize, Math.max(child.width, child.height));
 			uniqueX.add(baseChildX[index]);
 			uniqueY.add(baseChildY[index]);
 		}
-		iconOrder.sort(Comparator.comparingInt((Integer index) -> baseChildY[index])
-				.thenComparingInt(index -> baseChildX[index]));
+		anchors.sort(Comparator.comparingInt((Anchor anchor) -> anchor.baseY)
+				.thenComparingInt(anchor -> anchor.baseX));
+		for (int index = 0; index < rsInterface.children.length; index++) {
+			childAnchors[index] = resolveAnchorIndex(index);
+		}
 		padX = Math.max(0, resolvePadding(uniqueX, iconSize, 4));
 		padY = Math.max(0, resolvePadding(uniqueY, iconSize, 4));
 	}
@@ -192,11 +218,43 @@ public class PrayerPanel extends PanelManager.TabPanel {
 		return child.width <= MAX_ICON_SIZE && child.height <= MAX_ICON_SIZE;
 	}
 
+	private boolean isPrayerAnchor(RSInterface child) {
+		if (!shouldReflowChild(child)) {
+			return false;
+		}
+		return child.atActionType > 0;
+	}
+
+	private int resolveAnchorIndex(int childIndex) {
+		if (anchors.isEmpty()) {
+			return -1;
+		}
+		int baseX = baseChildX[childIndex];
+		int baseY = baseChildY[childIndex];
+		int bestIndex = -1;
+		int bestDistance = Integer.MAX_VALUE;
+		for (int idx = 0; idx < anchors.size(); idx++) {
+			Anchor anchor = anchors.get(idx);
+			int dx = Math.abs(baseX - anchor.baseX);
+			int dy = Math.abs(baseY - anchor.baseY);
+			int distance = dx + dy;
+			if (distance < bestDistance) {
+				bestDistance = distance;
+				bestIndex = idx;
+			}
+		}
+		int threshold = iconSize + Math.max(padX, padY) + ANCHOR_DISTANCE_BUFFER;
+		if (bestDistance > threshold) {
+			return -1;
+		}
+		return bestIndex;
+	}
+
 	private boolean isFilterModeEnabled() {
 		return Client.getUserSettings() != null && Client.getUserSettings().isPrayerFilterMode();
 	}
 
-	private java.util.Set<Integer> getFilteredPrayerIndices() {
+	private Set<Integer> getFilteredPrayerIndices() {
 		if (Client.getUserSettings() == null) {
 			return Collections.emptySet();
 		}
@@ -205,7 +263,7 @@ public class PrayerPanel extends PanelManager.TabPanel {
 
 	private boolean toggleFilterAt(Client client, int mouseX, int mouseY) {
 		RSInterface prayerBook = RSInterface.interfaceCache[PRAYER_INTERFACE_ID];
-		if (prayerBook == null || iconOrder == null) {
+		if (prayerBook == null || anchors == null) {
 			return false;
 		}
 		Rectangle bounds = getContentBounds(client);
@@ -216,7 +274,10 @@ public class PrayerPanel extends PanelManager.TabPanel {
 		}
 		int localX = absoluteX - bounds.x;
 		int localY = absoluteY - bounds.y;
-		for (int index : iconOrder) {
+		int scrollPosition = getScrollPosition(RSInterface.interfaceCache[Client.tabInterfaceIDs[getTabIndex()]], bounds);
+		localY += scrollPosition;
+		for (Anchor anchor : anchors) {
+			int index = anchor.childIndex;
 			RSInterface child = RSInterface.interfaceCache[prayerBook.children[index]];
 			if (child == null || child.interfaceHidden) {
 				continue;
@@ -226,15 +287,38 @@ public class PrayerPanel extends PanelManager.TabPanel {
 			int width = child.width;
 			int height = child.height;
 			if (localX >= x && localX <= x + width && localY >= y && localY <= y + height) {
-				java.util.Set<Integer> filtered = getFilteredPrayerIndices();
+				Set<Integer> filtered = getFilteredPrayerIndices();
 				if (filtered.contains(index)) {
 					filtered.remove(index);
 				} else {
 					filtered.add(index);
 				}
+				if (isDebugEnabled()) {
+					System.out.println("[PrayerLayout] clicked child=" + prayerBook.children[index] + " index=" + index);
+				}
 				return true;
 			}
 		}
 		return false;
+	}
+
+	private boolean isDebugEnabled() {
+		return Client.getUserSettings() != null && Client.getUserSettings().isPrayerLayoutDebug();
+	}
+
+	private static final class Anchor {
+		private final int childIndex;
+		private final int baseX;
+		private final int baseY;
+		private int targetX;
+		private int targetY;
+
+		private Anchor(int childIndex, int baseX, int baseY) {
+			this.childIndex = childIndex;
+			this.baseX = baseX;
+			this.baseY = baseY;
+			this.targetX = baseX;
+			this.targetY = baseY;
+		}
 	}
 }

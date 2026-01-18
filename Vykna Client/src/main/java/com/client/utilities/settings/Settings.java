@@ -45,6 +45,7 @@ public class Settings implements Serializable {
 		settings.rightPanelTabIndex = 0;
 		settings.prayerFilterMode = false;
 		settings.filteredPrayerIndices = new java.util.HashSet<>();
+		settings.prayerLayoutDebug = false;
 		return settings;
 	}
 
@@ -70,6 +71,7 @@ public class Settings implements Serializable {
 	private int drawDistance;
 	private boolean prayerFilterMode;
 	private java.util.Set<Integer> filteredPrayerIndices;
+	private boolean prayerLayoutDebug;
 	private boolean loadPresetOnLogin;
 	private String activePresetName;
 	private int minimapState;
@@ -320,6 +322,14 @@ public class Settings implements Serializable {
 
 	public void setFilteredPrayerIndices(java.util.Set<Integer> filteredPrayerIndices) {
 		this.filteredPrayerIndices = filteredPrayerIndices;
+	}
+
+	public boolean isPrayerLayoutDebug() {
+		return prayerLayoutDebug;
+	}
+
+	public void setPrayerLayoutDebug(boolean prayerLayoutDebug) {
+		this.prayerLayoutDebug = prayerLayoutDebug;
 	}
 
 	public Rectangle getRs3ViewportBounds() {

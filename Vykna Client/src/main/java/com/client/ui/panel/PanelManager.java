@@ -1332,7 +1332,7 @@ public class PanelManager {
 
 	static class TabPanel extends BasePanel {
 		private final int tabIndex;
-		private int scrollOffset;
+		protected int scrollOffset;
 
 		private TabPanel(int id, int tabIndex, Rectangle bounds, String title, boolean visible) {
 			super(id, bounds, visible, true, title);
@@ -1454,7 +1454,7 @@ public class PanelManager {
 			return maxHeight;
 		}
 
-		private int getScrollPosition(RSInterface rsInterface, Rectangle bounds) {
+		protected int getScrollPosition(RSInterface rsInterface, Rectangle bounds) {
 			if (!needsScroll(rsInterface, bounds)) {
 				scrollOffset = 0;
 				return 0;
