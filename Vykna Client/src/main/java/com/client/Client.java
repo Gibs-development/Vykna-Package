@@ -2735,7 +2735,7 @@ public class Client extends RSApplet {
 				if ((class9_1.type == 5 || class9_1.type == 17)
 						&& mouseX >= drawX && mouseY >= drawY
 						&& mouseX < drawX + class9_1.width && mouseY < drawY + class9_1.height) {
-					if (!(class9_1.parentID == 5608 && class9_1.type == 5 && class9_1.atActionType == 0)) {
+					if (!isPrayerInterface(class9_1)) {
 						hoverId = class9_1.id;
 					}
 				}
@@ -13367,6 +13367,29 @@ public class Client extends RSApplet {
 
 	public int getHoverId() {
 		return hoverId;
+	}
+
+	private boolean isPrayerInterface(RSInterface rsInterface) {
+		if (rsInterface == null) {
+			return false;
+		}
+		final int prayerInterfaceId = 5608;
+		final int quickPrayerInterfaceId = 17200;
+		final int quickPrayerParentId = 22500;
+		int safetyCounter = 0;
+		RSInterface current = rsInterface;
+		while (current != null && safetyCounter++ < 25) {
+			if (current.id == prayerInterfaceId || current.parentID == prayerInterfaceId || current.id == quickPrayerInterfaceId
+					|| current.parentID == quickPrayerInterfaceId || current.id == quickPrayerParentId
+					|| current.parentID == quickPrayerParentId) {
+				return true;
+			}
+			if (current.parentID == current.id || current.parentID < 0) {
+				return false;
+			}
+			current = RSInterface.interfaceCache[current.parentID];
+		}
+		return false;
 	}
 
 	public void method104() {
