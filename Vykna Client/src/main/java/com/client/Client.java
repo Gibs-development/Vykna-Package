@@ -2735,7 +2735,9 @@ public class Client extends RSApplet {
 				if ((class9_1.type == 5 || class9_1.type == 17)
 						&& mouseX >= drawX && mouseY >= drawY
 						&& mouseX < drawX + class9_1.width && mouseY < drawY + class9_1.height) {
-					hoverId = class9_1.id;
+					if (!(class9_1.parentID == 5608 && class9_1.type == 5 && class9_1.atActionType == 0)) {
+						hoverId = class9_1.id;
+					}
 				}
 
 

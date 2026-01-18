@@ -37,7 +37,7 @@ public class PrayerPanel extends PanelManager.TabPanel {
 	private boolean lastRs3Mode;
 
 	public PrayerPanel(int id, int tabIndex, Rectangle bounds, String title) {
-		super(id, tabIndex, bounds, title, false, true, 160, 200 + PanelManager.PANEL_HEADER_HEIGHT);
+		super(id, tabIndex, bounds, title, false, true, 160, 120);
 	}
 
 	@Override

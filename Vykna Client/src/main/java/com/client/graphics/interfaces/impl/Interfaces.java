@@ -2691,6 +2691,7 @@ interfaceId+=5000;
 				"Level 74\\nRigour\\nIncreases your Ranged attack\\nby 20% and damage by 23%,\\nand your defence by 25%",
 				-70, -100);
 		attachCustomPrayersToBook(prayerBook);
+		offsetPrayerChild(prayerBook, 19826, 0, -2);
 		setBounds(5608, 0, 0, 0, tab);
 	}
 
@@ -2717,16 +2718,21 @@ interfaceId+=5000;
 		if (prayerBook == null) {
 			return;
 		}
-		int xMinus = 1;
-		appendChildIfMissing(prayerBook, 39401, 152, 158);
-		appendChildIfMissing(prayerBook, 39404, 78, 195);
-		appendChildIfMissing(prayerBook, 39407, 115, 195);
-		appendChildIfMissing(prayerBook, 39402, 154, 158 - xMinus);
-		appendChildIfMissing(prayerBook, 39405, 81, 198 - xMinus);
-		appendChildIfMissing(prayerBook, 39408, 118, 198 - xMinus);
-		appendChildIfMissing(prayerBook, 39403, 154, 158);
-		appendChildIfMissing(prayerBook, 39406, 84, 198);
-		appendChildIfMissing(prayerBook, 39409, 120, 198);
+		int preserveGlowX = 0;
+		int preserveGlowY = 194;
+		int rigourGlowX = 78;
+		int rigourGlowY = 205;
+		int auguryGlowX = 115;
+		int auguryGlowY = 205;
+		appendChildIfMissing(prayerBook, 39401, preserveGlowX, preserveGlowY);
+		appendChildIfMissing(prayerBook, 39404, rigourGlowX, rigourGlowY);
+		appendChildIfMissing(prayerBook, 39407, auguryGlowX, auguryGlowY);
+		appendChildIfMissing(prayerBook, 39402, preserveGlowX + 2, preserveGlowY - 1);
+		appendChildIfMissing(prayerBook, 39405, rigourGlowX + 3, rigourGlowY + 2);
+		appendChildIfMissing(prayerBook, 39408, auguryGlowX + 3, auguryGlowY + 2);
+		appendChildIfMissing(prayerBook, 39403, preserveGlowX + 2, preserveGlowY);
+		appendChildIfMissing(prayerBook, 39406, rigourGlowX + 6, rigourGlowY + 3);
+		appendChildIfMissing(prayerBook, 39409, auguryGlowX + 5, auguryGlowY + 3);
 	}
 
 	private static void appendChildIfMissing(RSInterface parent, int childId, int x, int y) {
@@ -2741,6 +2747,19 @@ interfaceId+=5000;
 		parent.children[index] = childId;
 		parent.childX[index] = x;
 		parent.childY[index] = y;
+	}
+
+	private static void offsetPrayerChild(RSInterface parent, int childId, int xOffset, int yOffset) {
+		if (parent == null || parent.children == null) {
+			return;
+		}
+		for (int index = 0; index < parent.children.length; index++) {
+			if (parent.children[index] == childId) {
+				parent.childX[index] += xOffset;
+				parent.childY[index] += yOffset;
+				return;
+			}
+		}
 	}
 
 	public static void ancients(TextDrawingArea[] tda) {
