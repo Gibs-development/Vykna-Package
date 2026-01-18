@@ -27,26 +27,37 @@ public class PrayerPanel extends PanelManager.TabPanel {
 	private int iconSize;
 	private int padX = 4;
 	private int padY = 4;
+	private boolean layoutDirty = true;
+	private int lastLayoutWidth = -1;
+	private int lastLayoutHeight = -1;
+	private int lastClientWidth = -1;
+	private int lastClientHeight = -1;
+	private int lastInterfaceId = -1;
+	private int lastScrollMax = -1;
+	private boolean lastRs3Mode;
 
 	public PrayerPanel(int id, int tabIndex, Rectangle bounds, String title) {
-		super(id, tabIndex, bounds, title, false, true, 160, 200 + PanelManager.PANEL_HEADER_HEIGHT);
+		super(id, tabIndex, bounds, title, false, true, 160, 120);
 	}
 
 	@Override
 	public void draw(Client client) {
-		applyResponsiveLayout(client);
 		super.draw(client);
+		if (isDebugEnabled()) {
+			System.out.println("[PrayerLayout] hoverId=" + client.getHoverId()
+					+ " mouse=(" + client.getMouseX() + "," + client.getMouseY() + ")"
+					+ " scrollOffset=" + scrollOffset);
+		}
 	}
 
 	@Override
 	public boolean handleMouse(Client client, int mouseX, int mouseY) {
-		applyResponsiveLayout(client);
 		return super.handleMouse(client, mouseX, mouseY);
 	}
 
 	@Override
 	public void onResize(Client client) {
-		applyResponsiveLayout(client);
+		layoutDirty = true;
 	}
 
 	@Override
@@ -57,30 +68,35 @@ public class PrayerPanel extends PanelManager.TabPanel {
 		if (toggleFilterAt(client, mouseX, mouseY)) {
 			client.menuOpen = false;
 			client.menuActionRow = 0;
-			applyResponsiveLayout(client);
+			layoutDirty = true;
 		}
 		return true;
-	}
-
-	private void applyResponsiveLayout(Client client) {
-		int interfaceId = Client.tabInterfaceIDs[getTabIndex()];
-		if (interfaceId <= 0) {
-			return;
-		}
-		RSInterface rsInterface = RSInterface.interfaceCache[interfaceId];
-		if (rsInterface == null) {
-			return;
-		}
-		Rectangle bounds = getContentBounds(client);
-		updateInterfaceLayout(client, rsInterface, bounds);
 	}
 
 	@Override
 	protected void updateInterfaceLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
 		rsInterface.width = bounds.width;
 		rsInterface.height = bounds.height;
-		applyPrayerLayout(rsInterface, bounds);
-		rsInterface.scrollMax = Math.max(rsInterface.height, getInterfaceContentHeight(rsInterface));
+		RSInterface prayerBook = RSInterface.interfaceCache[PRAYER_INTERFACE_ID];
+		boolean rs3Mode = client.isRs3InterfaceStyleActive();
+		boolean sizeChanged = bounds.width != lastLayoutWidth || bounds.height != lastLayoutHeight;
+		boolean clientSizeChanged = Client.currentGameWidth != lastClientWidth || Client.currentGameHeight != lastClientHeight;
+		boolean interfaceChanged = rsInterface.id != lastInterfaceId;
+		int currentScrollMax = prayerBook == null ? rsInterface.scrollMax : prayerBook.scrollMax;
+		boolean scrollMaxChanged = currentScrollMax != lastScrollMax;
+		if (layoutDirty || sizeChanged || clientSizeChanged || interfaceChanged || rs3Mode != lastRs3Mode
+				|| scrollMaxChanged) {
+			applyPrayerLayout(rsInterface, bounds);
+			rsInterface.scrollMax = Math.max(rsInterface.height, getInterfaceContentHeight(rsInterface));
+			layoutDirty = false;
+			lastLayoutWidth = bounds.width;
+			lastLayoutHeight = bounds.height;
+			lastClientWidth = Client.currentGameWidth;
+			lastClientHeight = Client.currentGameHeight;
+			lastInterfaceId = rsInterface.id;
+			lastRs3Mode = rs3Mode;
+			lastScrollMax = prayerBook == null ? rsInterface.scrollMax : prayerBook.scrollMax;
+		}
 	}
 
 	private void applyPrayerLayout(RSInterface rsInterface, Rectangle bounds) {
