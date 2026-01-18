@@ -162,7 +162,28 @@ public class Sprite extends DrawingArea {
 			System.out.println("Error converting jpg");
 		}
 	}
-	
+	public Sprite getSubSprite(int sx, int sy, int w, int h) {
+		if (sx < 0) sx = 0;
+		if (sy < 0) sy = 0;
+		if (sx + w > myWidth)  w = myWidth - sx;
+		if (sy + h > myHeight) h = myHeight - sy;
+		if (w <= 0 || h <= 0) return Sprite.getEmptySprite(1, 1);
+
+		Sprite out = new Sprite(w, h);
+
+		int src = sx + sy * myWidth;
+		int dst = 0;
+
+		for (int y = 0; y < h; y++) {
+			System.arraycopy(this.myPixels, src, out.myPixels, dst, w);
+			src += myWidth;
+			dst += w;
+		}
+
+		out.setTransparency(255, 0, 255);
+		return out;
+	}
+
 	public Sprite(byte spriteData[]) {
 		try {
 			Image image = Toolkit.getDefaultToolkit().createImage(spriteData);
