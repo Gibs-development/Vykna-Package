@@ -66,6 +66,8 @@ public class Settings implements Serializable {
 	private Dimension stretchedModeDimensions;
 	private Rectangle rs3ViewportBounds;
 	private Map<Integer, Rs3PanelLayout> rs3PanelLayouts;
+	private Map<Integer, Integer> rs3PanelGroups;
+	private Map<Integer, Integer> rs3GroupActivePanels;
 
 	public Settings() {}
 
@@ -124,6 +126,34 @@ public class Settings implements Serializable {
 		if (rs3PanelLayouts != null) {
 			rs3PanelLayouts.clear();
 		}
+		if (rs3PanelGroups != null) {
+			rs3PanelGroups.clear();
+		}
+		if (rs3GroupActivePanels != null) {
+			rs3GroupActivePanels.clear();
+		}
+	}
+
+	public Map<Integer, Integer> getRs3PanelGroups() {
+		if (rs3PanelGroups == null) {
+			rs3PanelGroups = new HashMap<>();
+		}
+		return rs3PanelGroups;
+	}
+
+	public void setRs3PanelGroups(Map<Integer, Integer> rs3PanelGroups) {
+		this.rs3PanelGroups = rs3PanelGroups;
+	}
+
+	public Map<Integer, Integer> getRs3GroupActivePanels() {
+		if (rs3GroupActivePanels == null) {
+			rs3GroupActivePanels = new HashMap<>();
+		}
+		return rs3GroupActivePanels;
+	}
+
+	public void setRs3GroupActivePanels(Map<Integer, Integer> rs3GroupActivePanels) {
+		this.rs3GroupActivePanels = rs3GroupActivePanels;
 	}
 
 	public boolean isAntiAliasing() {
@@ -231,7 +261,7 @@ public class Settings implements Serializable {
 	}
 
 	public String getActivePresetName() {
-		return activePresetName == null || activePresetName.isEmpty() ? "Default" : activePresetName;
+		return activePresetName == null || activePresetName.isBlank() ? "Default" : activePresetName;
 	}
 
 	public void setActivePresetName(String activePresetName) {

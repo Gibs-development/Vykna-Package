@@ -76,6 +76,7 @@ public class PanelManager {
 	private boolean invalidPlacement;
 	private ResizeHandle resizeHandle;
 	private DockCandidate dockCandidate;
+	private int nextGroupId = 1000;
 
 	public void ensureRs3Layout(Client client) {
 		if (layoutWidth == Client.currentGameWidth && layoutHeight == Client.currentGameHeight && !panels.isEmpty()) {
@@ -88,6 +89,7 @@ public class PanelManager {
 			preferredBounds.put(panel.getId(), new Rectangle(panel.getBounds()));
 		}
 		applySavedLayout(client);
+		applySavedGroups(client);
 		layoutWidth = Client.currentGameWidth;
 		layoutHeight = Client.currentGameHeight;
 	}
@@ -115,12 +117,6 @@ public class PanelManager {
 				drawCloseButton(client, panel);
 			}
 			drawResizeHandle(client, panel);
-			if (panel == activePanel) {
-				drawSelectionOutline(panel.getBounds());
-			}
-		}
-		if (dockCandidate != null) {
-			drawDockPreview(dockCandidate);
 		}
 	}
 
@@ -200,7 +196,25 @@ public class PanelManager {
 						Sound.getSound().playSound(1042, SoundType.SOUND, 0);
 					}
 				}
-				preferredBounds.put(activePanel.getId(), new Rectangle(activePanel.getBounds()));
+				if (dragging) {
+					UiPanel targetPanel = findGroupTarget(activePanel);
+					if (targetPanel != null) {
+						groupPanels(activePanel, targetPanel);
+						dragging = false;
+						resizing = false;
+						invalidPlacement = false;
+						dockCandidate = null;
+						resizeHandle = null;
+						saveLayoutToSettings(client);
+						mouseDownLastFrame = mouseDown;
+						return;
+					}
+				}
+				if (activePanel instanceof GroupPanel) {
+					updatePreferredBounds((GroupPanel) activePanel);
+				} else {
+					preferredBounds.put(activePanel.getId(), new Rectangle(activePanel.getBounds()));
+				}
 			}
 			dragging = false;
 			resizing = false;
@@ -333,14 +347,8 @@ public class PanelManager {
 
 	public boolean handleMouseWheel(Client client, int mouseX, int mouseY, int rotation) {
 		UiPanel hit = getTopmostPanelAt(mouseX, mouseY);
-		if (hit instanceof RightPanelStack) {
-			RightPanelStack stack = (RightPanelStack) hit;
-			Rectangle bounds = stack.getBounds();
-			int headerHeight = getPanelHeaderHeight(client, stack);
-			int tabRows = stack.getTabRows(bounds);
-			Rectangle contentBounds = stack.getContentBounds(bounds, headerHeight, tabRows);
-			stack.scrollBy(rotation * 30, contentBounds, client);
-			return true;
+		if (hit instanceof GroupPanel) {
+			hit = ((GroupPanel) hit).getActivePanel();
 		}
 		if (!(hit instanceof TabPanel)) {
 			return false;
@@ -394,6 +402,12 @@ public class PanelManager {
 			if (panel.getId() == id) {
 				return panel;
 			}
+			if (panel instanceof GroupPanel) {
+				UiPanel child = ((GroupPanel) panel).getPanelById(id);
+				if (child != null) {
+					return child;
+				}
+			}
 		}
 		return null;
 	}
@@ -404,6 +418,11 @@ public class PanelManager {
 	}
 
 	public void togglePanelVisibility(int id) {
+		GroupPanel parent = getGroupForPanel(id);
+		if (parent != null) {
+			parent.togglePanelVisibility(id);
+			return;
+		}
 		UiPanel panel = getPanel(id);
 		if (!(panel instanceof BasePanel)) {
 			return;
@@ -439,6 +458,110 @@ public class PanelManager {
 		panels.add(panel);
 	}
 
+	private UiPanel findGroupTarget(UiPanel panel) {
+		if (!isGroupable(panel)) {
+			return null;
+		}
+		Rectangle bounds = panel.getBounds();
+		for (int index = panels.size() - 1; index >= 0; index--) {
+			UiPanel other = panels.get(index);
+			if (other == panel || !other.isVisible()) {
+				continue;
+			}
+			if (!isGroupable(other)) {
+				continue;
+			}
+			if (bounds.intersects(other.getBounds())) {
+				return other;
+			}
+		}
+		return null;
+	}
+
+	private boolean isGroupable(UiPanel panel) {
+		if (panel == null) {
+			return false;
+		}
+		if (panel instanceof GroupPanel) {
+			return true;
+		}
+		return panel instanceof TabPanel;
+	}
+
+	private void groupPanels(UiPanel source, UiPanel target) {
+		if (source == null || target == null || source == target) {
+			return;
+		}
+		GroupPanel targetGroup = target instanceof GroupPanel ? (GroupPanel) target : null;
+		GroupPanel sourceGroup = source instanceof GroupPanel ? (GroupPanel) source : null;
+		if (sourceGroup != null && sourceGroup == targetGroup) {
+			return;
+		}
+		if (targetGroup == null && sourceGroup == null) {
+			GroupPanel group = new GroupPanel(nextGroupId++, new Rectangle(target.getBounds()));
+			panels.remove(target);
+			panels.remove(source);
+			group.addPanel(target);
+			group.addPanel(source);
+			group.setActivePanel(source);
+			group.syncChildBounds();
+			panels.add(group);
+			bringToFront(group);
+			updatePreferredBounds(group);
+			return;
+		}
+		if (targetGroup != null && sourceGroup == null) {
+			panels.remove(source);
+			targetGroup.addPanel(source);
+			targetGroup.setActivePanel(source);
+			targetGroup.syncChildBounds();
+			bringToFront(targetGroup);
+			updatePreferredBounds(targetGroup);
+			return;
+		}
+		if (targetGroup == null && sourceGroup != null) {
+			panels.remove(target);
+			sourceGroup.addPanel(target);
+			sourceGroup.setActivePanel(target);
+			sourceGroup.syncChildBounds();
+			bringToFront(sourceGroup);
+			updatePreferredBounds(sourceGroup);
+			return;
+		}
+		if (targetGroup != null && sourceGroup != null) {
+			for (UiPanel child : new ArrayList<>(sourceGroup.getPanels())) {
+				targetGroup.addPanel(child);
+			}
+			targetGroup.setActivePanel(sourceGroup.getActivePanel());
+			panels.remove(sourceGroup);
+			targetGroup.syncChildBounds();
+			bringToFront(targetGroup);
+			updatePreferredBounds(targetGroup);
+		}
+	}
+
+	private void updatePreferredBounds(GroupPanel group) {
+		if (group == null) {
+			return;
+		}
+		for (UiPanel panel : group.getPanels()) {
+			preferredBounds.put(panel.getId(), new Rectangle(group.getBounds()));
+		}
+	}
+
+	private GroupPanel getGroupForPanel(int panelId) {
+		for (UiPanel panel : panels) {
+			if (!(panel instanceof GroupPanel)) {
+				continue;
+			}
+			GroupPanel group = (GroupPanel) panel;
+			if (group.getPanelById(panelId) != null) {
+				return group;
+			}
+		}
+		return null;
+	}
+
 	private void applySavedLayout(Client client) {
 		Settings settings = Client.getUserSettings();
 		if (settings == null) {
@@ -465,12 +588,62 @@ public class PanelManager {
 		}
 	}
 
+	private void applySavedGroups(Client client) {
+		Settings settings = Client.getUserSettings();
+		if (settings == null) {
+			return;
+		}
+		Map<Integer, Integer> groupMap = settings.getRs3PanelGroups();
+		if (groupMap.isEmpty()) {
+			return;
+		}
+		Map<Integer, List<UiPanel>> groups = new HashMap<>();
+		for (UiPanel panel : new ArrayList<>(panels)) {
+			Integer groupId = groupMap.get(panel.getId());
+			if (groupId == null) {
+				continue;
+			}
+			groups.computeIfAbsent(groupId, key -> new ArrayList<>()).add(panel);
+		}
+		for (Map.Entry<Integer, List<UiPanel>> entry : groups.entrySet()) {
+			List<UiPanel> groupPanels = entry.getValue();
+			if (groupPanels.size() < 2) {
+				continue;
+			}
+			GroupPanel group = new GroupPanel(entry.getKey(), new Rectangle(groupPanels.get(0).getBounds()));
+			for (UiPanel panel : groupPanels) {
+				panels.remove(panel);
+				group.addPanel(panel);
+			}
+			Integer activePanelId = settings.getRs3GroupActivePanels().get(entry.getKey());
+			if (activePanelId != null) {
+				group.setActivePanelById(activePanelId);
+			}
+			group.syncChildBounds();
+			panels.add(group);
+			nextGroupId = Math.max(nextGroupId, entry.getKey() + 1);
+		}
+	}
+
 	private void saveLayoutToSettings(Client client) {
 		Settings settings = Client.getUserSettings();
 		if (settings == null) {
 			return;
 		}
+		settings.getRs3PanelGroups().clear();
+		settings.getRs3GroupActivePanels().clear();
 		for (UiPanel panel : panels) {
+			if (panel instanceof GroupPanel) {
+				GroupPanel group = (GroupPanel) panel;
+				Rectangle bounds = new Rectangle(group.getBounds());
+				for (UiPanel child : group.getPanels()) {
+					settings.getRs3PanelLayouts().put(child.getId(), new Settings.Rs3PanelLayout(
+							bounds.x, bounds.y, bounds.width, bounds.height, child.isVisible()));
+					settings.getRs3PanelGroups().put(child.getId(), group.getGroupId());
+				}
+				settings.getRs3GroupActivePanels().put(group.getGroupId(), group.getActivePanelId());
+				continue;
+			}
 			Rectangle bounds = preferredBounds.getOrDefault(panel.getId(), panel.getBounds());
 			settings.getRs3PanelLayouts().put(panel.getId(), new Settings.Rs3PanelLayout(
 					bounds.x, bounds.y, bounds.width, bounds.height, panel.isVisible()));
@@ -615,6 +788,306 @@ public class PanelManager {
 			int tabBarX = Math.max(PANEL_MARGIN, minimapX - TAB_BAR_PANEL_WIDTH - PANEL_PADDING);
 			int tabBarY = minimapY;
 			panels.add(new ChatPanel(PANEL_ID_CHAT, new Rectangle(chatX, chatY, CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT)));
+		}
+	}
+
+	static class GroupPanel implements UiPanel {
+		private final int groupId;
+		private final Rectangle bounds;
+		private final List<UiPanel> panels = new ArrayList<>();
+		private UiPanel activePanel;
+
+		GroupPanel(int groupId, Rectangle bounds) {
+			this.groupId = groupId;
+			this.bounds = bounds;
+		}
+
+		int getGroupId() {
+			return groupId;
+		}
+
+		UiPanel getActivePanel() {
+			return activePanel;
+		}
+
+		int getActivePanelId() {
+			return activePanel != null ? activePanel.getId() : -1;
+		}
+
+		List<UiPanel> getPanels() {
+			return panels;
+		}
+
+		UiPanel getPanelById(int id) {
+			for (UiPanel panel : panels) {
+				if (panel.getId() == id) {
+					return panel;
+				}
+			}
+			return null;
+		}
+
+		void addPanel(UiPanel panel) {
+			if (panel == null || panels.contains(panel)) {
+				return;
+			}
+			panels.add(panel);
+			if (activePanel == null) {
+				activePanel = panel;
+			}
+			syncChildBounds();
+		}
+
+		void setActivePanel(UiPanel panel) {
+			if (panel == null || !panels.contains(panel)) {
+				return;
+			}
+			activePanel = panel;
+		}
+
+		void setActivePanelById(int panelId) {
+			UiPanel panel = getPanelById(panelId);
+			if (panel != null) {
+				setActivePanel(panel);
+			}
+		}
+
+		void togglePanelVisibility(int panelId) {
+			UiPanel panel = getPanelById(panelId);
+			if (!(panel instanceof BasePanel)) {
+				return;
+			}
+			BasePanel basePanel = (BasePanel) panel;
+			boolean visible = !basePanel.isVisible();
+			basePanel.setVisible(visible);
+			if (visible) {
+				setActivePanel(panel);
+			} else if (panel == activePanel) {
+				for (UiPanel candidate : panels) {
+					if (candidate.isVisible()) {
+						setActivePanel(candidate);
+						break;
+					}
+				}
+			}
+		}
+
+		void syncChildBounds() {
+			Rectangle contentBounds = getContentBounds();
+			for (UiPanel panel : panels) {
+				panel.setPosition(contentBounds.x, contentBounds.y);
+				panel.setSize(contentBounds.width, contentBounds.height);
+			}
+		}
+
+		@Override
+		public int getId() {
+			return groupId;
+		}
+
+		@Override
+		public Rectangle getBounds() {
+			return bounds;
+		}
+
+		@Override
+		public boolean isVisible() {
+			for (UiPanel panel : panels) {
+				if (panel.isVisible()) {
+					return true;
+				}
+			}
+			return false;
+		}
+
+		@Override
+		public boolean draggable() {
+			return true;
+		}
+
+		@Override
+		public String getTitle() {
+			return activePanel != null ? activePanel.getTitle() : "";
+		}
+
+		@Override
+		public boolean contains(int mouseX, int mouseY) {
+			return bounds.contains(mouseX, mouseY);
+		}
+
+		@Override
+		public void setPosition(int x, int y) {
+			bounds.setLocation(x, y);
+			syncChildBounds();
+		}
+
+		@Override
+		public void setSize(int width, int height) {
+			bounds.setSize(width, height);
+			syncChildBounds();
+		}
+
+		@Override
+		public void draw(Client client) {
+			if (activePanel != null) {
+				activePanel.draw(client);
+			}
+			drawTabs(client);
+		}
+
+		@Override
+		public boolean handleMouse(Client client, int mouseX, int mouseY) {
+			if (activePanel == null) {
+				return false;
+			}
+			int headerHeight = getPanelHeaderHeight(client, this);
+			if (mouseY < headerHeight) {
+				return false;
+			}
+			Rectangle childBounds = activePanel.getBounds();
+			return activePanel.handleMouse(client, mouseX - (childBounds.x - bounds.x), mouseY - (childBounds.y - bounds.y));
+		}
+
+		@Override
+		public boolean handleClick(Client client, int mouseX, int mouseY) {
+			if (panels.isEmpty()) {
+				return false;
+			}
+			int headerHeight = getPanelHeaderHeight(client, this);
+			if (mouseY < headerHeight) {
+				UiPanel selected = getPanelAtTabIndex(getTabIndexAt(mouseX));
+				if (selected != null && selected != activePanel) {
+					setActivePanel(selected);
+					if (client != null) {
+						client.getPanelManager().saveLayout(client);
+					}
+				}
+				return true;
+			}
+			if (activePanel == null) {
+				return false;
+			}
+			Rectangle childBounds = activePanel.getBounds();
+			return activePanel.handleClick(client, mouseX - (childBounds.x - bounds.x), mouseY - (childBounds.y - bounds.y));
+		}
+
+		@Override
+		public boolean handleRightClick(Client client, int mouseX, int mouseY) {
+			if (activePanel == null) {
+				return false;
+			}
+			int headerHeight = getPanelHeaderHeight(client, this);
+			if (mouseY < headerHeight) {
+				return false;
+			}
+			Rectangle childBounds = activePanel.getBounds();
+			return activePanel.handleRightClick(client, mouseX - (childBounds.x - bounds.x), mouseY - (childBounds.y - bounds.y));
+		}
+
+		@Override
+		public boolean resizable() {
+			return activePanel != null && activePanel.resizable();
+		}
+
+		@Override
+		public int getMinWidth() {
+			int minWidth = 0;
+			for (UiPanel panel : panels) {
+				minWidth = Math.max(minWidth, panel.getMinWidth());
+			}
+			return minWidth;
+		}
+
+		@Override
+		public int getMinHeight() {
+			int minHeight = 0;
+			for (UiPanel panel : panels) {
+				minHeight = Math.max(minHeight, panel.getMinHeight());
+			}
+			return minHeight;
+		}
+
+		@Override
+		public boolean keepAspectRatio() {
+			return activePanel != null && activePanel.keepAspectRatio();
+		}
+
+		@Override
+		public boolean drawsBackground() {
+			return true;
+		}
+
+		@Override
+		public boolean isClosable() {
+			return false;
+		}
+
+		@Override
+		public boolean isScrollable() {
+			return activePanel != null && activePanel.isScrollable();
+		}
+
+		@Override
+		public void onResize(Client client) {
+			if (activePanel != null) {
+				activePanel.onResize(client);
+			}
+		}
+
+		private Rectangle getContentBounds() {
+			int headerHeight = PANEL_HEADER_HEIGHT;
+			int contentHeight = Math.max(0, bounds.height - headerHeight);
+			return new Rectangle(bounds.x, bounds.y + headerHeight, bounds.width, contentHeight);
+		}
+
+		private void drawTabs(Client client) {
+			if (client == null || panels.size() < 2) {
+				return;
+			}
+			int headerHeight = getPanelHeaderHeight(client, this);
+			int tabCount = panels.size();
+			int baseWidth = bounds.width / tabCount;
+			int remainder = bounds.width % tabCount;
+			int x = bounds.x;
+			for (int index = 0; index < tabCount; index++) {
+				int width = baseWidth + (index < remainder ? 1 : 0);
+				UiPanel panel = panels.get(index);
+				boolean active = panel == activePanel;
+				int color = active ? adjustColor(PANEL_HEADER, 12) : PANEL_HEADER;
+				DrawingArea.drawPixels(headerHeight, bounds.y, x, color, width);
+				DrawingArea.drawPixels(1, bounds.y + headerHeight - 1, x, PANEL_BORDER, width);
+				String title = panel.getTitle();
+				if (title != null) {
+					int textColor = active ? 0xffd24a : PANEL_TEXT;
+					client.newSmallFont.drawCenteredString(title, x + width / 2, bounds.y + 13, textColor, 0);
+				}
+				x += width;
+			}
+		}
+
+		private int getTabIndexAt(int mouseX) {
+			if (panels.isEmpty()) {
+				return -1;
+			}
+			int tabCount = panels.size();
+			int baseWidth = bounds.width / tabCount;
+			int remainder = bounds.width % tabCount;
+			int x = 0;
+			for (int index = 0; index < tabCount; index++) {
+				int width = baseWidth + (index < remainder ? 1 : 0);
+				if (mouseX >= x && mouseX < x + width) {
+					return index;
+				}
+				x += width;
+			}
+			return tabCount - 1;
+		}
+
+		private UiPanel getPanelAtTabIndex(int index) {
+			if (index < 0 || index >= panels.size()) {
+				return null;
+			}
+			return panels.get(index);
 		}
 	}
 
@@ -1398,7 +1871,7 @@ public class PanelManager {
 		if (headerHeight > 0) {
 			DrawingArea.drawPixels(1, bounds.y + headerHeight, bounds.x, PANEL_BORDER, bounds.width);
 			String title = panel.getTitle();
-			if (client.isRs3EditModeActive() && title != null && !title.isEmpty()) {
+			if (!(panel instanceof GroupPanel) && client.isRs3EditModeActive() && title != null && !title.isEmpty()) {
 				client.newSmallFont.drawBasicString(title, bounds.x + 6, bounds.y + 13, PANEL_TEXT, 0);
 			}
 		}
@@ -1472,7 +1945,7 @@ public class PanelManager {
 		return mouseX >= x && mouseX <= x + CLOSE_BUTTON_SIZE && mouseY >= y && mouseY <= y + CLOSE_BUTTON_SIZE;
 	}
 
-	private int adjustColor(int color, int delta) {
+	private static int adjustColor(int color, int delta) {
 		int r = Math.min(255, Math.max(0, ((color >> 16) & 0xff) + delta));
 		int g = Math.min(255, Math.max(0, ((color >> 8) & 0xff) + delta));
 		int b = Math.min(255, Math.max(0, (color & 0xff) + delta));
@@ -1481,6 +1954,9 @@ public class PanelManager {
 
 	static int getPanelHeaderHeight(Client client, UiPanel panel) {
 		if (client == null || !client.isRs3InterfaceStyleActive()) {
+			return PANEL_HEADER_HEIGHT;
+		}
+		if (panel instanceof GroupPanel) {
 			return PANEL_HEADER_HEIGHT;
 		}
 		if (client.isRs3EditModeActive()) {
