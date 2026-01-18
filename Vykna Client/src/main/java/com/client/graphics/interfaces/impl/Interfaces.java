@@ -15,6 +15,8 @@ import com.client.graphics.interfaces.dropdown.KeybindingMenu;
 import com.client.graphics.interfaces.eventcalendar.EventCalendar;
 import com.client.graphics.interfaces.settings.SettingsInterface;
 
+import java.util.Arrays;
+
 public final class Interfaces extends RSInterface {
 
 	public static final int CLOSE_BUTTON_SMALL = 37302;
@@ -3167,6 +3169,31 @@ interfaceId+=5000;
 
 		setBounds(27660, 98 + 45, 205, 6, Interface);
 		setBounds(27661, 98 + 45, 205, 7, Interface);
+
+		int modelId = 27670;
+		if (RSInterface.interfaceCache[modelId] == null) {
+			addChar(modelId);
+		}
+		if (Interface != null) {
+			boolean hasModelChild = false;
+			if (Interface.children != null) {
+				for (int childId : Interface.children) {
+					if (childId == modelId) {
+						hasModelChild = true;
+						break;
+					}
+				}
+			}
+			if (!hasModelChild) {
+				int childCount = Interface.children == null ? 0 : Interface.children.length;
+				Interface.children = Arrays.copyOf(Interface.children == null ? new int[0] : Interface.children, childCount + 1);
+				Interface.childX = Arrays.copyOf(Interface.childX == null ? new int[0] : Interface.childX, childCount + 1);
+				Interface.childY = Arrays.copyOf(Interface.childY == null ? new int[0] : Interface.childY, childCount + 1);
+				Interface.children[childCount] = modelId;
+				Interface.childX[childCount] = 0;
+				Interface.childY[childCount] = 0;
+			}
+		}
 	}
 
 	public static void itemsOnDeath(TextDrawingArea[] wid) {
