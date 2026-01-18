@@ -12313,7 +12313,7 @@ public class Client extends RSApplet {
 					aTextDrawingArea_1273 };
 			RSInterface.unpack(streamLoader_1, allFonts, streamLoader_2, new RSFont[] {newSmallFont, newRegularFont, newBoldFont, newFancyFont});
 			drawLoadingText(100, "Preparing game engine");
-			InterfaceJsonDump.dumpInterfaceTree(5608, "ui_dump_5608.json");
+			InterfaceJsonDump.dumpInterfaceTree(1644, "ui_dump_1644.json");
 			if(getUserSettings().isOldGameframe() == false) {
 				mapBack = new Sprite("Gameframe/fixed/mapBack");
 			}else {
