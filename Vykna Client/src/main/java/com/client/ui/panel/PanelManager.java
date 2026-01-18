@@ -29,6 +29,11 @@ public class PanelManager {
 	private static final int DOCK_SNAP_THRESHOLD = 12;
 	private static final int GROUP_SNAP_THRESHOLD = 8;
 	private static final int GROUP_UNDOCK_THRESHOLD = 6;
+	private static final int EQUIPMENT_TAB_INTERFACE_ID = 1644;
+	private static final int EQUIPMENT_MODEL_CONTENT_TYPE = 328;
+	private static final int EQUIPMENT_SLOT_MAX_SIZE = 40;
+	private static final int EQUIPMENT_SLOT_PADDING = 4;
+	private static final Map<Integer, Map<Integer, Point>> EQUIPMENT_ORIGINAL_POSITIONS = new HashMap<>();
 	public static final int PANEL_ID_INVENTORY = 1;
 	public static final int PANEL_ID_PRAYER = 2;
 	public static final int PANEL_ID_MAGIC = 3;
@@ -1480,6 +1485,9 @@ public class PanelManager {
 		protected void updateInterfaceLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
 			rsInterface.width = bounds.width;
 			rsInterface.height = bounds.height;
+			if (rsInterface.id == EQUIPMENT_TAB_INTERFACE_ID) {
+				applyEquipmentLayout(rsInterface, bounds);
+			}
 		}
 
 		protected int getContentPadding(Client client, Rectangle bounds) {
@@ -1819,6 +1827,11 @@ public class PanelManager {
 				applyInventoryLayout(client, rsInterface, bounds);
 				return;
 			}
+			if (activeTabIndex == 4 && rsInterface.id == EQUIPMENT_TAB_INTERFACE_ID) {
+				applyEquipmentLayout(rsInterface, bounds);
+				rsInterface.scrollMax = Math.max(rsInterface.height, getInterfaceContentHeight(rsInterface));
+				return;
+			}
 			if (activeTabIndex == 5 || activeTabIndex == 6) {
 				applyIconGridLayout(rsInterface, bounds);
 			}
@@ -1943,6 +1956,195 @@ public class PanelManager {
 				this.label = label;
 				this.tabIndex = tabIndex;
 			}
+		}
+	}
+
+	private static void applyEquipmentLayout(RSInterface rsInterface, Rectangle bounds) {
+		if (rsInterface.children == null) {
+			return;
+		}
+		cacheEquipmentOriginalPositions(rsInterface);
+		List<EquipmentSlot> slots = new ArrayList<>();
+		int slotSize = 0;
+		int modelIndex = -1;
+		for (int index = 0; index < rsInterface.children.length; index++) {
+			RSInterface child = RSInterface.interfaceCache[rsInterface.children[index]];
+			if (child == null) {
+				continue;
+			}
+			if (child.type == 6 && child.contentType == EQUIPMENT_MODEL_CONTENT_TYPE) {
+				modelIndex = index;
+			}
+			if (isEquipmentSlot(child)) {
+				Point original = getEquipmentOriginalPosition(rsInterface, rsInterface.children[index]);
+				slots.add(new EquipmentSlot(index, original.x, original.y));
+				slotSize = Math.max(slotSize, Math.max(child.width, child.height));
+			}
+		}
+		if (slots.isEmpty()) {
+			return;
+		}
+		if (slotSize <= 0) {
+			slotSize = 32;
+		}
+
+		boolean usedRs3Layout = false;
+		int padding = EQUIPMENT_SLOT_PADDING;
+		List<EquipmentSlot> orderedSlots = orderEquipmentSlots(slots);
+		List<EquipmentSlot> topBottom = new ArrayList<>();
+		List<EquipmentSlot> leftSlots = new ArrayList<>();
+		List<EquipmentSlot> rightSlots = new ArrayList<>();
+		if (orderedSlots.size() >= 2) {
+			topBottom.add(orderedSlots.get(0));
+			topBottom.add(orderedSlots.get(orderedSlots.size() - 1));
+			for (int i = 1; i < orderedSlots.size() - 1; i++) {
+				EquipmentSlot slot = orderedSlots.get(i);
+				if (slot.x < getEquipmentHorizontalCenter(slots)) {
+					leftSlots.add(slot);
+				} else {
+					rightSlots.add(slot);
+				}
+			}
+			leftSlots.sort((a, b) -> Integer.compare(a.y, b.y));
+			rightSlots.sort((a, b) -> Integer.compare(a.y, b.y));
+		} else {
+			topBottom.addAll(orderedSlots);
+		}
+		if (modelIndex != -1) {
+			RSInterface model = RSInterface.interfaceCache[rsInterface.children[modelIndex]];
+			int modelWidth = model != null && model.width > 0 ? model.width : 136;
+			int modelHeight = model != null && model.height > 0 ? model.height : 168;
+			int centerX = bounds.width / 2;
+			int centerY = bounds.height / 2;
+			int modelLeft = centerX - modelWidth / 2;
+			int modelTop = centerY - modelHeight / 2;
+			int modelRight = modelLeft + modelWidth;
+			int modelBottom = modelTop + modelHeight;
+			int sideRows = Math.max(leftSlots.size(), rightSlots.size());
+			int sideColumnHeight = sideRows * slotSize + Math.max(0, sideRows - 1) * padding;
+			int sideStartY = centerY - sideColumnHeight / 2;
+			int leftX = modelLeft - slotSize - padding;
+			int rightX = modelRight + padding;
+			int topY = modelTop - slotSize - padding;
+			int bottomY = modelBottom + padding;
+			boolean fits = leftX >= padding
+					&& rightX + slotSize <= bounds.width - padding
+					&& topY >= padding
+					&& bottomY + slotSize <= bounds.height - padding
+					&& (sideRows == 0 || (sideStartY >= padding && sideStartY + sideColumnHeight <= bounds.height - padding));
+			if (fits) {
+					rsInterface.childX[modelIndex] = modelLeft;
+					rsInterface.childY[modelIndex] = modelTop;
+					if (!topBottom.isEmpty()) {
+						EquipmentSlot topSlot = topBottom.get(0);
+						rsInterface.childX[topSlot.index] = centerX - slotSize / 2;
+						rsInterface.childY[topSlot.index] = topY;
+					}
+					for (int row = 0; row < sideRows; row++) {
+						int y = sideStartY + row * (slotSize + padding);
+						if (row < leftSlots.size()) {
+							EquipmentSlot leftSlot = leftSlots.get(row);
+							rsInterface.childX[leftSlot.index] = leftX;
+							rsInterface.childY[leftSlot.index] = y;
+						}
+						if (row < rightSlots.size()) {
+							EquipmentSlot rightSlot = rightSlots.get(row);
+							rsInterface.childX[rightSlot.index] = rightX;
+							rsInterface.childY[rightSlot.index] = y;
+						}
+					}
+					if (topBottom.size() > 1) {
+						EquipmentSlot bottomSlot = topBottom.get(1);
+						rsInterface.childX[bottomSlot.index] = centerX - slotSize / 2;
+						rsInterface.childY[bottomSlot.index] = bottomY;
+					}
+					usedRs3Layout = true;
+				}
+			}
+
+		if (!usedRs3Layout) {
+			if (modelIndex != -1) {
+				rsInterface.childX[modelIndex] = bounds.width + 1000;
+				rsInterface.childY[modelIndex] = bounds.height + 1000;
+			}
+			int maxColumns = Math.max(1, (bounds.width - padding * 2) / (slotSize + padding));
+			int maxRows = Math.max(1, (bounds.height - padding * 2) / (slotSize + padding));
+			int columns = (int) Math.ceil(orderedSlots.size() / (double) maxRows);
+			columns = Math.max(1, Math.min(maxColumns, columns));
+			int rows = (int) Math.ceil(orderedSlots.size() / (double) columns);
+			int gridWidth = columns * slotSize + Math.max(0, columns - 1) * padding;
+			int gridHeight = rows * slotSize + Math.max(0, rows - 1) * padding;
+			int startX = Math.max(padding, (bounds.width - gridWidth) / 2);
+			int startY = Math.max(padding, (bounds.height - gridHeight) / 2);
+			for (int idx = 0; idx < orderedSlots.size(); idx++) {
+				int row = idx / columns;
+				int col = idx % columns;
+				EquipmentSlot slot = orderedSlots.get(idx);
+				rsInterface.childX[slot.index] = startX + col * (slotSize + padding);
+				rsInterface.childY[slot.index] = startY + row * (slotSize + padding);
+			}
+		}
+		rsInterface.scrollMax = bounds.height;
+	}
+
+	private static boolean isEquipmentSlot(RSInterface child) {
+		if (child == null || child.type != 5) {
+			return false;
+		}
+		if (child.width <= 0 || child.height <= 0) {
+			return false;
+		}
+		return child.width <= EQUIPMENT_SLOT_MAX_SIZE && child.height <= EQUIPMENT_SLOT_MAX_SIZE;
+	}
+
+	private static void cacheEquipmentOriginalPositions(RSInterface rsInterface) {
+		if (EQUIPMENT_ORIGINAL_POSITIONS.containsKey(rsInterface.id)) {
+			return;
+		}
+		Map<Integer, Point> positions = new HashMap<>();
+		for (int index = 0; index < rsInterface.children.length; index++) {
+			positions.put(rsInterface.children[index], new Point(rsInterface.childX[index], rsInterface.childY[index]));
+		}
+		EQUIPMENT_ORIGINAL_POSITIONS.put(rsInterface.id, positions);
+	}
+
+	private static Point getEquipmentOriginalPosition(RSInterface rsInterface, int childId) {
+		Map<Integer, Point> positions = EQUIPMENT_ORIGINAL_POSITIONS.get(rsInterface.id);
+		if (positions == null) {
+			return new Point(0, 0);
+		}
+		Point point = positions.get(childId);
+		return point == null ? new Point(0, 0) : point;
+	}
+
+	private static List<EquipmentSlot> orderEquipmentSlots(List<EquipmentSlot> slots) {
+		List<EquipmentSlot> ordered = new ArrayList<>(slots);
+		ordered.sort((a, b) -> {
+			if (a.y != b.y) {
+				return Integer.compare(a.y, b.y);
+			}
+			return Integer.compare(a.x, b.x);
+		});
+		return ordered;
+	}
+
+	private static int getEquipmentHorizontalCenter(List<EquipmentSlot> slots) {
+		int sum = 0;
+		for (EquipmentSlot slot : slots) {
+			sum += slot.x;
+		}
+		return slots.isEmpty() ? 0 : sum / slots.size();
+	}
+
+	private static final class EquipmentSlot {
+		private final int index;
+		private final int x;
+		private final int y;
+
+		private EquipmentSlot(int index, int x, int y) {
+			this.index = index;
+			this.x = x;
+			this.y = y;
 		}
 	}
 
