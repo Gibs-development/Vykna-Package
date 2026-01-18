@@ -524,7 +524,6 @@ public class Client extends RSApplet {
 		minimapState = 0;
 		Settings settings = getUserSettings();
 		if (settings != null) {
-			settings.setRightPanelTabIndex(3);
 			settings.setMinimapState(0);
 		}
 	}
