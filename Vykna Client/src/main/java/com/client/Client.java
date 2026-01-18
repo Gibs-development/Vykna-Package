@@ -2728,9 +2728,15 @@ public class Client extends RSApplet {
 				if (class9_1.type == 9 && mouseX >= drawX && mouseY >= drawY && mouseX < drawX + class9_1.width && mouseY < drawY + class9_1.height) {
 					anInt1315 = class9_1.id;
 				}
-				if (class9_1.type == 5 && mouseX >= drawX && mouseY >= drawY && mouseX < drawX + class9_1.width && mouseY < drawY + class9_1.height) {
+				if (class9_1.type == 5
+						&& class9_1.atActionType != 0
+						&& class9_1.sprite2 != null
+						&& mouseX >= drawX && mouseY >= drawY
+						&& mouseX < drawX + class9_1.width
+						&& mouseY < drawY + class9_1.height) {
 					hoverId = class9_1.id;
 				}
+
 
 				if (class9_1.type == 0) {
 					buildInterfaceMenu(drawX, class9_1, mouseX, drawY, mouseY, class9_1.scrollPosition);
@@ -10536,11 +10542,14 @@ public class Client extends RSApplet {
 				int baseX = (currentScreenMode == ScreenMode.FIXED) ? 0 : fullscreenOverlayOffX;
 				int baseY = (currentScreenMode == ScreenMode.FIXED) ? 0 : fullscreenOverlayOffY;
 				if (fs != null) {
+					hoverId = -1;      // <<< add this
+					anInt886 = -1;     // <<< add this (optional but recommended)
 					buildInterfaceMenu(baseX, fs, super.getMouseX(), baseY, super.getMouseY(), 0);
 				}
 				if (anInt886 != anInt1026) {
 					anInt1026 = anInt886;
 				}
+
 				if (anInt1315 != anInt1129) {
 					anInt1129 = anInt1315;
 				}

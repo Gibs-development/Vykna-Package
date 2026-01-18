@@ -3706,6 +3706,7 @@ public class RSInterface {
 		tab.width = width;
 		tab.height = height;
 		tab.tooltip = tooltip;
+		tab.actions = new String[] { "Select" };
 	}
 
 	public static void addHoverImage(int i, int j, int k, String name) {

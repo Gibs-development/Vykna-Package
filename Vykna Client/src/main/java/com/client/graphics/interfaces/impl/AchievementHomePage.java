@@ -100,20 +100,19 @@ public final class AchievementHomePage extends RSInterface {
 		rsi.child(c++, 35053, NAV_X + ICON_INSET, NAV_Y + (4 * TAB_GAP) + ICON_INSET);
 
 // ---- Overview block ----
-		rsi.child(c++, 35100, MAIN_X + 18, MAIN_Y + 6);
-		rsi.child(c++, 35101, MAIN_X + 18, MAIN_Y + 26);
-		rsi.child(c++, 35102, MAIN_X + 250, MAIN_Y + 26);
-
+		rsi.child(c++, 35100, MAIN_X + 4, MAIN_Y + 6); //Overview Title
+		rsi.child(c++, 35101, MAIN_X + 4, MAIN_Y + 24); //Achievements completed
+		rsi.child(c++, 35102, MAIN_X + 210, MAIN_Y + 24); //0/0
 // main skinned bar at x,y
-		final int MAIN_BAR_X = MAIN_X + 90;
-		final int MAIN_BAR_Y = MAIN_Y + 44;
+		final int MAIN_BAR_X = 86;
+		final int MAIN_BAR_Y = 90;
 		rsi.child(c++, 35200, MAIN_BAR_X, MAIN_BAR_Y);           // outer
 		rsi.child(c++, 35201, MAIN_BAR_X + 1, MAIN_BAR_Y + 1);   // cavity
 		rsi.child(c++, 35202, MAIN_BAR_X + 2, MAIN_BAR_Y + 2);   // fill (set percentage on this)
 		rsi.child(c++, 35203, MAIN_BAR_X + 2, MAIN_BAR_Y + 2);   // highlight
 
 // ---- Recently completed ----
-		rsi.child(c++, 35110, MAIN_X + 18, MAIN_Y + 70);
+		rsi.child(c++, 35110, MAIN_X + 4, MAIN_Y + 65);
 
 // ---- Almost finished ----
 		rsi.child(c++, 35120, MAIN_X + 18, MAIN_Y + 140);
