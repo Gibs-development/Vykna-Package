@@ -1,5 +1,8 @@
 package com.client.utilities.settings;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import java.awt.*;
 import java.io.Serializable;
 import java.util.HashMap;
@@ -39,6 +42,7 @@ public class Settings implements Serializable {
 		settings.bountyHunter = true;
 		settings.showEntityTarget = true;
 		settings.drawDistance = 30;
+		settings.rightPanelTabIndex = 0;
 		return settings;
 	}
 
@@ -47,6 +51,9 @@ public class Settings implements Serializable {
 	private static boolean rs3EditMode;
 	private int rs3PanelBackgroundColor;
 	private int rs3InterfaceTransparency;
+	@Getter
+	@Setter
+    private int rightPanelTabIndex;
 	private boolean gameTimers;
 	private boolean antiAliasing;
 	private boolean groundItemOverlay;
@@ -91,7 +98,7 @@ public class Settings implements Serializable {
 		return rs3EditMode;
 	}
 
-	public void setRs3EditMode(boolean rs3EditMode) {
+    public void setRs3EditMode(boolean rs3EditMode) {
 		this.rs3EditMode = rs3EditMode;
 	}
 

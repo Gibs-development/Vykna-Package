@@ -49,90 +49,136 @@ public final class AchievementHomePage extends RSInterface {
 		addSprite(35053, 0, SPRITE_ROOT + "MasteryIcon");
 
 		// ---- Home Page Text + Progress Bars ----
-		addText(35100, "Overview", tda, 1, 0x1E1E1E, false, true);
-		addText(35101, "Achievements Completed", tda, 0, 0x1E1E1E, false, true);
-		addText(35102, "0/0", tda, 0, 0x1E1E1E, true, true);
+		addText(35100, "Overview", tda, 1, 0xE3AE19, false, true);
+		addText(35101, "Achievements Completed", tda, 0, 0xFFFAE5, false, true);
+		addText(35102, "0/0", tda, 0, 0xFFFAE5, true, true);
 
 		// main completion bar 203x11
-		addProgressBar2021(35103, 203, 11, 0x2A2A2A);
+		addSkinProgressBar2021(35200, 203, 11); // main completion bar
 
-		addText(35110, "Recently completed", tda, 0, 0x1E1E1E, false, true);
+		addText(35110, "Recently completed", tda, 0, 0xFFFAE5, false, true);
 
-		addText(35120, "You're almost finished...", tda, 0, 0x1E1E1E, false, true);
-		addProgressBar2021(35121, 186, 11, 0x2A2A2A);
-		addProgressBar2021(35122, 186, 11, 0x2A2A2A);
-
-		addText(35130, "Categories", tda, 0, 0x1E1E1E, false, true);
+		addText(35120, "You're almost finished...", tda, 0, 0xFFFAE5, false, true);
+		addSkinProgressBar2021(35210, 186, 11); // almost finished bar 1
+		addSkinProgressBar2021(35220, 186, 11); // almost finished bar 2
+		addText(35130, "Categories", tda, 0, 0xE3AE19, false, true);
 
 		// 6 category mini bars (69x7)
-		addProgressBar2021(35131, 69, 7, 0x2A2A2A);
-		addProgressBar2021(35132, 69, 7, 0x2A2A2A);
-		addProgressBar2021(35133, 69, 7, 0x2A2A2A);
-		addProgressBar2021(35134, 69, 7, 0x2A2A2A);
-		addProgressBar2021(35135, 69, 7, 0x2A2A2A);
-		addProgressBar2021(35136, 69, 7, 0x2A2A2A);
-
+		addSkinProgressBar2021(35230, 69, 7);
+		addSkinProgressBar2021(35240, 69, 7);
+		addSkinProgressBar2021(35250, 69, 7);
+		addSkinProgressBar2021(35260, 69, 7);
+		addSkinProgressBar2021(35270, 69, 7);
+		addSkinProgressBar2021(35280, 69, 7);
 		// ---- Children ----
 		// 11 existing + 1+1+1+1 + 1 + 1+2 + 1 + 6 = 25 total
-		rsi.totalChildren(26);
+		// ---- Children ----
+		rsi.totalChildren(200);
 		int c = 0;
 
-		// BG
+// BG
 		rsi.child(c++, 35001, BG_X, BG_Y);
 
-		// Selected tab (Home)
+// Selected tab (Home)
 		rsi.child(c++, 35010, NAV_X, NAV_Y);
 		rsi.child(c++, 35011, NAV_X + ICON_INSET, NAV_Y + ICON_INSET);
 
-		// Achievements tab (button + icon)
+// Achievements tab (button + icon)
 		rsi.child(c++, 35020, NAV_X, NAV_Y + (1 * TAB_GAP));
 		rsi.child(c++, 35023, NAV_X + ICON_INSET, NAV_Y + (1 * TAB_GAP) + ICON_INSET);
 
-		// Skilling tab
+// Skilling tab
 		rsi.child(c++, 35030, NAV_X, NAV_Y + (2 * TAB_GAP));
 		rsi.child(c++, 35033, NAV_X + ICON_INSET, NAV_Y + (2 * TAB_GAP) + ICON_INSET);
 
-		// Combat tab
+// Combat tab
 		rsi.child(c++, 35040, NAV_X, NAV_Y + (3 * TAB_GAP));
 		rsi.child(c++, 35043, NAV_X + ICON_INSET, NAV_Y + (3 * TAB_GAP) + ICON_INSET);
 
-		// Mastery tab
+// Mastery tab
 		rsi.child(c++, 35050, NAV_X, NAV_Y + (4 * TAB_GAP));
 		rsi.child(c++, 35053, NAV_X + ICON_INSET, NAV_Y + (4 * TAB_GAP) + ICON_INSET);
 
-		// ---- Overview block ----
-		rsi.child(c++, 35100, MAIN_X + 18, MAIN_Y + 6);            // "Overview"
-		rsi.child(c++, 35101, MAIN_X + 18, MAIN_Y + 26);           // "Achievements Completed"
-		rsi.child(c++, 35102, MAIN_X + 250, MAIN_Y + 26);          // "0/0" right aligned-ish
-		rsi.child(c++, 35103, MAIN_X + 90, MAIN_Y + 44);           // main progress bar (203x11)
+// ---- Overview block ----
+		rsi.child(c++, 35100, MAIN_X + 18, MAIN_Y + 6);
+		rsi.child(c++, 35101, MAIN_X + 18, MAIN_Y + 26);
+		rsi.child(c++, 35102, MAIN_X + 250, MAIN_Y + 26);
 
-		// ---- Recently completed ----
+// main skinned bar at x,y
+		final int MAIN_BAR_X = MAIN_X + 90;
+		final int MAIN_BAR_Y = MAIN_Y + 44;
+		rsi.child(c++, 35200, MAIN_BAR_X, MAIN_BAR_Y);           // outer
+		rsi.child(c++, 35201, MAIN_BAR_X + 1, MAIN_BAR_Y + 1);   // cavity
+		rsi.child(c++, 35202, MAIN_BAR_X + 2, MAIN_BAR_Y + 2);   // fill (set percentage on this)
+		rsi.child(c++, 35203, MAIN_BAR_X + 2, MAIN_BAR_Y + 2);   // highlight
+
+// ---- Recently completed ----
 		rsi.child(c++, 35110, MAIN_X + 18, MAIN_Y + 70);
 
-		// ---- Almost finished ----
+// ---- Almost finished ----
 		rsi.child(c++, 35120, MAIN_X + 18, MAIN_Y + 140);
-		rsi.child(c++, 35121, MAIN_X + 60, MAIN_Y + 162);          // prog 186x11
-		rsi.child(c++, 35122, MAIN_X + 60, MAIN_Y + 202);          // prog 186x11
 
-		// ---- Categories ----
+// bar 1
+		final int AF1_X = MAIN_X + 60;
+		final int AF1_Y = MAIN_Y + 162;
+		rsi.child(c++, 35210, AF1_X, AF1_Y);
+		rsi.child(c++, 35211, AF1_X + 1, AF1_Y + 1);
+		rsi.child(c++, 35212, AF1_X + 2, AF1_Y + 2); // fill
+		rsi.child(c++, 35213, AF1_X + 2, AF1_Y + 2); // highlight
+
+// bar 2
+		final int AF2_X = MAIN_X + 60;
+		final int AF2_Y = MAIN_Y + 202;
+		rsi.child(c++, 35220, AF2_X, AF2_Y);
+		rsi.child(c++, 35221, AF2_X + 1, AF2_Y + 1);
+		rsi.child(c++, 35222, AF2_X + 2, AF2_Y + 2); // fill
+		rsi.child(c++, 35223, AF2_X + 2, AF2_Y + 2); // highlight
+
+// ---- Categories ----
 		rsi.child(c++, 35130, MAIN_X + 18, MAIN_Y + 235);
 
-		// 3x2 grid of 69x7 bars
 		final int CAT_X = MAIN_X + 18;
 		final int CAT_Y = MAIN_Y + 265;
-		final int CAT_GAP_X = 86; // 69 width + ~17 spacing
+		final int CAT_GAP_X = 86;
 		final int CAT_GAP_Y = 36;
 
-		rsi.child(c++, 35131, CAT_X + (0 * CAT_GAP_X), CAT_Y + (0 * CAT_GAP_Y));
-		rsi.child(c++, 35132, CAT_X + (1 * CAT_GAP_X), CAT_Y + (0 * CAT_GAP_Y));
-		rsi.child(c++, 35133, CAT_X + (2 * CAT_GAP_X), CAT_Y + (0 * CAT_GAP_Y));
+// helper macro-like placements (each is 4 children)
+		int x0 = CAT_X + (0 * CAT_GAP_X), x1 = CAT_X + (1 * CAT_GAP_X), x2 = CAT_X + (2 * CAT_GAP_X);
+		int y0 = CAT_Y + (0 * CAT_GAP_Y), y1 = CAT_Y + (1 * CAT_GAP_Y);
 
-		rsi.child(c++, 35134, CAT_X + (0 * CAT_GAP_X), CAT_Y + (1 * CAT_GAP_Y));
-		rsi.child(c++, 35135, CAT_X + (1 * CAT_GAP_X), CAT_Y + (1 * CAT_GAP_Y));
-		rsi.child(c++, 35136, CAT_X + (2 * CAT_GAP_X), CAT_Y + (1 * CAT_GAP_Y));
+// row 1
+		placeSkinnedBar(rsi, 35230, x0, y0, c);
+		c += 4;
+		placeSkinnedBar(rsi, 35240, x1, y0, c);
+		c += 4;
+		placeSkinnedBar(rsi, 35250, x2, y0, c);
+		c += 4;
+
+// row 2
+		placeSkinnedBar(rsi, 35260, x0, y1, c);
+		c += 4;
+		placeSkinnedBar(rsi, 35270, x1, y1, c);
+		c += 4;
+		placeSkinnedBar(rsi, 35280, x2, y1, c);
+		c += 4;
+		RSInterface.interfaceCache[35202].progressBar2021Percentage = 0.65;
+
+		RSInterface.interfaceCache[35212].progressBar2021Percentage = 0.42;
+		RSInterface.interfaceCache[35222].progressBar2021Percentage = 0.18;
+
+		RSInterface.interfaceCache[35232].progressBar2021Percentage = 0.90;
+		RSInterface.interfaceCache[35242].progressBar2021Percentage = 0.60;
+		RSInterface.interfaceCache[35252].progressBar2021Percentage = 0.25;
+		RSInterface.interfaceCache[35262].progressBar2021Percentage = 0.80;
+		RSInterface.interfaceCache[35272].progressBar2021Percentage = 0.10;
+		RSInterface.interfaceCache[35282].progressBar2021Percentage = 0.45;
+
+// etc
+
+// sanity
+		System.out.println("AchievementHomePage final child count = " + c);
+// System.out.println("AchievementHomePage children final c=" + c);
 	}
 
 
-
-
-}
+	}

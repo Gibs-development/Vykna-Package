@@ -3762,6 +3762,44 @@ public class RSInterface {
 		childX[id] = x;
 		childY[id] = y;
 	}
+	public static void addDrawBox(int id, int width, int height, int fillColor, int borderColor, int alpha) {
+		RSInterface r = addInterface(id);
+		r.type = TYPE_DRAW_BOX;
+		r.width = width;
+		r.height = height;
+		r.fillColor = fillColor;
+		r.borderColor = borderColor;
+		r.transparency = alpha;
+	}
+
+	public static void addSkinProgressBar2021(int baseId, int w, int h) {
+		// Outer border
+		addDrawBox(baseId, w, h, 0x000000, 0x14110d, 0);
+
+		// Inner cavity (slightly inset)
+		addDrawBox(baseId + 1, w - 2, h - 2, 0x14110d, 0x3a3328, 255);
+
+		// Actual fill (inset more)
+		addProgressBar2021(baseId + 2, w - 4, h - 4, 0x000000); // borderColor unused visually if you overlay borders
+
+		// Top highlight (1px alpha strip)
+		addAlphaBox(baseId + 3, w - 4, 1, 0xE6D9B3, 18);
+
+	}
+
+	public static void addAlphaBox(int id, int width, int height, int fillColor, int alpha) {
+		RSInterface r = addInterface(id);
+		r.type = TYPE_DRAW_BOX;
+		r.width = width;
+		r.height = height;
+		r.fillColor = fillColor;
+
+		// Sentinel value: tells the draw code to skip DrawingArea.drawBorder(...)
+		r.borderColor = -1;
+
+		// 0 = fully transparent, 255 = fully opaque (assuming your drawTransparentBox uses that convention)
+		r.transparency = alpha;
+	}
 
 	public void totalChildren(int t) {
 		children = new int[t];
@@ -4223,15 +4261,23 @@ public class RSInterface {
 	}
 
 	public static int getRgbProgressColor(double progress) {
-		if (progress < 0)
-			progress = 0;
-		if (progress > 1)
-			progress = 1;
-		double H = progress * 0.4; // Hue (note 0.4 = Green, see huge chart below)
-		double S = 0.9; // Saturation
-		double B = 0.9; // Brightness
-		return Color.getHSBColor((float)H, (float)S, (float)B).getRGB();
+		progress = Math.max(0, Math.min(1, progress));
+
+		// Keep it mostly green, slightly shifts toward yellow at high %
+		double H = 0.33 - (0.08 * (1.0 - progress)); // ~green range
+		double S = 0.55 + (0.15 * progress);         // 0.55 -> 0.70
+		double B = 0.55 + (0.20 * progress);         // 0.55 -> 0.75
+
+		return Color.getHSBColor((float) H, (float) S, (float) B).getRGB();
 	}
+
+	public static void placeSkinnedBar(RSInterface rsi, int baseId, int x, int y, int idx) {
+		rsi.child(idx,     baseId,     x,     y);
+		rsi.child(idx + 1, baseId + 1, x + 1, y + 1);
+		rsi.child(idx + 2, baseId + 2, x + 2, y + 2); // fill
+		rsi.child(idx + 3, baseId + 3, x + 2, y + 2); // highlight
+	}
+
 
 	/**
 	 * Determines if the widget has a tooltip

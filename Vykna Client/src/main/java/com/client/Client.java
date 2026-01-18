@@ -14541,12 +14541,14 @@ public class Client extends RSApplet {
 							DrawingArea.drawPixels(class9_1.height, _y, _x, color, progressBarWidth);
 							DrawingArea.drawBorder(_x, _y, class9_1.width, class9_1.height, class9_1.fillColor);
 						} else if (class9_1.type == RSInterface.TYPE_DRAW_BOX) {
-							//DrawingArea.drawRoundedRectangle(_x, _y, class9_1.width, class9_1.height, class9_1.fillColor, class9_1.transparency, true, true);
+							DrawingArea.drawTransparentBox(_x, _y, class9_1.width, class9_1.height,
+									class9_1.fillColor, class9_1.transparency);
 
-							DrawingArea.drawTransparentBox(_x, _y, class9_1.width, class9_1.height, class9_1.fillColor, class9_1.transparency);
-							DrawingArea.drawBorder(_x, _y, class9_1.width, class9_1.height, class9_1.borderColor);
+							// Only draw a border if borderColor is set
+							if (class9_1.borderColor != -1) {
+								DrawingArea.drawBorder(_x, _y, class9_1.width, class9_1.height, class9_1.borderColor);
+							}
 						}
-
 					if (interfaceText) {
 						newSmallFont.drawString(class9_1.id + "", _x - 12, _y, 0xFFFFFFFF, 0, 256);
 					}
