@@ -4377,7 +4377,7 @@ interfaceId+=5000;
 
 
 	public static void achievementInterface(TextDrawingArea[] TDA) {
-		CombatAchievementsInterface.build(TDA);
+		AchievementHomePage.build(TDA);
 	}
 
 
