@@ -21,16 +21,6 @@ public class MinimapBasePanel extends PanelManager.BasePanel {
 
 		DrawingArea.setDrawingArea(bounds.y + bounds.height, bounds.x, bounds.x + bounds.width, bounds.y + headerHeight);
 		client.drawMinimapAt(bounds.x, bounds.y + headerHeight, bounds.width, bounds.height - headerHeight);
-		if (client.isRs3EditModeActive()) {
-			Rectangle content = client.getRs3MinimapContentBounds(bounds.x, bounds.y + headerHeight,
-					bounds.width, bounds.height - headerHeight);
-			if (content != null) {
-				DrawingArea.drawPixels(1, content.y, content.x, 0xffd24a, content.width);
-				DrawingArea.drawPixels(1, content.y + content.height - 1, content.x, 0xffd24a, content.width);
-				DrawingArea.drawPixels(content.height, content.y, content.x, 0xffd24a, 1);
-				DrawingArea.drawPixels(content.height, content.y, content.x + content.width - 1, 0xffd24a, 1);
-			}
-		}
 		DrawingArea.setDrawingArea(clipBottom, clipLeft, clipRight, clipTop);
 	}
 
@@ -53,5 +43,15 @@ public class MinimapBasePanel extends PanelManager.BasePanel {
 		int absoluteY = bounds.y + mouseY;
 		client.processRs3MinimapClick(absoluteX, absoluteY, bounds.x, bounds.y + headerHeight, bounds.width, bounds.height - headerHeight);
 		return true;
+	}
+
+	@Override
+	public boolean isClosable() {
+		return false;
+	}
+
+	@Override
+	public boolean drawsBackground() {
+		return false;
 	}
 }

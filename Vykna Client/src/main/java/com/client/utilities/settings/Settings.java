@@ -24,6 +24,9 @@ public class Settings implements Serializable {
 		settings.rs3PanelBackgroundColor = 0x141414;
 		settings.rs3InterfaceTransparency = 0;
 		settings.oldGameframe = false;
+		settings.loadPresetOnLogin = false;
+		settings.activePresetName = "Default";
+		settings.minimapState = 0;
 		settings.gameTimers = true;
 		settings.antiAliasing = false;
 		settings.groundItemOverlay = true;
@@ -56,10 +59,15 @@ public class Settings implements Serializable {
 	private boolean bountyHunter;
 	private boolean showEntityTarget;
 	private int drawDistance;
+	private boolean loadPresetOnLogin;
+	private String activePresetName;
+	private int minimapState;
 	private boolean stretchedMode;
 	private Dimension stretchedModeDimensions;
 	private Rectangle rs3ViewportBounds;
 	private Map<Integer, Rs3PanelLayout> rs3PanelLayouts;
+	private Map<Integer, Integer> rs3PanelGroups;
+	private Map<Integer, Integer> rs3GroupActivePanels;
 
 	public Settings() {}
 
@@ -118,6 +126,34 @@ public class Settings implements Serializable {
 		if (rs3PanelLayouts != null) {
 			rs3PanelLayouts.clear();
 		}
+		if (rs3PanelGroups != null) {
+			rs3PanelGroups.clear();
+		}
+		if (rs3GroupActivePanels != null) {
+			rs3GroupActivePanels.clear();
+		}
+	}
+
+	public Map<Integer, Integer> getRs3PanelGroups() {
+		if (rs3PanelGroups == null) {
+			rs3PanelGroups = new HashMap<>();
+		}
+		return rs3PanelGroups;
+	}
+
+	public void setRs3PanelGroups(Map<Integer, Integer> rs3PanelGroups) {
+		this.rs3PanelGroups = rs3PanelGroups;
+	}
+
+	public Map<Integer, Integer> getRs3GroupActivePanels() {
+		if (rs3GroupActivePanels == null) {
+			rs3GroupActivePanels = new HashMap<>();
+		}
+		return rs3GroupActivePanels;
+	}
+
+	public void setRs3GroupActivePanels(Map<Integer, Integer> rs3GroupActivePanels) {
+		this.rs3GroupActivePanels = rs3GroupActivePanels;
 	}
 
 	public boolean isAntiAliasing() {
@@ -214,6 +250,30 @@ public class Settings implements Serializable {
 
 	public void setDrawDistance(int drawDistance) {
 		this.drawDistance = drawDistance;
+	}
+
+	public boolean isLoadPresetOnLogin() {
+		return loadPresetOnLogin;
+	}
+
+	public void setLoadPresetOnLogin(boolean loadPresetOnLogin) {
+		this.loadPresetOnLogin = loadPresetOnLogin;
+	}
+
+	public String getActivePresetName() {
+		return activePresetName == null || activePresetName.trim().isEmpty() ? "Default" : activePresetName;
+	}
+
+	public void setActivePresetName(String activePresetName) {
+		this.activePresetName = activePresetName;
+	}
+
+	public int getMinimapState() {
+		return minimapState;
+	}
+
+	public void setMinimapState(int minimapState) {
+		this.minimapState = minimapState;
 	}
 
 	public boolean isStretchedMode() {
