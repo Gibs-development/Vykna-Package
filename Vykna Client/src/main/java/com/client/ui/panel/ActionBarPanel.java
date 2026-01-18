@@ -6,7 +6,7 @@ import com.client.DrawingArea;
 import java.awt.Rectangle;
 
 public class ActionBarPanel extends PanelManager.BasePanel {
-	private static final int SLOT_SIZE = 28;
+	private static final int SLOT_SIZE = 30;
 	private static final int SLOT_GAP = 4;
 	private static final int SLOT_COUNT = 12;
 
@@ -16,6 +16,7 @@ public class ActionBarPanel extends PanelManager.BasePanel {
 
 	@Override
 	public void draw(Client client) {
+		updateCooldown();
 		Rectangle bounds = getBounds();
 		int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
 		int contentX = bounds.x + 6;

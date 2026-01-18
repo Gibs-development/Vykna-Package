@@ -2,6 +2,7 @@ package com.client.ui.panel;
 
 import com.client.Client;
 import com.client.DrawingArea;
+import com.client.Sprite;
 import com.client.graphics.interfaces.RSInterface;
 import com.client.sound.Sound;
 import com.client.sound.SoundType;
@@ -55,6 +56,7 @@ public class PanelManager {
 	public static final int PANEL_ID_TELEPORT = 32;
 	public static final int PANEL_ID_XP_PANEL = 33;
 	public static final int PANEL_ID_ACTION_BAR = 34;
+	public static final int PANEL_ID_RIGHT_STACK = 35;
 	private final List<UiPanel> panels = new ArrayList<>();
 	private final Map<Integer, Rectangle> preferredBounds = new HashMap<>();
 	private int layoutWidth = -1;
@@ -760,20 +762,7 @@ public class PanelManager {
 				inventoryY -= bottomOverflow;
 			}
 
-			panels.add(new InventoryPanel(PANEL_ID_INVENTORY, new Rectangle(baseX, inventoryY, PANEL_WIDTH, PANEL_HEIGHT)));
-			panels.add(new PrayerPanel(PANEL_ID_PRAYER, new Rectangle(baseX, prayerY, PANEL_WIDTH, PANEL_HEIGHT)));
-			panels.add(new MagicPanel(PANEL_ID_MAGIC, new Rectangle(baseX, magicY, PANEL_WIDTH, PANEL_HEIGHT)));
-			panels.add(new EquipmentPanel(PANEL_ID_EQUIPMENT, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING, inventoryY, PANEL_WIDTH, PANEL_HEIGHT)));
-			panels.add(new TabPanel(PANEL_ID_QUEST, 0, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Quest", false));
-			panels.add(new TabPanel(PANEL_ID_STATS, 1, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING, magicY, PANEL_WIDTH, PANEL_HEIGHT), "Stats", false));
-			panels.add(new TabPanel(PANEL_ID_SKILLS, 2, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 2 - PANEL_WIDTH, inventoryY, PANEL_WIDTH, PANEL_HEIGHT), "Skills", false));
-			panels.add(new TabPanel(PANEL_ID_CLAN, 7, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 2 - PANEL_WIDTH, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Clan", false));
-			panels.add(new TabPanel(PANEL_ID_FRIENDS, 8, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 2 - PANEL_WIDTH, magicY, PANEL_WIDTH, PANEL_HEIGHT), "Friends", false));
-			panels.add(new TabPanel(PANEL_ID_SETTINGS, 9, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 3 - PANEL_WIDTH, inventoryY, PANEL_WIDTH, PANEL_HEIGHT), "Settings", false));
-			panels.add(new TabPanel(PANEL_ID_EMOTES, 10, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 3 - PANEL_WIDTH, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Emotes", false));
-			panels.add(new TabPanel(PANEL_ID_MUSIC, 11, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 3 - PANEL_WIDTH, magicY, PANEL_WIDTH, PANEL_HEIGHT), "Music", false));
-			panels.add(new TabPanel(PANEL_ID_NOTES, 12, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 4 - PANEL_WIDTH, inventoryY, PANEL_WIDTH, PANEL_HEIGHT), "Notes", false));
-			panels.add(new TabPanel(PANEL_ID_LOGOUT, 13, new Rectangle(baseX - PANEL_WIDTH - PANEL_PADDING * 4 - PANEL_WIDTH, prayerY, PANEL_WIDTH, PANEL_HEIGHT), "Logout", false));
+			panels.add(new RightPanelStack(PANEL_ID_RIGHT_STACK, new Rectangle(baseX, inventoryY, PANEL_WIDTH, PANEL_HEIGHT)));
 
 			int minimapX = Math.max(PANEL_MARGIN, Client.currentGameWidth - MINIMAP_PANEL_WIDTH - PANEL_MARGIN);
 			int minimapY = PANEL_MARGIN;
@@ -799,7 +788,6 @@ public class PanelManager {
 			int tabBarX = Math.max(PANEL_MARGIN, minimapX - TAB_BAR_PANEL_WIDTH - PANEL_PADDING);
 			int tabBarY = minimapY;
 			panels.add(new ChatPanel(PANEL_ID_CHAT, new Rectangle(chatX, chatY, CHAT_PANEL_WIDTH, CHAT_PANEL_HEIGHT)));
-			panels.add(new TabBarPanel(PANEL_ID_TAB_BAR, new Rectangle(tabBarX, tabBarY, TAB_BAR_PANEL_WIDTH, TAB_BAR_PANEL_HEIGHT)));
 		}
 	}
 
@@ -1394,153 +1382,450 @@ public class PanelManager {
 		}
 	}
 
-	private static final class PrayerPanel extends TabPanel {
-		private PrayerPanel(int id, Rectangle bounds) {
-			super(id, 5, bounds, "Prayer", true, true, 120, 160 + PANEL_HEADER_HEIGHT);
-		}
+	private static final class RightPanelStack extends BasePanel {
+		private static final int TAB_ICON_SIZE = 28;
+		private static final int TAB_PADDING = 4;
+		private static final int TAB_ROW_HEIGHT = TAB_ICON_SIZE + TAB_PADDING;
+		private static final int TAB_ACTIVE_BG = 0x232323;
+		private static final int TAB_INACTIVE_BG = 0x171717;
+		private static final int TAB_HOVER_BG = 0x202020;
+		private static final int TAB_BORDER = 0x2c2c2c;
 
-		@Override
-		protected void updateInterfaceLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
-			super.updateInterfaceLayout(client, rsInterface, bounds);
-			rsInterface.scrollMax = Math.max(rsInterface.height, getInterfaceContentHeight(rsInterface));
-		}
+		private static final int INVENTORY_CONTAINER_ID = 3214;
+		private static final int INVENTORY_SLOT_SIZE = 32;
+		private static final int INVENTORY_PADDING = 4;
+		private static final int INVENTORY_MIN_COLUMNS = 2;
+		private static final int INVENTORY_MAX_COLUMNS = 8;
 
-		@Override
-		protected int getContentPadding(Client client, Rectangle bounds) {
-			int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
-			int availableHeight = bounds.height - headerHeight;
-			return (availableHeight < 210 || bounds.width < 170) ? 2 : 6;
-		}
-	}
-
-	private static final class MagicPanel extends TabPanel {
-		private MagicPanel(int id, Rectangle bounds) {
-			super(id, 6, bounds, "Magic", true, true, 120, 160 + PANEL_HEADER_HEIGHT);
-		}
-
-		@Override
-		protected void updateInterfaceLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
-			super.updateInterfaceLayout(client, rsInterface, bounds);
-			rsInterface.scrollMax = Math.max(rsInterface.height, getInterfaceContentHeight(rsInterface));
-		}
-
-		@Override
-		protected int getContentPadding(Client client, Rectangle bounds) {
-			int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
-			int availableHeight = bounds.height - headerHeight;
-			return (availableHeight < 210 || bounds.width < 170) ? 2 : 6;
-		}
-	}
-
-	private static final class EquipmentPanel extends TabPanel {
-		private static final int EXPANDED_MIN_WIDTH = 240;
-		private static final int EXPANDED_MIN_HEIGHT = 300;
-		private static final int EQUIPMENT_INTERFACE_ID = 1644;
-		private static final int CHARACTER_CHILD_ID = 15125;
-		private static final int[] SLOT_CHILD_IDS = {
-				1645, 1646, 1647, 1648, 1649, 1650, 1651, 1652, 1653, 1654, 1655
+		private static final TabEntry[] TABS = {
+				new TabEntry("Quest", 0),
+				new TabEntry("Stats", 1),
+				new TabEntry("Skills", 2),
+				new TabEntry("Inventory", 3),
+				new TabEntry("Equipment", 4),
+				new TabEntry("Prayer", 5),
+				new TabEntry("Magic", 6),
+				new TabEntry("Clan", 7),
+				new TabEntry("Friends", 8),
+				new TabEntry("Settings", 9),
+				new TabEntry("Emotes", 10),
+				new TabEntry("Music", 11),
+				new TabEntry("Notes", 12),
+				new TabEntry("Logout", 13)
 		};
-		private boolean expandedMode;
-		private final Map<Integer, Point> originalPositions = new HashMap<>();
 
-		private EquipmentPanel(int id, Rectangle bounds) {
-			super(id, 4, bounds, "Equipment", false, true, 160, 200 + PANEL_HEADER_HEIGHT);
+		private final Map<Integer, Integer> scrollOffsets = new HashMap<>();
+		private final Map<Integer, Map<Integer, Point>> originalChildPositions = new HashMap<>();
+		private int activeTabIndex;
+		private int hoveredTabIndex = -1;
+
+		private RightPanelStack(int id, Rectangle bounds) {
+			super(id, bounds, true, true, "Panels", true, 160, 200 + PANEL_HEADER_HEIGHT, false);
+			Settings settings = Client.getUserSettings();
+			int defaultTab = settings == null ? 3 : settings.getRightPanelTabIndex();
+			activeTabIndex = resolveTabIndex(defaultTab);
 		}
 
 		@Override
 		public void draw(Client client) {
-			updateLayout(client);
-			super.draw(client);
+			Rectangle bounds = getBounds();
+			int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+			int tabRows = drawTabBar(client, bounds, headerHeight);
+			Rectangle contentBounds = getContentBounds(bounds, headerHeight, tabRows);
+			drawActiveInterface(client, contentBounds);
 		}
 
 		@Override
 		public boolean handleMouse(Client client, int mouseX, int mouseY) {
-			updateLayout(client);
-			return super.handleMouse(client, mouseX, mouseY);
-		}
-
-		private void updateLayout(Client client) {
-			if (!client.isRs3InterfaceStyleActive()) {
-				restoreLayout();
-				return;
-			}
-			int interfaceId = Client.tabInterfaceIDs[getTabIndex()];
-			if (interfaceId != EQUIPMENT_INTERFACE_ID) {
-				restoreLayout();
-				return;
-			}
 			Rectangle bounds = getBounds();
-			boolean shouldExpand = bounds.width >= EXPANDED_MIN_WIDTH && bounds.height >= EXPANDED_MIN_HEIGHT;
-			if (shouldExpand == expandedMode) {
-				return;
+			int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+			int tabRows = getTabRows(bounds);
+			int absoluteX = bounds.x + mouseX;
+			int absoluteY = bounds.y + mouseY;
+			hoveredTabIndex = resolveTabAt(bounds, headerHeight, absoluteX, absoluteY);
+			Rectangle contentBounds = getContentBounds(bounds, headerHeight, tabRows);
+			if (absoluteY < contentBounds.y) {
+				return true;
 			}
-			if (shouldExpand) {
-				int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
-				applyExpandedLayout(bounds, headerHeight);
-			} else {
-				restoreLayout();
-			}
-			expandedMode = shouldExpand;
+			return handleInterfaceMouse(client, contentBounds, absoluteX, absoluteY);
 		}
 
-		private void applyExpandedLayout(Rectangle bounds, int headerHeight) {
-			RSInterface rsInterface = RSInterface.interfaceCache[EQUIPMENT_INTERFACE_ID];
-			if (rsInterface == null || rsInterface.children == null) {
+		@Override
+		public boolean handleClick(Client client, int mouseX, int mouseY) {
+			Rectangle bounds = getBounds();
+			int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+			int absoluteX = bounds.x + mouseX;
+			int absoluteY = bounds.y + mouseY;
+			int clickedTab = resolveTabAt(bounds, headerHeight, absoluteX, absoluteY);
+			if (clickedTab != -1) {
+				setActiveTab(client, clickedTab);
+				return true;
+			}
+			int tabRows = getTabRows(bounds);
+			Rectangle contentBounds = getContentBounds(bounds, headerHeight, tabRows);
+			if (absoluteY < contentBounds.y) {
+				return true;
+			}
+			return handleInterfaceClick(client, contentBounds, absoluteX, absoluteY);
+		}
+
+		@Override
+		public boolean handleRightClick(Client client, int mouseX, int mouseY) {
+			Rectangle bounds = getBounds();
+			int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+			int tabRows = getTabRows(bounds);
+			Rectangle contentBounds = getContentBounds(bounds, headerHeight, tabRows);
+			int absoluteX = bounds.x + mouseX;
+			int absoluteY = bounds.y + mouseY;
+			if (absoluteY < contentBounds.y) {
+				return true;
+			}
+			return handleInterfaceRightClick(client, contentBounds, absoluteX, absoluteY);
+		}
+
+		private int drawTabBar(Client client, Rectangle bounds, int headerHeight) {
+			int columns = Math.max(1, (bounds.width - TAB_PADDING * 2) / (TAB_ICON_SIZE + TAB_PADDING));
+			int rows = (int) Math.ceil(TABS.length / (double) columns);
+			int startX = bounds.x + TAB_PADDING;
+			int startY = bounds.y + headerHeight + TAB_PADDING;
+			for (int index = 0; index < TABS.length; index++) {
+				int col = index % columns;
+				int row = index / columns;
+				int x = startX + col * (TAB_ICON_SIZE + TAB_PADDING);
+				int y = startY + row * TAB_ROW_HEIGHT;
+				boolean active = TABS[index].tabIndex == activeTabIndex;
+				boolean hovered = TABS[index].tabIndex == hoveredTabIndex;
+				int color = active ? TAB_ACTIVE_BG : (hovered ? TAB_HOVER_BG : TAB_INACTIVE_BG);
+				DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, color, TAB_ICON_SIZE);
+				DrawingArea.drawPixels(1, y, x, TAB_BORDER, TAB_ICON_SIZE);
+				DrawingArea.drawPixels(1, y + TAB_ICON_SIZE - 1, x, TAB_BORDER, TAB_ICON_SIZE);
+				DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, TAB_BORDER, 1);
+				DrawingArea.drawPixels(TAB_ICON_SIZE, y, x + TAB_ICON_SIZE - 1, TAB_BORDER, 1);
+				Sprite icon = client.getTabIconSprite(TABS[index].tabIndex);
+				if (icon != null) {
+					int iconX = x + (TAB_ICON_SIZE - icon.myWidth) / 2;
+					int iconY = y + (TAB_ICON_SIZE - icon.myHeight) / 2;
+					icon.drawSprite(iconX, iconY);
+				} else {
+					client.newSmallFont.drawCenteredString(TABS[index].label.substring(0, 1), x + TAB_ICON_SIZE / 2,
+							y + 20, 0xffffff, 0);
+				}
+			}
+			return rows;
+		}
+
+		int getTabRows(Rectangle bounds) {
+			int columns = Math.max(1, (bounds.width - TAB_PADDING * 2) / (TAB_ICON_SIZE + TAB_PADDING));
+			return (int) Math.ceil(TABS.length / (double) columns);
+		}
+
+		Rectangle getContentBounds(Rectangle bounds, int headerHeight, int tabRows) {
+			int tabHeight = tabRows * TAB_ROW_HEIGHT + TAB_PADDING;
+			return new Rectangle(
+					bounds.x + TAB_PADDING,
+					bounds.y + headerHeight + tabHeight,
+					Math.max(0, bounds.width - TAB_PADDING * 2),
+					Math.max(0, bounds.height - headerHeight - tabHeight - TAB_PADDING));
+		}
+
+		private int resolveTabAt(Rectangle bounds, int headerHeight, int absoluteX, int absoluteY) {
+			int columns = Math.max(1, (bounds.width - TAB_PADDING * 2) / (TAB_ICON_SIZE + TAB_PADDING));
+			int startX = bounds.x + TAB_PADDING;
+			int startY = bounds.y + headerHeight + TAB_PADDING;
+			for (int index = 0; index < TABS.length; index++) {
+				int col = index % columns;
+				int row = index / columns;
+				int x = startX + col * (TAB_ICON_SIZE + TAB_PADDING);
+				int y = startY + row * TAB_ROW_HEIGHT;
+				if (absoluteX >= x && absoluteX <= x + TAB_ICON_SIZE && absoluteY >= y && absoluteY <= y + TAB_ICON_SIZE) {
+					return TABS[index].tabIndex;
+				}
+			}
+			return -1;
+		}
+
+		private void setActiveTab(Client client, int tabIndex) {
+			activeTabIndex = resolveTabIndex(tabIndex);
+			Settings settings = Client.getUserSettings();
+			if (settings != null) {
+				settings.setRightPanelTabIndex(activeTabIndex);
+			}
+			try {
+				com.client.utilities.settings.SettingsManager.saveSettings(client);
+			} catch (Exception e) {
+				System.err.println("[Settings] Failed to persist right panel tab selection.");
+				e.printStackTrace();
+			}
+		}
+
+		private int resolveTabIndex(int tabIndex) {
+			for (TabEntry entry : TABS) {
+				if (entry.tabIndex == tabIndex) {
+					return tabIndex;
+				}
+			}
+			return 3;
+		}
+
+		private void drawActiveInterface(Client client, Rectangle contentBounds) {
+			int interfaceId = Client.tabInterfaceIDs[activeTabIndex];
+			if (interfaceId <= 0) {
+				return;
+			}
+			RSInterface rsInterface = RSInterface.interfaceCache[interfaceId];
+			if (rsInterface == null) {
+				return;
+			}
+			updateInterfaceLayout(client, rsInterface, contentBounds);
+			int scrollPosition = getScrollPosition(rsInterface, contentBounds, activeTabIndex);
+			int clipLeft = DrawingArea.topX;
+			int clipTop = DrawingArea.topY;
+			int clipRight = DrawingArea.bottomX;
+			int clipBottom = DrawingArea.bottomY;
+			DrawingArea.setDrawingArea(contentBounds.y + contentBounds.height, contentBounds.x, contentBounds.x + contentBounds.width, contentBounds.y);
+			client.pushUiOffset(contentBounds.x, contentBounds.y);
+			client.drawInterfaceWithOffset(scrollPosition, 0, rsInterface, 0);
+			client.popUiOffset();
+			DrawingArea.setDrawingArea(clipBottom, clipLeft, clipRight, clipTop);
+			if (needsScroll(rsInterface, contentBounds)) {
+				int scrollHeight = contentBounds.height;
+				int scrollMax = getContentHeight(rsInterface);
+				client.drawScrollbar(scrollHeight, scrollOffsets.getOrDefault(activeTabIndex, 0), contentBounds.y,
+						contentBounds.x + contentBounds.width - 16, scrollMax);
+			}
+		}
+
+		private boolean handleInterfaceMouse(Client client, Rectangle contentBounds, int absoluteX, int absoluteY) {
+			int interfaceId = Client.tabInterfaceIDs[activeTabIndex];
+			if (interfaceId <= 0) {
+				return false;
+			}
+			RSInterface rsInterface = RSInterface.interfaceCache[interfaceId];
+			if (rsInterface == null) {
+				return false;
+			}
+			int adjustedMouseY = absoluteY - contentBounds.y;
+			int adjustedMouseX = absoluteX - contentBounds.x;
+			if (adjustedMouseY < 0 || adjustedMouseX < 0) {
+				return false;
+			}
+			updateInterfaceLayout(client, rsInterface, contentBounds);
+			client.pushUiOffset(contentBounds.x, contentBounds.y);
+			client.buildInterfaceMenuWithOffset(0, rsInterface, adjustedMouseX, 0, adjustedMouseY,
+					getScrollPosition(rsInterface, contentBounds, activeTabIndex));
+			client.popUiOffset();
+			return true;
+		}
+
+		private boolean handleInterfaceClick(Client client, Rectangle contentBounds, int absoluteX, int absoluteY) {
+			int interfaceId = Client.tabInterfaceIDs[activeTabIndex];
+			if (interfaceId <= 0) {
+				return false;
+			}
+			RSInterface rsInterface = RSInterface.interfaceCache[interfaceId];
+			if (rsInterface == null) {
+				return false;
+			}
+			int adjustedMouseY = absoluteY - contentBounds.y;
+			int adjustedMouseX = absoluteX - contentBounds.x;
+			if (adjustedMouseY < 0 || adjustedMouseX < 0) {
+				return false;
+			}
+			updateInterfaceLayout(client, rsInterface, contentBounds);
+			client.pushUiOffset(contentBounds.x, contentBounds.y);
+			client.buildInterfaceMenuWithOffset(0, rsInterface, adjustedMouseX, 0, adjustedMouseY,
+					getScrollPosition(rsInterface, contentBounds, activeTabIndex));
+			client.popUiOffset();
+			return true;
+		}
+
+		private boolean handleInterfaceRightClick(Client client, Rectangle contentBounds, int absoluteX, int absoluteY) {
+			int interfaceId = Client.tabInterfaceIDs[activeTabIndex];
+			if (interfaceId <= 0) {
+				return false;
+			}
+			RSInterface rsInterface = RSInterface.interfaceCache[interfaceId];
+			if (rsInterface == null) {
+				return false;
+			}
+			int adjustedMouseY = absoluteY - contentBounds.y;
+			int adjustedMouseX = absoluteX - contentBounds.x;
+			if (adjustedMouseY < 0 || adjustedMouseX < 0) {
+				return false;
+			}
+			updateInterfaceLayout(client, rsInterface, contentBounds);
+			client.pushUiOffset(contentBounds.x, contentBounds.y);
+			client.buildInterfaceMenuWithOffset(0, rsInterface, adjustedMouseX, 0, adjustedMouseY,
+					getScrollPosition(rsInterface, contentBounds, activeTabIndex));
+			client.popUiOffset();
+			return true;
+		}
+
+		void scrollBy(int delta, Rectangle contentBounds, Client client) {
+			int interfaceId = Client.tabInterfaceIDs[activeTabIndex];
+			if (interfaceId <= 0) {
+				return;
+			}
+			RSInterface rsInterface = RSInterface.interfaceCache[interfaceId];
+			if (rsInterface == null || !needsScroll(rsInterface, contentBounds)) {
+				scrollOffsets.put(activeTabIndex, 0);
+				return;
+			}
+			int maxScroll = Math.max(0, getContentHeight(rsInterface) - contentBounds.height);
+			int current = scrollOffsets.getOrDefault(activeTabIndex, 0);
+			scrollOffsets.put(activeTabIndex, clamp(current + delta, 0, maxScroll));
+		}
+
+		private boolean needsScroll(RSInterface rsInterface, Rectangle bounds) {
+			return getContentHeight(rsInterface) > bounds.height;
+		}
+
+		private int getContentHeight(RSInterface rsInterface) {
+			return Math.max(rsInterface.height, rsInterface.scrollMax);
+		}
+
+		private int getScrollPosition(RSInterface rsInterface, Rectangle bounds, int tabIndex) {
+			if (!needsScroll(rsInterface, bounds)) {
+				scrollOffsets.put(tabIndex, 0);
+				return 0;
+			}
+			int maxScroll = Math.max(0, getContentHeight(rsInterface) - bounds.height);
+			int current = scrollOffsets.getOrDefault(tabIndex, 0);
+			int clamped = clamp(current, 0, maxScroll);
+			scrollOffsets.put(tabIndex, clamped);
+			return clamped;
+		}
+
+		private void updateInterfaceLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
+			rsInterface.width = bounds.width;
+			rsInterface.height = bounds.height;
+			if (activeTabIndex == 3) {
+				applyInventoryLayout(client, rsInterface, bounds);
+				return;
+			}
+			if (activeTabIndex == 5 || activeTabIndex == 6) {
+				applyIconGridLayout(rsInterface, bounds);
+			}
+			rsInterface.scrollMax = Math.max(rsInterface.height, getInterfaceContentHeight(rsInterface));
+		}
+
+		private void applyInventoryLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
+			RSInterface container = RSInterface.interfaceCache[INVENTORY_CONTAINER_ID];
+			if (container == null) {
+				return;
+			}
+			int padX = container.invSpritePadX;
+			int padY = container.invSpritePadY;
+			int contentWidth = Math.max(1, bounds.width - INVENTORY_PADDING * 2);
+			int columns = Math.max(INVENTORY_MIN_COLUMNS,
+					Math.min(INVENTORY_MAX_COLUMNS, (contentWidth + padX) / (INVENTORY_SLOT_SIZE + padX)));
+			int rows = (int) Math.ceil(28D / columns);
+			int requiredHeight = rows * INVENTORY_SLOT_SIZE + Math.max(0, rows - 1) * padY + INVENTORY_PADDING * 2;
+			rsInterface.height = Math.max(bounds.height, requiredHeight);
+			int targetSize = columns * rows;
+			if (container.inventoryItemId == null || container.inventoryItemId.length != targetSize) {
+				int[] oldItems = container.inventoryItemId == null ? new int[0] : container.inventoryItemId;
+				int[] oldAmounts = container.inventoryAmounts == null ? new int[0] : container.inventoryAmounts;
+				container.inventoryItemId = new int[targetSize];
+				container.inventoryAmounts = new int[targetSize];
+				for (int index = 0; index < Math.min(28, targetSize); index++) {
+					if (index < oldItems.length) {
+						container.inventoryItemId[index] = oldItems[index];
+						container.inventoryAmounts[index] = oldAmounts[index];
+					}
+				}
+			}
+			container.width = columns;
+			container.height = rows;
+			client.getPanelManager().saveLayout(client);
+		}
+
+		private void applyIconGridLayout(RSInterface rsInterface, Rectangle bounds) {
+			if (rsInterface.children == null) {
 				return;
 			}
 			cacheOriginalPositions(rsInterface);
-			int centerX = bounds.width / 2;
-			int centerY = headerHeight + (bounds.height - headerHeight) / 2;
-			setChildPosition(rsInterface, CHARACTER_CHILD_ID, centerX - 32, centerY - 70);
-			setChildPosition(rsInterface, 1645, centerX - 18, centerY - 132);
-			setChildPosition(rsInterface, 1646, centerX - 86, centerY - 90);
-			setChildPosition(rsInterface, 1647, centerX - 18, centerY - 90);
-			setChildPosition(rsInterface, 1648, centerX - 126, centerY - 20);
-			setChildPosition(rsInterface, 1649, centerX - 18, centerY - 20);
-			setChildPosition(rsInterface, 1650, centerX + 90, centerY - 20);
-			setChildPosition(rsInterface, 1651, centerX - 18, centerY + 50);
-			setChildPosition(rsInterface, 1652, centerX - 126, centerY + 50);
-			setChildPosition(rsInterface, 1653, centerX - 18, centerY + 110);
-			setChildPosition(rsInterface, 1654, centerX + 90, centerY + 110);
-			setChildPosition(rsInterface, 1655, centerX + 90, centerY - 90);
-		}
-
-		private void restoreLayout() {
-			RSInterface rsInterface = RSInterface.interfaceCache[EQUIPMENT_INTERFACE_ID];
-			if (rsInterface == null || rsInterface.children == null || originalPositions.isEmpty()) {
+			List<Integer> iconIndices = new ArrayList<>();
+			int iconSize = 0;
+			for (int index = 0; index < rsInterface.children.length; index++) {
+				RSInterface child = RSInterface.interfaceCache[rsInterface.children[index]];
+				if (!shouldReflowChild(child)) {
+					continue;
+				}
+				iconIndices.add(index);
+				iconSize = Math.max(iconSize, Math.max(child.width, child.height));
+			}
+			if (iconIndices.isEmpty() || iconSize == 0) {
 				return;
 			}
-			for (Map.Entry<Integer, Point> entry : originalPositions.entrySet()) {
-				setChildPosition(rsInterface, entry.getKey(), entry.getValue().x, entry.getValue().y);
+			int padding = 4;
+			int columns = Math.max(1, (bounds.width - padding * 2) / (iconSize + padding));
+			int rows = (int) Math.ceil(iconIndices.size() / (double) columns);
+			int requiredHeight = rows * (iconSize + padding) + padding;
+			for (int idx = 0; idx < iconIndices.size(); idx++) {
+				int index = iconIndices.get(idx);
+				int row = idx / columns;
+				int col = idx % columns;
+				rsInterface.childX[index] = padding + col * (iconSize + padding);
+				rsInterface.childY[index] = padding + row * (iconSize + padding);
 			}
+			rsInterface.scrollMax = Math.max(bounds.height, requiredHeight);
+		}
+
+		private boolean shouldReflowChild(RSInterface child) {
+			if (child == null) {
+				return false;
+			}
+			if (child.type != 5) {
+				return false;
+			}
+			if (child.width <= 0 || child.height <= 0) {
+				return false;
+			}
+			return child.width <= 40 && child.height <= 40;
 		}
 
 		private void cacheOriginalPositions(RSInterface rsInterface) {
-			if (!originalPositions.isEmpty()) {
+			if (originalChildPositions.containsKey(rsInterface.id)) {
 				return;
 			}
-			cacheChildPosition(rsInterface, CHARACTER_CHILD_ID);
-			for (int childId : SLOT_CHILD_IDS) {
-				cacheChildPosition(rsInterface, childId);
+			Map<Integer, Point> positions = new HashMap<>();
+			for (int index = 0; index < rsInterface.children.length; index++) {
+				positions.put(rsInterface.children[index], new Point(rsInterface.childX[index], rsInterface.childY[index]));
 			}
+			originalChildPositions.put(rsInterface.id, positions);
 		}
 
-		private void cacheChildPosition(RSInterface rsInterface, int childId) {
+		protected int getInterfaceContentHeight(RSInterface rsInterface) {
+			int maxHeight = rsInterface.height;
+			if (rsInterface.children == null) {
+				return maxHeight;
+			}
 			for (int index = 0; index < rsInterface.children.length; index++) {
-				if (rsInterface.children[index] == childId) {
-					originalPositions.put(childId, new Point(rsInterface.childX[index], rsInterface.childY[index]));
-					return;
+				RSInterface child = RSInterface.interfaceCache[rsInterface.children[index]];
+				if (child == null) {
+					continue;
+				}
+				int childBottom = rsInterface.childY[index] + child.height + child.anInt265;
+				if (childBottom > maxHeight) {
+					maxHeight = childBottom;
 				}
 			}
+			return maxHeight;
 		}
 
-		private void setChildPosition(RSInterface rsInterface, int childId, int x, int y) {
-			for (int index = 0; index < rsInterface.children.length; index++) {
-				if (rsInterface.children[index] == childId) {
-					rsInterface.childX[index] = x;
-					rsInterface.childY[index] = y;
-					return;
-				}
+		@Override
+		public boolean isClosable() {
+			return false;
+		}
+
+		private static final class TabEntry {
+			private final String label;
+			private final int tabIndex;
+
+			private TabEntry(String label, int tabIndex) {
+				this.label = label;
+				this.tabIndex = tabIndex;
 			}
 		}
 	}
@@ -1558,6 +1843,8 @@ public class PanelManager {
 			}
 		}
 		int headerColor = adjustColor(backgroundColor, 10);
+		int highlightColor = adjustColor(backgroundColor, 22);
+		int shadowColor = adjustColor(backgroundColor, -12);
 		Rectangle bounds = panel.getBounds();
 		int headerHeight = getPanelHeaderHeight(client, panel);
 		if (backgroundAlpha < 255) {
@@ -1565,16 +1852,22 @@ public class PanelManager {
 			if (headerHeight > 0) {
 				DrawingArea.drawAlphaPixels(bounds.x, bounds.y, bounds.width, headerHeight, headerColor, backgroundAlpha);
 			}
+			DrawingArea.drawAlphaGradient(bounds.x, bounds.y, bounds.width, bounds.height,
+					highlightColor, shadowColor, Math.min(backgroundAlpha, 140));
 		} else {
 			DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x, backgroundColor, bounds.width);
 			if (headerHeight > 0) {
 				DrawingArea.drawPixels(headerHeight, bounds.y, bounds.x, headerColor, bounds.width);
 			}
+			DrawingArea.drawAlphaGradient(bounds.x, bounds.y, bounds.width, bounds.height,
+					highlightColor, shadowColor, 110);
 		}
 		DrawingArea.drawPixels(1, bounds.y, bounds.x, PANEL_BORDER, bounds.width);
 		DrawingArea.drawPixels(1, bounds.y + bounds.height - 1, bounds.x, PANEL_BORDER, bounds.width);
 		DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x, PANEL_BORDER, 1);
 		DrawingArea.drawPixels(bounds.height, bounds.y, bounds.x + bounds.width - 1, PANEL_BORDER, 1);
+		DrawingArea.drawPixels(1, bounds.y + 1, bounds.x + 1, highlightColor, bounds.width - 2);
+		DrawingArea.drawPixels(1, bounds.y + bounds.height - 2, bounds.x + 1, shadowColor, bounds.width - 2);
 		if (headerHeight > 0) {
 			DrawingArea.drawPixels(1, bounds.y + headerHeight, bounds.x, PANEL_BORDER, bounds.width);
 			String title = panel.getTitle();

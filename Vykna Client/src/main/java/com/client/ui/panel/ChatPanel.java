@@ -27,6 +27,7 @@ public class ChatPanel extends PanelManager.BasePanel {
 
 		DrawingArea.setDrawingArea(bounds.y + bounds.height, bounds.x, bounds.x + bounds.width, bounds.y + headerHeight);
 		client.drawChatAreaAt(bounds.x, bounds.y + headerHeight, bounds.width, bounds.height - headerHeight);
+		drawChatFrame(layout);
 		DrawingArea.setDrawingArea(clipBottom, clipLeft, clipRight, clipTop);
 	}
 
@@ -87,6 +88,28 @@ public class ChatPanel extends PanelManager.BasePanel {
 		int messageHeight = Math.max(0, messageBottom - messageTop);
 		Rectangle messageRect = new Rectangle(areaX + PADDING, messageTop, innerWidth, messageHeight);
 		return new Layout(headerRect, messageRect, inputRect);
+	}
+
+	private void drawChatFrame(Layout layout) {
+		Rectangle header = layout.headerRect;
+		Rectangle message = layout.messageRect;
+		Rectangle input = layout.inputRect;
+
+		drawInsetPanel(header, 0x17191b, 0x2b2f33);
+		drawInsetPanel(message, 0x121315, 0x2a2d31);
+		drawInsetPanel(input, 0x16181a, 0x35393d);
+
+		DrawingArea.drawPixels(1, message.y + 1, message.x + 2, 0x2e3236, message.width - 4);
+		DrawingArea.drawPixels(1, input.y + 1, input.x + 2, 0x3a3f44, input.width - 4);
+	}
+
+	private void drawInsetPanel(Rectangle rect, int baseColor, int accentColor) {
+		DrawingArea.drawPixels(rect.height, rect.y, rect.x, baseColor, rect.width);
+		DrawingArea.drawAlphaGradient(rect.x, rect.y, rect.width, rect.height, accentColor, 0x0c0d0e, 90);
+		DrawingArea.drawPixels(1, rect.y, rect.x, 0x1f2124, rect.width);
+		DrawingArea.drawPixels(1, rect.y + rect.height - 1, rect.x, 0x0d0e10, rect.width);
+		DrawingArea.drawPixels(rect.height, rect.y, rect.x, 0x1f2124, 1);
+		DrawingArea.drawPixels(rect.height, rect.y, rect.x + rect.width - 1, 0x1f2124, 1);
 	}
 
 	private static final class Layout {
