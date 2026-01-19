@@ -37,7 +37,67 @@ public final class TasksHomePage extends RSInterface {
 
     // Categories shown in dropdown
     private static final String[] TASK_CATEGORIES = {
-            "Misc", "Varrock", "Lumbridge", "Falador", "Ardougne", "Wilderness"
+            "Lumbridge",
+            "Varrock",
+            "Falador",
+            "Ardougne",
+            "Wilderness",
+            "Misc"
+    };
+
+    private static final class TaskRow {
+        private final String title;
+        private final String description;
+        private final int points;
+        private final boolean completed;
+
+        private TaskRow(String title, String description, int points, boolean completed) {
+            this.title = title;
+            this.description = description;
+            this.points = points;
+            this.completed = completed;
+        }
+    }
+
+    private static final TaskRow[][] TASKS_BY_CATEGORY = {
+            {
+                    new TaskRow("Lumbridge: Chop normal logs", "Chop logs from any tree in Lumbridge.", 5, true),
+                    new TaskRow("Lumbridge: Catch shrimp", "Net shrimp in the river south of Lumbridge.", 5, false),
+                    new TaskRow("Lumbridge: Bake bread", "Bake a loaf of bread in Lumbridge Castle.", 10, false),
+                    new TaskRow("Lumbridge: Talk to the Duke", "Speak with the Duke in the castle.", 5, true),
+                    new TaskRow("Lumbridge: Mine copper", "Mine copper ore in the mine south-east.", 5, false),
+            },
+            {
+                    new TaskRow("Varrock: Visit the museum", "Enter the Varrock Museum and speak to the curator.", 5, true),
+                    new TaskRow("Varrock: Buy a rune", "Purchase a rune from Aubury in the rune shop.", 10, false),
+                    new TaskRow("Varrock: Mine iron", "Mine iron ore in the south-east mine.", 10, false),
+                    new TaskRow("Varrock: Use the GE", "Place a buy offer on the Grand Exchange.", 15, false),
+                    new TaskRow("Varrock: Talk to Zaff", "Speak to Zaff in the staff shop.", 5, true),
+            },
+            {
+                    new TaskRow("Falador: Pray at altar", "Pray at the altar in Falador Castle.", 5, true),
+                    new TaskRow("Falador: Mine tin", "Mine tin ore in the Dwarven Mine.", 10, false),
+                    new TaskRow("Falador: Visit the park", "Walk through Falador Park.", 5, true),
+                    new TaskRow("Falador: Take a charter", "Board a charter ship from the docks.", 15, false),
+            },
+            {
+                    new TaskRow("Ardougne: Pickpocket a guard", "Pickpocket an Ardougne guard.", 15, false),
+                    new TaskRow("Ardougne: Steal a cake", "Steal a cake from the market stall.", 10, true),
+                    new TaskRow("Ardougne: Visit the zoo", "Walk through the Ardougne Zoo.", 5, true),
+                    new TaskRow("Ardougne: Use the bank", "Deposit items at the Ardougne bank.", 5, false),
+            },
+            {
+                    new TaskRow("Wilderness: Enter the wild", "Cross the ditch into the Wilderness.", 5, true),
+                    new TaskRow("Wilderness: Kill a skeleton", "Defeat a skeleton in level 5 wilderness.", 10, false),
+                    new TaskRow("Wilderness: Collect bones", "Pick up bones in the wilderness.", 5, false),
+                    new TaskRow("Wilderness: Visit the obelisk", "Touch a wilderness obelisk.", 15, false),
+            },
+            {
+                    new TaskRow("Misc: Check your tasks", "Open the tasks home screen.", 5, true),
+                    new TaskRow("Misc: Talk to a banker", "Speak to any banker in the world.", 5, false),
+                    new TaskRow("Misc: Equip armor", "Equip any piece of armor.", 5, false),
+                    new TaskRow("Misc: Use a teleport", "Use any teleport to move around.", 10, false),
+            }
     };
 
     private static int currentCategory = 0;
@@ -78,12 +138,15 @@ public final class TasksHomePage extends RSInterface {
         }
         currentCategory = categoryIndex;
 
-        String categoryName = TASK_CATEGORIES[categoryIndex];
-
-        // Dummy progress values for now
-        int completed = (categoryIndex * 3) % 25;
-        int total = 25;
-        int percent = (int) ((completed * 100.0) / total);
+        TaskRow[] tasks = TASKS_BY_CATEGORY[categoryIndex];
+        int completed = 0;
+        for (TaskRow task : tasks) {
+            if (task.completed) {
+                completed++;
+            }
+        }
+        int total = tasks.length;
+        int percent = total == 0 ? 0 : (int) ((completed * 100.0) / total);
 
         // Update progress label
         if (RSInterface.interfaceCache[TEXT_PROGRESS] != null) {
@@ -96,13 +159,16 @@ public final class TasksHomePage extends RSInterface {
             int base = ROW_START_ID + (i * ROW_STRIDE);
 
             if (RSInterface.interfaceCache[base + 1] != null) {
-                RSInterface.interfaceCache[base + 1].message = categoryName + " Task " + (i + 1);
+                RSInterface.interfaceCache[base + 1].message =
+                        i < tasks.length ? tasks[i].title : "";
             }
             if (RSInterface.interfaceCache[base + 2] != null) {
-                RSInterface.interfaceCache[base + 2].message = "Do something in " + categoryName + " to earn rewards.";
+                RSInterface.interfaceCache[base + 2].message =
+                        i < tasks.length ? tasks[i].description : "";
             }
             if (RSInterface.interfaceCache[base + 3] != null) {
-                RSInterface.interfaceCache[base + 3].message = String.valueOf(5 + (i % 15));
+                RSInterface.interfaceCache[base + 3].message =
+                        i < tasks.length ? String.valueOf(tasks[i].points) : "";
             }
         }
     }
@@ -154,18 +220,8 @@ public final class TasksHomePage extends RSInterface {
         // ---- Top row controls ----
         dropdownMenu(
                 DROPDOWN_ID, 166, 0, TASK_CATEGORIES,
-                new MenuItem("Select task set") {
-                    @Override
-                    public void select(int optionSelected, RSInterface rsInterface) {
-                        TasksHomePage.refreshList(optionSelected);
-                    }
-
-                    @Override
-                    public void execute() {
-                        // no-op for dropdowns in this interface
-                    }
-                },
-                DARK_DROPDOWN_COLORS, false, Interfaces.defaultTextDrawingAreas, 1
+                (optionSelected, rsInterface) -> TasksHomePage.refreshList(optionSelected),
+                DARK_DROPDOWN_COLORS, false, tda, 1
         );
 
         addHoverText(TEXT_SHOW_COMPLETED, "show completed", "Toggle showing completed tasks",
