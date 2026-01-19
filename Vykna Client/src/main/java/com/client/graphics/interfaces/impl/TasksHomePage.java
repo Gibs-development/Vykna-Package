@@ -188,7 +188,7 @@ public final class TasksHomePage extends RSInterface {
         final int MAIN_Y = BG_Y + 40;
 
         // ---- Background (reuse) ----
-        addSprite(INTERFACE_ID + 1, 0, SPRITE_ROOT + "Background");
+        addSprite(INTERFACE_ID + 1, 0, SPRITE_ROOT + "/Tasks/Background");
 
         // ---- Left Tabs (reuse) ----
         // Selected = Tasks tab

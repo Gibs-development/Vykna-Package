@@ -36,6 +36,7 @@ public final class Interfaces extends RSInterface {
 		tournamentLobby(defaultTextDrawingAreas);
 		pvpTab(defaultTextDrawingAreas);
 	    achievementInterface(defaultTextDrawingAreas);
+		taskInterface(defaultTextDrawingAreas);
 		playerProfiler(defaultTextDrawingAreas);
 		profileTab(defaultTextDrawingAreas);
 		myProfile(defaultTextDrawingAreas);
@@ -4428,6 +4429,10 @@ interfaceId+=5000;
 
 	public static void achievementInterface(TextDrawingArea[] TDA) {
 		AchievementHomePage.build(TDA);
+	}
+
+	public static void taskInterface(TextDrawingArea[] TDA) {
+		TasksHomePage.build(TDA);
 	}
 
 
