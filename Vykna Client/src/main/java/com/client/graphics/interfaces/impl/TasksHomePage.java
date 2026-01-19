@@ -220,12 +220,6 @@ public final class TasksHomePage extends RSInterface {
         addText(TEXT_TITLE, "Tasks", tda, 2, 0xE3AE19, false, true);
 
         // ---- Top row controls ----
-        dropdownMenu(
-                DROPDOWN_ID, 166, 0, TASK_CATEGORIES,
-                (optionSelected, rsInterface) -> TasksHomePage.refreshList(optionSelected),
-                DARK_DROPDOWN_COLORS, false, tda, 1
-        );
-
         addHoverText(TEXT_SHOW_COMPLETED, "show completed", "Toggle showing completed tasks",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
 
@@ -317,7 +311,6 @@ public final class TasksHomePage extends RSInterface {
         rsi.child(c++, TEXT_TITLE, MAIN_X + 4, MAIN_Y - 16);
 
         // Top row
-        rsi.child(c++, DROPDOWN_ID, MAIN_X + 4, MAIN_Y + 6);
         rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 10);
 
         // Scroll
