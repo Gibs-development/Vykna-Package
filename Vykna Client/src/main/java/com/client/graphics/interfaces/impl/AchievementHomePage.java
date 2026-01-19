@@ -71,7 +71,7 @@ public final class AchievementHomePage extends RSInterface {
 		// ---- Layout constants ----
 		final int BG_X = 8, BG_Y = 8;
 		final int NAV_X = BG_X + 16;
-		final int NAV_Y = BG_Y + 50;
+		final int NAV_Y = BG_Y + 65;
 		final int TAB_GAP = 46;
 		final int ICON_INSET = 7;
 
@@ -143,9 +143,32 @@ public final class AchievementHomePage extends RSInterface {
 		addSkinProgressBar2021(35270, 69, 7);
 		addSkinProgressBar2021(35280, 69, 7);
 
+		// ---- NEW: Achievement Summary + Ranks + Scores + Clickable list ----
+		addText(35160, "Achievement Summary", tda, 1, 0xE3AE19, false, true);
+
+		addText(35161, "Rank 1: Player", tda, 0, 0xFFFAE5, false, true);
+		addText(35162, "Score:", tda, 0, 0xFFFAE5, false, true);
+
+		addText(35163, "Rank 2: Player", tda, 0, 0xFFFAE5, false, true);
+		addText(35164, "Score:", tda, 0, 0xFFFAE5, false, true);
+
+		addText(35165, "Rank 3: Player", tda, 0, 0xFFFAE5, false, true);
+		addText(35166, "Score:", tda, 0, 0xFFFAE5, false, true);
+// Clickable text (6 lines) - MUST be hover text like your example
+// width/height are just sensible defaults; tweak if needed
+		final int CLICK_W = 82;
+		final int CLICK_H = 16;
+
+		addHoverText(35170, "Quests", "Quests", tda, 0, 0xE3AE19, false, true, CLICK_W, CLICK_H);
+		addHoverText(35171, "Tasks", "Tasks", tda, 0, 0xE3AE19, false, true, CLICK_W, CLICK_H);
+		addHoverText(35172, "Skilling", "Skilling", tda, 0, 0xE3AE19, false, true, CLICK_W, CLICK_H);
+		addHoverText(35173, "Combat", "Combat", tda, 0, 0xE3AE19, false, true, CLICK_W, CLICK_H);
+		addHoverText(35174, "Collection", "Collections", tda, 0, 0xE3AE19, false, true, CLICK_W, CLICK_H);
+		addHoverText(35175, "Mastery", "Mastery", tda, 0, 0xE3AE19, false, true, CLICK_W, CLICK_H);
+
 		// ---- Children ----
 		// Keep this count exact; otherwise you'll hit "Null child of index" errors.
-		rsi.totalChildren(62);
+		rsi.totalChildren(75);
 		int c = 0;
 
 		// BG
@@ -174,7 +197,7 @@ public final class AchievementHomePage extends RSInterface {
 		// ---- Overview block ----
 		rsi.child(c++, 35100, MAIN_X + 4, MAIN_Y + 6);
 		rsi.child(c++, 35101, MAIN_X + 4, MAIN_Y + 24);
-		rsi.child(c++, 35102, MAIN_X + 210, MAIN_Y + 24);
+		rsi.child(c++, 35102, MAIN_X + 200, MAIN_Y + 24);
 
 		// main skinned bar at x,y
 		final int MAIN_BAR_X = 86;
@@ -197,7 +220,7 @@ public final class AchievementHomePage extends RSInterface {
 		rsi.child(c++, 35112, RECENT_ICON_X + 42, RECENT_ICON_Y + 18);
 
 		// ---- Almost finished ----
-		rsi.child(c++, 35120, MAIN_X + 4, MAIN_Y + 126);
+		rsi.child(c++, 35120, MAIN_X + 4, MAIN_Y + 128);
 
 		// 2 "close to finish" achievements (icon + 2 lines)
 		final int AF_BLOCK_X = MAIN_X + 4;
@@ -228,15 +251,15 @@ public final class AchievementHomePage extends RSInterface {
 		rsi.child(c++, 35222, AF2_X + 2, AF2_Y + 2);
 		rsi.child(c++, 35223, AF2_X + 2, AF2_Y + 2);
 
-// ---- Categories ----
+		// ---- Categories ----
 		rsi.child(c++, 35130, MAIN_X + 270, MAIN_Y + 6);
 
-		final int CAT_X = MAIN_X + 248;
-		final int CAT_Y = MAIN_Y + 30;
+		final int CAT_X = MAIN_X + 249;
+		final int CAT_Y = MAIN_Y + 49;
 		final int CAT_GAP_X = 86;
 		final int CAT_GAP_Y = 36;
 
-// 2 columns, 3 rows
+		// 2 columns, 3 rows
 		int x0 = CAT_X;
 		int x1 = CAT_X + CAT_GAP_X;
 
@@ -244,17 +267,41 @@ public final class AchievementHomePage extends RSInterface {
 		int y1 = CAT_Y + CAT_GAP_Y;
 		int y2 = CAT_Y + (2 * CAT_GAP_Y);
 
-// row 1
+		// row 1
 		placeSkinnedBar(rsi, 35230, x0, y0, c); c += 4;
 		placeSkinnedBar(rsi, 35240, x1, y0, c); c += 4;
 
-// row 2
+		// row 2
 		placeSkinnedBar(rsi, 35250, x0, y1, c); c += 4;
 		placeSkinnedBar(rsi, 35260, x1, y1, c); c += 4;
 
-// row 3
+		// row 3
 		placeSkinnedBar(rsi, 35270, x0, y2, c); c += 4;
 		placeSkinnedBar(rsi, 35280, x1, y2, c); c += 4;
+
+		// ---- NEW: Summary block placement (rough positions; tweak freely) ----
+		final int SUMMARY_X = MAIN_X + 270 + 25-2;
+		final int SUMMARY_Y = MAIN_Y + 170 - 70+ 30;
+
+		rsi.child(c++, 35160, 194, 19);           // "Achievement Summary"
+
+		// Rank list (each with Score under it)
+		rsi.child(c++, 35161, SUMMARY_X, SUMMARY_Y + 18+6);      // Rank 1
+		rsi.child(c++, 35162, SUMMARY_X, SUMMARY_Y + 32+6);      // Score 1
+
+		rsi.child(c++, 35163, SUMMARY_X, SUMMARY_Y + 52+10-1);      // Rank 2
+		rsi.child(c++, 35164, SUMMARY_X, SUMMARY_Y + 66+10-1);      // Score 2
+
+		rsi.child(c++, 35165, SUMMARY_X, SUMMARY_Y + 86+12);      // Rank 3
+		rsi.child(c++, 35166, SUMMARY_X, SUMMARY_Y + 100+12);     // Score 3
+
+
+		rsi.child(c++, 35170, 322+23, 82); // Quests
+		rsi.child(c++, 35171, 410+23, 82); // Tasks
+		rsi.child(c++, 35172,  322+23, 119); // Skilling
+		rsi.child(c++, 35173, 410+23, 119); // Combat
+		rsi.child(c++, 35174,322+23, 155); // Collections
+		rsi.child(c++, 35175, 410+23, 155); // Mastery
 
 		// Dummy % values (client-side visual testing)
 		RSInterface.interfaceCache[35202].progressBar2021Percentage = 0.65;
@@ -270,4 +317,5 @@ public final class AchievementHomePage extends RSInterface {
 
 		System.out.println("AchievementHomePage final child count = " + c);
 	}
+
 }

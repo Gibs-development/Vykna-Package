@@ -2899,11 +2899,15 @@ public class RSInterface {
 		rsinterface.message = text;
 		rsinterface.aString228 = "";
 		rsinterface.textColor = color;
-		rsinterface.secondaryColor = 0;
+
+		// Use secondaryColor as hover color (must be non-zero to show change)
+		rsinterface.secondaryColor = 0xFF9900; // <-- hover color
+
 		rsinterface.anInt216 = 0xffffff;
 		rsinterface.anInt239 = 0;
 		rsinterface.tooltip = tooltip;
 	}
+
 
 	public static void addHoverText(int id, String text, String tooltip, TextDrawingArea tda[], int idx, int color,
 			boolean center, boolean textShadowed, int width) {
@@ -3710,7 +3714,6 @@ public class RSInterface {
 		tab.width = width;
 		tab.height = height;
 		tab.tooltip = tooltip;
-		tab.actions = new String[] { "Select" };
 	}
 	public static void addConfigSpriteGrid(int id, String sprite, int cols, int rows, int iconSize) {
 		RSInterface r = addInterface(id);
