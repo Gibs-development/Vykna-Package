@@ -1,8 +1,10 @@
 package com.client.ui.panel;
 
 import com.client.Client;
+import com.client.Configuration;
 import com.client.DrawingArea;
 import com.client.Sprite;
+import com.client.UiSkin;
 import com.client.graphics.interfaces.RSInterface;
 import com.client.sound.Sound;
 import com.client.sound.SoundType;
@@ -22,6 +24,7 @@ public class PanelManager {
 	private static final int PANEL_HEADER = 0x1c1c1c;
 	private static final int PANEL_BORDER = 0x2c2c2c;
 	private static final int PANEL_TEXT = 0xffffff;
+	private static final int RS3_PANEL_TEXT = 0xE0D6C2;
 	private static final int RESIZE_HANDLE_SIZE = 12;
 	private static final int CLOSE_BUTTON_SIZE = 12;
 	private static final int CLOSE_BUTTON_PADDING = 4;
@@ -1166,11 +1169,21 @@ public class PanelManager {
 				UiPanel panel = panels.get(index);
 				boolean active = panel == activePanel;
 				int color = active ? adjustColor(PANEL_HEADER, 12) : PANEL_HEADER;
-				DrawingArea.drawPixels(headerHeight, bounds.y, x, color, width);
-				DrawingArea.drawPixels(1, bounds.y + headerHeight - 1, x, PANEL_BORDER, width);
+				if (Configuration.rs3StyleUiEnabled && client.isRs3InterfaceStyleActive()) {
+					color = active ? UiSkin.RS3_BG_3 : UiSkin.RS3_BG_2;
+					DrawingArea.drawPixels(headerHeight, bounds.y, x, color, width);
+					DrawingArea.drawPixels(1, bounds.y + headerHeight - 1, x, UiSkin.RS3_BORDER_1, width);
+					DrawingArea.drawAlphaBox(x, bounds.y, width, 1, UiSkin.RS3_METAL_1, UiSkin.HIGHLIGHT_ALPHA);
+				} else {
+					DrawingArea.drawPixels(headerHeight, bounds.y, x, color, width);
+					DrawingArea.drawPixels(1, bounds.y + headerHeight - 1, x, PANEL_BORDER, width);
+				}
 				String title = panel.getTitle();
 				if (title != null) {
 					int textColor = active ? 0xffd24a : PANEL_TEXT;
+					if (Configuration.rs3StyleUiEnabled && client.isRs3InterfaceStyleActive()) {
+						textColor = active ? UiSkin.RS3_GOLD : RS3_PANEL_TEXT;
+					}
 					client.newSmallFont.drawCenteredString(title, x + width / 2, bounds.y + 13, textColor, 0);
 				}
 				x += width;
@@ -1612,11 +1625,21 @@ public class PanelManager {
 				boolean active = TABS[index].tabIndex == activeTabIndex;
 				boolean hovered = TABS[index].tabIndex == hoveredTabIndex;
 				int color = active ? TAB_ACTIVE_BG : (hovered ? TAB_HOVER_BG : TAB_INACTIVE_BG);
-				DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, color, TAB_ICON_SIZE);
-				DrawingArea.drawPixels(1, y, x, TAB_BORDER, TAB_ICON_SIZE);
-				DrawingArea.drawPixels(1, y + TAB_ICON_SIZE - 1, x, TAB_BORDER, TAB_ICON_SIZE);
-				DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, TAB_BORDER, 1);
-				DrawingArea.drawPixels(TAB_ICON_SIZE, y, x + TAB_ICON_SIZE - 1, TAB_BORDER, 1);
+				if (Configuration.rs3StyleUiEnabled && client.isRs3InterfaceStyleActive()) {
+					color = active ? UiSkin.RS3_BG_3 : (hovered ? UiSkin.RS3_BG_2 : UiSkin.RS3_BG_1);
+					DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, color, TAB_ICON_SIZE);
+					DrawingArea.drawPixels(1, y, x, UiSkin.RS3_BORDER_1, TAB_ICON_SIZE);
+					DrawingArea.drawPixels(1, y + TAB_ICON_SIZE - 1, x, UiSkin.RS3_BORDER_1, TAB_ICON_SIZE);
+					DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, UiSkin.RS3_BORDER_1, 1);
+					DrawingArea.drawPixels(TAB_ICON_SIZE, y, x + TAB_ICON_SIZE - 1, UiSkin.RS3_BORDER_1, 1);
+					DrawingArea.drawAlphaBox(x + 1, y + 1, TAB_ICON_SIZE - 2, 1, UiSkin.RS3_METAL_1, UiSkin.HIGHLIGHT_ALPHA);
+				} else {
+					DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, color, TAB_ICON_SIZE);
+					DrawingArea.drawPixels(1, y, x, TAB_BORDER, TAB_ICON_SIZE);
+					DrawingArea.drawPixels(1, y + TAB_ICON_SIZE - 1, x, TAB_BORDER, TAB_ICON_SIZE);
+					DrawingArea.drawPixels(TAB_ICON_SIZE, y, x, TAB_BORDER, 1);
+					DrawingArea.drawPixels(TAB_ICON_SIZE, y, x + TAB_ICON_SIZE - 1, TAB_BORDER, 1);
+				}
 				Sprite icon = client.getTabIconSprite(TABS[index].tabIndex);
 				if (icon != null) {
 					int iconX = x + (TAB_ICON_SIZE - icon.myWidth) / 2;
@@ -1950,6 +1973,10 @@ public class PanelManager {
 		if (panel instanceof ChatPanel) {
 			return;
 		}
+		if (Configuration.rs3StyleUiEnabled && client.isRs3InterfaceStyleActive()) {
+			drawRs3PanelBackground(client, panel);
+			return;
+		}
 		int backgroundColor = PANEL_BACKGROUND;
 		int backgroundAlpha = 255;
 		Settings settings = Client.getUserSettings();
@@ -1996,6 +2023,19 @@ public class PanelManager {
 		}
 	}
 
+	private void drawRs3PanelBackground(Client client, UiPanel panel) {
+		Rectangle bounds = panel.getBounds();
+		int headerHeight = getPanelHeaderHeight(client, panel);
+		UiSkin.drawRs3Panel(bounds.x, bounds.y, bounds.width, bounds.height, UiSkin.PANEL_ALPHA);
+		if (headerHeight > 0) {
+			UiSkin.drawRs3Divider(bounds.x + 1, bounds.y + headerHeight, bounds.width - 2, 180);
+			String title = panel.getTitle();
+			if (!(panel instanceof GroupPanel) && client.isRs3EditModeActive() && title != null && !title.isEmpty()) {
+				client.newSmallFont.drawBasicString(title, bounds.x + 6, bounds.y + 13, RS3_PANEL_TEXT, 0);
+			}
+		}
+	}
+
 	private void drawResizeHandle(Client client, UiPanel panel) {
 		if (!panel.resizable()) {
 			return;
@@ -2031,6 +2071,14 @@ public class PanelManager {
 	}
 
 	private void drawCornerHandle(int x, int y) {
+		if (Configuration.rs3StyleUiEnabled) {
+			DrawingArea.drawPixels(RESIZE_HANDLE_SIZE, y, x, UiSkin.RS3_BG_3, RESIZE_HANDLE_SIZE);
+			DrawingArea.drawPixels(1, y, x, UiSkin.RS3_BORDER_1, RESIZE_HANDLE_SIZE);
+			DrawingArea.drawPixels(1, y + RESIZE_HANDLE_SIZE - 1, x, UiSkin.RS3_BORDER_1, RESIZE_HANDLE_SIZE);
+			DrawingArea.drawPixels(RESIZE_HANDLE_SIZE, y, x, UiSkin.RS3_BORDER_1, 1);
+			DrawingArea.drawPixels(RESIZE_HANDLE_SIZE, y, x + RESIZE_HANDLE_SIZE - 1, UiSkin.RS3_BORDER_1, 1);
+			return;
+		}
 		DrawingArea.drawPixels(RESIZE_HANDLE_SIZE, y, x, 0x2a2a2a, RESIZE_HANDLE_SIZE);
 		DrawingArea.drawPixels(1, y, x, 0x3a3a3a, RESIZE_HANDLE_SIZE);
 		DrawingArea.drawPixels(1, y + RESIZE_HANDLE_SIZE - 1, x, 0x3a3a3a, RESIZE_HANDLE_SIZE);
@@ -2055,6 +2103,15 @@ public class PanelManager {
 		Rectangle bounds = panel.getBounds();
 		int x = bounds.x + bounds.width - CLOSE_BUTTON_SIZE - CLOSE_BUTTON_PADDING;
 		int y = bounds.y + (PANEL_HEADER_HEIGHT - CLOSE_BUTTON_SIZE) / 2;
+		if (Configuration.rs3StyleUiEnabled) {
+			DrawingArea.drawPixels(CLOSE_BUTTON_SIZE, y, x, UiSkin.RS3_BG_3, CLOSE_BUTTON_SIZE);
+			DrawingArea.drawPixels(1, y, x, UiSkin.RS3_BORDER_1, CLOSE_BUTTON_SIZE);
+			DrawingArea.drawPixels(1, y + CLOSE_BUTTON_SIZE - 1, x, UiSkin.RS3_BORDER_1, CLOSE_BUTTON_SIZE);
+			DrawingArea.drawPixels(CLOSE_BUTTON_SIZE, y, x, UiSkin.RS3_BORDER_1, 1);
+			DrawingArea.drawPixels(CLOSE_BUTTON_SIZE, y, x + CLOSE_BUTTON_SIZE - 1, UiSkin.RS3_BORDER_1, 1);
+			client.newSmallFont.drawCenteredString("X", x + CLOSE_BUTTON_SIZE / 2, y + 9, UiSkin.RS3_GOLD, 0);
+			return;
+		}
 		DrawingArea.drawPixels(CLOSE_BUTTON_SIZE, y, x, 0x2a2a2a, CLOSE_BUTTON_SIZE);
 		DrawingArea.drawPixels(1, y, x, 0x3a3a3a, CLOSE_BUTTON_SIZE);
 		DrawingArea.drawPixels(1, y + CLOSE_BUTTON_SIZE - 1, x, 0x3a3a3a, CLOSE_BUTTON_SIZE);
