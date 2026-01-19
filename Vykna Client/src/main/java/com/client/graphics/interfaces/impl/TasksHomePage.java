@@ -220,6 +220,13 @@ public final class TasksHomePage extends RSInterface {
         addText(TEXT_TITLE, "Tasks", tda, 2, 0xE3AE19, false, true);
 
         // ---- Top row controls ----
+        dropdownMenu(
+                DROPDOWN_ID, 166, 0, TASK_CATEGORIES,
+                (optionSelected, rsInterface) -> TasksHomePage.refreshList(optionSelected),
+                DARK_DROPDOWN_COLORS, false, tda, 1
+        );
+
+        // ---- Top row controls ----
         addHoverText(TEXT_SHOW_COMPLETED, "show completed", "Toggle showing completed tasks",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
 
@@ -307,12 +314,6 @@ public final class TasksHomePage extends RSInterface {
         rsi.child(c++, INTERFACE_ID + 70, NAV_X, NAV_Y + (5 * TAB_GAP));
         rsi.child(c++, INTERFACE_ID + 73, NAV_X + ICON_INSET, NAV_Y + (5 * TAB_GAP) + ICON_INSET);
 
-        // Title
-        rsi.child(c++, TEXT_TITLE, MAIN_X + 4, MAIN_Y - 16);
-
-        // Top row
-        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 10);
-
         // Scroll
         rsi.child(c++, SCROLL_ID, MAIN_X + 4, MAIN_Y + 30);
 
@@ -325,6 +326,13 @@ public final class TasksHomePage extends RSInterface {
         rsi.child(c++, PROGRESS_BAR_ID + 1, BAR_X + 1, BAR_Y + 1);
         rsi.child(c++, PROGRESS_BAR_ID + 2, BAR_X + 2, BAR_Y + 2);
         rsi.child(c++, PROGRESS_BAR_ID + 3, BAR_X + 2, BAR_Y + 2);
+
+        // Title
+        rsi.child(c++, TEXT_TITLE, MAIN_X + 4, MAIN_Y - 16);
+
+        // Top row
+        rsi.child(c++, DROPDOWN_ID, MAIN_X + 4, MAIN_Y + 6);
+        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 10);
 
         // Populate initial list (Misc)
         refreshList(0);
