@@ -1151,17 +1151,29 @@ public class Client extends RSApplet {
 			boolean active = channelButtonClickPosition == index;
 			boolean hover = channelButtonHoverPosition == index;
 			int background = active ? 0x2a2a2a : 0x1a1a1a;
-			if (hover) {
+			int border = 0x2c2c2c;
+			int text = 0xffffff;
+			if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+				background = active ? UiSkin.RS3_BG_3 : UiSkin.RS3_BG_2;
+				if (hover) {
+					background = active ? UiSkin.RS3_BG_3 : UiSkin.RS3_BG_1;
+				}
+				border = UiSkin.RS3_BORDER_1;
+				text = active ? UiSkin.RS3_GOLD : 0xE0D6C2;
+			} else if (hover) {
 				background = active ? 0x353535 : 0x2a2a2a;
 			}
 			DrawingArea.drawPixels(button.height, button.y, button.x, background, button.width);
-			DrawingArea.drawPixels(1, button.y, button.x, 0x2c2c2c, button.width);
-			DrawingArea.drawPixels(1, button.y + button.height - 1, button.x, 0x2c2c2c, button.width);
-			DrawingArea.drawPixels(button.height, button.y, button.x, 0x2c2c2c, 1);
-			DrawingArea.drawPixels(button.height, button.y, button.x + button.width - 1, 0x2c2c2c, 1);
+			DrawingArea.drawPixels(1, button.y, button.x, border, button.width);
+			DrawingArea.drawPixels(1, button.y + button.height - 1, button.x, border, button.width);
+			DrawingArea.drawPixels(button.height, button.y, button.x, border, 1);
+			DrawingArea.drawPixels(button.height, button.y, button.x + button.width - 1, border, 1);
+			if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+				DrawingArea.drawAlphaBox(button.x + 1, button.y + 1, button.width - 2, 1, UiSkin.RS3_METAL_1, UiSkin.HIGHLIGHT_ALPHA);
+			}
 			if (index < labels.length) {
 				newSmallFont.drawCenteredString(labels[index], button.x + button.width / 2,
-						button.y + button.height - 7, 0xffffff, 0);
+						button.y + button.height - 7, text, 0);
 			}
 		}
 	}
@@ -1249,7 +1261,20 @@ public class Client extends RSApplet {
 			if (!rs3ChatOverride) {
 				chatArea.drawSprite(xOffset, yOffset);
 			} else {
-				DrawingArea.drawPixels(chatAreaHeight, yOffset, xOffset, 0x141414, chatAreaWidth);
+				if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+					UiSkin.drawRs3Panel(xOffset, yOffset, chatAreaWidth, chatAreaHeight, UiSkin.PANEL_ALPHA);
+					if (headerRect != null) {
+						UiSkin.drawRs3Inset(headerRect.x, headerRect.y, headerRect.width, headerRect.height, UiSkin.INSET_ALPHA);
+					}
+					if (messageRect != null) {
+						UiSkin.drawRs3Inset(messageRect.x, messageRect.y, messageRect.width, messageRect.height, UiSkin.INSET_ALPHA);
+					}
+					if (inputRect != null) {
+						UiSkin.drawRs3Inset(inputRect.x, inputRect.y, inputRect.width, inputRect.height, UiSkin.INSET_ALPHA);
+					}
+				} else {
+					DrawingArea.drawPixels(chatAreaHeight, yOffset, xOffset, 0x141414, chatAreaWidth);
+				}
 			}
 			if (rs3ChatOverride) {
 				drawRs3ChatButtons(headerRect);
@@ -3232,6 +3257,30 @@ public class Client extends RSApplet {
 		if (height <= 0) {
 			return;
 		}
+		if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+			UiSkin.drawRs3Inset(xPosition, yPosition, 16, 16, UiSkin.INSET_ALPHA);
+			UiSkin.drawRs3Inset(xPosition, yPosition + height - 16, 16, 16, UiSkin.INSET_ALPHA);
+			int trackHeight = height - 32;
+			if (trackHeight > 0) {
+				int trackInnerHeight = Math.max(0, trackHeight - 2);
+				if (trackInnerHeight > 0) {
+					DrawingArea.drawAlphaBox(xPosition + 1, yPosition + 17, 14, trackInnerHeight, UiSkin.RS3_BG_2, UiSkin.INSET_ALPHA);
+				}
+			}
+			int k1 = height - 32;
+			if (scrollMax > 0) {
+				k1 = ((height - 32) * height) / scrollMax;
+			}
+			if (k1 < 8)
+				k1 = 8;
+			int l1 = 0;
+			int scrollRange = scrollMax - height;
+			if (scrollRange > 0) {
+				l1 = ((height - 32 - k1) * scrollPosition) / scrollRange;
+			}
+			UiSkin.drawRs3Panel(xPosition + 1, yPosition + 16 + l1, 14, k1, UiSkin.PANEL_ALPHA);
+			return;
+		}
 		scrollBar1.drawSprite(xPosition, yPosition);
 		scrollBar2.drawSprite(xPosition, (yPosition + height) - 16);
 		DrawingArea.drawPixels(height - 32, yPosition + 16, xPosition, 0x000001, 16);
@@ -4436,17 +4485,26 @@ public class Client extends RSApplet {
 		needDrawTabArea = true;
 		inputTaken = true;
 		tabAreaAltered = true;
-		DrawingArea.drawBox(xPos, yPos, menuW, menuH, 0x5d5447);
-		DrawingArea.drawBox(xPos + 1, yPos + 1, menuW - 2, 16, 0);
-		DrawingArea.drawBoxOutline(xPos + 1, yPos + 18, menuW - 2, menuH - 19, 0);
-		newBoldFont.drawBasicString("Choose Option", xPos + 3, yPos + 14, 0x5d5447, 0x000000);
+		if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+			UiSkin.drawRs3Panel(xPos, yPos, menuW, menuH, UiSkin.PANEL_ALPHA);
+			UiSkin.drawRs3Inset(xPos + 1, yPos + 1, menuW - 2, 16, UiSkin.INSET_ALPHA);
+			UiSkin.drawRs3Divider(xPos + 1, yPos + 18, menuW - 2, 200);
+			newBoldFont.drawBasicString("Choose Option", xPos + 3, yPos + 14, UiSkin.RS3_GOLD, 0x000000);
+		} else {
+			DrawingArea.drawBox(xPos, yPos, menuW, menuH, 0x5d5447);
+			DrawingArea.drawBox(xPos + 1, yPos + 1, menuW - 2, 16, 0);
+			DrawingArea.drawBoxOutline(xPos + 1, yPos + 18, menuW - 2, menuH - 19, 0);
+			newBoldFont.drawBasicString("Choose Option", xPos + 3, yPos + 14, 0x5d5447, 0x000000);
+		}
 		int mouseX = super.getMouseX() - (xOffSet);
 		int mouseY = (-yOffSet) + super.getMouseY();
 		for (int l1 = 0; l1 < menuActionRow; l1++) {
 			int textY = yPos + 31 + (menuActionRow - 1 - l1) * 15;
 			int disColor = 0xffffff;
 			if (mouseX > xPos && mouseX < xPos + menuW && mouseY > textY - 13 && mouseY < textY + 3) {
-				disColor = 0xffff00;
+				disColor = Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle() ? UiSkin.RS3_GOLD_HOVER : 0xffff00;
+			} else if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+				disColor = 0xE0D6C2;
 			}
 			newBoldFont.drawBasicString(menuActionName[l1], xPos + 3, textY, disColor, 0x000000);
 		}
@@ -14253,8 +14311,12 @@ public class Client extends RSApplet {
 									}
 								}
 							}
-							DrawingArea.drawPixels(boxHeight, yPos, xPos, 0xFFFFA0, boxWidth);
-							DrawingArea.fillPixels(xPos, boxWidth, boxHeight, 0, yPos);
+							if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+								UiSkin.drawRs3TooltipBg(xPos, yPos, boxWidth, boxHeight, UiSkin.TOOLTIP_ALPHA);
+							} else {
+								DrawingArea.drawPixels(boxHeight, yPos, xPos, 0xFFFFA0, boxWidth);
+								DrawingArea.fillPixels(xPos, boxWidth, boxHeight, 0, yPos);
+							}
 							String s2 = class9_1.message;
 							for (int j11 = yPos + textDrawingArea_2.anInt1497 + 2; s2
 									.length() > 0; j11 += textDrawingArea_2.anInt1497 + 1) {// anInt1497
@@ -15978,11 +16040,17 @@ public class Client extends RSApplet {
 		if (x + w > DrawingArea.bottomX) x = mx - w - 12;
 		if (y + h > DrawingArea.bottomY) y = my - h - 12;
 
-		DrawingArea.drawAlphaBox(x, y, w, h, 0x0b0b0b, 180);
-		DrawingArea.drawBorder(x, y, w, h, 0x6b5a3a);
+		if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+			UiSkin.drawRs3TooltipBg(x, y, w, h, UiSkin.TOOLTIP_ALPHA);
+			newRegularFont.drawBasicString(title, x + pad, y + 14, UiSkin.RS3_GOLD, 0);
+			newSmallFont.drawBasicString(desc, x + pad, y + 28, 0xE0D6C2, 0);
+		} else {
+			DrawingArea.drawAlphaBox(x, y, w, h, 0x0b0b0b, 180);
+			DrawingArea.drawBorder(x, y, w, h, 0x6b5a3a);
 
-		newRegularFont.drawBasicString(title, x + pad, y + 14, 0xFFFAE5, 0);
-		newSmallFont.drawBasicString(desc, x + pad, y + 28, 0xC9C1A6, 0);
+			newRegularFont.drawBasicString(title, x + pad, y + 14, 0xFFFAE5, 0);
+			newSmallFont.drawBasicString(desc, x + pad, y + 28, 0xC9C1A6, 0);
+		}
 	}
 
 	public void drawTopLeftTooltip() {
@@ -16012,8 +16080,16 @@ public class Client extends RSApplet {
 		toolTip=s;
 
 		if (Configuration.menuHovers && !s.contains("Walk here")) {
-			DrawingArea.drawAlphaPixels(super.getMouseX(), super.getMouseY() - 11, newBoldFont.getTextWidth(s.trim()) + 6, 17, 0, 100);
-			newBoldFont.drawBasicString(s, super.getMouseX() + 2, super.getMouseY() + 2, 0xFFFFFF, 1);
+			int tipX = super.getMouseX();
+			int tipY = super.getMouseY() - 11;
+			int tipW = newBoldFont.getTextWidth(s.trim()) + 6;
+			if (Configuration.rs3StyleUiEnabled && isRs3InterfaceStyle()) {
+				UiSkin.drawRs3TooltipBg(tipX, tipY, tipW, 17, UiSkin.TOOLTIP_ALPHA);
+				newBoldFont.drawBasicString(s, tipX + 2, super.getMouseY() + 2, 0xE0D6C2, 1);
+			} else {
+				DrawingArea.drawAlphaPixels(tipX, tipY, tipW, 17, 0, 100);
+				newBoldFont.drawBasicString(s, super.getMouseX() + 2, super.getMouseY() + 2, 0xFFFFFF, 1);
+			}
 		}
 
 		newBoldFont.drawString(s, 8, 19, 0xffffff, 0, 255);

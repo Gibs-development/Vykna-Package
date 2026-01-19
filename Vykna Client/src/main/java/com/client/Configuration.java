@@ -125,5 +125,6 @@ public class Configuration {
 	public static boolean enablePouch;
 	public static boolean statusBars;
 	public static boolean menuHovers;
+	public static boolean rs3StyleUiEnabled = false;
 
 }
