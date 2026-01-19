@@ -226,6 +226,7 @@ public final class TasksHomePage extends RSInterface {
                 DARK_DROPDOWN_COLORS, false, tda, 1
         );
 
+        // ---- Top row controls ----
         addHoverText(TEXT_SHOW_COMPLETED, "show completed", "Toggle showing completed tasks",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
 
