@@ -191,6 +191,7 @@ public class Walking implements PacketType {
 		c.isWc = false;
 		c.clickNpcType = 0;
 		c.clickObjectType = 0;
+		c.getPerkManager().onMove();
 		if (c.isBanking)
 			c.isBanking = false;
 		if (c.tradeStatus >= 0) {

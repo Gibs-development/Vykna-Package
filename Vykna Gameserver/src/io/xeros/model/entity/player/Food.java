@@ -254,7 +254,8 @@ public class Food {
         }
 
         if (id != 13441) {
-            player.getHealth().increase(foodToEat.getHeal());
+            int heal = player.getPerkManager().modifyFoodHealing(foodToEat.getHeal());
+            player.getHealth().increase(heal);
         }
         lastEaten = Optional.of(foodToEat);
 

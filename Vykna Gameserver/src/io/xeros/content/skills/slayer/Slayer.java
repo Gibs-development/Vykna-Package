@@ -83,6 +83,7 @@ public class Slayer {
 	 * The amount of the task the player has left to slay
 	 */
 	private int taskAmount;
+	private int taskAmountAssigned;
 
 	/**
 	 * The player that will be referenced in slayer related operations
@@ -189,6 +190,7 @@ public class Slayer {
 			}
 
 			taskAmount = Misc.random(Range.between(minimum, maximum));
+			taskAmountAssigned = taskAmount;
 			master = m.getId();
 
 			if (masterId == 8623) {
@@ -210,6 +212,7 @@ public class Slayer {
 	protected void setAmountToSlay(int amount) {
 		if (task.isPresent() && master == BOSS_TASK_NPC_ID) {
 			taskAmount = amount;
+			taskAmountAssigned = amount;
 			player.lastTask = task.get().getFormattedName();
 			player.start(new DialogueBuilder(player).setNpcId(Npcs.NIEVE).npc("You've been assigned x" + amount + " " + task.get().getFormattedName() + "."));
 
@@ -255,6 +258,20 @@ public class Slayer {
 	}
 
 	public void reduceTaskAmount(Player player) {
+		if (player.getPerkManager().hasPerk(io.xeros.model.items.PerkModule.TROPHY_TAKER)) {
+			int rank = player.getPerkManager().getPerkRank(io.xeros.model.items.PerkModule.TROPHY_TAKER);
+			double chance = rank * 0.02;
+			if (Math.random() <= chance) {
+				if (Misc.random(1) == 0) {
+					player.getPerkManager().activatePerk(io.xeros.model.items.PerkModule.TROPHY_TAKER, "preserve a slayer kill", 8_000);
+					return;
+				}
+				taskAmount = Math.max(0, taskAmount - 2);
+				player.getPerkManager().activatePerk(io.xeros.model.items.PerkModule.TROPHY_TAKER, "count a slayer kill twice", 8_000);
+				return;
+			}
+		}
+
 		if (hasBoSEquipment(player) && Misc.random(100) < 30) {
 			player.sendMessage("Your bracelet shines.");
 			player.decreaseSlaughterCharge(1);
@@ -1274,6 +1291,11 @@ public class Slayer {
 	 */
 	public void setTaskAmount(int taskAmount) {
 		this.taskAmount = taskAmount;
+		this.taskAmountAssigned = taskAmount;
+	}
+
+	public int getTaskAmountAssigned() {
+		return taskAmountAssigned;
 	}
 
 	/**

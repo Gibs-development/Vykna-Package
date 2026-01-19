@@ -113,6 +113,12 @@ public final class WrathSystem {
         if (target instanceof Player) {
             gain = Math.max(1, gain - 1);
         }
+
+        if (attacker.getPerkManager().hasPerk(io.xeros.model.items.PerkModule.INVIGORATING)) {
+            int rank = attacker.getPerkManager().getPerkRank(io.xeros.model.items.PerkModule.INVIGORATING);
+            gain += Math.max(0, (int) Math.floor(gain * (rank * 0.05)));
+            attacker.getPerkManager().activatePerk(io.xeros.model.items.PerkModule.INVIGORATING, "channel extra wrath", 8_000);
+        }
         attacker.getPA().sendSound(Sfx.BLADE_HIT);
         addWrath(attacker, gain);
     }

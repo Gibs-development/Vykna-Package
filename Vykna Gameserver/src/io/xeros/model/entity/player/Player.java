@@ -852,6 +852,7 @@ public class Player extends Entity {
     public int[] playerEquipmentN = new int[14];
     public ItemAttributes[] playerEquipmentAttrs = new ItemAttributes[14];
     public int[] playerEquipmentAttrHash = new int[14];
+    private final PerkManager perkManager = new PerkManager(this);
 
     public int[] playerLevel = new int[25];
     public int[] playerXP = new int[25];
@@ -4521,6 +4522,9 @@ public class Player extends Entity {
             Degrade.degradeDefending(this);
         }
 
+        damage = perkManager.applyIncomingDamage(entity, damage);
+        perkManager.onHitTaken(entity, damage);
+
         if (damage < 0) {
             damage = 0;
             h = Hitmark.MISS;
@@ -5555,7 +5559,15 @@ public class Player extends Entity {
 
     @Override
     public boolean susceptibleTo(HealthStatus status) {
+        if (status == HealthStatus.POISON && perkManager.hasPerk(PerkModule.VENOMBLOOD)) {
+            perkManager.activatePerk(PerkModule.VENOMBLOOD, "negate poison damage", 10_000);
+            return false;
+        }
         return !getItems().isWearingItem(12931, playerHat) && !getItems().isWearingItem(13199, playerHat) && !getItems().isWearingItem(13197, playerHat);
+    }
+
+    public PerkManager getPerkManager() {
+        return perkManager;
     }
 
     @Override

@@ -17,6 +17,10 @@ public class ItemsLostOnDeath {
             amount -= 3;
         if (CombatPrayer.isPrayerOn(player, CombatPrayer.PROTECT_ITEM))
             amount += 1;
+        if (!player.getPosition().inWild() && player.getPerkManager().hasPerk(io.xeros.model.items.PerkModule.HOARDING)) {
+            amount += 1;
+            player.getPerkManager().activatePerk(io.xeros.model.items.PerkModule.HOARDING, "protect an extra item", 10_000);
+        }
         return amount;
     }
 

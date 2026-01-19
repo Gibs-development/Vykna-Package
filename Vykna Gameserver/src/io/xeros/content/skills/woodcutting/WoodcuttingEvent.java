@@ -91,6 +91,7 @@ public class WoodcuttingEvent extends Event<Player> {
 
 			Server.getGlobalObjects().add(new GlobalObject(tree.equals(Tree.REDWOOD) ? stumpId : tree.getStumpId(), x, y, attachment.heightLevel, face, 10, tree.getRespawnTime(), objectId));
 			attachment.getItems().addItem(tree.getWood(), 1);
+			attachment.getPerkManager().onResourceGather(tree.getWood(), new Location3D(attachment.getX(), attachment.getY(), attachment.heightLevel));
 			attachment.getEventCalendar().progress(EventChallenge.CUT_DOWN_X_MAGIC_LOGS);
 			attachment.getPA().addSkillXPMultiplied((int)osrsExperience, Skill.WOODCUTTING.getId(), true);
 			Achievements.increase(attachment, AchievementType.WOODCUT, 1);

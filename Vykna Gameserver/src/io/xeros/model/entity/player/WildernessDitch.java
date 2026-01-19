@@ -4,6 +4,7 @@ import io.xeros.content.wildwarning.WildWarning;
 import io.xeros.model.cycleevent.CycleEvent;
 import io.xeros.model.cycleevent.CycleEventContainer;
 import io.xeros.model.cycleevent.CycleEventHandler;
+import io.xeros.model.items.PerkModule;
 
 /**
  * Class WildernessDitch Handles Crossing the wilderness ditch
@@ -34,6 +35,10 @@ public class WildernessDitch {
 	}
 
 	private static void enter(final Player c) {
+		if (c.getPerkManager().hasPerk(PerkModule.CAUTIOUS)) {
+			c.getPerkManager().activatePerk(PerkModule.CAUTIOUS, "avoid the wilderness", 10_000);
+			return;
+		}
 		c.setForceMovement(c.absX, 3523, 0, 10, "NORTH", 0);
 		if (c.stopPlayerPacket) {
 			return;
