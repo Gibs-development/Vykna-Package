@@ -348,6 +348,7 @@ public class NPCDeath {
 
 
         Location3D location = new Location3D(dropX, dropY, dropHeight);
+        c.getPerkManager().onNpcKill(npc, location);
         int amountOfDrops = 1;
         if (isDoubleDrops()) {
             amountOfDrops++;

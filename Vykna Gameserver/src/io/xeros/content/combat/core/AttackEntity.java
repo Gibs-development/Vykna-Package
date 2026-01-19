@@ -38,6 +38,7 @@ import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.PlayerHandler;
 import io.xeros.model.entity.player.Right;
 import io.xeros.model.items.ItemAssistant;
+import io.xeros.model.items.PerkModule;
 import io.xeros.model.multiplayersession.MultiplayerSessionType;
 import io.xeros.model.multiplayersession.duel.DuelSession;
 import io.xeros.model.multiplayersession.duel.DuelSessionRules;
@@ -285,7 +286,8 @@ public class AttackEntity {
         attacker.arrowUsedOnAttack = attacker.playerEquipment[Player.playerArrows];
 
         handleItemChangesOnAttack(targetEntity);
-        attacker.attackTimer = getAttackDelay() + (Spores.isInfected(attacker) ? 1 : 0);
+        int fatiguingDelay = attacker.getPerkManager().getPerkRank(PerkModule.FATIGUING);
+        attacker.attackTimer = getAttackDelay() + (Spores.isInfected(attacker) ? 1 : 0) + fatiguingDelay;
         attacker.hitDelay = MeleeData.getHitDelay(attacker);
         attacker.faceEntity(targetEntity);
         attacker.lastAttackedEntity = EntityReference.getReference(targetEntity);

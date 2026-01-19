@@ -3318,6 +3318,7 @@ public class PlayerAssistant {
 		if (skill == Configuration.BONUS_SKILL) {
 			amount *= 1.5;
 		}
+		amount = c.getPerkManager().modifySkillExperience(amount);
 		if (dropExperience) {
 			addXpDrop(new XpDrop(amount, skill));
 		}

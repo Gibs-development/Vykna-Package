@@ -36,6 +36,7 @@ import io.xeros.model.entity.npc.NPC;
 import io.xeros.model.entity.npc.NPCHandler;
 import io.xeros.model.entity.player.*;
 import io.xeros.model.items.EquipmentSet;
+import io.xeros.model.items.PerkModule;
 import io.xeros.util.Misc;
 import org.apache.commons.net.io.SocketOutputStream;
 
@@ -133,6 +134,8 @@ public abstract class HitDispatcher {
                     defenceMultiplier);
             maximumDamage = MeleeCombatFormula.get().getMaxHit(attacker, defender, specialDamageBoost,
                     specialPassiveMultiplier);
+            maximumAccuracy = attacker.getPerkManager().applyAccuracyBonus(maximumAccuracy);
+            maximumDamage = attacker.getPerkManager().applyMaxHitBonus(defender, maximumDamage);
 
             beforeDamageCalculated(combatType);
 
@@ -154,6 +157,13 @@ public abstract class HitDispatcher {
                 }
             }
 
+
+            if (isAccurate && damage > 0) {
+                damage = attacker.getPerkManager().applyMinimumDamage(damage, maximumDamage);
+                if (attacker.getPerkManager().tryCriticalHit()) {
+                    damage = (int) Math.floor(damage * 1.2);
+                }
+            }
 
             afterDamageCalculated(combatType, isAccurate);
 
@@ -285,6 +295,8 @@ public abstract class HitDispatcher {
                     boltEffect.get().execute(attacker, defender, new Damage(damage));
                 }
             }
+            maximumAccuracy = attacker.getPerkManager().applyAccuracyBonus(maximumAccuracy);
+            maximumDamage = attacker.getPerkManager().applyMaxHitBonus(defender, maximumDamage);
 
             beforeDamageCalculated(combatType);
             damage = attacker.rubyBoltSpecial ? getRubyBoltDamage(attacker, defender) : Misc.random(maximumDamage);
@@ -294,6 +306,13 @@ public abstract class HitDispatcher {
             if (defender.isNPC()) {
                 if (defender.asNPC().getNpcId() == Npcs.MAX_DUMMY)
                     isAccurate = true;
+            }
+
+            if (isAccurate && damage > 0) {
+                damage = attacker.getPerkManager().applyMinimumDamage(damage, maximumDamage);
+                if (attacker.getPerkManager().tryCriticalHit()) {
+                    damage = (int) Math.floor(damage * 1.2);
+                }
             }
 
             // Dark Bow damage modifiers
@@ -313,6 +332,9 @@ public abstract class HitDispatcher {
                 boolean isAccurate2 = isMaxHitDummy || maximumAccuracy >= rand.nextDouble();
                 if (!isAccurate2 && !attacker.ignoreDefence) {
                     damage2 = 0;
+                }
+                if (isAccurate2 && damage2 > 0) {
+                    damage2 = attacker.getPerkManager().applyMinimumDamage(damage2, maximumDamage);
                 }
             }
 
@@ -403,11 +425,20 @@ public abstract class HitDispatcher {
                     defenceMultiplier);
             maximumDamage = MagicCombatFormula.STANDARD.getMaxHit(attacker, defender, specialDamageBoost,
                     specialPassiveMultiplier);
+            maximumAccuracy = attacker.getPerkManager().applyAccuracyBonus(maximumAccuracy);
+            maximumDamage = attacker.getPerkManager().applyMaxHitBonus(defender, maximumDamage);
 
             beforeDamageCalculated(combatType);
             damage = Misc.random(maximumDamage);
 
             boolean isAccurate = isMaxHitDummy || maximumAccuracy >= rand.nextDouble();
+
+            if (isAccurate && damage > 0) {
+                damage = attacker.getPerkManager().applyMinimumDamage(damage, maximumDamage);
+                if (attacker.getPerkManager().tryCriticalHit()) {
+                    damage = (int) Math.floor(damage * 1.2);
+                }
+            }
 
             afterDamageCalculated(combatType, isAccurate);
 
@@ -477,7 +508,8 @@ public abstract class HitDispatcher {
             venomEffect.execute(attacker, defender, new Damage(6));
         }
 
-        attacker.attackTimer = attacker.attacking.getAttackDelay() + (Spores.isInfected(attacker) ? 1 : 0);
+        int fatiguingDelay = attacker.getPerkManager().getPerkRank(PerkModule.FATIGUING);
+        attacker.attackTimer = attacker.attacking.getAttackDelay() + (Spores.isInfected(attacker) ? 1 : 0) + fatiguingDelay;
 
 
         if (defender != null && defender.isNPC()) {

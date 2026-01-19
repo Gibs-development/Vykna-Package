@@ -121,6 +121,7 @@ public abstract class HitExecutor {
 
                     defender.appendDamage(attacker, damage.getAmount(), damage.getHitmark());
                     WrathSystem.onPlayerDealtDamage(attacker, defender, damage.getAmount());
+                    attacker.getPerkManager().onHitDealt(defender, damage.getAmount(), damage.getSpecial() != null);
                     break;
 
                 case RANGE:
@@ -137,6 +138,7 @@ public abstract class HitExecutor {
                     }
                     defender.appendDamage(attacker, damage.getAmount(), damage.getHitmark());
                     WrathSystem.onPlayerDealtDamage(attacker, defender, damage.getAmount());
+                    attacker.getPerkManager().onHitDealt(defender, damage.getAmount(), damage.getSpecial() != null);
                     break;
 
                 case MAGE:
@@ -150,6 +152,7 @@ public abstract class HitExecutor {
                     if (damage.isSuccess()) {
                         defender.appendDamage(attacker, damage.getAmount(), damage.getHitmark());
                     WrathSystem.onPlayerDealtDamage(attacker, defender, damage.getAmount());
+                        attacker.getPerkManager().onHitDealt(defender, damage.getAmount(), damage.getSpecial() != null);
                         if (attacker.oldSpellId > -1) {
                             defender.startGraphic(new Graphic(CombatSpellData.MAGIC_SPELLS[attacker.oldSpellId][5],
                                     CombatSpellData.getEndGfxHeight(attacker) == 100 ? Graphic.GraphicHeight.MIDDLE : Graphic.GraphicHeight.LOW));

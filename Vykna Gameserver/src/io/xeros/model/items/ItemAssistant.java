@@ -547,6 +547,7 @@ public class ItemAssistant {
 			player.playerBonus[Bonus.PRAYER.ordinal()] += 7;
 		}
 
+		player.getPerkManager().rebuild();
 		addContainerUpdate(ContainerUpdate.EQUIPMENT);
 	}
 

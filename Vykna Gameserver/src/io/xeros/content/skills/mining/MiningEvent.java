@@ -426,6 +426,7 @@ public class MiningEvent extends Event<Player> {
 		}
 
 		attachment.getItems().addItem(itemId, amount);
+		attachment.getPerkManager().onResourceGather(itemId, new Location3D(attachment.getX(), attachment.getY(), attachment.heightLevel));
 
 		if (mineral == Mineral.GEM) {
 			if (itemId == 6571) {

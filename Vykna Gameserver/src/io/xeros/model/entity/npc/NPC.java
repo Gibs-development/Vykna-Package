@@ -799,6 +799,10 @@ public class NPC extends Entity {
 		setUpdateRequired(true);
 	}
 
+	public int getFaceIndex() {
+		return face;
+	}
+
 	public void appendForcedMovementUpdate(Player player, Stream str) {
 		str.writeByte(forceMovement.getStart(player).getX());
 		str.writeByte(forceMovement.getStart(player).getY());
