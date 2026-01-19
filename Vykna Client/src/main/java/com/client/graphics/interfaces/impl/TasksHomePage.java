@@ -1,7 +1,6 @@
 package com.client.graphics.interfaces.impl;
 
 import com.client.TextDrawingArea;
-import com.client.graphics.interfaces.MenuItem;
 import com.client.graphics.interfaces.RSInterface;
 
 /**
@@ -16,9 +15,9 @@ public final class TasksHomePage extends RSInterface {
     // Interface ids (keep separate from 35000 range)
     public static final int INTERFACE_ID = 36000;
 
-    // Dropdown + headers
+    // Header
+    private static final int TEXT_TITLE = 36009;
     private static final int DROPDOWN_ID = 36010;
-    private static final int TEXT_POINTS_HEADER = 36011;
     private static final int TEXT_SHOW_COMPLETED = 36012;
 
     // Scroll
@@ -35,7 +34,7 @@ public final class TasksHomePage extends RSInterface {
     // Dropdown colors (dark)
     private static final int[] DARK_DROPDOWN_COLORS = { 0x1a1a1a, 0x2a2a2a, 0x202224, 0x2b2e32, 0x34383d };
 
-    // Categories shown in dropdown
+    // Task categories
     private static final String[] TASK_CATEGORIES = {
             "Lumbridge",
             "Varrock",
@@ -217,6 +216,9 @@ public final class TasksHomePage extends RSInterface {
                 36, 36, "Mastery", 0, 1);
         addSprite(INTERFACE_ID + 73, 0, SPRITE_ROOT + "MasteryIcon");
 
+        // ---- Title ----
+        addText(TEXT_TITLE, "Tasks", tda, 2, 0xE3AE19, false, true);
+
         // ---- Top row controls ----
         dropdownMenu(
                 DROPDOWN_ID, 166, 0, TASK_CATEGORIES,
@@ -226,8 +228,6 @@ public final class TasksHomePage extends RSInterface {
 
         addHoverText(TEXT_SHOW_COMPLETED, "show completed", "Toggle showing completed tasks",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
-
-        addText(TEXT_POINTS_HEADER, "points", tda, 0, 0xE3AE19, false, true);
 
         // ---- Scroll container ----
         RSInterface scroll = addTabInterface(SCROLL_ID);
@@ -239,12 +239,14 @@ public final class TasksHomePage extends RSInterface {
         final int ROW_COUNT = 50;
 
         scroll.scrollMax = ROW_COUNT * ROW_H;
-        scroll.totalChildren(ROW_COUNT * 5);
+        scroll.totalChildren(ROW_COUNT * 6);
 
         for (int i = 0; i < ROW_COUNT; i++) {
             final int base = ROW_START_ID + (i * ROW_STRIDE);
+            final int boxId = base + 5;
 
             int valueIndex = (i % 4) + 1;
+            addBox(boxId, 0x3a3228, 0x2c261f, 120, scroll.width - 12, ROW_H - 6);
             addGridSpriteValueIndex(base + 0, RECENT_ATLAS, 2, 2, ICON_SIZE, valueIndex, "");
 
             // Start blank; refreshList() will populate
@@ -255,11 +257,12 @@ public final class TasksHomePage extends RSInterface {
             addHoverText(base + 4, "", "View task", tda, 0, 0xFFFFFF, false, true, scroll.width, ROW_H);
 
             int y = i * ROW_H;
-            scroll.child(i * 5 + 0, base + 0, 6, y + 6);
-            scroll.child(i * 5 + 1, base + 1, 50, y + 4);
-            scroll.child(i * 5 + 2, base + 2, 50, y + 20);
-            scroll.child(i * 5 + 3, base + 3, scroll.width - 10, y + 4);
-            scroll.child(i * 5 + 4, base + 4, 0, y);
+            scroll.child(i * 6 + 0, boxId, 2, y + 3);
+            scroll.child(i * 6 + 1, base + 0, 6, y + 6);
+            scroll.child(i * 6 + 2, base + 1, 50, y + 4);
+            scroll.child(i * 6 + 3, base + 2, 50, y + 20);
+            scroll.child(i * 6 + 4, base + 3, scroll.width - 10, y + 4);
+            scroll.child(i * 6 + 5, base + 4, 0, y);
         }
 
         // ---- Bottom completion progress ----
@@ -274,9 +277,9 @@ public final class TasksHomePage extends RSInterface {
                 + 2 /*skill btn+icon*/
                 + 2 /*combat btn+icon*/
                 + 2 /*mastery btn+icon*/
+                + 1 /*title*/
                 + 1 /*dropdown*/
                 + 1 /*show completed*/
-                + 1 /*points*/
                 + 1 /*scroll*/
                 + 1 /*progress text*/
                 + 4 /*progress bar parts*/);
@@ -310,11 +313,6 @@ public final class TasksHomePage extends RSInterface {
         rsi.child(c++, INTERFACE_ID + 70, NAV_X, NAV_Y + (5 * TAB_GAP));
         rsi.child(c++, INTERFACE_ID + 73, NAV_X + ICON_INSET, NAV_Y + (5 * TAB_GAP) + ICON_INSET);
 
-        // Top row
-        rsi.child(c++, DROPDOWN_ID, MAIN_X + 4, MAIN_Y + 6);
-        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 10);
-        rsi.child(c++, TEXT_POINTS_HEADER, MAIN_X + 360, MAIN_Y + 10);
-
         // Scroll
         rsi.child(c++, SCROLL_ID, MAIN_X + 4, MAIN_Y + 30);
 
@@ -327,6 +325,13 @@ public final class TasksHomePage extends RSInterface {
         rsi.child(c++, PROGRESS_BAR_ID + 1, BAR_X + 1, BAR_Y + 1);
         rsi.child(c++, PROGRESS_BAR_ID + 2, BAR_X + 2, BAR_Y + 2);
         rsi.child(c++, PROGRESS_BAR_ID + 3, BAR_X + 2, BAR_Y + 2);
+
+        // Title
+        rsi.child(c++, TEXT_TITLE, MAIN_X + 4, MAIN_Y - 16);
+
+        // Top row
+        rsi.child(c++, DROPDOWN_ID, MAIN_X + 4, MAIN_Y + 6);
+        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 10);
 
         // Populate initial list (Misc)
         refreshList(0);
