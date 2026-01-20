@@ -6,7 +6,6 @@
       <excludeFolder url="file://$MODULE_DIR$/../../Vykna Gameserver/deps" />
       <excludeFolder url="file://$MODULE_DIR$/../../Vykna Gameserver/gradle" />
       <excludeFolder url="file://$MODULE_DIR$/../../Vykna Gameserver/logs" />
-      <excludeFolder url="file://$MODULE_DIR$/../../Vykna Gameserver/save_files" />
     </content>
   </component>
 </module>
