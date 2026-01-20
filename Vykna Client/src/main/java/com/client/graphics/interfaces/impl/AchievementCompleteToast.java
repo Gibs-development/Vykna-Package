@@ -12,11 +12,17 @@ public final class AchievementCompleteToast extends RSInterface {
     private static final String SPRITE_ROOT = "interfaces/vykna_achievements/";
     private static final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
 
-    // IMPORTANT:
-    // This assumes the atlas sheet is stored as "AchievementRecentAtlas 0"
-    // and contains a grid of 32x32 icons.
+    // Atlas tiles
     private static final int TILE_SIZE = 32;
     private static final int DEFAULT_ICON_INDEX = 0;
+
+    // Panel size
+    private static final int PANEL_W = 240;
+    private static final int PANEL_H = 64;
+
+    // Position (centered on fixed 512px layout)
+    private static final int X = (512 - PANEL_W) / 2;
+    private static final int Y = 20;
 
     public static final int INTERFACE_ID = 64650;
 
@@ -27,9 +33,6 @@ public final class AchievementCompleteToast extends RSInterface {
     private static final int TEXT_NAME  = INTERFACE_ID + 11;
     private static final int TEXT_EXTRA = INTERFACE_ID + 12;
 
-    private static final int X = 166;
-    private static final int Y = 20;
-
     // cache cropped tiles so we don’t crop every time
     private static Sprite[] atlasTileCache;
 
@@ -38,10 +41,22 @@ public final class AchievementCompleteToast extends RSInterface {
     public static void build(TextDrawingArea[] tda) {
         RSInterface r = addInterface(INTERFACE_ID);
 
+        // Background placeholder (we override with generated panel sprite)
         addSprite(BG_ID, 0, SPRITE_ROOT + "LeftTabSelected");
+        RSInterface bg = RSInterface.interfaceCache[BG_ID];
+        if (bg != null) {
+            Sprite panel = buildPanelSprite(PANEL_W, PANEL_H);
+            bg.sprite1 = panel;
+            bg.sprite2 = panel;
+            bg.width = PANEL_W;
+            bg.height = PANEL_H;
 
-        // Create icon component (we'll override sprite1/sprite2 with cropped tile)
-        addSprite(ICON_ID, 0, SPRITE_ROOT + "LeftTabSelected"); // safe placeholder that definitely loads
+            // Only if your RSInterface supports it; harmless if unused
+            bg.spriteOpacity = 210; // 0..255 (lower = more transparent)
+        }
+
+        // Icon placeholder (we override with cropped atlas tile)
+        addSprite(ICON_ID, 0, SPRITE_ROOT + "LeftTabSelected");
         RSInterface icon = RSInterface.interfaceCache[ICON_ID];
         if (icon != null) {
             Sprite tile = getAtlasTile(DEFAULT_ICON_INDEX);
@@ -51,25 +66,26 @@ public final class AchievementCompleteToast extends RSInterface {
                 icon.width = tile.myWidth;
                 icon.height = tile.myHeight;
             } else {
-                // fallback size so it doesn't explode layout
                 icon.width = TILE_SIZE;
                 icon.height = TILE_SIZE;
             }
         }
 
-        addText(TEXT_TITLE, "Achievement complete!", tda, 2, 0xFFFFFF, true, true);
-        addText(TEXT_NAME,  "", tda, 1, 0xFFD200, true, true);
-        addText(TEXT_EXTRA, "", tda, 0, 0xFFFFFF, true, true);
+        // Left aligned text looks much cleaner in a toast
+        addText(TEXT_TITLE, "Achievement complete!", tda, 2, 0xE6C35A, false, true);
+        addText(TEXT_NAME,  "", tda, 1, 0xFFFFFF, false, true);
+        addText(TEXT_EXTRA, "", tda, 0, 0xC8C8C8, false, true);
 
         r.totalChildren(6);
 
         int c = 0;
         r.child(c++, BG_ID,   X,      Y);
-        r.child(c++, ICON_ID, X + 12, Y + 8);
+        r.child(c++, ICON_ID, X + 10, Y + 16);
 
-        r.child(c++, TEXT_TITLE, X + 95, Y + 10);
-        r.child(c++, TEXT_NAME,  X + 95, Y + 26);
-        r.child(c++, TEXT_EXTRA, X + 95, Y + 40);
+        int textX = X + 52; // icon (32) + padding
+        r.child(c++, TEXT_TITLE, textX, Y + 12);
+        r.child(c++, TEXT_NAME,  textX, Y + 28);
+        r.child(c++, TEXT_EXTRA, textX, Y + 44);
     }
 
     public static void setToastText(String name, String extraLine) {
@@ -102,7 +118,9 @@ public final class AchievementCompleteToast extends RSInterface {
         if (atlasTileCache == null || index >= atlasTileCache.length) {
             int newSize = Math.max(index + 1, atlasTileCache == null ? 64 : atlasTileCache.length * 2);
             Sprite[] newCache = new Sprite[newSize];
-            if (atlasTileCache != null) System.arraycopy(atlasTileCache, 0, newCache, 0, atlasTileCache.length);
+            if (atlasTileCache != null) {
+                System.arraycopy(atlasTileCache, 0, newCache, 0, atlasTileCache.length);
+            }
             atlasTileCache = newCache;
         }
 
@@ -137,5 +155,43 @@ public final class AchievementCompleteToast extends RSInterface {
 
         atlasTileCache[index] = out;
         return out;
+    }
+
+    /** Generates a simple dark panel with a gold border (no external sprites required). */
+    private static Sprite buildPanelSprite(int w, int h) {
+        Sprite s = new Sprite(w, h);
+
+        final int fill = 0x151515;     // dark fill
+        final int border = 0x8A6A2F;   // gold-ish border
+        final int border2 = 0x2B2011;  // inner border for depth
+
+        // Fill
+        for (int i = 0; i < s.myPixels.length; i++) {
+            s.myPixels[i] = fill;
+        }
+
+        // Outer border
+        for (int x = 0; x < w; x++) {
+            s.myPixels[x] = border;                       // top
+            s.myPixels[(h - 1) * w + x] = border;        // bottom
+        }
+        for (int y = 0; y < h; y++) {
+            s.myPixels[y * w] = border;                  // left
+            s.myPixels[y * w + (w - 1)] = border;        // right
+        }
+
+        // Inner border (1px inset)
+        if (w > 4 && h > 4) {
+            for (int x = 1; x < w - 1; x++) {
+                s.myPixels[1 * w + x] = border2;
+                s.myPixels[(h - 2) * w + x] = border2;
+            }
+            for (int y = 1; y < h - 1; y++) {
+                s.myPixels[y * w + 1] = border2;
+                s.myPixels[y * w + (w - 2)] = border2;
+            }
+        }
+
+        return s;
     }
 }

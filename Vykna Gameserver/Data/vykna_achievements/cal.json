@@ -13,7 +13,7 @@
     },
     "2101": {
       "current": 0,
-      "target": 10,
+      "target": 20,
       "done": false
     },
     "2102": {
@@ -43,7 +43,7 @@
     },
     "1101": {
       "current": 0,
-      "target": 1,
+      "target": 5,
       "done": false
     },
     "3101": {
@@ -53,12 +53,32 @@
     },
     "1102": {
       "current": 0,
-      "target": 10,
+      "target": 50,
       "done": false
     },
     "3102": {
       "current": 0,
       "target": 3,
+      "done": false
+    },
+    "1201": {
+      "current": 0,
+      "target": 1,
+      "done": false
+    },
+    "1202": {
+      "current": 0,
+      "target": 10,
+      "done": false
+    },
+    "2201": {
+      "current": 0,
+      "target": 10,
+      "done": false
+    },
+    "2202": {
+      "current": 0,
+      "target": 100,
       "done": false
     }
   }
