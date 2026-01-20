@@ -12,7 +12,7 @@ public final class VyknaProgressionInterfaces {
 
     // Home page tab buttons (AchievementHomePage)
     public static final int HOME_TAB_TASKS = 35020;
-    public static final int HOME_TAB_SKILLING = 35030;
+    public static final int HOME_TAB_SKILLING = 136214;
     public static final int HOME_TAB_COMBAT = 35040;
 
     // List page tab buttons (AchievementListPage)
