@@ -1,7 +1,16 @@
 package com.client.graphics.interfaces.impl;
 
 import com.client.TextDrawingArea;
+import com.client.graphics.interfaces.MenuItem;
 import com.client.graphics.interfaces.RSInterface;
+import com.client.graphics.interfaces.impl.DropdownMenu;
+import com.client.vykna_progression.ProgressionEntryDefinition;
+import com.client.vykna_progression.ProgressionListType;
+import com.client.vykna_progression.VyknaProgressionDefinitions;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 /**
  * Tasks page (mockup) built from AchievementHomePage base.
@@ -19,15 +28,15 @@ import com.client.graphics.interfaces.RSInterface;
  *     from rendering at (0,0) or under the left tabs.
  *
  * IMPORTANT:
- *  - INTERFACE_ID remains 36000 so your existing open-interface code keeps working.
+ *  - INTERFACE_ID is assigned to a free range to avoid interface id collisions.
  */
 public final class AchievementListPage extends RSInterface {
 
     private static final String SPRITE_ROOT = "interfaces/vykna_progression/";
     private static final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
 
-    // Keep same interface id so openInterface packets/etc still work
-    public static final int INTERFACE_ID = 64504;
+    // Assigned to a free range to avoid interface id collisions.
+    public static final int INTERFACE_ID = 55281;
 
     // ----- SAFE ID RANGES (avoid helper-method collisions) -----
 
@@ -40,6 +49,8 @@ public final class AchievementListPage extends RSInterface {
 
     private static final int NAV_HOME_BTN = INTERFACE_ID + 1200;
     private static final int NAV_HOME_ICON = INTERFACE_ID + 1210;
+
+    private static final int NAV_TASKS_BTN = 220181;
 
     private static final int NAV_SKILL_BTN = INTERFACE_ID + 1240;
     private static final int NAV_SKILL_ICON = INTERFACE_ID + 1250;
@@ -69,87 +80,46 @@ public final class AchievementListPage extends RSInterface {
     // Dropdown colors (dark)
     private static final int[] DARK_DROPDOWN_COLORS = { 0x1a1a1a, 0x2a2a2a, 0x202224, 0x2b2e32, 0x34383d };
 
-    // Task categories
-    private static final String[] TASK_CATEGORIES = {
-            "Lumbridge",
-            "Varrock",
-            "Falador",
-            "Ardougne",
-            "Wilderness",
-            "Misc"
-    };
+    private static final String ALL_FILTER = "All";
+    private static final int DROPDOWN_WIDTH = 166;
+    private static final MenuItem DROPDOWN_ACTION =
+            (optionSelected, rsInterface) -> AchievementListPage.refreshList(getDropdownOption(optionSelected, rsInterface));
 
     private static final class TaskRow {
         private final String title;
         private final String description;
         private final int points;
         private final boolean completed;
+        private final int spriteIndex;
 
         // Optional per-task progress (e.g. 21/50). If target <= 0, bar is hidden.
         private final int progressCurrent;
         private final int progressTarget;
 
-        private TaskRow(String title, String description, int points, boolean completed) {
+        private TaskRow(String title, String description, int points, boolean completed, int spriteIndex) {
             this.title = title;
             this.description = description;
             this.points = points;
             this.completed = completed;
+            this.spriteIndex = spriteIndex;
             this.progressCurrent = 0;
             this.progressTarget = 0;
         }
 
-        private TaskRow(String title, String description, int points, boolean completed, int progressCurrent, int progressTarget) {
+        private TaskRow(String title, String description, int points, boolean completed, int spriteIndex,
+                        int progressCurrent, int progressTarget) {
             this.title = title;
             this.description = description;
             this.points = points;
             this.completed = completed;
+            this.spriteIndex = spriteIndex;
             this.progressCurrent = progressCurrent;
             this.progressTarget = progressTarget;
         }
     }
 
-    private static final TaskRow[][] TASKS_BY_CATEGORY = {
-            {
-                    new TaskRow("Lumbridge: Chop normal logs", "Chop logs from any tree in Lumbridge.", 5, true, 21, 50),
-                    new TaskRow("Lumbridge: Catch shrimp", "Net shrimp in the river south of Lumbridge.", 5, false),
-                    new TaskRow("Lumbridge: Bake bread", "Bake a loaf of bread in Lumbridge Castle.", 10, false),
-                    new TaskRow("Lumbridge: Talk to the Duke", "Speak with the Duke in the castle.", 5, true),
-                    new TaskRow("Lumbridge: Mine copper", "Mine copper ore in the mine south-east.", 5, false),
-            },
-            {
-                    new TaskRow("Varrock: Visit the museum", "Enter the Varrock Museum and speak to the curator.", 5, true),
-                    new TaskRow("Varrock: Buy a rune", "Purchase a rune from Aubury in the rune shop.", 10, false),
-                    new TaskRow("Varrock: Mine iron", "Mine iron ore in the south-east mine.", 10, false),
-                    new TaskRow("Varrock: Use the GE", "Place a buy offer on the Grand Exchange.", 15, false),
-                    new TaskRow("Varrock: Talk to Zaff", "Speak to Zaff in the staff shop.", 5, true),
-            },
-            {
-                    new TaskRow("Falador: Pray at altar", "Pray at the altar in Falador Castle.", 5, true),
-                    new TaskRow("Falador: Mine tin", "Mine tin ore in the Dwarven Mine.", 10, false),
-                    new TaskRow("Falador: Visit the park", "Walk through Falador Park.", 5, true),
-                    new TaskRow("Falador: Take a charter", "Board a charter ship from the docks.", 15, false),
-            },
-            {
-                    new TaskRow("Ardougne: Pickpocket a guard", "Pickpocket an Ardougne guard.", 15, false),
-                    new TaskRow("Ardougne: Steal a cake", "Steal a cake from the market stall.", 10, true),
-                    new TaskRow("Ardougne: Visit the zoo", "Walk through the Ardougne Zoo.", 5, true),
-                    new TaskRow("Ardougne: Use the bank", "Deposit items at the Ardougne bank.", 5, false),
-            },
-            {
-                    new TaskRow("Wilderness: Enter the wild", "Cross the ditch into the Wilderness.", 5, true),
-                    new TaskRow("Wilderness: Kill a skeleton", "Defeat a skeleton in level 5 wilderness.", 10, false),
-                    new TaskRow("Wilderness: Collect bones", "Pick up bones in the wilderness.", 5, false),
-                    new TaskRow("Wilderness: Visit the obelisk", "Touch a wilderness obelisk.", 15, false),
-            },
-            {
-                    new TaskRow("Misc: Check your tasks", "Open the tasks home screen.", 5, true),
-                    new TaskRow("Misc: Talk to a banker", "Speak to any banker in the world.", 5, false),
-                    new TaskRow("Misc: Equip armor", "Equip any piece of armor.", 5, false),
-                    new TaskRow("Misc: Use a teleport", "Use any teleport to move around.", 10, false),
-            }
-    };
-
-    private static int currentCategory = 0;
+    private static ProgressionListType currentListType = ProgressionListType.TASKS;
+    private static String currentFilter = ALL_FILTER;
 
     // Scroll layout (shared by build + refresh)
     private static final int ROW_H = 48;
@@ -164,14 +134,10 @@ public final class AchievementListPage extends RSInterface {
      * The interface is built once, so we allocate enough rows for the largest category.
      * On refresh we reposition/hide unused rows and shrink scrollMax so the scrollbar matches.
      */
+    private static final int MAX_ROWS = 200;
+
     private static int maxTaskCount() {
-        int max = 0;
-        for (TaskRow[] rows : TASKS_BY_CATEGORY) {
-            if (rows != null && rows.length > max) {
-                max = rows.length;
-            }
-        }
-        return max;
+        return MAX_ROWS;
     }
 
     private AchievementListPage() {}
@@ -203,101 +169,169 @@ public final class AchievementListPage extends RSInterface {
         r.tooltip = tooltip;
     }
 
-    public static void refreshList(int categoryIndex) {
-        if (categoryIndex < 0 || categoryIndex >= TASK_CATEGORIES.length) {
-            categoryIndex = 0;
-        }
-        currentCategory = categoryIndex;
+    public static void refreshList(String selectedOption) {
+        String resolvedFilter = normalizeFilter(selectedOption);
+        currentFilter = resolvedFilter;
 
-        TaskRow[] tasks = TASKS_BY_CATEGORY[categoryIndex];
+        List<ProgressionEntryDefinition> entries = VyknaProgressionDefinitions.getEntries(currentListType);
+        List<TaskRow> rows = new ArrayList<>();
+        for (ProgressionEntryDefinition entry : entries) {
+            if (!ALL_FILTER.equalsIgnoreCase(currentFilter)
+                    && !normalizeFilter(entry.getSubcategory()).equalsIgnoreCase(currentFilter)) {
+                continue;
+            }
+            String status = entry.isCompleted() ? "Completed" : "Incomplete";
+            rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+                    entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
+                    entry.getProgressCurrent(), entry.getRequirementTarget()));
+        }
+
+        if (rows.isEmpty() && !ALL_FILTER.equalsIgnoreCase(currentFilter)) {
+            currentFilter = ALL_FILTER;
+            rows = new ArrayList<>();
+            for (ProgressionEntryDefinition entry : entries) {
+                String status = entry.isCompleted() ? "Completed" : "Incomplete";
+                rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+                        entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
+                        entry.getProgressCurrent(), entry.getRequirementTarget()));
+            }
+        }
+
         int completed = 0;
-        for (TaskRow task : tasks) {
+        for (TaskRow task : rows) {
             if (task.completed) completed++;
         }
-        int total = tasks.length;
-        int percent = total == 0 ? 0 : (int) ((completed * 100.0) / total);
+        int total = rows.size();
 
         if (RSInterface.interfaceCache[TEXT_PROGRESS] != null) {
             RSInterface.interfaceCache[TEXT_PROGRESS].message =
-                    "Completion: " + completed + "/" + total + " (" + percent + "%)";
+                    "Completed: " + completed + "/" + total;
         }
 
-        // Resize the scrollbar to match the number of tasks in this category.
-        // Note: scrollMax should never be smaller than the scroll height.
+        // Hide the bottom progress bar for now (no progress bars in this stage).
+        for (int i = 0; i < 4; i++) {
+            RSInterface bar = RSInterface.interfaceCache[PROGRESS_BAR_ID + i];
+            if (bar != null) {
+                bar.interfaceHidden = true;
+            }
+        }
+
         RSInterface scroll = RSInterface.interfaceCache[SCROLL_ID];
         if (scroll != null) {
-            scroll.scrollMax = Math.max(tasks.length * ROW_H, scroll.height);
+            scroll.scrollMax = Math.max(rows.size() * ROW_H, scroll.height);
         }
 
-        // Fill rows we need, and push unused rows out of view so we don't render empty boxes.
         final int rowCount = maxTaskCount();
         for (int i = 0; i < rowCount; i++) {
             int base = ROW_START_ID + (i * ROW_STRIDE);
-            int boxId = base + 5;
-
-            boolean active = i < tasks.length;
+            boolean active = i < rows.size();
 
             if (RSInterface.interfaceCache[base + 1] != null) {
-                RSInterface.interfaceCache[base + 1].message = active ? tasks[i].title : "";
+                RSInterface.interfaceCache[base + 1].message = active ? rows.get(i).title : "";
             }
             if (RSInterface.interfaceCache[base + 2] != null) {
-                RSInterface.interfaceCache[base + 2].message = active ? tasks[i].description : "";
+                RSInterface.interfaceCache[base + 2].message = active ? rows.get(i).description : "";
             }
             if (RSInterface.interfaceCache[base + 3] != null) {
-                RSInterface.interfaceCache[base + 3].message = active ? "<icon=0>" + tasks[i].points : "";
+                RSInterface.interfaceCache[base + 3].message = active ? "<icon=0>" + rows.get(i).points : "";
+            }
+            if (RSInterface.interfaceCache[base + 0] != null) {
+                RSInterface.interfaceCache[base + 0].valueIndex = active ? rows.get(i).spriteIndex : 1;
             }
 
-            // Per-task progress bar + [x/y] in the middle
             final int barBgId = base + 6;
             final int barFillId = base + 7;
             final int barTextId = base + 8;
-
-            if (RSInterface.interfaceCache[barTextId] != null) {
-                if (active && tasks[i].progressTarget > 0) {
-                    RSInterface.interfaceCache[barTextId].message = "[" + tasks[i].progressCurrent + "/" + tasks[i].progressTarget + "]";
-                } else {
-                    RSInterface.interfaceCache[barTextId].message = "";
-                }
+            boolean showProgress = active && rows.get(i).progressTarget > 0;
+            if (RSInterface.interfaceCache[barBgId] != null) {
+                RSInterface.interfaceCache[barBgId].interfaceHidden = !showProgress;
             }
-
             if (RSInterface.interfaceCache[barFillId] != null) {
-                if (active && tasks[i].progressTarget > 0) {
-                    int pct = (int) ((tasks[i].progressCurrent * 100L) / Math.max(1, tasks[i].progressTarget));
-                    if (pct < 0) pct = 0;
-                    if (pct > 100) pct = 100;
-                    int w = (ROW_BAR_W * pct) / 100;
-                    RSInterface.interfaceCache[barFillId].width = w;
-                } else {
-                    RSInterface.interfaceCache[barFillId].width = 0;
-                }
+                RSInterface.interfaceCache[barFillId].interfaceHidden = !showProgress;
+            }
+            if (RSInterface.interfaceCache[barTextId] != null) {
+                RSInterface.interfaceCache[barTextId].interfaceHidden = !showProgress;
+            }
+            if (showProgress && RSInterface.interfaceCache[barFillId] != null
+                    && RSInterface.interfaceCache[barTextId] != null) {
+                int current = Math.min(rows.get(i).progressCurrent, rows.get(i).progressTarget);
+                int target = Math.max(rows.get(i).progressTarget, 1);
+                int filledWidth = Math.max(1, (int) Math.floor((current / (double) target) * ROW_BAR_W));
+                RSInterface.interfaceCache[barFillId].width = filledWidth;
+                RSInterface.interfaceCache[barTextId].message = current + "/" + target;
             }
 
-            // Reposition the row children (9 per row) so unused rows don't draw.
             if (scroll != null && scroll.childY != null) {
                 int childBase = i * 9;
                 int y = active ? (i * ROW_H) : ROWS_HIDDEN_Y;
 
-                // box
                 if (childBase + 0 < scroll.childY.length) scroll.childY[childBase + 0] = y + 3;
-                // icon
                 if (childBase + 1 < scroll.childY.length) scroll.childY[childBase + 1] = y + 6;
-                // title
                 if (childBase + 2 < scroll.childY.length) scroll.childY[childBase + 2] = y + 4;
-                // desc
                 if (childBase + 3 < scroll.childY.length) scroll.childY[childBase + 3] = y + 20;
-                // points
                 if (childBase + 4 < scroll.childY.length) scroll.childY[childBase + 4] = y + 10;
-                // hover
                 if (childBase + 5 < scroll.childY.length) scroll.childY[childBase + 5] = y;
 
-                // progress bg
                 if (childBase + 6 < scroll.childY.length) scroll.childY[childBase + 6] = y + 30;
-                // progress fill
                 if (childBase + 7 < scroll.childY.length) scroll.childY[childBase + 7] = y + 31;
-                // progress text
                 if (childBase + 8 < scroll.childY.length) scroll.childY[childBase + 8] = y + 31;
             }
         }
+    }
+
+    public static void applyServerPayload(int listTypeId) {
+        currentListType = ProgressionListType.fromId(listTypeId);
+        updateDropdownOptions(VyknaProgressionDefinitions.getSubcategories(currentListType));
+        if (RSInterface.interfaceCache[TEXT_TITLE] != null) {
+            RSInterface.interfaceCache[TEXT_TITLE].message = currentListType.getDisplayName() + " Progression";
+        }
+        refreshList(ALL_FILTER);
+    }
+
+    private static void updateDropdownOptions(List<String> subcategories) {
+        List<String> options = new ArrayList<>();
+        options.add(ALL_FILTER);
+        if (subcategories != null && !subcategories.isEmpty()) {
+            List<String> sorted = new ArrayList<>(subcategories);
+            sorted.sort(String.CASE_INSENSITIVE_ORDER);
+            options.addAll(sorted);
+        }
+        RSInterface dropdown = RSInterface.interfaceCache[DROPDOWN_ID];
+        if (dropdown != null) {
+            dropdown.dropdown = new DropdownMenu(
+                    DROPDOWN_WIDTH, false, 0, options.toArray(new String[0]), DROPDOWN_ACTION);
+            dropdown.dropdown.setSelected(ALL_FILTER);
+        }
+        currentFilter = ALL_FILTER;
+    }
+
+    private static String getDropdownOption(int optionSelected, RSInterface rsInterface) {
+        if (rsInterface != null && rsInterface.dropdown != null) {
+            String selected = normalizeFilter(rsInterface.dropdown.getSelected());
+            if (!"Select an option".equalsIgnoreCase(selected)) {
+                return selected;
+            }
+        }
+        String[] options = null;
+        if (rsInterface != null && rsInterface.dropdown != null) {
+            options = rsInterface.dropdown.getOptions();
+        }
+        RSInterface cached = RSInterface.interfaceCache[DROPDOWN_ID];
+        if ((options == null || options.length == 0) && cached != null && cached.dropdown != null) {
+            options = cached.dropdown.getOptions();
+        }
+        if (options != null && optionSelected >= 0 && optionSelected < options.length) {
+            return options[optionSelected];
+        }
+        return ALL_FILTER;
+    }
+
+    private static String normalizeFilter(String value) {
+        if (value == null) {
+            return ALL_FILTER;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? ALL_FILTER : trimmed;
     }
 
     public static void build(TextDrawingArea[] tda) {
@@ -319,6 +353,8 @@ public final class AchievementListPage extends RSInterface {
 
         // ---- Left Tabs ----
         // Selected = Tasks tab
+        addHoverButtonNew(NAV_TASKS_BTN, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
+                36, 36, "Tasks", 0, 1);
         addSprite(NAV_SELECTED_BG, 0, SPRITE_ROOT + "LeftTabSelected");
         addSprite(NAV_SELECTED_ICON, 0, SPRITE_ROOT + "TasksIcon");
 
@@ -352,8 +388,8 @@ public final class AchievementListPage extends RSInterface {
 
         // ---- Top row controls ----
         dropdownMenu(
-                DROPDOWN_ID, 166, 0, TASK_CATEGORIES,
-                (optionSelected, rsInterface) -> AchievementListPage.refreshList(optionSelected),
+                DROPDOWN_ID, DROPDOWN_WIDTH, 0, new String[] { ALL_FILTER },
+                DROPDOWN_ACTION,
                 DARK_DROPDOWN_COLORS, false, tda, 1
         );
 
@@ -425,6 +461,7 @@ public final class AchievementListPage extends RSInterface {
         // ---- Children ----
         rsi.totalChildren(
                 1   // bg
+                        + 1 // tasks btn (selected)
                         + 2 // selected tab + icon
                         + 2 // home btn+icon
                         + 2 // skill btn+icon
@@ -443,6 +480,9 @@ public final class AchievementListPage extends RSInterface {
 
         // BG
         rsi.child(c++, BG_ID, BG_X, BG_Y);
+
+        // Tasks tab button (selected state is overlaid)
+        rsi.child(c++, NAV_TASKS_BTN, NAV_X, NAV_Y + (1 * TAB_GAP));
 
         // Selected tab (Tasks) - position at index 1 like your original
         rsi.child(c++, NAV_SELECTED_BG, NAV_X, NAV_Y + (1 * TAB_GAP));
@@ -489,6 +529,6 @@ public final class AchievementListPage extends RSInterface {
 
         // Populate initial list
 
-        refreshList(0);
+        refreshList(ALL_FILTER);
     }
 }

@@ -60,6 +60,7 @@ import io.xeros.content.upgrade.UpgradeData;
 import io.xeros.content.upgrade.UpgradeHandler;
 import io.xeros.content.upgrade.UpgradeType;
 import io.xeros.content.vykna_progression.VyknaProgressionHandler;
+import io.xeros.content.vykna_progression.VyknaProgressionPlayerState;
 import io.xeros.content.wogw.Wogw;
 import io.xeros.content.world_event.Tournament;
 import io.xeros.model.*;
@@ -576,6 +577,7 @@ public class Player extends Entity {
     private long lastContainerSearch;
     private OldAchievementHandler oldAchievementHandler;
     private VyknaProgressionHandler vah;
+    private VyknaProgressionPlayerState vyknaProgressionState = new VyknaProgressionPlayerState();
     private String macAddress;
     private String uuid = "";
     private final Duel duelSession = new Duel(this);
@@ -3399,6 +3401,14 @@ public class Player extends Entity {
     public VyknaProgressionHandler getVyknaAchievements() {
         if (vah == null) vah = new VyknaProgressionHandler(this);
         return vah;
+    }
+
+    public VyknaProgressionPlayerState getVyknaProgressionState() {
+        return vyknaProgressionState;
+    }
+
+    public void setVyknaProgressionState(VyknaProgressionPlayerState vyknaProgressionState) {
+        this.vyknaProgressionState = vyknaProgressionState;
     }
 
     public long getLastContainerSearch() {

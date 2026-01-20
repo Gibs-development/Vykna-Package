@@ -61,7 +61,7 @@ public class RSInterface {
 		newFonts = newFontSystem;
 		int i = -1;
 		int j = stream.readUShort();
-		interfaceCache = new RSInterface[j + 80000];
+		interfaceCache = new RSInterface[Math.max(j + 80000, 230000)];
 		while (stream.currentOffset < stream.buffer.length) {
 			int k = stream.readUShort();
 			if (k == 65535) {
