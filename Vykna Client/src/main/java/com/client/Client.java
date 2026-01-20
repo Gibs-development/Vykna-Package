@@ -5465,12 +5465,33 @@ public class Client extends RSApplet {
 	}
 
 	private GameTimer gameTimer;
+	private static int toastIconForType(String type) {
+		if (type == null) return 0; // default icon index (Tasks)
+
+		type = type.toLowerCase();
+
+		if (type.startsWith("c")) return 2; // Combat icon index
+		if (type.startsWith("s")) return 1; // Skilling icon index
+
+		return 0; // Tasks icon index
+	}
+
 
 	private void mainGameProcessor() {
 		if (loadingStage == 2 && fullscreenInterfaceID != -1) {
 			menuActionRow = 0;
 			menuOpen = false;
 			return;
+		}
+		if (achievementToastTicks > 0) {
+			achievementToastTicks--;
+			if (achievementToastTicks == 0) {
+				// restore whatever was there before
+				if (openWalkableWidgetID == AchievementCompleteToast.INTERFACE_ID) {
+					openWalkableWidgetID = achievementToastPrevWalkable;
+				}
+				achievementToastPrevWalkable = -1;
+			}
 		}
 
 		timeOutHasLoggedMessages();
@@ -8478,6 +8499,9 @@ public class Client extends RSApplet {
 		}
 		pmTabToReply(name);
 	}
+	private static int parseIntSafe(String s, int fallback) {
+		try { return Integer.parseInt(s); } catch (Exception e) { return fallback; }
+	}
 
 	private void method73() {
 		do {
@@ -8827,6 +8851,24 @@ public class Client extends RSApplet {
 								exception.printStackTrace();
 							}
 						}
+						if (inputString.startsWith("::achtest") || inputString.startsWith("::achtoast")) {
+							String[] parts = inputString.split(" ", 6);
+
+							String type = parts.length > 1 ? parts[1] : "task";
+							String name = parts.length > 2 ? parts[2].replace("\"", "") : "Chop 50 logs";
+							int cur = parts.length > 3 ? parseIntSafe(parts[3], 21) : 21;
+							int target = parts.length > 4 ? parseIntSafe(parts[4], 50) : 50;
+							int points = parts.length > 5 ? parseIntSafe(parts[5], 5) : 5;
+
+							boolean done = cur >= target;
+							String extra = "[" + cur + "/" + target + "]  +" + points + " points" + (done ? "  (Completed)" : "");
+
+							showAchievementCompleteToast(name, extra, toastIconForType(type));
+
+							inputString = "";
+							return;
+						}
+
 
 						if (inputString.startsWith("::screenmode")) {
 							String screenMode;
@@ -8871,6 +8913,7 @@ public class Client extends RSApplet {
 								drawTabArea();
 							}
 						}
+
 						if (inputString.equals("::togglecounter"))
 							drawExperienceCounter = !drawExperienceCounter;
 
@@ -12082,6 +12125,20 @@ public class Client extends RSApplet {
 		return "";
 	}
 
+	private int achievementToastTicks = 0;
+	private int achievementToastPrevWalkable = -1;
+
+	public void showAchievementCompleteToast(String name, String extraLine, int iconIndex) {
+		AchievementCompleteToast.setToastText(name, extraLine);
+		AchievementCompleteToast.setToastIconIndex(iconIndex);
+
+		achievementToastTicks = 150;
+
+		achievementToastPrevWalkable = openWalkableWidgetID;
+		openWalkableWidgetID = AchievementCompleteToast.INTERFACE_ID;
+	}
+
+
 	@Override
 	void startUp() {
 		HoverMenuManager.init();
@@ -12372,6 +12429,8 @@ public class Client extends RSApplet {
 			RSInterface.unpack(streamLoader_1, allFonts, streamLoader_2, new RSFont[] {newSmallFont, newRegularFont, newBoldFont, newFancyFont});
 			drawLoadingText(100, "Preparing game engine");
 			InterfaceJsonDump.dumpInterfaceTree(1644, "ui_dump_1644.json");
+			InterfaceIdStartupReport.printFreeRangesToConsole(0, 70000, 1000);
+
 			if(getUserSettings().isOldGameframe() == false) {
 				mapBack = new Sprite("Gameframe/fixed/mapBack");
 			}else {
