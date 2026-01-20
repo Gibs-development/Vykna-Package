@@ -10,32 +10,34 @@ import java.util.List;
 
 public final class CombatAchievementsHandler {
 
-	private static final int INTERFACE_ID = 35000;
-	private static final int BUTTON_ID_START = 35003;
-	private static final int BUTTON_ID_END = 35545;
-	private static final int CLOSE_BUTTON = 35003;
-	private static final int TAB_HOME = 35360;
-	private static final int TAB_COMBAT = 35362;
-	private static final int TAB_MASTERY = 35364;
-	private static final int NAV_BUTTON_START = 35401;
-	private static final int NAV_BUTTON_END = 35435;
-	private static final int MASTERY_BUTTON_START = 35501;
-	private static final int MASTERY_BUTTON_END = 35506;
-	private static final int MONSTER_BUTTON_START = 35521;
-	private static final int MONSTER_BUTTON_END = 35527;
-	private static final int REWARD_BUTTON_START = 35541;
-	private static final int REWARD_BUTTON_END = 35545;
+	// Offset old IDs so the legacy achievements interface can't reach 35000 anymore.
+	private static final int OFFSET = 21000;
+	private static final int INTERFACE_ID = 35000 + OFFSET;
+	private static final int BUTTON_ID_START = 35003 + OFFSET;
+	private static final int BUTTON_ID_END = 35545 + OFFSET;
+	private static final int CLOSE_BUTTON = 35003 + OFFSET;
+	private static final int TAB_HOME = 35360 + OFFSET;
+	private static final int TAB_COMBAT = 35362 + OFFSET;
+	private static final int TAB_MASTERY = 35364 + OFFSET;
+	private static final int NAV_BUTTON_START = 35401 + OFFSET;
+	private static final int NAV_BUTTON_END = 35435 + OFFSET;
+	private static final int MASTERY_BUTTON_START = 35501 + OFFSET;
+	private static final int MASTERY_BUTTON_END = 35506 + OFFSET;
+	private static final int MONSTER_BUTTON_START = 35521 + OFFSET;
+	private static final int MONSTER_BUTTON_END = 35527 + OFFSET;
+	private static final int REWARD_BUTTON_START = 35541 + OFFSET;
+	private static final int REWARD_BUTTON_END = 35545 + OFFSET;
 
-	private static final int FEED_TITLE_ID = 35300;
-	private static final int SELECTED_TITLE_ID = 35006;
-	private static final int SELECTED_DESC_ID = 35008;
-	private static final int SELECTED_DIFFICULTY_ID = 35010;
-	private static final int SELECTED_PROGRESS_ID = 35012;
-	private static final int SELECTED_REWARD_ID = 35014;
-	private static final int COMPLETED_TEXT_ID = 35015;
-	private static final int POINTS_TEXT_ID = 35016;
+	private static final int FEED_TITLE_ID = 35300 + OFFSET;
+	private static final int SELECTED_TITLE_ID = 35006 + OFFSET;
+	private static final int SELECTED_DESC_ID = 35008 + OFFSET;
+	private static final int SELECTED_DIFFICULTY_ID = 35010 + OFFSET;
+	private static final int SELECTED_PROGRESS_ID = 35012 + OFFSET;
+	private static final int SELECTED_REWARD_ID = 35014 + OFFSET;
+	private static final int COMPLETED_TEXT_ID = 35015 + OFFSET;
+	private static final int POINTS_TEXT_ID = 35016 + OFFSET;
 
-	private static final int LIST_ENTRY_START = 35031;
+	private static final int LIST_ENTRY_START = 35031 + OFFSET;
 	private static final int LIST_ENTRY_COUNT = 200;
 
 	private static final List<String> NAV_ITEMS = Arrays.asList(
