@@ -127,10 +127,6 @@ public class ClickingButtons implements PacketType {
 		}
 
 
-//		if (AchievementButtons.handleButtons(c, actionButtonId)) {/* NEW Achievements */
-//			return;
-//		}
-
 		if (CreditHandler.handleClicking(c, actionButtonId)) {//Credit handler
 			return;
 		}

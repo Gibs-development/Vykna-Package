@@ -16,6 +16,7 @@ import io.xeros.Server;
 import io.xeros.achievements.AchievementList;
 import io.xeros.achievements.InterfaceHandler;
 import io.xeros.content.*;
+import io.xeros.content.achievement.vykna.AchievementListType;
 import io.xeros.content.barrows.Barrows;
 import io.xeros.content.bosses.*;
 import io.xeros.content.bosspoints.BossPoints;
@@ -59,7 +60,6 @@ import io.xeros.content.tutorial.TutorialDialogue;
 import io.xeros.content.upgrade.UpgradeData;
 import io.xeros.content.upgrade.UpgradeHandler;
 import io.xeros.content.upgrade.UpgradeType;
-import io.xeros.content.vykna_achievements.AchievementHandler;
 import io.xeros.content.wogw.Wogw;
 import io.xeros.content.world_event.Tournament;
 import io.xeros.model.*;
@@ -105,7 +105,8 @@ import io.xeros.model.cycleevent.impl.MinigamePlayersEvent;
 import io.xeros.model.cycleevent.impl.RunEnergyEvent;
 import io.xeros.model.cycleevent.impl.SkillRestorationEvent;
 import io.xeros.content.item.lootable.unref.CoinBagBuldging;
-import io.xeros.content.redundant_achievement.OldAchievementHandler;
+import io.xeros.content.achievement.AchievementHandler;
+import io.xeros.content.achievement.Achievements;
 import io.xeros.content.achievement_diary.AchievementDiaryManager;
 import io.xeros.content.achievement_diary.RechargeItems;
 import io.xeros.content.bosses.godwars.God;
@@ -574,8 +575,7 @@ public class Player extends Entity {
     private LocalDate lastVote = LocalDate.of(1970, 1, 1);
     private LocalDate lastVotePanelPoint = LocalDate.of(1970, 1, 1);
     private long lastContainerSearch;
-    private OldAchievementHandler oldAchievementHandler;
-    private AchievementHandler vah;
+    private AchievementHandler achievementHandler;
     private String macAddress;
     private String uuid = "";
     private final Duel duelSession = new Duel(this);
@@ -3391,14 +3391,9 @@ public class Player extends Entity {
         return flowerPokerHand != null && flowerPokerHand.other != null;
     }
 
-    public OldAchievementHandler getAchievements() {
-        if (oldAchievementHandler == null) oldAchievementHandler = new OldAchievementHandler(this);
-        return oldAchievementHandler;
-    }
-
-    public AchievementHandler getVyknaAchievements() {
-        if (vah == null) vah = new AchievementHandler(this);
-        return vah;
+    public AchievementHandler getAchievements() {
+        if (achievementHandler == null) achievementHandler = new AchievementHandler(this);
+        return achievementHandler;
     }
 
     public long getLastContainerSearch() {
