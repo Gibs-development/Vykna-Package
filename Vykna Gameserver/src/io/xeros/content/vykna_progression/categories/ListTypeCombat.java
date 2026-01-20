@@ -1,48 +1,58 @@
 package io.xeros.content.vykna_progression.categories;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import io.xeros.content.vykna_progression.ProgressionEntry;
+import io.xeros.content.vykna_progression.ProgressionListDefinition;
+import io.xeros.content.vykna_progression.ProgressionListType;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 public enum ListTypeCombat {
+    SLAYER_APPRENTICE(2000, "Slayer Apprentice", "Complete 5 Slayer tasks.", "Slayer",
+            "slayer_tasks", 5, 5),
+    GIANT_MOLE_HUNTER(2001, "Giant Mole Hunter", "Defeat the Giant Mole 3 times.", "Giant Mole",
+            "giant_mole_kills", 3, 8),
+    BANDOS_BREAKER(2002, "Bandos Breaker", "Defeat General Graardor 5 times.", "General Graardor",
+            "graardor_kills", 5, 10);
 
-    KILL_GOBLINS_25(2000, "KILL_GOBLINS_25", 3),
-    HIT_10_DAMAGE(2001, "HIT_10_DAMAGE", 1);
-
-    private final int uid;
-    private final String tag;
+    private final int entryId;
+    private final String name;
+    private final String description;
+    private final String subcategory;
+    private final String requirementKey;
+    private final int requirementTarget;
     private final int points;
 
-    ListTypeCombat(int uid, String tag, int points) {
-        this.uid = uid;
-        this.tag = tag;
+    ListTypeCombat(int entryId, String name, String description, String subcategory,
+                   String requirementKey, int requirementTarget, int points) {
+        this.entryId = entryId;
+        this.name = name;
+        this.description = description;
+        this.subcategory = subcategory;
+        this.requirementKey = requirementKey;
+        this.requirementTarget = requirementTarget;
         this.points = points;
     }
 
-    public int getUid() {
-        return uid;
+    public ProgressionEntry toEntry() {
+        return new ProgressionEntry(entryId, name, description, ProgressionListType.COMBAT.getId(),
+                subcategory, points, requirementKey, requirementTarget);
     }
 
-    public String getTag() {
-        return tag;
-    }
-
-    public int getPoints() {
-        return points;
-    }
-
-    private static final Map<Integer, ListTypeCombat> BY_UID;
-    static {
-        Map<Integer, ListTypeCombat> map = new HashMap<>();
-        for (ListTypeCombat a : values()) {
-            if (map.put(a.uid, a) != null) {
-                throw new IllegalStateException("Duplicate CombatCategory uid: " + a.uid);
-            }
+    public static ProgressionListDefinition getDefinition() {
+        List<ProgressionEntry> entries = new ArrayList<>();
+        Set<String> subcategories = new TreeSet<>();
+        for (ListTypeCombat entry : values()) {
+            entries.add(entry.toEntry());
+            subcategories.add(entry.subcategory);
         }
-        BY_UID = Collections.unmodifiableMap(map);
-    }
-
-    public static ListTypeCombat forUid(int uid) {
-        return BY_UID.get(uid);
+        return new ProgressionListDefinition(
+                ProgressionListType.COMBAT.getId(),
+                ProgressionListType.COMBAT.getDisplayName(),
+                new ArrayList<>(subcategories),
+                entries
+        );
     }
 }
