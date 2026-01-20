@@ -11,6 +11,7 @@ import io.xeros.Server;
 import io.xeros.content.*;
 import io.xeros.content.SigilSystem1.tier1Sigils;
 import io.xeros.content.redundant_achievement.CombatAchievementsHandler;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.achievement_diary.impl.KandarinDiaryEntry;
 import io.xeros.content.cheatprevention.CheatEngineBlock;
 import io.xeros.content.combat.magic.CombatSpellData;
@@ -43,7 +44,6 @@ import io.xeros.content.sound.Sfx;
 import io.xeros.content.tradingpost.Listing;
 import io.xeros.content.tutorial.TutorialDialogue;
 import io.xeros.content.vote_panel.VotePanelInterface;
-import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.wogw.Wogw;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
@@ -85,6 +85,10 @@ public class ClickingButtons implements PacketType {
 			c.sendMessage("actionbutton: " + actionButtonId + ", DialogueID: " + c.dialogueAction + ", real id: " + realButtonId);
 		}
 		if (c.isDead || c.getHealth().getCurrentHealth() <= 0) {
+			return;
+		}
+
+		if (VyknaProgressionHandler.handleButton(c, actionButtonId)) {
 			return;
 		}
 
@@ -135,9 +139,6 @@ public class ClickingButtons implements PacketType {
 			return;
 		}
 
-		if (VyknaProgressionHandler.handleButton(c , actionButtonId)) {
-			return;
-		}
 		if (Tabswitcher.handleButton(c, actionButtonId)) {//For the new quest tab
 			return;
 		}
@@ -433,7 +434,8 @@ public class ClickingButtons implements PacketType {
 			case 136201:
 			case 136204:
 			case 136207:
-				CombatAchievementsHandler.openInterface(c);
+			case 46471: // Quest tab "View achievements"
+				VyknaProgressionHandler.open(c);
 				break;
 
 			case 2204:

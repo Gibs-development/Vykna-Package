@@ -1,8 +1,8 @@
-package io.xeros.content.vykna_progression;
+package com.client.vykna_progression;
 
 public enum ProgressionListType {
     TASKS(1, "Task"),
-    SKILLS(2, "Skilling"),
+    SKILLING(2, "Skilling"),
     COMBAT(3, "Combat");
 
     private final int id;
@@ -19,5 +19,14 @@ public enum ProgressionListType {
 
     public String getDisplayName() {
         return displayName;
+    }
+
+    public static ProgressionListType fromId(int id) {
+        for (ProgressionListType type : values()) {
+            if (type.id == id) {
+                return type;
+            }
+        }
+        return TASKS;
     }
 }
