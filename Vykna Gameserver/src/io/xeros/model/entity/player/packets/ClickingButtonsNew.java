@@ -2,6 +2,7 @@ package io.xeros.model.entity.player.packets;
 
 import io.xeros.Server;
 import io.xeros.content.redundant_achievement.CombatAchievementsHandler;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.dailyrewards.DailyRewards;
 import io.xeros.content.party.PartyInterface;
 import io.xeros.content.wildwarning.WildWarning;
@@ -62,6 +63,10 @@ public class ClickingButtonsNew implements PacketType {
         }
 
         if (c.getAchievements().clickButton(buttonId)) {
+            return;
+        }
+
+        if (VyknaProgressionHandler.handleButton(c, buttonId)) {
             return;
         }
 
