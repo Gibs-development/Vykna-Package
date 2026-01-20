@@ -1,8 +1,6 @@
 package io.xeros.achievements;
 
 import io.xeros.Configuration;
-import io.xeros.content.achievement.AchievementTier;
-import io.xeros.content.achievement.AchievementType;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.items.GameItem;
 

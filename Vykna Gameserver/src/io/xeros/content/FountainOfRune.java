@@ -69,7 +69,7 @@ public class FountainOfRune {
 				Discord.writeDropsSyncMessage(""+ player.getLoginName() + " has received an ultra rare: Amulet Of Eternal Glory from the Fountain Of Rune!");
 				AchievementHandler.activate(player, AchievementList.ETERNAL_GLORY, 1);
 			}
-			if (item >= 1704 && item <= 1712 || item == 11976) {//Amulet of glory achievement
+			if (item >= 1704 && item <= 1712 || item == 11976) {//Amulet of glory redundant_achievement
 				AchievementHandler.activate(player, AchievementList.RECHARGE_GLORYI, amount);
 				AchievementHandler.activate(player, AchievementList.RECHARGE_GLORYII, amount);
 				AchievementHandler.activate(player, AchievementList.RECHARGE_GLORYIII, amount);

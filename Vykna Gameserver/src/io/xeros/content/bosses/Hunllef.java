@@ -3,8 +3,8 @@ package io.xeros.content.bosses;
 
 import java.util.function.Consumer;
 
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.instances.InstancedArea;
 import io.xeros.content.instances.impl.LegacySoloPlayerInstance;
 import io.xeros.content.skills.agility.AgilityHandler;

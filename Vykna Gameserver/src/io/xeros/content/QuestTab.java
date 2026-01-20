@@ -9,14 +9,13 @@ import java.util.stream.IntStream;
 
 import io.xeros.Configuration;
 import io.xeros.Server;
-import io.xeros.content.achievement.inter.TasksInterface;
+import io.xeros.content.redundant_achievement.inter.TasksInterface;
 import io.xeros.content.bonus_skill.BonusSkill;
 import io.xeros.content.boosts.BoostType;
 import io.xeros.content.boosts.Booster;
 import io.xeros.content.boosts.Boosts;
 import io.xeros.content.collection_log.CollectionLog;
 import io.xeros.content.combat.stats.MonsterKillLog;
-import io.xeros.content.dailytasks.DailyTasks;
 import io.xeros.content.dialogue.DialogueBuilder;
 import io.xeros.content.dialogue.DialogueOption;
 import io.xeros.content.evil_tree.EvilTree;

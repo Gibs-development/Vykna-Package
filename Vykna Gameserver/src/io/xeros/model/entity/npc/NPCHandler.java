@@ -10,8 +10,8 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import com.google.common.base.Preconditions;
 import io.xeros.content.SkillcapePerks;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.AchievementDiaryKills;
 import io.xeros.content.bosses.*;
 import io.xeros.content.bosses.godwars.GodwarsNPCs;
@@ -1071,7 +1071,7 @@ public class NPCHandler {
     }
 
     /**
-     * Handles kills towards the achievement diaries
+     * Handles kills towards the redundant_achievement diaries
      *
      * @param npc The npc killed.
      */

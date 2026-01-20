@@ -5,7 +5,7 @@ import com.client.TextDrawingArea;
 import com.client.graphics.interfaces.RSInterface;
 
 /**
- * Small walkable overlay "toast" shown when an achievement completes.
+ * Small walkable overlay "toast" shown when an redundant_achievement completes.
  */
 public final class AchievementCompleteToast extends RSInterface {
 

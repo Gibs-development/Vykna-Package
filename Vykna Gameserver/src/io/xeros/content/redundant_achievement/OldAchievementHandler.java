@@ -1,16 +1,14 @@
-package io.xeros.content.achievement;
+package io.xeros.content.redundant_achievement;
 
 import java.io.BufferedWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import io.xeros.Server;
-import io.xeros.content.achievement.Achievements.Achievement;
-import io.xeros.content.achievement.inter.TasksInterface;
+import io.xeros.content.redundant_achievement.Achievements.Achievement;
+import io.xeros.content.redundant_achievement.inter.TasksInterface;
 import io.xeros.model.entity.npc.NPC;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.mode.ModeType;
@@ -20,7 +18,7 @@ import io.xeros.util.logging.player.ClaimAchievementLog;
 /**
  * @author Jason MacKeigan (http://www.rune-server.org/members/Jason)
  */
-public class AchievementHandler {
+public class OldAchievementHandler {
 
     public static final String COLOR = "074091";
 
@@ -38,7 +36,7 @@ public class AchievementHandler {
     public int points;
     private boolean firstAchievementLoginJune2021;
 
-    public AchievementHandler(Player player) {
+    public OldAchievementHandler(Player player) {
         this.player = player;
     }
 
@@ -63,7 +61,7 @@ public class AchievementHandler {
             }
         }
 
-        // This is a fix for someone having a complete achievement marked as incomplete.
+        // This is a fix for someone having a complete redundant_achievement marked as incomplete.
         for (Achievement achievement : Achievement.values()) {
             if (!isComplete(achievement)) {
                 int remaining = getAmountRemaining(achievement);
@@ -86,12 +84,12 @@ public class AchievementHandler {
                 if (isComplete(it.getTier().getId(), it.getId()) && getAmountRemaining(it.getTier().getId(), it.getId()) < it.getAmount()) {
                     setComplete(it.getTier().getId(), it.getId(), false);
                     setClaimed(it.getTier().getId(), it.getId(), false);
-                    player.sendMessage(Misc.colorWrap(COLOR, "Set achievement '" + it.getFormattedName() + "' to incomplete because amount required has changed"));
+                    player.sendMessage(Misc.colorWrap(COLOR, "Set redundant_achievement '" + it.getFormattedName() + "' to incomplete because amount required has changed"));
                 }
             });
 
             // Determine highest 'amount' in each achievementthat shares a type,
-            // set all of achievement type to that amount (they stop ticking when complete, so they will have different values)
+            // set all of redundant_achievement type to that amount (they stop ticking when complete, so they will have different values)
             List<List<Achievement>> unsetGrouped = Arrays.stream(AchievementType.values())
                     .map(it -> Arrays.stream(unset).filter(group -> group.getType() == it)
                     .collect(Collectors.toList()))
@@ -119,7 +117,7 @@ public class AchievementHandler {
                 if (isComplete(achievement.getTier().getId(), achievement.getId())) {
                     Achievements.addReward(player, achievement);
                     setClaimed(achievement, true);
-                    player.sendMessage(Misc.colorWrap(COLOR, "Reclaimed achievement '" + achievement.getFormattedName() + "' because rewards have changed."));
+                    player.sendMessage(Misc.colorWrap(COLOR, "Reclaimed redundant_achievement '" + achievement.getFormattedName() + "' because rewards have changed."));
                 }
             });
         }
@@ -145,7 +143,7 @@ public class AchievementHandler {
     }
 
     /**
-     * If achievement is less than kc, tick achievement by kc.
+     * If redundant_achievement is less than kc, tick redundant_achievement by kc.
      */
     private void fixKc(AchievementType type, int kc) {
         for (Achievement achievement : Achievement.values()) {
@@ -227,13 +225,13 @@ public class AchievementHandler {
                 if (getAmountRemaining(achievement) >= amountRequired) {
                     setComplete(achievement, true);
                 } else {
-                    player.sendMessage(Misc.colorWrap(COLOR, "You haven't completed this achievement yet!"));
+                    player.sendMessage(Misc.colorWrap(COLOR, "You haven't completed this redundant_achievement yet!"));
                     return true;
                 }
             }
 
             if (isClaimed(achievement.getTier().getId(), achievement.getId())) {
-                player.sendMessage(Misc.colorWrap(COLOR, "You've already claimed this achievement!"));
+                player.sendMessage(Misc.colorWrap(COLOR, "You've already claimed this redundant_achievement!"));
                 return true;
             }
 
@@ -241,7 +239,7 @@ public class AchievementHandler {
             setClaimed(achievement.getTier().getId(), achievement.getId(), true);
             TasksInterface.updateProgress(player, "achievements", achievement);
             player.sendMessage("<col=" + COLOR + ">Claimed the " + achievement.getTier().getName().toLowerCase()
-                    + " achievement '" + achievement.getFormattedName() + "'.</col>");
+                    + " redundant_achievement '" + achievement.getFormattedName() + "'.</col>");
             Server.getLogging().write(new ClaimAchievementLog(player, achievement));
             return true;
         }

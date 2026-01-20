@@ -1,4 +1,4 @@
-package io.xeros.content.achievement.inter;
+package io.xeros.content.redundant_achievement.inter;
 
 import io.xeros.model.items.GameItem;
 

@@ -1,7 +1,7 @@
 package io.xeros.content.skills.agility.impl.rooftop;
 
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.combat.Hitmark;
 import io.xeros.content.skills.agility.AgilityHandler;
 import io.xeros.content.skills.agility.MarkOfGrace;

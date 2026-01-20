@@ -4,8 +4,8 @@ import java.util.Arrays;
 import java.util.List;
 
 import com.google.common.collect.Lists;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.dialogue.DialogueBuilder;
 import io.xeros.content.dialogue.DialogueExpression;
 import io.xeros.content.questing.Quest;

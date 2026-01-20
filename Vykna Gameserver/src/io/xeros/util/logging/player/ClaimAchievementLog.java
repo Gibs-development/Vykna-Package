@@ -1,8 +1,7 @@
 package io.xeros.util.logging.player;
 
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.model.entity.player.Player;
-import io.xeros.model.items.GameItem;
 import io.xeros.util.Misc;
 import io.xeros.util.logging.PlayerLog;
 
@@ -24,6 +23,6 @@ public class ClaimAchievementLog extends PlayerLog {
 
     @Override
     public String getLoggedMessage() {
-        return Misc.replaceBracketsWithArguments("Claimed achievement {}", achievement);
+        return Misc.replaceBracketsWithArguments("Claimed redundant_achievement {}", achievement);
     }
 }

@@ -187,7 +187,7 @@ public class Cannon {
         int balls = player.getItems().getInventoryCount(ballType);
 
         if (player.usingGraniteCannonballs && cannonballsLoaded > 0 && ballType == Items.CANNONBALL) {
-            player.sendMessage("You cannot mix cannonball types in your cannon.");
+            player.sendMessage("You cannot mix cannonball categories in your cannon.");
             return;
         }
         if (player.getItems().getInventoryCount(Items.GRANITE_CANNONBALL) > 0) {

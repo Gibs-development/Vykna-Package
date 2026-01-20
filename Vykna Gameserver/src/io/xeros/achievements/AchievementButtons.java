@@ -8,7 +8,7 @@ import java.util.HashMap;
 
 
 /**
- * Handles the achievement buttons
+ * Handles the redundant_achievement buttons
  * 
  * @author C.T
  *

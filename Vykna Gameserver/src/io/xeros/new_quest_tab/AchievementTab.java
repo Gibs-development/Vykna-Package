@@ -11,7 +11,7 @@ import java.util.stream.IntStream;
 
 
 /**
- * The achievement tab inside the quest tab.
+ * The redundant_achievement tab inside the quest tab.
  *
  * @author C.T for runerogue
  *

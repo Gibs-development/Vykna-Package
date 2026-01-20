@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import io.xeros.Server;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.event.eventcalendar.EventChallenge;
 import io.xeros.content.item.lootable.LootRarity;
 import io.xeros.content.item.lootable.Lootable;

@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import com.google.common.base.Preconditions;
 import io.xeros.Server;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.bosses.godwars.Godwars;
 import io.xeros.content.bosses.grotesqueguardians.GrotesqueInstance;
 import io.xeros.content.hespori.Hespori;
@@ -32,7 +32,6 @@ import io.xeros.content.skills.slayer.SlayerMaster;
 import io.xeros.content.skills.slayer.Task;
 import io.xeros.content.trails.RewardLevel;
 import io.xeros.content.vote_panel.VotePanelManager;
-import io.xeros.content.wogw.Wogw;
 import io.xeros.content.world_event.WorldEvent;
 import io.xeros.model.Items;
 import io.xeros.model.Npcs;
@@ -46,7 +45,6 @@ import io.xeros.model.entity.player.Boundary;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.PlayerHandler;
 import io.xeros.model.entity.player.Right;
-import io.xeros.model.entity.player.mode.ModeType;
 import io.xeros.model.items.GameItem;
 import io.xeros.model.items.ItemAssistant;
 import io.xeros.util.ItemConstants;
@@ -58,8 +56,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.json.simple.parser.ParseException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import static io.xeros.content.world_event.WorldEvent.timeEventEnd;
 
 public class DropManager {
 

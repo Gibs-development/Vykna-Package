@@ -1,10 +1,10 @@
-package io.xeros.content.achievement;
+package io.xeros.content.redundant_achievement;
 
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.Set;
 
-import io.xeros.content.achievement.inter.TasksInterface;
+import io.xeros.content.redundant_achievement.inter.TasksInterface;
 import io.xeros.content.bosses.wildypursuit.FragmentOfSeren;
 import io.xeros.content.bosses.wildypursuit.TheUnbearable;
 import io.xeros.model.Items;
@@ -24,7 +24,7 @@ public class Achievements {
     /**
      * README (WARNING)
      * You cannot change the enum names because they are used in the save files.
-     * If you need to change the name of an achievement for display purposes then
+     * If you need to change the name of an redundant_achievement for display purposes then
      * set the first argument as a string.
      */
     public enum Achievement {
@@ -117,7 +117,7 @@ public class Achievements {
 
         /**
          * Removed because the boss was really broken. I would avoid using the 4 identification from now on.
-         * If we need to add this achievement back set it above the other achievements (and don't forget to update it with players kc on login).
+         * If we need to add this redundant_achievement back set it above the other achievements (and don't forget to update it with players kc on login).
          */
         //GROTESQUE_GUARDIANS("Grotesque",  4, AchievementTier.TIER_4, AchievementType.GROTESQUES, "Kill %d Grotesques\\nGuardians", 100, 4, new GameItem(6828, 1), new GameItem(995, 10000000)),
 
@@ -238,11 +238,11 @@ public class Achievements {
                         player.getAchievements().setAmountRemaining(tier, achievement.getId(), achievement.getAmount()); // Set to max amount in case they went over
                         player.getAchievements().setComplete(tier, achievement.getId(), true);
                         player.getAchievements().setPoints(achievement.getPoints() + player.getAchievements().getPoints());
-                        player.sendMessage(Misc.colorWrap(AchievementHandler.COLOR, "<clan=6>You've completed the " + achievement.getTier().getName().toLowerCase()
-                            + " achievement '" + achievement.getFormattedName() + "'!"));
+                        player.sendMessage(Misc.colorWrap(OldAchievementHandler.COLOR, "<clan=6>You've completed the " + achievement.getTier().getName().toLowerCase()
+                            + " redundant_achievement '" + achievement.getFormattedName() + "'!"));
 
                         if (player.getAchievements().hasCompletedAll()) {
-                            PlayerHandler.executeGlobalStaffMessage(Misc.colorWrap(AchievementHandler.COLOR,
+                            PlayerHandler.executeGlobalStaffMessage(Misc.colorWrap(OldAchievementHandler.COLOR,
                                     "<clan=6> " + player.getDisplayNameFormatted() + " has completed all achievements!"));
                         }
                     }

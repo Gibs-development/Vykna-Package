@@ -4,5 +4,8 @@
     <content url="file://$MODULE_DIR$/../../Vykna Gameserver/build/generated/sources/annotationProcessor/java/test">
       <sourceFolder url="file://$MODULE_DIR$/../../Vykna Gameserver/build/generated/sources/annotationProcessor/java/test" isTestSource="true" generated="true" />
     </content>
+    <content url="file://$MODULE_DIR$/../../Vykna Gameserver/test" dumb="true">
+      <excludeFolder url="file://$MODULE_DIR$/../../Vykna Gameserver/test" />
+    </content>
   </component>
 </module>

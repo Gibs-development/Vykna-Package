@@ -25,7 +25,7 @@ public class Discord {
     private static JDA jda = null;
 
     /**
-     * Write to a channel that contains misc. types of information about player activity.
+     * Write to a channel that contains misc. categories of information about player activity.
      */
     public static void writeServerSyncMessage(String message, Object...args) {
         sendChannelMessage("server-sync", message, args);//server

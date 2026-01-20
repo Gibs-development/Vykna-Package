@@ -179,7 +179,7 @@ public class WarriorsGuild {
 				player.sendMessage("@blu@The cyclops dropped a " + ItemAssistant.getItemName(item) + " on the ground.", 600000);
 			}
 
-			if (nextDefender() == 12954) {//dragon defender achievement
+			if (nextDefender() == 12954) {//dragon defender redundant_achievement
 				AchievementHandler.activate(player, AchievementList.DRAGON_DEFENDER, 1);//NEW ACHIEVEMNTS
 			}
 		}

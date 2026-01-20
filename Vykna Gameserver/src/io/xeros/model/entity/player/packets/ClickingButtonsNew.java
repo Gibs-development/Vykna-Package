@@ -1,17 +1,13 @@
 package io.xeros.model.entity.player.packets;
 
-import io.xeros.Configuration;
 import io.xeros.Server;
-import io.xeros.content.achievement.CombatAchievementsHandler;
-import io.xeros.content.bonus_skill.BonusSkill;
+import io.xeros.content.redundant_achievement.CombatAchievementsHandler;
 import io.xeros.content.dailyrewards.DailyRewards;
 import io.xeros.content.party.PartyInterface;
 import io.xeros.content.wildwarning.WildWarning;
 import io.xeros.model.entity.player.PacketType;
 import io.xeros.model.entity.player.Player;
 import io.xeros.util.logging.player.ClickButtonLog;
-
-import java.util.concurrent.TimeUnit;
 
 /**
  * Since button clicking is messed up and sends a weird id some new things
@@ -58,6 +54,10 @@ public class ClickingButtonsNew implements PacketType {
         }
 
         if (c.getTeleportInterface().clickButton(buttonId)) {
+            return;
+        }
+
+        if (c.getAchievements().clickButton(buttonId)) {
             return;
         }
 

@@ -4,8 +4,7 @@ import java.util.*;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-import io.xeros.content.achievement.inter.TasksInterface;
-import io.xeros.content.achievement_diary.impl.VarrockDiaryEntry;
+import io.xeros.content.redundant_achievement.inter.TasksInterface;
 import io.xeros.model.entity.player.Player;
 
 public abstract class StatefulAchievementDiary<T extends Enum<T>> extends

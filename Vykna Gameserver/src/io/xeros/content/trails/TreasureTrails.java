@@ -1,21 +1,17 @@
 package io.xeros.content.trails;
 
-import java.util.Arrays;
 import java.util.List;
 
-import io.xeros.Server;
 import io.xeros.achievements.AchievementHandler;
 import io.xeros.achievements.AchievementList;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
-import io.xeros.content.skills.hunter.impling.ItemRarity;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.entity.npc.pets.PetHandler;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.PlayerHandler;
 import io.xeros.model.items.GameItem;
-import io.xeros.model.items.ImmutableItem;
 import io.xeros.util.Misc;
 
 public class TreasureTrails {

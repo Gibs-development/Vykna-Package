@@ -140,9 +140,9 @@ public class Tabswitcher {
                     return true;
 
                 case 215195://Achievement action
-                    InterfaceHandler.writeText(new AchievementInterface(player, AchievementHandler.AchievementDifficulty.EASY));
-                    AchievementInterface.sendInterfaceForAchievement(player, AchievementList.ANSWER_15_TRIVIABOTS_CORRECTLY);
-                    player.setAchievement(AchievementHandler.AchievementDifficulty.EASY);
+//                    InterfaceHandler.writeText(new AchievementInterface(player, AchievementHandler.AchievementDifficulty.EASY));
+//                    AchievementInterface.sendInterfaceForAchievement(player, AchievementList.ANSWER_15_TRIVIABOTS_CORRECTLY);
+//                    player.setAchievement(AchievementHandler.AchievementDifficulty.EASY);
                     player.getPA().showInterface(35_000);
                     return true;
 

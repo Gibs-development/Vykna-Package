@@ -2,8 +2,8 @@ package io.xeros.content.skills.mining;
 
 import io.xeros.Server;
 import io.xeros.content.SkillcapePerks;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.DesertDiaryEntry;
 import io.xeros.content.achievement_diary.impl.FaladorDiaryEntry;
 import io.xeros.content.achievement_diary.impl.FremennikDiaryEntry;

@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Dummy achievement definitions for client-side testing.
+ * Dummy redundant_achievement definitions for client-side testing.
  *
  * Server will eventually send a "definition id" (defId) for each recent completion slot.
  * Client will look up this definition and render spriteIndex from the atlas.

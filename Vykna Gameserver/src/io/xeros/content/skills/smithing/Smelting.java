@@ -3,9 +3,8 @@ package io.xeros.content.skills.smithing;
 import java.util.Objects;
 
 import io.xeros.Server;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
-import io.xeros.content.skills.Skill;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.cycleevent.Event;
 import io.xeros.model.entity.player.Player;

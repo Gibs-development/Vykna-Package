@@ -79,7 +79,7 @@ public class ObjectOptionTwo {
 				c.startAnimation(881);
 				if (Misc.random(15) == 1) {
 					c.sendMessage("You steal a cup of tea.");
-					c.sendMessage("@red@Well done! you have completed a task in the varrock area. your achievement diary has been updated.");
+					c.sendMessage("@red@Well done! you have completed a task in the varrock area. your redundant_achievement diary has been updated.");
 					c.getItems().addItem(712, 1);
 					c.getDiaryManager().getVarrockDiary().progress(VarrockDiaryEntry.TEA_STALL);
 					c.getPA().addSkillXPMultiplied(50, Skill.THIEVING.getId(), true);

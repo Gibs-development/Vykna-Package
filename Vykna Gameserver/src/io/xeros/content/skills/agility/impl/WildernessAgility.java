@@ -1,7 +1,7 @@
 package io.xeros.content.skills.agility.impl;
 
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.WildernessDiaryEntry;
 import io.xeros.model.entity.player.Player;
 

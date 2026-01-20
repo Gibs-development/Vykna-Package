@@ -36,7 +36,7 @@ public class StaffTab {
 
 
 	/**
-	 * Punishment types
+	 * Punishment categories
 	 * @author C.T
 	 *
 	 */

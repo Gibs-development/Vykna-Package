@@ -117,7 +117,7 @@ public class Killstreak {
 	}
 
 	/**
-	 * There are several different types of killstreaks. Allowing early support for different types of killstreaks will allow for the addition of more in the future without having
+	 * There are several different categories of killstreaks. Allowing early support for different categories of killstreaks will allow for the addition of more in the future without having
 	 * to do an overhaul.
 	 */
 	public enum Type {

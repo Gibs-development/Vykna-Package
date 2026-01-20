@@ -18,9 +18,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import io.xeros.Configuration;
 import io.xeros.Server;
-import io.xeros.achievements.AchievementHandler;
 import io.xeros.achievements.AchievementList;
-import io.xeros.content.achievement.AchievementTier;
+import io.xeros.content.redundant_achievement.AchievementTier;
 import io.xeros.content.achievement_diary.DifficultyAchievementDiary;
 import io.xeros.content.achievement_diary.impl.ArdougneDiaryEntry;
 import io.xeros.content.achievement_diary.impl.DesertDiaryEntry;
@@ -44,7 +43,6 @@ import io.xeros.content.lootbag.LootingBag;
 import io.xeros.content.lootbag.LootingBagItem;
 import io.xeros.content.privatemessaging.FriendType;
 import io.xeros.content.privatemessaging.FriendsListEntry;
-import io.xeros.content.questing.LearningTheRopes.LearningTheRopesQuest;
 import io.xeros.content.skills.slayer.SlayerMaster;
 import io.xeros.content.skills.slayer.SlayerUnlock;
 import io.xeros.content.skills.slayer.Task;
@@ -706,7 +704,7 @@ public class PlayerSave {
                                     p.getBH().setSpellAccessible(Boolean.parseBoolean(token2));
                                 } else if (token.equals("killStreak")) {
                                     p.killStreak = Integer.parseInt(token2);
-                                } else if (token.equals("achievement-points")) {
+                                } else if (token.equals("redundant_achievement-points")) {
                                     p.getAchievements().setPoints(Integer.parseInt(token2));
                                 } else if (token.equals("d1Complete")) { //Varrock claimed
                                     p.d1Complete = Boolean.parseBoolean(token2);
@@ -1277,7 +1275,7 @@ public class PlayerSave {
                                         : ReadMode == 20 ? AchievementTier.STARTER
                                         : null;
                                 if (tier == null)
-                                    throw new IllegalStateException("Unsupported achievement read mode: " + ReadMode);
+                                    throw new IllegalStateException("Unsupported redundant_achievement read mode: " + ReadMode);
                                 p.getAchievements().readFromSave(token, token3, tier);
                                 break;
                             case 14:
@@ -2072,7 +2070,7 @@ public class PlayerSave {
                 characterfile.write("d11Complete = ", 0, 14);
                 characterfile.write(Boolean.toString(p.d11Complete), 0, Boolean.toString(p.d11Complete).length());
                 characterfile.newLine();
-                characterfile.write("achievement-points = " + p.getAchievements().getPoints());
+                characterfile.write("redundant_achievement-points = " + p.getAchievements().getPoints());
                 characterfile.newLine();
                 characterfile.write("xpLock = ", 0, 9);
                 characterfile.write(Boolean.toString(p.expLock), 0, Boolean.toString(p.expLock).length());

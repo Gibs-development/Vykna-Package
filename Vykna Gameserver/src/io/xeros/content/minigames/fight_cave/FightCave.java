@@ -1,7 +1,7 @@
 package io.xeros.content.minigames.fight_cave;
 
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.KaramjaDiaryEntry;
 import io.xeros.content.event.eventcalendar.EventChallenge;
 import io.xeros.model.cycleevent.CycleEvent;

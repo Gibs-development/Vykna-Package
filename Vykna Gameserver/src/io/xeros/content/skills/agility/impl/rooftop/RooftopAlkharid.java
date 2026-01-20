@@ -1,15 +1,14 @@
 package io.xeros.content.skills.agility.impl.rooftop;
 
 import io.xeros.Server;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.skills.agility.AgilityHandler;
 import io.xeros.content.skills.agility.MarkOfGrace;
 import io.xeros.model.cycleevent.CycleEvent;
 import io.xeros.model.cycleevent.CycleEventContainer;
 import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.entity.player.Player;
-import io.xeros.model.world.objects.GlobalObjects;
 
 /**
  * Rooftop Agility Al Kharid

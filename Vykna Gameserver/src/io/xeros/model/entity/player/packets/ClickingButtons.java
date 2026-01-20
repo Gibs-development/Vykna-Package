@@ -8,11 +8,9 @@ import java.util.stream.Collectors;
 
 import io.xeros.Configuration;
 import io.xeros.Server;
-import io.xeros.achievements.*;
 import io.xeros.content.*;
 import io.xeros.content.SigilSystem1.tier1Sigils;
-import io.xeros.content.achievement.CombatAchievementsHandler;
-import io.xeros.content.achievement_diary.impl.ArdougneDiaryEntry;
+import io.xeros.content.redundant_achievement.CombatAchievementsHandler;
 import io.xeros.content.achievement_diary.impl.KandarinDiaryEntry;
 import io.xeros.content.cheatprevention.CheatEngineBlock;
 import io.xeros.content.combat.magic.CombatSpellData;
@@ -24,7 +22,6 @@ import io.xeros.content.dialogue.DialogueAction;
 import io.xeros.content.dialogue.DialogueActionButton;
 import io.xeros.content.dialogue.DialogueConstants;
 import io.xeros.content.dialogue.impl.CrystalCaveEntryDialogue;
-import io.xeros.content.dialogue.types.OptionDialogue;
 import io.xeros.content.fireofexchange.help.HelpDatabase;
 import io.xeros.content.hespori.Hespori;
 import io.xeros.content.item.lootable.LootableInterface;
@@ -46,11 +43,10 @@ import io.xeros.content.sound.Sfx;
 import io.xeros.content.tradingpost.Listing;
 import io.xeros.content.tutorial.TutorialDialogue;
 import io.xeros.content.vote_panel.VotePanelInterface;
+import io.xeros.content.vykna_achievements.AchievementHandler;
 import io.xeros.content.wogw.Wogw;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
-import io.xeros.model.entity.npc.NPCHandler;
-import io.xeros.model.entity.npc.pets.PetHandler;
 import io.xeros.model.entity.player.*;
 import io.xeros.model.entity.player.mode.group.GroupIronmanBank;
 import io.xeros.model.entity.player.packets.dialogueoptions.FiveOptions;
@@ -131,14 +127,17 @@ public class ClickingButtons implements PacketType {
 		}
 
 
-		if (AchievementButtons.handleButtons(c, actionButtonId)) {/* NEW Achievements */
-			return;
-		}
+//		if (AchievementButtons.handleButtons(c, actionButtonId)) {/* NEW Achievements */
+//			return;
+//		}
 
 		if (CreditHandler.handleClicking(c, actionButtonId)) {//Credit handler
 			return;
 		}
 
+		if (AchievementHandler.handleButton(c , actionButtonId)) {
+			return;
+		}
 		if (Tabswitcher.handleButton(c, actionButtonId)) {//For the new quest tab
 			return;
 		}
@@ -2712,7 +2711,7 @@ public class ClickingButtons implements PacketType {
 
 		case 166028:
 			c.getPA().showInterface(39000);
-			AchievementHandler.activate(c, AchievementList.ADVANCED_OPTIONS, 1);//NEW ACHIEVEMNTS
+		//	AchievementHandler.activate(c, AchievementList.ADVANCED_OPTIONS, 1);//NEW ACHIEVEMNTS
 			break;
 			/**
 			 * Prayers *

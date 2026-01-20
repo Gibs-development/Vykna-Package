@@ -35,7 +35,7 @@ public class CombatConfigs {
     }
 
     /**
-     * Retrieves the Combat style for the different entity types
+     * Retrieves the Combat style for the different entity categories
      * @param entity The entity whose Combat style is being checked
      * @return The combat style for the entity type
      */

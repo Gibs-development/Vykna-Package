@@ -85,7 +85,7 @@ public class Degrade {
 		/**
 		 * @param itemId The item.
 		 * @param weapon If <code>true</code> it will be degraded when attacking, otherwise on defending.
-		 * @param combatType The combat type that will degrade this item, null means all types will degrade it.
+		 * @param combatType The combat type that will degrade this item, null means all categories will degrade it.
 		 * @param brokenId The broken item id.
 		 * @param cost The cost to defend.
 		 * @param hits The attacks/defends to fully degrade the item.

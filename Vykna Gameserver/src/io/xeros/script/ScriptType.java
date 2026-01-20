@@ -1,7 +1,7 @@
 package io.xeros.script;
 
 /**
- * The script types.
+ * The script categories.
  * 
  * @author Adil
  * @version 12/03/2017

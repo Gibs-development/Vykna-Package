@@ -7,9 +7,9 @@ public enum CombatType {
 	MELEE, RANGE, MAGE, DRAGON_FIRE, SPECIAL;
 
 	/**
-	 * Retrieves a random {@link CombatType} from the specified {@code types} array.
+	 * Retrieves a random {@link CombatType} from the specified {@code categories} array.
 	 * 
-	 * @param types the array of types that could be returned
+	 * @param types the array of categories that could be returned
 	 * @return a random {@code CombatType} from the array
 	 */
 	public static CombatType getRandom(CombatType... types) {

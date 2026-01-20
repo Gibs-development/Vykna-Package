@@ -5,8 +5,8 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import io.xeros.Server;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.FaladorDiaryEntry;
 import io.xeros.content.skills.Skill;
 import io.xeros.model.Animation;

@@ -252,7 +252,7 @@ public class TriviaBot {
 			{"@red@ Trivia:</col> <col=6666FF>What is the capital of Italy ?", "Rome"},
 			{"@red@ Trivia:</col> <col=6666FF>What is the most consumed beverages around the world ?", "water"},
 			{"@red@ Trivia:</col> <col=6666FF>Where can I add a player if we don't seem to get along ?", "Ignore list"},
-			{"@red@ Trivia:</col> <col=6666FF>What is the 8th achievement on Legendary ?", "fire of exchange"},
+			{"@red@ Trivia:</col> <col=6666FF>What is the 8th redundant_achievement on Legendary ?", "fire of exchange"},
 			{"@red@ Trivia:</col> <col=6666FF>What was Rune-scape's original name ?", "Deviousmud"},
 
 			{"@red@ Trivia:</col> <col=6666FF>What level do you need to go to the Woodcutting guild ?", "90"},
@@ -302,7 +302,7 @@ public class TriviaBot {
 			{"@red@ Trivia:</col> <col=6666FF>What color does zulrah take on melee attack ? ", "red"},
 			{"@red@ Trivia:</col> <col=6666FF>How much gp is given to pass trough the Al-kharid gate at Lumbridge ?", "10"},
 			{"@red@ Trivia:</col> <col=6666FF>How many Goblins are there south of the cows ? ", "8"},
-			{"@red@ Trivia:</col> <col=6666FF>What is the 4th Legendary achievement ?", "the mimic"},
+			{"@red@ Trivia:</col> <col=6666FF>What is the 4th Legendary redundant_achievement ?", "the mimic"},
 			{"@red@ Trivia:</col> <col=6666FF>What chest can I open every hour ?", "Loyalty"},
 
 			{"@red@ Trivia:</col> <col=6666FF>What is currently the max combat level on RuneRogue ?", "126"},

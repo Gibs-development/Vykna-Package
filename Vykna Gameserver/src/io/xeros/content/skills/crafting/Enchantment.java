@@ -204,7 +204,7 @@ public class Enchantment {
 		}
 		/*if (enc.equals(Enchant.DRAGONSTONE_RING)) {
 			player.sendMessage("This item cannot be enchanted into a 'ring of wealth' at this time. However, the ring");
-			player.sendMessage("of wealth can be bought through the voting, donation and achievement store.");
+			player.sendMessage("of wealth can be bought through the voting, donation and redundant_achievement store.");
 			return;
 		}*/
 		if (player.playerLevel[Player.playerMagic] >= enc.getLevelReq()) {
@@ -218,7 +218,7 @@ public class Enchantment {
 						player.gfx100(enc.getGFX());
 						player.getPA().sendFrame106(6);
 
-						if (enc.getUnenchanted() >= 1704 && enc.getUnenchanted() <= 1712 || enc.getUnenchanted() == 11976) {//Amulet of glory achievement
+						if (enc.getUnenchanted() >= 1704 && enc.getUnenchanted() <= 1712 || enc.getUnenchanted() == 11976) {//Amulet of glory redundant_achievement
 							AchievementHandler.activate(player, AchievementList.RECHARGE_GLORYI, 1);
 							AchievementHandler.activate(player, AchievementList.RECHARGE_GLORYII, 1);
 							AchievementHandler.activate(player, AchievementList.RECHARGE_GLORYIII, 1);

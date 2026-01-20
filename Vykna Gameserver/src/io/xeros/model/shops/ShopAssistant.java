@@ -1,21 +1,18 @@
 package io.xeros.model.shops;
 
-import com.everythingrs.marketplace.Item;
 import io.xeros.Configuration;
 import io.xeros.Server;
 import io.xeros.content.fireofexchange.FireOfExchange;
-import io.xeros.content.achievement.AchievementTier;
-import io.xeros.content.achievement.Achievements.Achievement;
+import io.xeros.content.redundant_achievement.AchievementTier;
+import io.xeros.content.redundant_achievement.Achievements.Achievement;
 import io.xeros.content.achievement_diary.impl.LumbridgeDraynorDiaryEntry;
 import io.xeros.content.fireofexchange.FireOfExchangeBurnPrice;
-import io.xeros.content.item.lootable.MysteryBoxRarity;
 import io.xeros.content.lootbag.LootingBag;
 import io.xeros.content.questing.hftd.HftdQuest;
 import io.xeros.content.world_event.Tournament;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.definitions.ShopDef;
-import io.xeros.model.entity.player.Boundary;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.PlayerHandler;
 import io.xeros.model.entity.player.save.PlayerSave;
@@ -2897,7 +2894,7 @@ public class ShopAssistant {
 					logShop("bought", itemID, amount);
 				}
 			} else {
-				c.sendMessage("You do not have enough achievement points to buy this item.");
+				c.sendMessage("You do not have enough redundant_achievement points to buy this item.");
 			}
 		} else if (c.myShopId == 75) {
 			if (c.pcPoints >= getSpecialItemValue(itemID) * amount) {

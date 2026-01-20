@@ -5,8 +5,8 @@ import java.util.Optional;
 
 import io.xeros.Server;
 import io.xeros.content.*;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.ArdougneDiaryEntry;
 import io.xeros.content.achievement_diary.impl.FremennikDiaryEntry;
 import io.xeros.content.achievement_diary.impl.VarrockDiaryEntry;
@@ -29,7 +29,6 @@ import io.xeros.content.skills.prayer.Bone;
 import io.xeros.content.skills.prayer.Prayer;
 import io.xeros.content.skills.slayer.SlayerUnlock;
 import io.xeros.content.trails.MasterClue;
-import io.xeros.content.wogw.Wogw;
 import io.xeros.model.Animation;
 import io.xeros.model.Items;
 import io.xeros.model.collisionmap.ObjectDef;
@@ -1545,7 +1544,7 @@ public class UseItem {
 			if (PotionDecanting.get().matches(gameItemUsed, gameItemUsedWith)) {
 				PotionDecanting.get().mix(c, gameItemUsed, gameItemUsedWith);
 			} else {
-				c.sendMessage("You cannot combine two potions of different types.");
+				c.sendMessage("You cannot combine two potions of different categories.");
 			}
 			return;
 		}

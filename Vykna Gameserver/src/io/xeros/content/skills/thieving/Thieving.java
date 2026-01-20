@@ -8,8 +8,8 @@ import java.util.Map.Entry;
 
 import com.google.common.collect.Lists;
 import io.xeros.content.SkillcapePerks;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.ArdougneDiaryEntry;
 import io.xeros.content.achievement_diary.impl.DesertDiaryEntry;
 import io.xeros.content.achievement_diary.impl.FaladorDiaryEntry;

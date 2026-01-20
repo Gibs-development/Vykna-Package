@@ -6,8 +6,8 @@ import java.util.List;
 
 import com.google.common.collect.Lists;
 import io.xeros.Server;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.Right;

@@ -93,7 +93,7 @@ public class Achievements {
 	 * 			X-coordinate of the image.
 	 */
 	private static void achievementProgress(int x) {
-		//TODO #FULLSCREEN ADJUST interface, achievement interface progress bar
+		//TODO #FULLSCREEN ADJUST interface, redundant_achievement interface progress bar
 		x += Client.currentScreenMode == ScreenMode.FIXED ? 0 : (Client.instance.getWidth() / 2) - 256;
 		int y = Client.currentScreenMode == ScreenMode.FIXED ? 0 : (Client.instance.getHeight() / 2) - 267;
 		Client.cacheSprite[394].drawSprite(x, 271 + y);
@@ -127,7 +127,7 @@ public class Achievements {
 			return;
 		}
 
-		//TODO #FULLSCREEN ADJUST interface, achievement interface pop up
+		//TODO #FULLSCREEN ADJUST interface, redundant_achievement interface pop up
 		int x = Client.currentScreenMode == ScreenMode.FIXED ? 0 : (Client.instance.getWidth() / 2) - 256;
 		int y = 0;
 		Client.cacheSprite[399].drawSprite(155 + x, 5 + y);

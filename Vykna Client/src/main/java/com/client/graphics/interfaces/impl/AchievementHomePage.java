@@ -9,13 +9,13 @@ import com.client.graphics.interfaces.RSInterface;
  * Home page layout notes:
  * - Left nav tabs on the left.
  * - Overview / progress blocks on the left content area.
- * - "Most recent achievement" replaces the old 4-icon "recently completed" grid.
+ * - "Most recent redundant_achievement" replaces the old 4-icon "recently completed" grid.
  *
- * Recent achievement icon uses a single atlas (type 17):
+ * Recent redundant_achievement icon uses a single atlas (type 17):
  *   interfaces/vykna_achievements/AchievementRecentAtlas.png
  *
  * Dummy client-side data:
- *   valueIndex is set to 1 for the recent achievement icon.
+ *   valueIndex is set to 1 for the recent redundant_achievement icon.
  *   When server-side is ready, swap valueIndex usage to configId and have server send defIds.
  */
 public final class AchievementHomePage extends RSInterface {
@@ -110,8 +110,8 @@ public final class AchievementHomePage extends RSInterface {
 		// main completion bar 203x11
 		addSkinProgressBar2021(35200, 203, 11);
 
-		// ---- Most recent achievement (replaces old 4-icon grid) ----
-		addText(35110, "Most recent achievement", tda, 0, 0xFFFAE5, false, true);
+		// ---- Most recent redundant_achievement (replaces old 4-icon grid) ----
+		addText(35110, "Most recent redundant_achievement", tda, 0, 0xFFFAE5, false, true);
 		addText(35111, "A FRIEND IN NEED", tda, 0, 0xE3AE19, false, true);
 		addText(35112, "Complete a quest for a local.", tda, 0, 0xFFFAE5, false, true);
 
@@ -207,7 +207,7 @@ public final class AchievementHomePage extends RSInterface {
 		rsi.child(c++, 35202, MAIN_BAR_X + 2, MAIN_BAR_Y + 2);
 		rsi.child(c++, 35203, MAIN_BAR_X + 2, MAIN_BAR_Y + 2);
 
-		// ---- Most recent achievement ----
+		// ---- Most recent redundant_achievement ----
 		// You said you'll add the rectangle background, so this is just icon + 2 lines.
 		final int RECENT_BLOCK_X = MAIN_X + 4;
 		final int RECENT_BLOCK_Y = MAIN_Y + 65;

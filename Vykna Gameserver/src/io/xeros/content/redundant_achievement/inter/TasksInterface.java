@@ -1,24 +1,18 @@
-package io.xeros.content.achievement.inter;
+package io.xeros.content.redundant_achievement.inter;
 
 import com.google.common.collect.Lists;
 import io.xeros.Server;
-import io.xeros.content.achievement.AchievementTier;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementTier;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.DifficultyAchievementDiary;
-import io.xeros.content.achievement_diary.StatefulAchievementDiary;
-import io.xeros.content.achievement_diary.impl.VarrockAchievementDiary;
 import io.xeros.model.entity.player.Player;
-import io.xeros.model.items.GameItem;
 import io.xeros.util.JsonUtil;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TasksInterface {
 

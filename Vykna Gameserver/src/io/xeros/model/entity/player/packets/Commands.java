@@ -1,34 +1,24 @@
 package io.xeros.model.entity.player.packets;
 
-import java.io.File;
 import java.util.Arrays;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
 
-import com.everythingrs.donate.Donation;
-import com.everythingrs.vote.Vote;
 import com.google.common.collect.Lists;
 import io.xeros.Configuration;
 import io.xeros.Server;
-import io.xeros.achievements.AchievementHandler;
-import io.xeros.achievements.AchievementList;
 import io.xeros.achievements.InterfaceHandler;
 import io.xeros.content.*;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
 import io.xeros.content.bosses.grotesqueguardians.GrotesqueInstance;
 
 import io.xeros.content.bosses.nightmare.Nightmare;
 import io.xeros.content.bosses.nightmare.NightmareConstants;
 import io.xeros.content.combat.Hitmark;
 import io.xeros.content.combat.weapon.WeaponData;
-import io.xeros.content.combat.wrath.ChannelBarSender;
 import io.xeros.content.commands.CommandManager;
 import io.xeros.content.event.eventcalendar.EventCalendarHelper;
 import io.xeros.content.items.Starter;
@@ -43,7 +33,6 @@ import io.xeros.content.world_event.Tournament;
 import io.xeros.content.world_event_galvek.GalvekEventBossHandler;
 import io.xeros.content.world_event_solak.SolakEventBossHandler;
 import io.xeros.model.Items;
-import io.xeros.model.Npcs;
 import io.xeros.model.SlottedItem;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.entity.HealthStatus;
@@ -73,8 +62,6 @@ import io.xeros.sql.eventcalendar.queries.AddWinnerQuery;
 import io.xeros.util.Misc;
 import io.xeros.util.logging.player.ClanChatLog;
 import io.xeros.util.logging.player.CommandLog;
-import org.apache.commons.io.FileUtils;
-
 
 
 /**

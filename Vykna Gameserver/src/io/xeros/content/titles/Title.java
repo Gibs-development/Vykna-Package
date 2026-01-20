@@ -5,8 +5,8 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.Set;
 
-import io.xeros.content.achievement.AchievementTier;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementTier;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.model.entity.npc.pets.PetHandler;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.Right;
@@ -255,7 +255,7 @@ public enum Title implements Comparator<Title> {
 		public boolean meetsStandard(Player player) {
 			return player.diariesCompleted >= 11;
 		}
-	}, "To receive access to this title, a player must have completed all achievement diaries."),
+	}, "To receive access to this title, a player must have completed all redundant_achievement diaries."),
 
 	MORPH("#CanUSeeMe", 0, TitleCurrency.NONE, new TitleRequirement() {
 

@@ -1,4 +1,4 @@
-package io.xeros.content.achievement;
+package io.xeros.content.redundant_achievement;
 
 /**
  * 

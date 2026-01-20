@@ -1,8 +1,8 @@
 package io.xeros.content.skills.fletching;
 
 import io.xeros.content.SkillcapePerks;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.KandarinDiaryEntry;
 import io.xeros.content.achievement_diary.impl.WesternDiaryEntry;
 import io.xeros.content.skills.Skill;

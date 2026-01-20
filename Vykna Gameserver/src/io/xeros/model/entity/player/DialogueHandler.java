@@ -923,7 +923,7 @@ public class DialogueHandler {
 			c.nextChat = -1;
 			break;
 		case 4:
-			sendItemStatement("Twiggy hands you the achievement cape and hood.", 13069);
+			sendItemStatement("Twiggy hands you the redundant_achievement cape and hood.", 13069);
 			c.nextChat = 7;
 			break;
 		case 7:

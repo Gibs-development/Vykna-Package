@@ -4,8 +4,8 @@ import java.util.Random;
 
 import io.xeros.Server;
 import io.xeros.content.SkillcapePerks;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.LumbridgeDraynorDiaryEntry;
 import io.xeros.content.achievement_diary.impl.VarrockDiaryEntry;
 import io.xeros.content.achievement_diary.impl.WesternDiaryEntry;

@@ -1,7 +1,7 @@
 package io.xeros.content.commands.test;
 
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.commands.Command;
 import io.xeros.model.entity.player.Player;
 
@@ -27,6 +27,6 @@ public class Completeachievement extends Command {
     }
 
     public Optional<String> getDescription() {
-        return Optional.of("Complete achievement, use 'all' or none for list");
+        return Optional.of("Complete redundant_achievement, use 'all' or none for list");
     }
 }

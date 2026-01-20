@@ -221,7 +221,7 @@ public enum Right implements Comparator<Right> {
 	/**
 	 * Determines if the players right equal that of {@link Right#MODERATOR}, {@link Right#ADMINISTRATOR},
 	 * and {@link Right#OWNER}
-	 * @return	true if they are any of the predefined types
+	 * @return	true if they are any of the predefined categories
 	 */
 	public boolean isStaff() {
 		return isHelper() || isModerator() || isAdministrator() || isOwner();

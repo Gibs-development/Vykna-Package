@@ -16239,7 +16239,7 @@ public class Client extends RSApplet {
 				71 box
 				72 gift box
 				73 sand pit
-				74 green achievement star
+				74 green redundant_achievement star
 				75 pets
 				76 bounty icon
 				77 sword and shirt icon

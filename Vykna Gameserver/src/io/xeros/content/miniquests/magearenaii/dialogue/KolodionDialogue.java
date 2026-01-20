@@ -1,18 +1,11 @@
 package io.xeros.content.miniquests.magearenaii.dialogue;
 
-import com.everythingrs.marketplace.Item;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.dialogue.DialogueBuilder;
 import io.xeros.content.dialogue.DialogueOption;
-import io.xeros.content.dialogue.types.OptionDialogue;
 import io.xeros.content.miniquests.magearenaii.MageArenaII;
-import io.xeros.model.SlottedItem;
-import io.xeros.model.entity.npc.NPC;
 import io.xeros.model.entity.player.Player;
-
-import java.util.Arrays;
-import java.util.List;
 
 public class KolodionDialogue extends DialogueBuilder {
 

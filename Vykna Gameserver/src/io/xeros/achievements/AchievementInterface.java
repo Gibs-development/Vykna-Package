@@ -11,7 +11,7 @@ import java.util.List;
 
 
 /**
- * Handles the achievement interfaces
+ * Handles the redundant_achievement interfaces
  * 
  * @author C.T
  *
@@ -21,7 +21,7 @@ public class AchievementInterface extends InterfaceHandler {
 
 
 	/**
-	 * Sends the achievement completion interface
+	 * Sends the redundant_achievement completion interface
 	 * 
 	 * @param player
 	 * @param achievement
@@ -40,11 +40,11 @@ public class AchievementInterface extends InterfaceHandler {
 			color = 0xC41414;
 			break;
 		}
-		player.sendMessage("You've completed the achievement: " + achievement.getName() + "!", color);
+		player.sendMessage("You've completed the redundant_achievement: " + achievement.getName() + "!", color);
 	}
 
 	/**
-	 * Sends the achievement information interface
+	 * Sends the redundant_achievement information interface
 	 * 
 	 * @param player
 	 * @param achievement
@@ -58,7 +58,7 @@ public class AchievementInterface extends InterfaceHandler {
 		player.getPA().sendString("<col=ff7000>" + achievement.getDescription(), 35008);
 		player.getPA().sendString("<col=ff7000>" + difficulty, 35010);
 		player.getPA().sendString("<col=ff7000>" + Misc.format(completed) + " / " + Misc.format(achievement.getCompleteAmount()) + " ( " + progress + "% )", 35012);
-		player.getPA().sendString("<col=ff7000>" + achievement.getReward() + " achievement point" + (achievement.getReward() == 1 ? "" : "s") + ".", 35014);
+		player.getPA().sendString("<col=ff7000>" + achievement.getReward() + " redundant_achievement point" + (achievement.getReward() == 1 ? "" : "s") + ".", 35014);
 
 		for (GameItem item : achievement.getRewards()) {
 			player.getPA().itemOnInterface(item.getId(), item.getAmount(), 36002, 0);

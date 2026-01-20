@@ -7,15 +7,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.google.common.collect.Lists;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.bosspoints.BossPoints;
 import io.xeros.content.event.eventcalendar.EventChallenge;
 import io.xeros.content.item.lootable.LootRarity;
 import io.xeros.content.item.lootable.Lootable;
 import io.xeros.content.leaderboards.LeaderboardType;
 import io.xeros.content.leaderboards.LeaderboardUtils;
-import io.xeros.content.minigames.tob.instance.TobInstance;
 import io.xeros.model.Items;
 import io.xeros.model.Npcs;
 import io.xeros.model.definitions.ItemDef;

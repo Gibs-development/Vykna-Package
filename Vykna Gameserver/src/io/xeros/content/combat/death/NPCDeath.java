@@ -6,13 +6,11 @@ import io.xeros.Configuration;
 import io.xeros.Server;
 import io.xeros.achievements.AchievementHandler;
 import io.xeros.achievements.AchievementList;
-import io.xeros.content.Announcement;
 import io.xeros.content.Kratos;
-import io.xeros.content.achievement.AchievementType;
-import io.xeros.content.achievement.Achievements;
+import io.xeros.content.redundant_achievement.AchievementType;
+import io.xeros.content.redundant_achievement.Achievements;
 import io.xeros.content.achievement_diary.impl.FremennikDiaryEntry;
 import io.xeros.content.achievement_diary.impl.MorytaniaDiaryEntry;
-import io.xeros.content.barrows.Barrows;
 import io.xeros.content.bosses.*;
 import io.xeros.content.bossfactory.BossController;
 import io.xeros.content.bossfactory.BossFactoryRegistry;
@@ -21,20 +19,12 @@ import io.xeros.content.bossfactory.drop.GlobalLootChestReceiver;
 import io.xeros.content.bossfactory.instance.BossFactoryInstance;
 import io.xeros.content.bosses.nightmare.NightmareConstants;
 import io.xeros.content.bosses.wildypursuit.FragmentOfSeren;
-import io.xeros.content.bosses.wildypursuit.TheUnbearable;
 import io.xeros.content.bosspoints.BossPoints;
 import io.xeros.content.event.eventcalendar.EventChallenge;
-import io.xeros.content.events.monsterhunt.MonsterHunt;
 import io.xeros.content.minigames.warriors_guild.AnimatedArmour;
-import io.xeros.content.revenant_event.RevenantEventBossHandler;
 import io.xeros.content.skills.Skill;
-import io.xeros.content.sound.Sfx;
-import io.xeros.content.world_event_solak.SolakEventBossHandler;
 import io.xeros.model.Npcs;
-import io.xeros.model.cycleevent.CycleEvent;
-import io.xeros.model.cycleevent.CycleEventContainer;
 import io.xeros.model.items.ItemAttributes;
-import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.definitions.NpcDef;
 import io.xeros.model.entity.npc.NPC;
@@ -50,7 +40,6 @@ import io.xeros.util.Misc;
 import io.xeros.util.discord.Discord;
 
 
-import static io.xeros.content.minigames.xeric.XericRewards.giveReward;
 import static io.xeros.content.revenant_event.RevenantEventBossHandler.rewardPlayersSuperior;
 
 public class NPCDeath {
