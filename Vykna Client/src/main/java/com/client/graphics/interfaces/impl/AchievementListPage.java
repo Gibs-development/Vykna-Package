@@ -28,15 +28,15 @@ import java.util.List;
  *     from rendering at (0,0) or under the left tabs.
  *
  * IMPORTANT:
- *  - INTERFACE_ID remains 64504 so your existing open-interface code keeps working.
+ *  - INTERFACE_ID is assigned to a free range to avoid interface id collisions.
  */
 public final class AchievementListPage extends RSInterface {
 
     private static final String SPRITE_ROOT = "interfaces/vykna_progression/";
     private static final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
 
-    // Keep same interface id so openInterface packets/etc still work
-    public static final int INTERFACE_ID = 64504;
+    // Assigned to a free range to avoid interface id collisions.
+    public static final int INTERFACE_ID = 55281;
 
     // ----- SAFE ID RANGES (avoid helper-method collisions) -----
 
@@ -81,7 +81,7 @@ public final class AchievementListPage extends RSInterface {
     private static final String ALL_FILTER = "All";
     private static final int DROPDOWN_WIDTH = 166;
     private static final MenuItem DROPDOWN_ACTION =
-            (optionSelected, rsInterface) -> AchievementListPage.refreshList(String.valueOf(optionSelected));
+            (optionSelected, rsInterface) -> AchievementListPage.refreshList(getDropdownOption(optionSelected, rsInterface));
 
     private static final class TaskRow {
         private final String title;
@@ -164,21 +164,29 @@ public final class AchievementListPage extends RSInterface {
     }
 
     public static void refreshList(String selectedOption) {
-        if (selectedOption == null || selectedOption.trim().isEmpty()) {
-            selectedOption = ALL_FILTER;
-        }
-        currentFilter = selectedOption;
+        String resolvedFilter = normalizeFilter(selectedOption);
+        currentFilter = resolvedFilter;
 
         List<ProgressionEntryDefinition> entries = VyknaProgressionDefinitions.getEntries(currentListType);
         List<TaskRow> rows = new ArrayList<>();
         for (ProgressionEntryDefinition entry : entries) {
             if (!ALL_FILTER.equalsIgnoreCase(currentFilter)
-                    && !entry.getSubcategory().equalsIgnoreCase(currentFilter)) {
+                    && !normalizeFilter(entry.getSubcategory()).equalsIgnoreCase(currentFilter)) {
                 continue;
             }
             String status = entry.isCompleted() ? "Completed" : "Incomplete";
             rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
                     entry.getPoints(), entry.isCompleted()));
+        }
+
+        if (rows.isEmpty() && !ALL_FILTER.equalsIgnoreCase(currentFilter)) {
+            currentFilter = ALL_FILTER;
+            rows = new ArrayList<>();
+            for (ProgressionEntryDefinition entry : entries) {
+                String status = entry.isCompleted() ? "Completed" : "Incomplete";
+                rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+                        entry.getPoints(), entry.isCompleted()));
+            }
         }
 
         int completed = 0;
@@ -278,13 +286,26 @@ public final class AchievementListPage extends RSInterface {
     }
 
     private static String getDropdownOption(int optionSelected, RSInterface rsInterface) {
+        String[] options = null;
         if (rsInterface != null && rsInterface.dropdown != null) {
-            String[] options = rsInterface.dropdown.getOptions();
-            if (options != null && optionSelected >= 0 && optionSelected < options.length) {
-                return options[optionSelected];
-            }
+            options = rsInterface.dropdown.getOptions();
+        }
+        RSInterface cached = RSInterface.interfaceCache[DROPDOWN_ID];
+        if ((options == null || options.length == 0) && cached != null && cached.dropdown != null) {
+            options = cached.dropdown.getOptions();
+        }
+        if (options != null && optionSelected >= 0 && optionSelected < options.length) {
+            return options[optionSelected];
         }
         return ALL_FILTER;
+    }
+
+    private static String normalizeFilter(String value) {
+        if (value == null) {
+            return ALL_FILTER;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? ALL_FILTER : trimmed;
     }
 
     public static void build(TextDrawingArea[] tda) {
