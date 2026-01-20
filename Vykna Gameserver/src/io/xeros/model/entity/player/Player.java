@@ -17,6 +17,7 @@ import io.xeros.achievements.AchievementList;
 import io.xeros.achievements.InterfaceHandler;
 import io.xeros.content.*;
 import io.xeros.content.achievement.AchievementType;
+import io.xeros.content.achievement.vykna.AchievementListType;
 import io.xeros.content.barrows.Barrows;
 import io.xeros.content.bosses.*;
 import io.xeros.content.bosspoints.BossPoints;
@@ -6524,6 +6525,25 @@ public class Player extends Entity {
     public void setAchievement(io.xeros.achievements.AchievementHandler.AchievementDifficulty achievementPage) {
        this.achievementPage = achievementPage;
    }
+
+    private AchievementListType achievementListType = AchievementListType.TASKS;
+    private int achievementSubcategoryIndex;
+
+    public AchievementListType getAchievementListType() {
+        return achievementListType == null ? AchievementListType.TASKS : achievementListType;
+    }
+
+    public void setAchievementListType(AchievementListType achievementListType) {
+        this.achievementListType = achievementListType;
+    }
+
+    public int getAchievementSubcategoryIndex() {
+        return achievementSubcategoryIndex;
+    }
+
+    public void setAchievementSubcategoryIndex(int achievementSubcategoryIndex) {
+        this.achievementSubcategoryIndex = achievementSubcategoryIndex;
+    }
 
     public boolean completedAllAchievements() {
         return getPA().achievementCompleted() >= AchievementList.getTotal() - 1;
