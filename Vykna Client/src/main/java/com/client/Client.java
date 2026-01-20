@@ -14490,9 +14490,11 @@ public class Client extends RSApplet {
 							}
 							if (defId < 0) defId = 0;
 
-								com.client.achievements.VyknaAchievementDefinitions.Definition def =
-										com.client.achievements.VyknaAchievementDefinitions.get(defId);
-								int index = def == null ? 0 : def.getIconId();
+							// resolve to definition -> spriteIndex
+							com.client.achievements.AchievementDefinitions.AchievementDefinition def =
+									com.client.achievements.AchievementDefinitions.getById(defId);
+
+							int index = def.spriteIndex;
 
 							int size = class9_1.gridCellSize;
 							int cols = class9_1.gridCols;
@@ -14523,9 +14525,9 @@ public class Client extends RSApplet {
 							}
 
 							// tooltip if hovered
-								if (hoverId == class9_1.id && defId != 0 && def != null) {
-									queueAchievementTooltip(def.getName(), def.getDescription(), super.getMouseX(), super.getMouseY());
-								}
+							if (hoverId == class9_1.id && defId != 0) {
+								queueAchievementTooltip(def.name, def.description, super.getMouseX(), super.getMouseY());
+							}
 				} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
 
 							DropdownMenu d = class9_1.dropdown;
@@ -19878,10 +19880,6 @@ public class Client extends RSApplet {
 
 				case 253:
 					String s = inStream.readString();
-					if (com.client.achievements.VyknaAchievementPayloadHandler.handle(s)) {
-						incomingPacket = -1;
-						return true;
-					}
 					if (s.startsWith(":attrdbg:")) {
 
 						// tolerate begin / end markers with labels

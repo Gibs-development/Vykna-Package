@@ -115,7 +115,6 @@ import io.xeros.content.bosses.godwars.GodwarsEquipment;
 import io.xeros.content.bosses.zulrah.Zulrah;
 import io.xeros.content.cheatprevention.RandomEventInterface;
 import io.xeros.content.collection_log.CollectionLog;
-import io.xeros.content.vykna_achievements.VyknaAchievementManager;
 import io.xeros.content.bossfactory.drop.BossLootChestContainer;
 import io.xeros.content.combat.CombatItems;
 import io.xeros.content.combat.Hitmark;
@@ -462,7 +461,6 @@ public class Player extends Entity {
 
     private CollectionLog viewingCollectionLog;
     private CollectionLog collectionLog = new CollectionLog();
-    private final VyknaAchievementManager vyknaAchievements = new VyknaAchievementManager(this);
 
     public List<GameItem> dropItems;
     public CollectionLog.CollectionTabType collectionLogTab;
@@ -1969,7 +1967,6 @@ public class Player extends Entity {
         getFriendsList().onLogin();
         CompletionistCape.onLogin(this);
         getAchievements().onLogin();
-        getVyknaAchievements().load();
         getDiaryManager().setDiariesCompleted();
         Barrows.updateSavedBarrowsProgress(this);
         Barrows.updateBarrowsInterface(this);
@@ -2975,10 +2972,6 @@ public class Player extends Entity {
 
     public CollectionLog getCollectionLog() {
         return collectionLog;
-    }
-
-    public VyknaAchievementManager getVyknaAchievements() {
-        return vyknaAchievements;
     }
 
     public CollectionLog getGroupIronmanCollectionLog() {

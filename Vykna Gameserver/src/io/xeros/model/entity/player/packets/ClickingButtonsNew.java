@@ -2,7 +2,7 @@ package io.xeros.model.entity.player.packets;
 
 import io.xeros.Configuration;
 import io.xeros.Server;
-import io.xeros.content.vykna_achievements.VyknaAchievementsInterfaceHandler;
+import io.xeros.content.achievement.CombatAchievementsHandler;
 import io.xeros.content.bonus_skill.BonusSkill;
 import io.xeros.content.dailyrewards.DailyRewards;
 import io.xeros.content.party.PartyInterface;
@@ -61,7 +61,11 @@ public class ClickingButtonsNew implements PacketType {
             return;
         }
 
-        if (VyknaAchievementsInterfaceHandler.handleButton(c, buttonId)) {
+        if (c.getAchievements().clickButton(buttonId)) {
+            return;
+        }
+
+        if (CombatAchievementsHandler.handle(c, buttonId)) {
             return;
         }
 

@@ -29,8 +29,7 @@ public class TaskInterfaceActions {
             achievements = JsonUtil.fromJson(Signlink.getCacheDirectory() + "etc/achievements.json",
                     new TypeToken<List<TaskEntry>>() {});
         } catch (IOException e) {
-            // Optional fallback when cache json is missing.
-            achievements = Lists.newArrayList();
+            e.printStackTrace();
         }
     }
 

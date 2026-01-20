@@ -1431,7 +1431,6 @@ public class PlayerSave {
             if (!p.isBot())
                 logger.debug("Saving game for {}", p);
             Misc.createDirectory(getSaveDirectory());
-            p.getVyknaAchievements().save();
 
 
             int tbTime = (int) (p.teleBlockStartMillis - System.currentTimeMillis() + p.teleBlockLength);
