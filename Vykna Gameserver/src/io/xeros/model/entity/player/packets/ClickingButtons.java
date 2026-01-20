@@ -91,6 +91,10 @@ public class ClickingButtons implements PacketType {
 		if (VyknaProgressionHandler.handleButton(c, actionButtonId)) {
 			return;
 		}
+		// Some interfaces emit legacy action button ids for this packet.
+		if (VyknaProgressionHandler.handleButton(c, realButtonId)) {
+			return;
+		}
 
 		if (c.isFping()) {
 			/**
