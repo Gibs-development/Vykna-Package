@@ -35,8 +35,8 @@ public final class AchievementListPage extends RSInterface {
     private static final String SPRITE_ROOT = "interfaces/vykna_progression/";
     private static final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
 
-    // Keep same interface id so openInterface packets/etc still work
-    public static final int INTERFACE_ID = 64504;
+    // Assigned to a free range to avoid interface id collisions.
+    public static final int INTERFACE_ID = 55281;
 
     // ----- SAFE ID RANGES (avoid helper-method collisions) -----
 
@@ -81,7 +81,7 @@ public final class AchievementListPage extends RSInterface {
     private static final String ALL_FILTER = "All";
     private static final int DROPDOWN_WIDTH = 166;
     private static final MenuItem DROPDOWN_ACTION =
-            (optionSelected, rsInterface) -> AchievementListPage.refreshList(optionSelected);
+            (optionSelected, rsInterface) -> AchievementListPage.refreshList(String.valueOf(optionSelected));
 
     private static final class TaskRow {
         private final String title;

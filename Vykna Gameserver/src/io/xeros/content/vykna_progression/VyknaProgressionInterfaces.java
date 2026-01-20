@@ -8,7 +8,17 @@ public final class VyknaProgressionInterfaces {
     public static final int HOME_INTERFACE_ID = 35000;
 
     // List page interface (client: AchievementListPage.INTERFACE_ID)
-    public static final int LIST_INTERFACE_ID = 64504;
+    public static final int LIST_INTERFACE_ID = 55281;
+
+    // Home page tab buttons (AchievementHomePage real button ids)
+    public static final int HOME_TAB_TASKS = 136204;
+    public static final int HOME_TAB_SKILLING = 136214;
+    public static final int HOME_TAB_COMBAT = 136224;
+
+    // List page tab buttons (AchievementListPage)
+    public static final int LIST_TAB_HOME = LIST_INTERFACE_ID + 1200;
+    public static final int LIST_TAB_SKILLING = LIST_INTERFACE_ID + 1240;
+    public static final int LIST_TAB_COMBAT = LIST_INTERFACE_ID + 1260;
 
     // Home page tab buttons (AchievementHomePage)
     public static final int HOME_TAB_TASKS = 35020;
