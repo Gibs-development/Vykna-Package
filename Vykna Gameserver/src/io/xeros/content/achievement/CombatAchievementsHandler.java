@@ -106,11 +106,10 @@ public final class CombatAchievementsHandler {
 	private CombatAchievementsHandler() {
 	}
 
-    public static void openInterface(Player player) {
-        player.getPA().showInterface(INTERFACE_ID);
-        openHome(player);
-        player.getVyknaAchievements().sendList("combat", "starter");
-    }
+	public static void openInterface(Player player) {
+		player.getPA().showInterface(INTERFACE_ID);
+		openHome(player);
+	}
 
 	public static boolean handle(Player player, int buttonId) {
 		if (buttonId < BUTTON_ID_START || buttonId > BUTTON_ID_END) {
