@@ -5465,14 +5465,17 @@ public class Client extends RSApplet {
 	}
 
 	private GameTimer gameTimer;
-	private static String toastIconForType(String type) {
-		// swap these to whatever sprites you actually have
-		if (type == null) return "interfaces/vykna_achievements/TasksIcon";
+	private static int toastIconForType(String type) {
+		if (type == null) return 0; // default icon index (Tasks)
+
 		type = type.toLowerCase();
-		if (type.startsWith("c")) return "interfaces/vykna_achievements/CombatIcon";
-		if (type.startsWith("s")) return "interfaces/vykna_achievements/SkillingIcon";
-		return "interfaces/vykna_achievements/TasksIcon";
+
+		if (type.startsWith("c")) return 2; // Combat icon index
+		if (type.startsWith("s")) return 1; // Skilling icon index
+
+		return 0; // Tasks icon index
 	}
+
 
 	private void mainGameProcessor() {
 		if (loadingStage == 2 && fullscreenInterfaceID != -1) {
@@ -8848,10 +8851,7 @@ public class Client extends RSApplet {
 								exception.printStackTrace();
 							}
 						}
-						if (inputString.startsWith("achtoast")) {
-							// Format:
-							// ::achtoast
-							// ::achtoast task "Chop 50 logs" 21 50 5
+						if (inputString.startsWith("::achtest") || inputString.startsWith("::achtoast")) {
 							String[] parts = inputString.split(" ", 6);
 
 							String type = parts.length > 1 ? parts[1] : "task";
@@ -8864,8 +8864,11 @@ public class Client extends RSApplet {
 							String extra = "[" + cur + "/" + target + "]  +" + points + " points" + (done ? "  (Completed)" : "");
 
 							showAchievementCompleteToast(name, extra, toastIconForType(type));
+
+							inputString = "";
 							return;
 						}
+
 
 						if (inputString.startsWith("::screenmode")) {
 							String screenMode;
@@ -12125,17 +12128,12 @@ public class Client extends RSApplet {
 	private int achievementToastTicks = 0;
 	private int achievementToastPrevWalkable = -1;
 
-	public void showAchievementCompleteToast(String name, String extraLine, String iconSpritePath) {
-		// configure the overlay content
+	public void showAchievementCompleteToast(String name, String extraLine, int iconIndex) {
 		AchievementCompleteToast.setToastText(name, extraLine);
-		if (iconSpritePath != null) {
-			AchievementCompleteToast.setToastIcon(iconSpritePath);
-		}
+		AchievementCompleteToast.setToastIconIndex(iconIndex);
 
-		// show overlay for ~3 seconds (adjust for your client tick rate)
 		achievementToastTicks = 150;
 
-		// preserve existing walkable interface if you use it elsewhere
 		achievementToastPrevWalkable = openWalkableWidgetID;
 		openWalkableWidgetID = AchievementCompleteToast.INTERFACE_ID;
 	}

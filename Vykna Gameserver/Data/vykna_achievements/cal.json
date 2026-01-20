@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "progress": {
+    "2001": {
+      "current": 0,
+      "target": 50,
+      "done": false
+    },
+    "2002": {
+      "current": 0,
+      "target": 250,
+      "done": false
+    },
+    "2101": {
+      "current": 0,
+      "target": 10,
+      "done": false
+    },
+    "2102": {
+      "current": 0,
+      "target": 100,
+      "done": false
+    },
+    "1001": {
+      "current": 0,
+      "target": 5,
+      "done": false
+    },
+    "3001": {
+      "current": 0,
+      "target": 1,
+      "done": false
+    },
+    "1002": {
+      "current": 0,
+      "target": 25,
+      "done": false
+    },
+    "3002": {
+      "current": 0,
+      "target": 5,
+      "done": false
+    },
+    "1101": {
+      "current": 0,
+      "target": 1,
+      "done": false
+    },
+    "3101": {
+      "current": 0,
+      "target": 1,
+      "done": false
+    },
+    "1102": {
+      "current": 0,
+      "target": 10,
+      "done": false
+    },
+    "3102": {
+      "current": 0,
+      "target": 3,
+      "done": false
+    }
+  }
+}
