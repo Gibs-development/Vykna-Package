@@ -43,7 +43,7 @@ import io.xeros.content.sound.Sfx;
 import io.xeros.content.tradingpost.Listing;
 import io.xeros.content.tutorial.TutorialDialogue;
 import io.xeros.content.vote_panel.VotePanelInterface;
-import io.xeros.content.vykna_achievements.AchievementHandler;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.wogw.Wogw;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
@@ -135,7 +135,7 @@ public class ClickingButtons implements PacketType {
 			return;
 		}
 
-		if (AchievementHandler.handleButton(c , actionButtonId)) {
+		if (VyknaProgressionHandler.handleButton(c , actionButtonId)) {
 			return;
 		}
 		if (Tabswitcher.handleButton(c, actionButtonId)) {//For the new quest tab

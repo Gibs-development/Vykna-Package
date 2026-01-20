@@ -23,7 +23,7 @@ import com.client.graphics.interfaces.RSInterface;
  */
 public final class AchievementListPage extends RSInterface {
 
-    private static final String SPRITE_ROOT = "interfaces/vykna_achievements/";
+    private static final String SPRITE_ROOT = "interfaces/vykna_progression/";
     private static final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
 
     // Keep same interface id so openInterface packets/etc still work

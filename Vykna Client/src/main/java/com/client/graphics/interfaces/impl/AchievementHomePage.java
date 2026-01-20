@@ -12,7 +12,7 @@ import com.client.graphics.interfaces.RSInterface;
  * - "Most recent redundant_achievement" replaces the old 4-icon "recently completed" grid.
  *
  * Recent redundant_achievement icon uses a single atlas (type 17):
- *   interfaces/vykna_achievements/AchievementRecentAtlas.png
+ *   interfaces/vykna_progression/AchievementRecentAtlas.png
  *
  * Dummy client-side data:
  *   valueIndex is set to 1 for the recent redundant_achievement icon.
@@ -20,7 +20,7 @@ import com.client.graphics.interfaces.RSInterface;
  */
 public final class AchievementHomePage extends RSInterface {
 
-	private static final String SPRITE_ROOT = "interfaces/vykna_achievements/";
+	private static final String SPRITE_ROOT = "interfaces/vykna_progression/";
 	@SuppressWarnings("unused")
 	private static final int LIST_SIZE = 200;
 

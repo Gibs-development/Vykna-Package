@@ -1,12 +1,12 @@
-package io.xeros.content.vykna_achievements;
+package io.xeros.content.vykna_progression;
 
 import io.xeros.model.entity.player.Player;
 
-public final class AchievementHandler {
+public final class VyknaProgressionHandler {
 
     public static final int ACHIEVEMENTS_INTERFACE_ID = 35000;
     private final Player player;
-    public AchievementHandler(Player player) {
+    public VyknaProgressionHandler(Player player) {
         this.player = player;
     }
 

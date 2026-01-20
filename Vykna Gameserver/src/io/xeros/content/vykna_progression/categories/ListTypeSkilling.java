@@ -1,10 +1,10 @@
-package io.xeros.content.vykna_achievements.categories;
+package io.xeros.content.vykna_progression.categories;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum SkillingCategory {
+public enum ListTypeSkilling {
 
     CHOP_LOGS_100(3000, "CHOP_LOGS_100", 5),
     FISH_SHRIMP_50(3001, "FISH_SHRIMP_50", 3);
@@ -13,7 +13,7 @@ public enum SkillingCategory {
     private final String tag;
     private final int points;
 
-    SkillingCategory(int uid, String tag, int points) {
+    ListTypeSkilling(int uid, String tag, int points) {
         this.uid = uid;
         this.tag = tag;
         this.points = points;
@@ -31,10 +31,10 @@ public enum SkillingCategory {
         return points;
     }
 
-    private static final Map<Integer, SkillingCategory> BY_UID;
+    private static final Map<Integer, ListTypeSkilling> BY_UID;
     static {
-        Map<Integer, SkillingCategory> map = new HashMap<>();
-        for (SkillingCategory a : values()) {
+        Map<Integer, ListTypeSkilling> map = new HashMap<>();
+        for (ListTypeSkilling a : values()) {
             if (map.put(a.uid, a) != null) {
                 throw new IllegalStateException("Duplicate SkillingCategory uid: " + a.uid);
             }
@@ -42,7 +42,7 @@ public enum SkillingCategory {
         BY_UID = Collections.unmodifiableMap(map);
     }
 
-    public static SkillingCategory forUid(int uid) {
+    public static ListTypeSkilling forUid(int uid) {
         return BY_UID.get(uid);
     }
 }

@@ -9,7 +9,7 @@ import com.client.graphics.interfaces.RSInterface;
  */
 public final class AchievementCompleteToast extends RSInterface {
 
-    private static final String SPRITE_ROOT = "interfaces/vykna_achievements/";
+    private static final String SPRITE_ROOT = "interfaces/vykna_progression/";
     private static final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
 
     // Atlas tiles

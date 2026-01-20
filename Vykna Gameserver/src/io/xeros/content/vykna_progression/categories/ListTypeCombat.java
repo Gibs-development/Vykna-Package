@@ -1,10 +1,10 @@
-package io.xeros.content.vykna_achievements.categories;
+package io.xeros.content.vykna_progression.categories;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public enum CombatCategory {
+public enum ListTypeCombat {
 
     KILL_GOBLINS_25(2000, "KILL_GOBLINS_25", 3),
     HIT_10_DAMAGE(2001, "HIT_10_DAMAGE", 1);
@@ -13,7 +13,7 @@ public enum CombatCategory {
     private final String tag;
     private final int points;
 
-    CombatCategory(int uid, String tag, int points) {
+    ListTypeCombat(int uid, String tag, int points) {
         this.uid = uid;
         this.tag = tag;
         this.points = points;
@@ -31,10 +31,10 @@ public enum CombatCategory {
         return points;
     }
 
-    private static final Map<Integer, CombatCategory> BY_UID;
+    private static final Map<Integer, ListTypeCombat> BY_UID;
     static {
-        Map<Integer, CombatCategory> map = new HashMap<>();
-        for (CombatCategory a : values()) {
+        Map<Integer, ListTypeCombat> map = new HashMap<>();
+        for (ListTypeCombat a : values()) {
             if (map.put(a.uid, a) != null) {
                 throw new IllegalStateException("Duplicate CombatCategory uid: " + a.uid);
             }
@@ -42,7 +42,7 @@ public enum CombatCategory {
         BY_UID = Collections.unmodifiableMap(map);
     }
 
-    public static CombatCategory forUid(int uid) {
+    public static ListTypeCombat forUid(int uid) {
         return BY_UID.get(uid);
     }
 }

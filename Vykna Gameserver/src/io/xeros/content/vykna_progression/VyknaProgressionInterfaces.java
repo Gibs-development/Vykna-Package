@@ -1,8 +1,8 @@
-package io.xeros.content.vykna_achievements;
+package io.xeros.content.vykna_progression;
 
-public final class AchievementInterfaces {
+public final class VyknaProgressionInterfaces {
 
-    private AchievementInterfaces() {}
+    private VyknaProgressionInterfaces() {}
 
     // Home page opens to 35000 (you already have this working)
     public static final int HOME_INTERFACE_ID = 35000;
