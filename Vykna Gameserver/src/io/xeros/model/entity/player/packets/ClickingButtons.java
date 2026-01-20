@@ -11,6 +11,7 @@ import io.xeros.Server;
 import io.xeros.content.*;
 import io.xeros.content.SigilSystem1.tier1Sigils;
 import io.xeros.content.redundant_achievement.CombatAchievementsHandler;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.achievement_diary.impl.KandarinDiaryEntry;
 import io.xeros.content.cheatprevention.CheatEngineBlock;
 import io.xeros.content.combat.magic.CombatSpellData;
@@ -433,7 +434,8 @@ public class ClickingButtons implements PacketType {
 			case 136201:
 			case 136204:
 			case 136207:
-				CombatAchievementsHandler.openInterface(c);
+			case 46471: // Quest tab "View achievements"
+				VyknaProgressionHandler.open(c);
 				break;
 
 			case 2204:
