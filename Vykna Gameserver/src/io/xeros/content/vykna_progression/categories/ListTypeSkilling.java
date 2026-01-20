@@ -11,11 +11,13 @@ import java.util.TreeSet;
 
 public enum ListTypeSkilling {
     LOG_CHOPPER(3000, "Log Chopper", "Chop 100 logs.", "Woodcutting",
-            "logs_chopped", 100, 5),
+            "logs_chopped", 100, 5, 1),
     SHRIMP_FISHER(3001, "Shrimp Fisher", "Catch 50 shrimp.", "Fishing",
-            "shrimp_caught", 50, 3),
+            "shrimp_caught", 50, 3, 2),
     ORE_SEEKER(3002, "Ore Seeker", "Mine 25 ore rocks.", "Mining",
-            "ore_mined", 25, 4);
+            "ore_mined", 25, 4, 3),
+    BONE_BURIER(3003, "Bone Burier", "Bury 10 bones.", "Prayer",
+            "bones_buried", 10, 3, 4);
 
     private final int entryId;
     private final String name;
@@ -24,9 +26,10 @@ public enum ListTypeSkilling {
     private final String requirementKey;
     private final int requirementTarget;
     private final int points;
+    private final int spriteIndex;
 
     ListTypeSkilling(int entryId, String name, String description, String subcategory,
-                     String requirementKey, int requirementTarget, int points) {
+                     String requirementKey, int requirementTarget, int points, int spriteIndex) {
         this.entryId = entryId;
         this.name = name;
         this.description = description;
@@ -34,11 +37,12 @@ public enum ListTypeSkilling {
         this.requirementKey = requirementKey;
         this.requirementTarget = requirementTarget;
         this.points = points;
+        this.spriteIndex = spriteIndex;
     }
 
     public ProgressionEntry toEntry() {
         return new ProgressionEntry(entryId, name, description, ProgressionListType.SKILLS.getId(),
-                subcategory, points, requirementKey, requirementTarget);
+                subcategory, points, requirementKey, requirementTarget, spriteIndex);
     }
 
     public static ProgressionListDefinition getDefinition() {

@@ -11,11 +11,11 @@ import java.util.TreeSet;
 
 public enum ListTypeTasks {
     FIRE_STARTER(1000, "Fire Starter", "Burn 50 logs.", "Exploration",
-            "logs_burned", 50, 5),
+            "logs_burned", 50, 5, 1),
     TOWN_TOURIST(1001, "Town Tourist", "Visit three major cities.", "Travel",
-            "cities_visited", 3, 4),
+            "cities_visited", 3, 4, 2),
     EARLY_CHECKIN(1002, "Early Check-in", "Open the Vykna Progression menu.", "General",
-            "open_progression", 1, 1);
+            "open_progression", 1, 1, 3);
 
     private final int entryId;
     private final String name;
@@ -24,9 +24,10 @@ public enum ListTypeTasks {
     private final String requirementKey;
     private final int requirementTarget;
     private final int points;
+    private final int spriteIndex;
 
     ListTypeTasks(int entryId, String name, String description, String subcategory,
-                  String requirementKey, int requirementTarget, int points) {
+                  String requirementKey, int requirementTarget, int points, int spriteIndex) {
         this.entryId = entryId;
         this.name = name;
         this.description = description;
@@ -34,11 +35,12 @@ public enum ListTypeTasks {
         this.requirementKey = requirementKey;
         this.requirementTarget = requirementTarget;
         this.points = points;
+        this.spriteIndex = spriteIndex;
     }
 
     public ProgressionEntry toEntry() {
         return new ProgressionEntry(entryId, name, description, ProgressionListType.TASKS.getId(),
-                subcategory, points, requirementKey, requirementTarget);
+                subcategory, points, requirementKey, requirementTarget, spriteIndex);
     }
 
     public static ProgressionListDefinition getDefinition() {

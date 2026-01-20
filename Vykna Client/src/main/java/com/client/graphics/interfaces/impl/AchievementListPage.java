@@ -50,7 +50,7 @@ public final class AchievementListPage extends RSInterface {
     private static final int NAV_HOME_BTN = INTERFACE_ID + 1200;
     private static final int NAV_HOME_ICON = INTERFACE_ID + 1210;
 
-    private static final int NAV_TASKS_BTN = INTERFACE_ID + 1220;
+    private static final int NAV_TASKS_BTN = 220181;
 
     private static final int NAV_SKILL_BTN = INTERFACE_ID + 1240;
     private static final int NAV_SKILL_ICON = INTERFACE_ID + 1250;
@@ -90,25 +90,29 @@ public final class AchievementListPage extends RSInterface {
         private final String description;
         private final int points;
         private final boolean completed;
+        private final int spriteIndex;
 
         // Optional per-task progress (e.g. 21/50). If target <= 0, bar is hidden.
         private final int progressCurrent;
         private final int progressTarget;
 
-        private TaskRow(String title, String description, int points, boolean completed) {
+        private TaskRow(String title, String description, int points, boolean completed, int spriteIndex) {
             this.title = title;
             this.description = description;
             this.points = points;
             this.completed = completed;
+            this.spriteIndex = spriteIndex;
             this.progressCurrent = 0;
             this.progressTarget = 0;
         }
 
-        private TaskRow(String title, String description, int points, boolean completed, int progressCurrent, int progressTarget) {
+        private TaskRow(String title, String description, int points, boolean completed, int spriteIndex,
+                        int progressCurrent, int progressTarget) {
             this.title = title;
             this.description = description;
             this.points = points;
             this.completed = completed;
+            this.spriteIndex = spriteIndex;
             this.progressCurrent = progressCurrent;
             this.progressTarget = progressTarget;
         }
@@ -178,7 +182,8 @@ public final class AchievementListPage extends RSInterface {
             }
             String status = entry.isCompleted() ? "Completed" : "Incomplete";
             rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
-                    entry.getPoints(), entry.isCompleted()));
+                    entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
+                    entry.getProgressCurrent(), entry.getRequirementTarget()));
         }
 
         if (rows.isEmpty() && !ALL_FILTER.equalsIgnoreCase(currentFilter)) {
@@ -187,7 +192,8 @@ public final class AchievementListPage extends RSInterface {
             for (ProgressionEntryDefinition entry : entries) {
                 String status = entry.isCompleted() ? "Completed" : "Incomplete";
                 rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
-                        entry.getPoints(), entry.isCompleted()));
+                        entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
+                        entry.getProgressCurrent(), entry.getRequirementTarget()));
             }
         }
 
@@ -229,19 +235,30 @@ public final class AchievementListPage extends RSInterface {
             if (RSInterface.interfaceCache[base + 3] != null) {
                 RSInterface.interfaceCache[base + 3].message = active ? "<icon=0>" + rows.get(i).points : "";
             }
+            if (RSInterface.interfaceCache[base + 0] != null) {
+                RSInterface.interfaceCache[base + 0].valueIndex = active ? rows.get(i).spriteIndex : 1;
+            }
 
-            // Hide per-row progress bars (no progress bars in this stage).
             final int barBgId = base + 6;
             final int barFillId = base + 7;
             final int barTextId = base + 8;
+            boolean showProgress = active && rows.get(i).progressTarget > 0;
             if (RSInterface.interfaceCache[barBgId] != null) {
-                RSInterface.interfaceCache[barBgId].interfaceHidden = true;
+                RSInterface.interfaceCache[barBgId].interfaceHidden = !showProgress;
             }
             if (RSInterface.interfaceCache[barFillId] != null) {
-                RSInterface.interfaceCache[barFillId].interfaceHidden = true;
+                RSInterface.interfaceCache[barFillId].interfaceHidden = !showProgress;
             }
             if (RSInterface.interfaceCache[barTextId] != null) {
-                RSInterface.interfaceCache[barTextId].interfaceHidden = true;
+                RSInterface.interfaceCache[barTextId].interfaceHidden = !showProgress;
+            }
+            if (showProgress && RSInterface.interfaceCache[barFillId] != null
+                    && RSInterface.interfaceCache[barTextId] != null) {
+                int current = Math.min(rows.get(i).progressCurrent, rows.get(i).progressTarget);
+                int target = Math.max(rows.get(i).progressTarget, 1);
+                int filledWidth = Math.max(1, (int) Math.floor((current / (double) target) * ROW_BAR_W));
+                RSInterface.interfaceCache[barFillId].width = filledWidth;
+                RSInterface.interfaceCache[barTextId].message = current + "/" + target;
             }
 
             if (scroll != null && scroll.childY != null) {

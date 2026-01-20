@@ -9,6 +9,7 @@ public class ProgressionEntryDefinition {
     private int points;
     private String requirementKey;
     private int requirementTarget;
+    private int spriteIndex;
     private boolean completed;
     private int progressCurrent;
 
@@ -42,6 +43,10 @@ public class ProgressionEntryDefinition {
 
     public int getRequirementTarget() {
         return requirementTarget;
+    }
+
+    public int getSpriteIndex() {
+        return spriteIndex;
     }
 
     public boolean isCompleted() {

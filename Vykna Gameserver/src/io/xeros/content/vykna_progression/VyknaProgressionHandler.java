@@ -47,6 +47,9 @@ public final class VyknaProgressionHandler {
             case VyknaProgressionInterfaces.LIST_TAB_HOME:
                 open(player);
                 return true;
+            case VyknaProgressionInterfaces.LIST_TAB_TASKS:
+                openList(player, ProgressionListType.TASKS);
+                return true;
             case VyknaProgressionInterfaces.LIST_TAB_SKILLING:
                 openList(player, ProgressionListType.SKILLS);
                 return true;
@@ -164,6 +167,7 @@ public final class VyknaProgressionHandler {
         private final int points;
         private final String requirementKey;
         private final int requirementTarget;
+        private final int spriteIndex;
         private final boolean completed;
         private final int progressCurrent;
 
@@ -176,6 +180,7 @@ public final class VyknaProgressionHandler {
             this.points = entry.getPoints();
             this.requirementKey = entry.getRequirementKey();
             this.requirementTarget = entry.getRequirementTarget();
+            this.spriteIndex = entry.getSpriteIndex();
             this.completed = completed;
             this.progressCurrent = progressCurrent;
         }

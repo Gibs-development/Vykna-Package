@@ -9,9 +9,10 @@ public class ProgressionEntry {
     private final int points;
     private final String requirementKey;
     private final int requirementTarget;
+    private final int spriteIndex;
 
     public ProgressionEntry(int entryId, String name, String description, int listTypeId, String subcategory,
-                            int points, String requirementKey, int requirementTarget) {
+                            int points, String requirementKey, int requirementTarget, int spriteIndex) {
         this.entryId = entryId;
         this.name = name;
         this.description = description;
@@ -20,6 +21,7 @@ public class ProgressionEntry {
         this.points = points;
         this.requirementKey = requirementKey;
         this.requirementTarget = requirementTarget;
+        this.spriteIndex = spriteIndex;
     }
 
     public int getEntryId() {
@@ -52,5 +54,9 @@ public class ProgressionEntry {
 
     public int getRequirementTarget() {
         return requirementTarget;
+    }
+
+    public int getSpriteIndex() {
+        return spriteIndex;
     }
 }
