@@ -23,9 +23,16 @@ public class VyknaProgressionSaveEntry implements PlayerSaveEntry {
         if (!KEY.equals(key)) {
             return false;
         }
-        VyknaProgressionPlayerState state = GSON.fromJson(value, VyknaProgressionPlayerState.class);
-        if (state != null) {
-            player.setVyknaProgressionState(state);
+        if (value == null || value.trim().isEmpty()) {
+            return true;
+        }
+        try {
+            VyknaProgressionPlayerState state = GSON.fromJson(value, VyknaProgressionPlayerState.class);
+            if (state != null) {
+                player.setVyknaProgressionState(state);
+            }
+        } catch (Exception e) {
+            return true;
         }
         return true;
     }

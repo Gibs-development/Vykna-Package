@@ -44,7 +44,6 @@ import io.xeros.content.sound.Sfx;
 import io.xeros.content.tradingpost.Listing;
 import io.xeros.content.tutorial.TutorialDialogue;
 import io.xeros.content.vote_panel.VotePanelInterface;
-import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.wogw.Wogw;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
@@ -86,6 +85,10 @@ public class ClickingButtons implements PacketType {
 			c.sendMessage("actionbutton: " + actionButtonId + ", DialogueID: " + c.dialogueAction + ", real id: " + realButtonId);
 		}
 		if (c.isDead || c.getHealth().getCurrentHealth() <= 0) {
+			return;
+		}
+
+		if (VyknaProgressionHandler.handleButton(c, actionButtonId)) {
 			return;
 		}
 
@@ -136,9 +139,6 @@ public class ClickingButtons implements PacketType {
 			return;
 		}
 
-		if (VyknaProgressionHandler.handleButton(c , actionButtonId)) {
-			return;
-		}
 		if (Tabswitcher.handleButton(c, actionButtonId)) {//For the new quest tab
 			return;
 		}
