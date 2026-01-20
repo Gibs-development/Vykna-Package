@@ -81,7 +81,7 @@ public final class AchievementListPage extends RSInterface {
     private static final String ALL_FILTER = "All";
     private static final int DROPDOWN_WIDTH = 166;
     private static final MenuItem DROPDOWN_ACTION =
-            (optionSelected, rsInterface) -> AchievementListPage.refreshList(String.valueOf(optionSelected));
+            (optionSelected, rsInterface) -> AchievementListPage.refreshList(optionSelected);
 
     private static final class TaskRow {
         private final String title;
