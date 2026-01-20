@@ -277,6 +277,16 @@ public final class AchievementListPage extends RSInterface {
         currentFilter = ALL_FILTER;
     }
 
+    private static String getDropdownOption(int optionSelected, RSInterface rsInterface) {
+        if (rsInterface != null && rsInterface.dropdown != null) {
+            String[] options = rsInterface.dropdown.getOptions();
+            if (options != null && optionSelected >= 0 && optionSelected < options.length) {
+                return options[optionSelected];
+            }
+        }
+        return ALL_FILTER;
+    }
+
     public static void build(TextDrawingArea[] tda) {
         RSInterface rsi = addTabInterface(INTERFACE_ID);
 
