@@ -76,7 +76,6 @@ public final class Interfaces extends RSInterface {
 		Pestpanel(defaultTextDrawingAreas);
 		Pestpanel2(defaultTextDrawingAreas);
 		configureLunar(defaultTextDrawingAreas);
-		achievements(defaultTextDrawingAreas);
 		updateShopWidget(defaultTextDrawingAreas);
 		initializeTitleWidget(defaultTextDrawingAreas);
 		initializeCommandHelp();
@@ -4429,6 +4428,7 @@ interfaceId+=5000;
 
 	public static void achievementInterface(TextDrawingArea[] TDA) {
 		AchievementHomePage.build(TDA);
+		AchievementListPage.build(TDA);
 	}
 
 	public static void taskInterface(TextDrawingArea[] TDA) {

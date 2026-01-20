@@ -11,7 +11,7 @@ import io.xeros.Server;
 import io.xeros.achievements.*;
 import io.xeros.content.*;
 import io.xeros.content.SigilSystem1.tier1Sigils;
-import io.xeros.content.achievement.CombatAchievementsHandler;
+import io.xeros.content.vykna_achievements.VyknaAchievementsInterfaceHandler;
 import io.xeros.content.achievement_diary.impl.ArdougneDiaryEntry;
 import io.xeros.content.achievement_diary.impl.KandarinDiaryEntry;
 import io.xeros.content.cheatprevention.CheatEngineBlock;
@@ -434,7 +434,7 @@ public class ClickingButtons implements PacketType {
 			case 136201:
 			case 136204:
 			case 136207:
-				CombatAchievementsHandler.openInterface(c);
+				VyknaAchievementsInterfaceHandler.openHome(c);
 				break;
 
 			case 2204:
