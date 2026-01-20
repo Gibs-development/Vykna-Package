@@ -28,7 +28,7 @@ import java.util.List;
  *     from rendering at (0,0) or under the left tabs.
  *
  * IMPORTANT:
- *  - INTERFACE_ID remains 64504 so your existing open-interface code keeps working.
+ *  - INTERFACE_ID is assigned to a free range to avoid interface id collisions.
  */
 public final class AchievementListPage extends RSInterface {
 
@@ -49,6 +49,8 @@ public final class AchievementListPage extends RSInterface {
 
     private static final int NAV_HOME_BTN = INTERFACE_ID + 1200;
     private static final int NAV_HOME_ICON = INTERFACE_ID + 1210;
+
+    private static final int NAV_TASKS_BTN = INTERFACE_ID + 1220;
 
     private static final int NAV_SKILL_BTN = INTERFACE_ID + 1240;
     private static final int NAV_SKILL_ICON = INTERFACE_ID + 1250;
@@ -81,7 +83,7 @@ public final class AchievementListPage extends RSInterface {
     private static final String ALL_FILTER = "All";
     private static final int DROPDOWN_WIDTH = 166;
     private static final MenuItem DROPDOWN_ACTION =
-            (optionSelected, rsInterface) -> AchievementListPage.refreshList(String.valueOf(optionSelected));
+            (optionSelected, rsInterface) -> AchievementListPage.refreshList(getDropdownOption(optionSelected, rsInterface));
 
     private static final class TaskRow {
         private final String title;
@@ -164,21 +166,29 @@ public final class AchievementListPage extends RSInterface {
     }
 
     public static void refreshList(String selectedOption) {
-        if (selectedOption == null || selectedOption.trim().isEmpty()) {
-            selectedOption = ALL_FILTER;
-        }
-        currentFilter = selectedOption;
+        String resolvedFilter = normalizeFilter(selectedOption);
+        currentFilter = resolvedFilter;
 
         List<ProgressionEntryDefinition> entries = VyknaProgressionDefinitions.getEntries(currentListType);
         List<TaskRow> rows = new ArrayList<>();
         for (ProgressionEntryDefinition entry : entries) {
             if (!ALL_FILTER.equalsIgnoreCase(currentFilter)
-                    && !entry.getSubcategory().equalsIgnoreCase(currentFilter)) {
+                    && !normalizeFilter(entry.getSubcategory()).equalsIgnoreCase(currentFilter)) {
                 continue;
             }
             String status = entry.isCompleted() ? "Completed" : "Incomplete";
             rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
                     entry.getPoints(), entry.isCompleted()));
+        }
+
+        if (rows.isEmpty() && !ALL_FILTER.equalsIgnoreCase(currentFilter)) {
+            currentFilter = ALL_FILTER;
+            rows = new ArrayList<>();
+            for (ProgressionEntryDefinition entry : entries) {
+                String status = entry.isCompleted() ? "Completed" : "Incomplete";
+                rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+                        entry.getPoints(), entry.isCompleted()));
+            }
         }
 
         int completed = 0;
@@ -273,18 +283,38 @@ public final class AchievementListPage extends RSInterface {
         if (dropdown != null) {
             dropdown.dropdown = new DropdownMenu(
                     DROPDOWN_WIDTH, false, 0, options.toArray(new String[0]), DROPDOWN_ACTION);
+            dropdown.dropdown.setSelected(ALL_FILTER);
         }
         currentFilter = ALL_FILTER;
     }
 
     private static String getDropdownOption(int optionSelected, RSInterface rsInterface) {
         if (rsInterface != null && rsInterface.dropdown != null) {
-            String[] options = rsInterface.dropdown.getOptions();
-            if (options != null && optionSelected >= 0 && optionSelected < options.length) {
-                return options[optionSelected];
+            String selected = normalizeFilter(rsInterface.dropdown.getSelected());
+            if (!"Select an option".equalsIgnoreCase(selected)) {
+                return selected;
             }
         }
+        String[] options = null;
+        if (rsInterface != null && rsInterface.dropdown != null) {
+            options = rsInterface.dropdown.getOptions();
+        }
+        RSInterface cached = RSInterface.interfaceCache[DROPDOWN_ID];
+        if ((options == null || options.length == 0) && cached != null && cached.dropdown != null) {
+            options = cached.dropdown.getOptions();
+        }
+        if (options != null && optionSelected >= 0 && optionSelected < options.length) {
+            return options[optionSelected];
+        }
         return ALL_FILTER;
+    }
+
+    private static String normalizeFilter(String value) {
+        if (value == null) {
+            return ALL_FILTER;
+        }
+        String trimmed = value.trim();
+        return trimmed.isEmpty() ? ALL_FILTER : trimmed;
     }
 
     public static void build(TextDrawingArea[] tda) {
@@ -306,6 +336,8 @@ public final class AchievementListPage extends RSInterface {
 
         // ---- Left Tabs ----
         // Selected = Tasks tab
+        addHoverButtonNew(NAV_TASKS_BTN, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
+                36, 36, "Tasks", 0, 1);
         addSprite(NAV_SELECTED_BG, 0, SPRITE_ROOT + "LeftTabSelected");
         addSprite(NAV_SELECTED_ICON, 0, SPRITE_ROOT + "TasksIcon");
 
@@ -412,6 +444,7 @@ public final class AchievementListPage extends RSInterface {
         // ---- Children ----
         rsi.totalChildren(
                 1   // bg
+                        + 1 // tasks btn (selected)
                         + 2 // selected tab + icon
                         + 2 // home btn+icon
                         + 2 // skill btn+icon
@@ -430,6 +463,9 @@ public final class AchievementListPage extends RSInterface {
 
         // BG
         rsi.child(c++, BG_ID, BG_X, BG_Y);
+
+        // Tasks tab button (selected state is overlaid)
+        rsi.child(c++, NAV_TASKS_BTN, NAV_X, NAV_Y + (1 * TAB_GAP));
 
         // Selected tab (Tasks) - position at index 1 like your original
         rsi.child(c++, NAV_SELECTED_BG, NAV_X, NAV_Y + (1 * TAB_GAP));
