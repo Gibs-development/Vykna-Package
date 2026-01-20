@@ -19821,6 +19821,10 @@ public class Client extends RSApplet {
 
 				case 253:
 					String s = inStream.readString();
+					if (com.client.achievements.VyknaAchievementPayloadHandler.handle(s)) {
+						incomingPacket = -1;
+						return true;
+					}
 					if (s.startsWith(":attrdbg:")) {
 
 						// tolerate begin / end markers with labels
