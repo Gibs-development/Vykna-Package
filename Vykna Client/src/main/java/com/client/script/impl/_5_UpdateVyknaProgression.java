@@ -1,5 +1,6 @@
 package com.client.script.impl;
 
+import com.client.graphics.interfaces.impl.AchievementHomePage;
 import com.client.graphics.interfaces.impl.AchievementListPage;
 import com.client.utilities.JsonUtil;
 import com.client.vykna_progression.ProgressionListPayload;
@@ -24,7 +25,8 @@ public class _5_UpdateVyknaProgression {
             ProgressionListPayload payload = JsonUtil.fromJsonString(
                     data, new TypeToken<ProgressionListPayload>() {});
             VyknaProgressionDefinitions.applyListPayload(payload);
-            AchievementListPage.applyServerPayload(payload.getListTypeId());
+            AchievementListPage.applyServerPayload(payload.getListTypeId(), payload.getPageIndex());
+            AchievementHomePage.refreshProgressions();
         }
     }
 }

@@ -17,6 +17,8 @@ public final class VyknaProgressionHandler {
     private static final String KEY_VISIT = "visit:";
     private static final String KEY_TOTAL_LEVEL = "total_level";
     private static final String KEY_TOTAL_XP = "total_xp";
+    private static final int DEFAULT_PAGE_SIZE = 25;
+    private static final int MAX_LIST_JSON_CHARS = 12000;
 
     public VyknaProgressionHandler(Player player) {
     }
@@ -246,36 +248,88 @@ public final class VyknaProgressionHandler {
             }
         }
 
-        ListPayload payload;
-        try {
-            payload = new ListPayload(
-                    definition.getId(),
-                    definition.getSubcategories(),
-                    entries
-            );
-        } catch (Exception e) {
-            error(player, "Failed constructing ListPayload. definitionId=" + safeDefId(definition), e);
-            return;
-        }
+        sendPagedListData(player, definition, entries);
+    }
 
-        String json;
-        try {
-            json = JsonUtil.toJson(payload);
-        } catch (Exception e) {
-            error(player, "JsonUtil.toJson(payload) threw. definitionId=" + safeDefId(definition)
-                    + ", entriesBuilt=" + entries.size(), e);
-            return;
-        }
+    private static void sendPagedListData(Player player, ProgressionListDefinition definition, List<EntryPayload> entries) {
+        int totalEntries = entries.size();
+        int pageSize = DEFAULT_PAGE_SIZE;
+        int pageIndex = 0;
+        int start = 0;
+        int totalPages = Math.max(1, (int) Math.ceil(totalEntries / (double) pageSize));
 
-        debug(player, "Sending clientscript: id=" + CLIENT_SCRIPT_ID
-                + ", key=listData, jsonLength=" + (json == null ? -1 : json.length())
-                + ", entriesBuilt=" + entries.size());
+        debug(player, "Paging list payload: totalEntries=" + totalEntries
+                + ", pageSize=" + pageSize
+                + ", totalPages=" + totalPages
+                + ", maxJsonChars=" + MAX_LIST_JSON_CHARS);
 
-        try {
-            player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listData", json);
-        } catch (Exception e) {
-            error(player, "runClientScript() threw. clientScriptId=" + CLIENT_SCRIPT_ID
-                    + ", definitionId=" + safeDefId(definition), e);
+        while (start < totalEntries) {
+            int end = Math.min(start + pageSize, totalEntries);
+            List<EntryPayload> pageEntries = new ArrayList<>(entries.subList(start, end));
+            ListPayload payload;
+            try {
+                payload = new ListPayload(
+                        definition.getId(),
+                        definition.getSubcategories(),
+                        pageEntries,
+                        pageIndex,
+                        pageSize,
+                        totalEntries,
+                        totalPages
+                );
+            } catch (Exception e) {
+                error(player, "Failed constructing ListPayload page. definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex, e);
+                return;
+            }
+
+            String json;
+            try {
+                json = JsonUtil.toJson(payload);
+            } catch (Exception e) {
+                error(player, "JsonUtil.toJson(payload) threw. definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex
+                        + ", entriesBuilt=" + pageEntries.size(), e);
+                return;
+            }
+
+            if (json != null && json.length() > MAX_LIST_JSON_CHARS && pageSize > 1) {
+                int nextPageSize = Math.max(1, pageSize / 2);
+                debug(player, "Payload page exceeded limit, shrinking pageSize from " + pageSize
+                        + " to " + nextPageSize
+                        + " (jsonLength=" + json.length() + ")");
+                pageSize = nextPageSize;
+                totalPages = Math.max(1, (int) Math.ceil(totalEntries / (double) pageSize));
+                continue;
+            }
+
+            if (json != null && json.length() > MAX_LIST_JSON_CHARS) {
+                debug(player, "Payload page still exceeds safe limit, skipping send. definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex
+                        + ", jsonLength=" + json.length()
+                        + ", entriesBuilt=" + pageEntries.size());
+                start = end;
+                pageIndex++;
+                continue;
+            }
+
+            debug(player, "Sending clientscript page: id=" + CLIENT_SCRIPT_ID
+                    + ", key=listData, pageIndex=" + pageIndex
+                    + ", pageSize=" + pageSize
+                    + ", jsonLength=" + (json == null ? -1 : json.length())
+                    + ", entriesBuilt=" + pageEntries.size());
+
+            try {
+                player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listData", json);
+            } catch (Exception e) {
+                error(player, "runClientScript() threw. clientScriptId=" + CLIENT_SCRIPT_ID
+                        + ", definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex, e);
+                return;
+            }
+
+            start = end;
+            pageIndex++;
         }
     }
 
@@ -301,11 +355,20 @@ public final class VyknaProgressionHandler {
         private final int listTypeId;
         private final List<String> subcategories;
         private final List<EntryPayload> entries;
+        private final int pageIndex;
+        private final int pageSize;
+        private final int totalEntries;
+        private final int totalPages;
 
-        private ListPayload(int listTypeId, List<String> subcategories, List<EntryPayload> entries) {
+        private ListPayload(int listTypeId, List<String> subcategories, List<EntryPayload> entries,
+                            int pageIndex, int pageSize, int totalEntries, int totalPages) {
             this.listTypeId = listTypeId;
             this.subcategories = subcategories;
             this.entries = entries;
+            this.pageIndex = pageIndex;
+            this.pageSize = pageSize;
+            this.totalEntries = totalEntries;
+            this.totalPages = totalPages;
         }
     }
 
