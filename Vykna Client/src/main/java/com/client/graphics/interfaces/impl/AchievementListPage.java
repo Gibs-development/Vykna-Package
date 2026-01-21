@@ -198,24 +198,20 @@ public final class AchievementListPage extends RSInterface {
             }
         }
 
-        int completed = 0;
-        for (TaskRow task : rows) {
-            if (task.completed) completed++;
+        VyknaProgressionDefinitions.CompletionStats stats;
+        if (ALL_FILTER.equalsIgnoreCase(currentFilter)) {
+            stats = VyknaProgressionDefinitions.getOverallStats();
+        } else {
+            stats = VyknaProgressionDefinitions.getStatsForSubcategory(currentListType, currentFilter);
         }
-        int total = rows.size();
 
         if (RSInterface.interfaceCache[TEXT_PROGRESS] != null) {
             RSInterface.interfaceCache[TEXT_PROGRESS].message =
-                    "Completed: " + completed + "/" + total;
+                    "Completed: " + stats.getCompleted() + "/" + stats.getTotal();
         }
 
-        // Hide the bottom progress bar for now (no progress bars in this stage).
-        for (int i = 0; i < 4; i++) {
-            RSInterface bar = RSInterface.interfaceCache[PROGRESS_BAR_ID + i];
-            if (bar != null) {
-                bar.interfaceHidden = true;
-            }
-        }
+        setSkinnedBarPercentage(PROGRESS_BAR_ID, stats.getRatio());
+        setSkinnedBarVisible(PROGRESS_BAR_ID, true);
 
         RSInterface scroll = RSInterface.interfaceCache[SCROLL_ID];
         if (scroll != null) {
@@ -380,7 +376,7 @@ public final class AchievementListPage extends RSInterface {
         addSprite(NAV_SKILL_ICON, 0, SPRITE_ROOT + "SkillingIcon");
 
         addHoverButtonNew(NAV_COMBAT_BTN, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
-                36, 36, "Combat Achievements", 0, 1);
+                36, 36, "Combat Progressions", 0, 1);
         addSprite(NAV_COMBAT_ICON, 0, SPRITE_ROOT + "CombatIcon");
 
         addHoverButtonNew(NAV_MASTERY_BTN, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
@@ -388,7 +384,7 @@ public final class AchievementListPage extends RSInterface {
         addSprite(NAV_MASTERY_ICON, 0, SPRITE_ROOT + "MasteryIcon");
 
         // ---- Title ----
-        addText(TEXT_TITLE, "Task System", tda, 2, 0xE3AE19, false, true);
+        addText(TEXT_TITLE, "Progression System", tda, 2, 0xE3AE19, false, true);
 
         // ---- Close button (top-right) ----
         // Uses the same sprite path style as the rest of the interface. If your client uses cacheSprite3-based
@@ -433,7 +429,7 @@ public final class AchievementListPage extends RSInterface {
             addText(base + 1, "", tda, 0, 0xE3AE19, false, true);
             addText(base + 2, "", tda, 0, 0xFFFAE5, false, true);
             addText(base + 3, "", tda, 0, 0xFFFAE5, true, true); // points, right aligned
-            addHoverText(base + 4, "", "View task", tda, 0, 0xFFFFFF, false, true, scroll.width, ROW_H);
+            addHoverText(base + 4, "", "View progression", tda, 0, 0xFFFFFF, false, true, scroll.width, ROW_H);
 
             // Per-row progress (hidden if target <= 0)
             addBox(barBgId, 0x2c261f, 0x1f1a15, 120, ROW_BAR_W, ROW_BAR_H);
@@ -542,5 +538,22 @@ public final class AchievementListPage extends RSInterface {
         // Populate initial list
 
         refreshList(ALL_FILTER);
+    }
+
+    private static void setSkinnedBarPercentage(int baseId, double ratio) {
+        double clamped = Math.max(0.0, Math.min(1.0, ratio));
+        RSInterface fill = RSInterface.interfaceCache[baseId + 2];
+        if (fill != null) {
+            fill.progressBar2021Percentage = clamped;
+        }
+    }
+
+    private static void setSkinnedBarVisible(int baseId, boolean visible) {
+        for (int i = 0; i < 4; i++) {
+            RSInterface bar = RSInterface.interfaceCache[baseId + i];
+            if (bar != null) {
+                bar.interfaceHidden = !visible;
+            }
+        }
     }
 }
