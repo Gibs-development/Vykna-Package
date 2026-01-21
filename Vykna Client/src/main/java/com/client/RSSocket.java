@@ -8,7 +8,7 @@ import java.net.Socket;
 
 final class RSSocket implements Runnable {
 
-	public static final int SIZE = 16_384;
+	public static final int SIZE = 32_768;
 
 	public RSSocket(RSApplet RSApplet_, Socket socket1) throws IOException {
 		closed = false;

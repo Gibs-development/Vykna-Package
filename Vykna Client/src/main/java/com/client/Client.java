@@ -14482,26 +14482,36 @@ public class Client extends RSApplet {
 								continue;
 							}
 
-							// defId from config (server sets), fallback to valueIndex
-							int defId = (class9_1.configId >= 0) ? variousSettings[class9_1.configId] : class9_1.valueIndex;
-							if (class9_1.configId >= 0) {
-								// CHANGE THIS to your actual config/varp array name
-								defId = variousSettings[class9_1.configId];
-							}
-							if (defId < 0) defId = 0;
-
-							// resolve to definition -> spriteIndex
-							com.client.achievements.AchievementDefinitions.AchievementDefinition def =
-									com.client.achievements.AchievementDefinitions.getById(defId);
-
-							int index = def.spriteIndex;
-
 							int size = class9_1.gridCellSize;
 							int cols = class9_1.gridCols;
-							if (size <= 0 || cols <= 0) continue;
+							int rows = class9_1.gridRows;
+							if (size <= 0 || cols <= 0 || rows <= 0) continue;
 
-							int maxIcons = (class9_1.sprite1.myWidth / size) * (class9_1.sprite1.myHeight / size);
+							int maxIcons = cols * rows;
+							int maxIconsBySprite = (class9_1.sprite1.myWidth / size) * (class9_1.sprite1.myHeight / size);
+							if (maxIconsBySprite > 0) {
+								maxIcons = Math.min(maxIcons, maxIconsBySprite);
+							}
 							if (maxIcons <= 0) continue;
+
+							int defId = 0;
+							com.client.achievements.AchievementDefinitions.AchievementDefinition def = null;
+							int index;
+							if (class9_1.gridUseValueIndex) {
+								index = Math.max(class9_1.valueIndex, 1) - 1;
+							} else {
+								// defId from config (server sets), fallback to valueIndex
+								defId = (class9_1.configId >= 0) ? variousSettings[class9_1.configId] : class9_1.valueIndex;
+								if (class9_1.configId >= 0) {
+									// CHANGE THIS to your actual config/varp array name
+									defId = variousSettings[class9_1.configId];
+								}
+								if (defId < 0) defId = 0;
+
+								// resolve to definition -> spriteIndex
+								def = com.client.achievements.AchievementDefinitions.getById(defId);
+								index = def.spriteIndex;
+							}
 
 							if (index < 0 || index >= maxIcons) index = 0;
 
@@ -14525,7 +14535,7 @@ public class Client extends RSApplet {
 							}
 
 							// tooltip if hovered
-							if (hoverId == class9_1.id && defId != 0) {
+							if (!class9_1.gridUseValueIndex && hoverId == class9_1.id && defId != 0 && def != null) {
 								queueAchievementTooltip(def.name, def.description, super.getMouseX(), super.getMouseY());
 							}
 				} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
