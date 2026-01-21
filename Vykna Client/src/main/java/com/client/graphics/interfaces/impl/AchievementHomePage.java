@@ -87,7 +87,7 @@ public final class AchievementHomePage extends RSInterface {
 		addSprite(35011, 0, SPRITE_ROOT + "OverviewIcon");
 
 		addHoverButtonNew(35020, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
-				36, 36, "Achievements", 0, 1);
+				36, 36, "Tasks", 0, 1);
 		addSprite(35023, 0, SPRITE_ROOT + "TasksIcon");
 
 		addHoverButtonNew(35030, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",

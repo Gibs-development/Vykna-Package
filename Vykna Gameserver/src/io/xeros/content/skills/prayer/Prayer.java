@@ -11,6 +11,7 @@ import io.xeros.Configuration;
 import io.xeros.Server;
 import io.xeros.content.event.eventcalendar.EventChallenge;
 import io.xeros.content.skills.Skill;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.model.cycleevent.Event;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.entity.player.Boundary;
@@ -91,6 +92,7 @@ public class Prayer {
 		lastAction.reset();
 		lastAction.start();
 		onBonesBuriedOrCrushed(bone, false);
+		VyknaProgressionHandler.addProgress(player, "bones_buried", 1);
 	}
 
 	private int xpAdd;
