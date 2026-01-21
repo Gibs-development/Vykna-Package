@@ -58,6 +58,7 @@ public final class AchievementHomePage extends RSInterface {
 		r.gridCols = gridCols;
 		r.gridRows = gridRows;
 		r.gridCellSize = cellSize;
+		r.gridUseValueIndex = true;
 
 		r.valueIndex = valueIndex; // dummy defId (1..4)
 		r.configId = -1;          // later: set configId and ignore valueIndex
@@ -116,9 +117,9 @@ public final class AchievementHomePage extends RSInterface {
 		addText(35112, "Complete a quest for a local.", tda, 0, 0xFFFAE5, false, true);
 
 		// 1 recent icon (36x36) pulled from the atlas.
-		// Atlas layout: 2 cols x 2 rows, each cell 36x36.
+		// Atlas layout: 6 cols x 6 rows, each cell 36x36.
 		final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
-		addGridSpriteValueIndex(35300, RECENT_ATLAS, 2, 2, 36, 1, "");
+		addGridSpriteValueIndex(35300, RECENT_ATLAS, 6, 6, 36, 1, "");
 
 		addText(35120, "You're almost finished...", tda, 0, 0xFFFAE5, false, true);
 		// Two "close to finish" achievements (dummy client-side)
@@ -127,9 +128,9 @@ public final class AchievementHomePage extends RSInterface {
 		addText(35123, "RANK: MASTER FINIX", tda, 0, 0xE3AE19, false, true);
 		addText(35124, "Finish the remaining objectives.", tda, 0, 0xFFFAE5, false, true);
 
-		// Icons for those two achievements (pulled from the same 2x2 atlas for now)
-		addGridSpriteValueIndex(35301, RECENT_ATLAS, 2, 2, 36, 2, "");
-		addGridSpriteValueIndex(35302, RECENT_ATLAS, 2, 2, 36, 3, "");
+		// Icons for those two achievements (pulled from the same 6x6 atlas)
+		addGridSpriteValueIndex(35301, RECENT_ATLAS, 6, 6, 36, 2, "");
+		addGridSpriteValueIndex(35302, RECENT_ATLAS, 6, 6, 36, 3, "");
 		addSkinProgressBar2021(35210, 186, 11);
 		addSkinProgressBar2021(35220, 186, 11);
 

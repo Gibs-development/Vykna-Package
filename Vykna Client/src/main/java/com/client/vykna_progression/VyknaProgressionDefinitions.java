@@ -23,16 +23,17 @@ public final class VyknaProgressionDefinitions {
 
     public static void applyListPayload(ProgressionListPayload payload) {
         ProgressionListType type = ProgressionListType.fromId(payload.getListTypeId());
+        boolean replace = payload.getPageIndex() == 0;
         switch (type) {
             case COMBAT:
-                COMBAT.update(payload);
+                COMBAT.update(payload, replace);
                 break;
             case SKILLING:
-                SKILLING.update(payload);
+                SKILLING.update(payload, replace);
                 break;
             case TASKS:
             default:
-                TASKS.update(payload);
+                TASKS.update(payload, replace);
                 break;
         }
     }
