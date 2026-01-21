@@ -12,13 +12,13 @@ public class CombatProjectile {
     public int speed;
     public int offset;
 
-    // TODO not sure why offset isn't set here in either constructor, maybe intentional?
     public CombatProjectile(int gfx, int startHeight, int endHeight, int delay, int speed, int offset, int angle) {
         this.gfx = gfx;
         this.startHeight = startHeight;
         this.endHeight = endHeight;
         this.delay = delay;
         this.speed = speed;
+        this.offset = offset;
         this.angle = angle;
     }
 
@@ -28,6 +28,7 @@ public class CombatProjectile {
         this.endHeight = projectile.endHeight;
         this.delay = projectile.delay;
         this.speed = projectile.speed;
+        this.offset = projectile.offset;
         this.angle = projectile.angle;
     }
 

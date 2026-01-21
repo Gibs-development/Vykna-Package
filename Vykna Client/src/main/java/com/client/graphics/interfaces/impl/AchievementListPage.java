@@ -50,7 +50,7 @@ public final class AchievementListPage extends RSInterface {
     private static final int NAV_HOME_BTN = INTERFACE_ID + 1200;
     private static final int NAV_HOME_ICON = INTERFACE_ID + 1210;
 
-    private static final int NAV_TASKS_BTN = 92021;
+    private static final int NAV_TASKS_BTN = INTERFACE_ID + 1220;
 
     private static final int NAV_SKILL_BTN = INTERFACE_ID + 1240;
     private static final int NAV_SKILL_ICON = INTERFACE_ID + 1250;

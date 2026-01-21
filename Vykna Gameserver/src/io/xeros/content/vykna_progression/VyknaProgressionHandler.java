@@ -56,6 +56,7 @@ public final class VyknaProgressionHandler {
                 open(player);
                 return true;
             case VyknaProgressionInterfaces.LIST_TAB_TASKS:
+            case VyknaProgressionInterfaces.LIST_TAB_TASKS_REAL:
                 openList(player, ProgressionListType.TASKS);
                 return true;
             case VyknaProgressionInterfaces.LIST_TAB_SKILLING:
