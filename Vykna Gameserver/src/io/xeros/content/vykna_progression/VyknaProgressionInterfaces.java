@@ -17,7 +17,7 @@ public final class VyknaProgressionInterfaces {
 
     // List page tab buttons (AchievementListPage)
     public static final int LIST_TAB_HOME = LIST_INTERFACE_ID + 1200;
-    public static final int LIST_TAB_TASKS = 220181;
+    public static final int LIST_TAB_TASKS = 92021;
     public static final int LIST_TAB_SKILLING = LIST_INTERFACE_ID + 1240;
     public static final int LIST_TAB_COMBAT = LIST_INTERFACE_ID + 1260;
 

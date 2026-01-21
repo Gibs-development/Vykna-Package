@@ -57,6 +57,7 @@ import io.xeros.model.items.GameItem;
 import io.xeros.model.items.ItemAttributes;
 import io.xeros.model.items.bank.BankItem;
 import io.xeros.model.items.bank.BankTab;
+import io.xeros.model.entity.player.save.impl.VyknaProgressionSaveEntry;
 import io.xeros.util.Misc;
 import io.xeros.util.PasswordHashing;
 import io.xeros.util.Reflection;
@@ -118,6 +119,11 @@ public class PlayerSave {
                 e.printStackTrace();
             }
         });
+        boolean hasVyknaProgression = playerSaveEntryList.stream()
+                .anyMatch(entry -> entry instanceof VyknaProgressionSaveEntry);
+        if (!hasVyknaProgression) {
+            playerSaveEntryList.add(new VyknaProgressionSaveEntry());
+        }
         playerSaveEntryList = Collections.unmodifiableList(playerSaveEntryList);
         logger.info("Loaded " + playerSaveEntryList.size() + " Player Save Entries.");
     }
