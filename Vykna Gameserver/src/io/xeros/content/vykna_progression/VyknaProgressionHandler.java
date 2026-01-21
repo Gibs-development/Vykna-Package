@@ -32,12 +32,6 @@ public final class VyknaProgressionHandler {
         addProgress(player, "open_progression", 1);
     }
 
-    public static void openList(Player player, ProgressionListType listType) {
-        if (player == null || listType == null) return;
-
-        player.getPA().showInterface(VyknaProgressionInterfaces.LIST_INTERFACE_ID);
-        sendListData(player, listType);
-    }
 
     public static boolean handleButton(Player player, int buttonId) {
         if (player == null) return false;
@@ -124,31 +118,173 @@ public final class VyknaProgressionHandler {
         player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listTypes", JsonUtil.toJson(listTypes));
     }
 
-    private static void sendListData(Player player, ProgressionListType listType) {
-        ProgressionListDefinition definition = VyknaProgressionRegistry.getByListTypeId(listType.getId());
-        if (definition == null) {
+// Put these inside the same class as openList/sendListData
+
+    private static final boolean DEBUG_PROGRESSIONS = true;
+
+    private static void debug(Player player, String msg) {
+        if (!DEBUG_PROGRESSIONS) return;
+        String name;
+        try {
+            // Adjust if your Player uses a different field/getter.
+            name = (player == null ? "null" : player.playerName);
+        } catch (Exception ignored) {
+            name = "unknown";
+        }
+        System.out.println("[VyknaProgressions] [" + name + "] " + msg);
+    }
+
+    private static void error(Player player, String msg, Throwable t) {
+        String name;
+        try {
+            name = (player == null ? "null" : player.playerName);
+        } catch (Exception ignored) {
+            name = "unknown";
+        }
+        System.err.println("[VyknaProgressions][ERROR] [" + name + "] " + msg);
+        if (t != null) t.printStackTrace();
+    }
+
+    public static void openList(Player player, ProgressionListType listType) {
+        if (player == null || listType == null) return;
+
+        try {
+            debug(player, "openList() -> showInterface id=" + VyknaProgressionInterfaces.LIST_INTERFACE_ID
+                    + ", listType=" + listType + " (id=" + listType.getId() + ")");
+            player.getPA().showInterface(VyknaProgressionInterfaces.LIST_INTERFACE_ID);
+        } catch (Exception e) {
+            error(player, "openList() failed while showing interface.", e);
+            // Optional: player.sendMessage("Progressions UI failed to open. Check server logs.");
             return;
         }
 
-        List<EntryPayload> entries = new ArrayList<>();
-        VyknaProgressionPlayerState state = player.getVyknaProgressionState();
-        for (ProgressionEntry entry : definition.getEntries()) {
-            boolean completed = state.isCompleted(entry.getEntryId());
-            int progress = state.getProgress(entry.getEntryId());
-            DerivedProgress derivedProgress = resolveDerivedProgress(player, state, entry);
-            if (derivedProgress != null) {
-                progress = derivedProgress.progress;
-                completed = derivedProgress.completed;
-            }
-            entries.add(new EntryPayload(entry, completed, progress));
+        try {
+            sendListData(player, listType);
+        } catch (Exception e) {
+            error(player, "openList() failed while sending list data for listType id=" + listType.getId(), e);
+            // Optional: player.sendMessage("Failed to load progression list. Check server logs.");
+        }
+    }
+
+    private static void sendListData(Player player, ProgressionListType listType) {
+        debug(player, "sendListData() start for listType=" + listType + " (id=" + listType.getId() + ")");
+
+        ProgressionListDefinition definition;
+        try {
+            definition = VyknaProgressionRegistry.getByListTypeId(listType.getId());
+        } catch (Exception e) {
+            error(player, "Registry lookup threw for listTypeId=" + listType.getId(), e);
+            return;
         }
 
-        ListPayload payload = new ListPayload(
-                definition.getId(),
-                definition.getSubcategories(),
-                entries
-        );
-        player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listData", JsonUtil.toJson(payload));
+        if (definition == null) {
+            debug(player, "No ProgressionListDefinition found for listTypeId=" + listType.getId() + " (definition=null)");
+            return;
+        }
+
+        List<ProgressionEntry> defEntries = null;
+        try {
+            defEntries = definition.getEntries();
+        } catch (Exception e) {
+            error(player, "definition.getEntries() threw. definitionId=" + safeDefId(definition), e);
+            return;
+        }
+
+        if (defEntries == null) {
+            debug(player, "definition.getEntries() returned null. definitionId=" + safeDefId(definition));
+            return;
+        }
+
+        VyknaProgressionPlayerState state;
+        try {
+            state = player.getVyknaProgressionState();
+        } catch (Exception e) {
+            error(player, "player.getVyknaProgressionState() threw.", e);
+            return;
+        }
+
+        if (state == null) {
+            debug(player, "player progression state is null (state=null). Cannot build list.");
+            return;
+        }
+
+        debug(player, "Building payload: definitionId=" + safeDefId(definition)
+                + ", subcats=" + (definition.getSubcategories() == null ? "null" : definition.getSubcategories().size())
+                + ", entries=" + defEntries.size());
+
+        List<EntryPayload> entries = new ArrayList<>(defEntries.size());
+
+        for (int i = 0; i < defEntries.size(); i++) {
+            ProgressionEntry entry = defEntries.get(i);
+            if (entry == null) {
+                debug(player, "Null entry at index=" + i + " in definitionId=" + safeDefId(definition));
+                continue;
+            }
+
+            try {
+                boolean completed = state.isCompleted(entry.getEntryId());
+                int progress = state.getProgress(entry.getEntryId());
+
+                DerivedProgress derivedProgress = null;
+                try {
+                    derivedProgress = resolveDerivedProgress(player, state, entry);
+                } catch (Exception e) {
+                    // isolate derived resolver issues specifically
+                    error(player, "resolveDerivedProgress() threw for entryId=" + entry.getEntryId()
+                            + " (index=" + i + ", definitionId=" + safeDefId(definition) + ")", e);
+                }
+
+                if (derivedProgress != null) {
+                    progress = derivedProgress.progress;
+                    completed = derivedProgress.completed;
+                }
+
+                entries.add(new EntryPayload(entry, completed, progress));
+            } catch (Exception e) {
+                error(player, "Failed building EntryPayload for entryId=" + safeEntryId(entry)
+                        + " (index=" + i + ", definitionId=" + safeDefId(definition) + ")", e);
+            }
+        }
+
+        ListPayload payload;
+        try {
+            payload = new ListPayload(
+                    definition.getId(),
+                    definition.getSubcategories(),
+                    entries
+            );
+        } catch (Exception e) {
+            error(player, "Failed constructing ListPayload. definitionId=" + safeDefId(definition), e);
+            return;
+        }
+
+        String json;
+        try {
+            json = JsonUtil.toJson(payload);
+        } catch (Exception e) {
+            error(player, "JsonUtil.toJson(payload) threw. definitionId=" + safeDefId(definition)
+                    + ", entriesBuilt=" + entries.size(), e);
+            return;
+        }
+
+        debug(player, "Sending clientscript: id=" + CLIENT_SCRIPT_ID
+                + ", key=listData, jsonLength=" + (json == null ? -1 : json.length())
+                + ", entriesBuilt=" + entries.size());
+
+        try {
+            player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listData", json);
+        } catch (Exception e) {
+            error(player, "runClientScript() threw. clientScriptId=" + CLIENT_SCRIPT_ID
+                    + ", definitionId=" + safeDefId(definition), e);
+        }
+    }
+
+    private static int safeDefId(ProgressionListDefinition def) {
+        try { return def == null ? -1 : def.getId(); } catch (Exception e) { return -2; }
+    }
+
+    private static int safeEntryId(ProgressionEntry entry) {
+        try { return entry == null ? -1 : entry.getEntryId(); } catch (Exception e) { return -2; }
     }
 
     private static final class ListTypePayload {
