@@ -162,6 +162,7 @@ public final class AchievementListPage extends RSInterface {
         r.gridCols = gridCols;
         r.gridRows = gridRows;
         r.gridCellSize = cellSize;
+        r.gridUseValueIndex = true;
 
         r.valueIndex = valueIndex; // dummy
         r.configId = -1;
@@ -236,7 +237,10 @@ public final class AchievementListPage extends RSInterface {
                 RSInterface.interfaceCache[base + 3].message = active ? "<icon=0>" + rows.get(i).points : "";
             }
             if (RSInterface.interfaceCache[base + 0] != null) {
-                RSInterface.interfaceCache[base + 0].valueIndex = active ? rows.get(i).spriteIndex : 1;
+                if (active) {
+                    RSInterface.interfaceCache[base + 0].valueIndex = rows.get(i).spriteIndex;
+                }
+                RSInterface.interfaceCache[base + 0].interfaceHidden = !active;
             }
 
             final int barBgId = base + 6;
@@ -280,12 +284,20 @@ public final class AchievementListPage extends RSInterface {
     }
 
     public static void applyServerPayload(int listTypeId) {
+        applyServerPayload(listTypeId, 0);
+    }
+
+    public static void applyServerPayload(int listTypeId, int pageIndex) {
         currentListType = ProgressionListType.fromId(listTypeId);
-        updateDropdownOptions(VyknaProgressionDefinitions.getSubcategories(currentListType));
-        if (RSInterface.interfaceCache[TEXT_TITLE] != null) {
-            RSInterface.interfaceCache[TEXT_TITLE].message = currentListType.getDisplayName() + " Progression";
+        if (pageIndex == 0) {
+            updateDropdownOptions(VyknaProgressionDefinitions.getSubcategories(currentListType));
+            if (RSInterface.interfaceCache[TEXT_TITLE] != null) {
+                RSInterface.interfaceCache[TEXT_TITLE].message = currentListType.getDisplayName() + " Progression";
+            }
+            refreshList(ALL_FILTER);
+        } else {
+            refreshList(currentFilter);
         }
-        refreshList(ALL_FILTER);
     }
 
     private static void updateDropdownOptions(List<String> subcategories) {
@@ -416,7 +428,7 @@ public final class AchievementListPage extends RSInterface {
 
             int valueIndex = (i % 4) + 1;
             addBox(boxId, 0x3a3228, 0x2c261f, 120, scroll.width - 12, ROW_H - 6);
-            addGridSpriteValueIndex(base + 0, RECENT_ATLAS, 2, 2, ICON_SIZE, valueIndex, "");
+            addGridSpriteValueIndex(base + 0, RECENT_ATLAS, 6, 6, ICON_SIZE, valueIndex, "");
 
             addText(base + 1, "", tda, 0, 0xE3AE19, false, true);
             addText(base + 2, "", tda, 0, 0xFFFAE5, false, true);

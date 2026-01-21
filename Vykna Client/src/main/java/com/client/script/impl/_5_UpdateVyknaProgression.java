@@ -24,7 +24,7 @@ public class _5_UpdateVyknaProgression {
             ProgressionListPayload payload = JsonUtil.fromJsonString(
                     data, new TypeToken<ProgressionListPayload>() {});
             VyknaProgressionDefinitions.applyListPayload(payload);
-            AchievementListPage.applyServerPayload(payload.getListTypeId());
+            AchievementListPage.applyServerPayload(payload.getListTypeId(), payload.getPageIndex());
         }
     }
 }
