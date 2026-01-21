@@ -6,7 +6,10 @@ import io.xeros.model.entity.player.Player;
 import io.xeros.util.JsonUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class VyknaProgressionHandler {
 
@@ -19,6 +22,7 @@ public final class VyknaProgressionHandler {
     private static final String KEY_TOTAL_XP = "total_xp";
     private static final int DEFAULT_PAGE_SIZE = 25;
     private static final int MAX_LIST_JSON_CHARS = 12000;
+    private static final Map<String, Integer> SCORE_BY_PLAYER = new HashMap<>();
 
     public VyknaProgressionHandler(Player player) {
     }
@@ -31,6 +35,11 @@ public final class VyknaProgressionHandler {
 
         player.getPA().showInterface(ACHIEVEMENTS_INTERFACE_ID);
         sendListTypes(player);
+        sendListData(player, ProgressionListType.TASKS);
+        sendListData(player, ProgressionListType.SKILLS);
+        sendListData(player, ProgressionListType.COMBAT);
+        updateLeaderboard(player, player.getVyknaProgressionState());
+        sendSummaryData(player);
         addProgress(player, "open_progression", 1);
     }
 
@@ -60,6 +69,13 @@ public final class VyknaProgressionHandler {
                 return true;
             case VyknaProgressionInterfaces.LIST_TAB_COMBAT:
                 openList(player, ProgressionListType.COMBAT);
+                return true;
+            case VyknaProgressionInterfaces.LIST_TOGGLE_COMPLETED:
+                toggleShowCompleted(player);
+                return true;
+            case VyknaProgressionInterfaces.LIST_CLOSE:
+            case VyknaProgressionInterfaces.HOME_CLOSE:
+                player.getPA().closeAllWindows();
                 return true;
             default:
                 return false;
@@ -107,6 +123,10 @@ public final class VyknaProgressionHandler {
                 if (updated >= target && !state.isCompleted(entry.getEntryId())) {
                     state.setCompleted(entry.getEntryId(), true);
                     state.addPoints(entry.getPoints());
+                    state.addScore(entry.getPoints());
+                    state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
+                    updateLeaderboard(player, state);
+                    sendSummaryData(player);
                 }
             }
         }
@@ -118,6 +138,41 @@ public final class VyknaProgressionHandler {
             listTypes.add(new ListTypePayload(type.getId(), type.getDisplayName()));
         }
         player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listTypes", JsonUtil.toJson(listTypes));
+    }
+
+    private static void sendSummaryData(Player player) {
+        if (player == null) {
+            return;
+        }
+        VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        SummaryPayload payload = new SummaryPayload(
+                state.getScoreTotal(),
+                state.getPointsTotal(),
+                state.getLastCompletedEntryId(),
+                state.getLastCompletedListTypeId(),
+                state.isShowCompleted(),
+                getTopLeaderboard()
+        );
+        player.getPA().runClientScript(CLIENT_SCRIPT_ID, "summaryData", JsonUtil.toJson(payload));
+    }
+
+    private static void toggleShowCompleted(Player player) {
+        VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        boolean show = !state.isShowCompleted();
+        state.setShowCompleted(show);
+        player.getPA().runClientScript(CLIENT_SCRIPT_ID, "toggleCompleted", show ? 1 : 0);
+    }
+
+    private static void updateLeaderboard(Player player, VyknaProgressionPlayerState state) {
+        String name = player == null ? "unknown" : player.playerName;
+        SCORE_BY_PLAYER.put(name, state.getScoreTotal());
+    }
+
+    private static List<LeaderboardEntry> getTopLeaderboard() {
+        List<LeaderboardEntry> entries = new ArrayList<>();
+        SCORE_BY_PLAYER.forEach((name, score) -> entries.add(new LeaderboardEntry(name, score)));
+        entries.sort(Comparator.comparingInt(LeaderboardEntry::getScore).reversed());
+        return entries.subList(0, Math.min(3, entries.size()));
     }
 
 // Put these inside the same class as openList/sendListData
@@ -372,6 +427,39 @@ public final class VyknaProgressionHandler {
         }
     }
 
+    private static final class SummaryPayload {
+        private final int scoreTotal;
+        private final int pointsTotal;
+        private final int lastCompletedEntryId;
+        private final int lastCompletedListTypeId;
+        private final boolean showCompleted;
+        private final List<LeaderboardEntry> leaderboard;
+
+        private SummaryPayload(int scoreTotal, int pointsTotal, int lastCompletedEntryId, int lastCompletedListTypeId,
+                               boolean showCompleted, List<LeaderboardEntry> leaderboard) {
+            this.scoreTotal = scoreTotal;
+            this.pointsTotal = pointsTotal;
+            this.lastCompletedEntryId = lastCompletedEntryId;
+            this.lastCompletedListTypeId = lastCompletedListTypeId;
+            this.showCompleted = showCompleted;
+            this.leaderboard = leaderboard;
+        }
+    }
+
+    private static final class LeaderboardEntry {
+        private final String name;
+        private final int score;
+
+        private LeaderboardEntry(String name, int score) {
+            this.name = name;
+            this.score = score;
+        }
+
+        private int getScore() {
+            return score;
+        }
+    }
+
     private static final class EntryPayload {
         private final int entryId;
         private final String name;
@@ -439,6 +527,9 @@ public final class VyknaProgressionHandler {
         if (completed && !state.isCompleted(entry.getEntryId())) {
             state.setCompleted(entry.getEntryId(), true);
             state.addPoints(entry.getPoints());
+            state.addScore(entry.getPoints());
+            state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
+            updateLeaderboard(player, state);
         }
         state.setProgress(entry.getEntryId(), Math.min(progress, target));
         return new DerivedProgress(Math.min(progress, target), state.isCompleted(entry.getEntryId()));

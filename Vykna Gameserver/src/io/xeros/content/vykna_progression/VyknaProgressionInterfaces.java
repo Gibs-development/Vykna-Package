@@ -21,6 +21,9 @@ public final class VyknaProgressionInterfaces {
     public static final int LIST_TAB_TASKS_REAL = 92021;
     public static final int LIST_TAB_SKILLING = LIST_INTERFACE_ID + 1240;
     public static final int LIST_TAB_COMBAT = LIST_INTERFACE_ID + 1260;
+    public static final int LIST_TOGGLE_COMPLETED = LIST_INTERFACE_ID + 2020;
+    public static final int LIST_CLOSE = LIST_INTERFACE_ID + 2005;
+    public static final int HOME_CLOSE = 35005;
 
     // Client ids (from the class you pasted)
     public static final int TEXT_TITLE = LIST_INTERFACE_ID + 2000;     // 66504

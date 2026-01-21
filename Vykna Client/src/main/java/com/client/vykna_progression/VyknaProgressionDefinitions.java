@@ -16,6 +16,7 @@ public final class VyknaProgressionDefinitions {
     );
 
     private static List<ProgressionListTypePayload> listTypes = new ArrayList<>();
+    private static ProgressionSummaryPayload summaryPayload;
 
     private VyknaProgressionDefinitions() {
     }
@@ -26,6 +27,14 @@ public final class VyknaProgressionDefinitions {
 
     public static List<ProgressionListTypePayload> getListTypes() {
         return listTypes;
+    }
+
+    public static void setSummaryPayload(ProgressionSummaryPayload payload) {
+        summaryPayload = payload;
+    }
+
+    public static ProgressionSummaryPayload getSummaryPayload() {
+        return summaryPayload;
     }
 
     public static void applyListPayload(ProgressionListPayload payload) {
@@ -67,6 +76,16 @@ public final class VyknaProgressionDefinitions {
             default:
                 return TASKS.getEntries();
         }
+    }
+
+    public static ProgressionEntryDefinition getEntryById(int listTypeId, int entryId) {
+        ProgressionListType type = ProgressionListType.fromId(listTypeId);
+        for (ProgressionEntryDefinition entry : getEntries(type)) {
+            if (entry.getEntryId() == entryId) {
+                return entry;
+            }
+        }
+        return null;
     }
 
     public static CompletionStats getOverallStats() {

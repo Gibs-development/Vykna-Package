@@ -78,7 +78,7 @@ public final class AchievementListPage extends RSInterface {
     private static final int PROGRESS_BAR_ID = INTERFACE_ID + 4010;
 
     // Dropdown colors (dark)
-    private static final int[] DARK_DROPDOWN_COLORS = { 0x1a1a1a, 0x2a2a2a, 0x202224, 0x2b2e32, 0x34383d };
+    private static final int[] DARK_DROPDOWN_COLORS = { 0x2b2118, 0x3a2a1c, 0x4a3624, 0x5a4331, 0x6a503b };
 
     private static final String ALL_FILTER = "All";
     private static final int DROPDOWN_WIDTH = 166;
@@ -120,6 +120,7 @@ public final class AchievementListPage extends RSInterface {
 
     private static ProgressionListType currentListType = ProgressionListType.TASKS;
     private static String currentFilter = ALL_FILTER;
+    private static boolean showCompleted = true;
 
     // Scroll layout (shared by build + refresh)
     private static final int ROW_H = 48;
@@ -177,12 +178,15 @@ public final class AchievementListPage extends RSInterface {
         List<ProgressionEntryDefinition> entries = VyknaProgressionDefinitions.getEntries(currentListType);
         List<TaskRow> rows = new ArrayList<>();
         for (ProgressionEntryDefinition entry : entries) {
+            if (!showCompleted && entry.isCompleted()) {
+                continue;
+            }
             if (!ALL_FILTER.equalsIgnoreCase(currentFilter)
                     && !normalizeFilter(entry.getSubcategory()).equalsIgnoreCase(currentFilter)) {
                 continue;
             }
-            String status = entry.isCompleted() ? "Completed" : "Incomplete";
-            rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+            rows.add(new TaskRow(formatStatus(entry.getName(), entry.isCompleted()),
+                    formatStatus(entry.getDescription(), entry.isCompleted()),
                     entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
                     entry.getProgressCurrent(), entry.getRequirementTarget()));
         }
@@ -191,8 +195,11 @@ public final class AchievementListPage extends RSInterface {
             currentFilter = ALL_FILTER;
             rows = new ArrayList<>();
             for (ProgressionEntryDefinition entry : entries) {
-                String status = entry.isCompleted() ? "Completed" : "Incomplete";
-                rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+                if (!showCompleted && entry.isCompleted()) {
+                    continue;
+                }
+                rows.add(new TaskRow(formatStatus(entry.getName(), entry.isCompleted()),
+                        formatStatus(entry.getDescription(), entry.isCompleted()),
                         entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
                         entry.getProgressCurrent(), entry.getRequirementTarget()));
             }
@@ -200,7 +207,7 @@ public final class AchievementListPage extends RSInterface {
 
         VyknaProgressionDefinitions.CompletionStats stats;
         if (ALL_FILTER.equalsIgnoreCase(currentFilter)) {
-            stats = VyknaProgressionDefinitions.getOverallStats();
+            stats = VyknaProgressionDefinitions.getStatsForType(currentListType);
         } else {
             stats = VyknaProgressionDefinitions.getStatsForSubcategory(currentListType, currentFilter);
         }
@@ -276,6 +283,19 @@ public final class AchievementListPage extends RSInterface {
                 if (childBase + 7 < scroll.childY.length) scroll.childY[childBase + 7] = y + 31;
                 if (childBase + 8 < scroll.childY.length) scroll.childY[childBase + 8] = y + 31;
             }
+        }
+    }
+
+    public static void setShowCompleted(boolean showCompletedFlag) {
+        showCompleted = showCompletedFlag;
+        updateShowCompletedText();
+        refreshList(currentFilter);
+    }
+
+    private static void updateShowCompletedText() {
+        if (RSInterface.interfaceCache[TEXT_SHOW_COMPLETED] != null) {
+            RSInterface.interfaceCache[TEXT_SHOW_COMPLETED].message =
+                    showCompleted ? "Hide Completed" : "Show Completed";
         }
     }
 
@@ -537,6 +557,7 @@ public final class AchievementListPage extends RSInterface {
 
         // Populate initial list
 
+        updateShowCompletedText();
         refreshList(ALL_FILTER);
     }
 
@@ -555,5 +576,12 @@ public final class AchievementListPage extends RSInterface {
                 bar.interfaceHidden = !visible;
             }
         }
+    }
+
+    private static String formatStatus(String text, boolean completed) {
+        if (!completed) {
+            return text;
+        }
+        return "<s>" + text + "</s>";
     }
 }
