@@ -198,6 +198,12 @@ public final class AchievementListPage extends RSInterface {
                     && !normalizeFilter(entry.getSubcategory()).equalsIgnoreCase(currentFilter)) {
                 continue;
             }
+            if (!matchesQuery(progressionSearchQuery, entry)) {
+                continue;
+            }
+            if (!showCompleted && entry.isCompleted()) {
+                continue;
+            }
             rows.add(new TaskRow(formatStatus(entry.getName(), entry.isCompleted()),
                     formatStatus(entry.getDescription(), entry.isCompleted()),
                     entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
@@ -208,6 +214,9 @@ public final class AchievementListPage extends RSInterface {
             currentFilter = ALL_FILTER;
             rows = new ArrayList<>();
             for (ProgressionEntryDefinition entry : entries) {
+                if (!matchesQuery(progressionSearchQuery, entry)) {
+                    continue;
+                }
                 if (!showCompleted && entry.isCompleted()) {
                     continue;
                 }
@@ -216,6 +225,11 @@ public final class AchievementListPage extends RSInterface {
                         entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
                         entry.getProgressCurrent(), entry.getRequirementTarget()));
             }
+        }
+
+        if (rows.isEmpty()) {
+            rows.add(new TaskRow("No results", "Try a different term or clear the search.",
+                    0, false, 1));
         }
 
         VyknaProgressionDefinitions.CompletionStats stats;
@@ -631,5 +645,15 @@ public final class AchievementListPage extends RSInterface {
             return text;
         }
         return "<s>" + text + "</s>";
+    }
+
+    private static boolean matchesQuery(String query, ProgressionEntryDefinition entry) {
+        if (query == null || query.trim().isEmpty()) {
+            return true;
+        }
+        String normalized = query.trim().toLowerCase();
+        String name = entry.getName() == null ? "" : entry.getName().toLowerCase();
+        String description = entry.getDescription() == null ? "" : entry.getDescription().toLowerCase();
+        return name.contains(normalized) || description.contains(normalized);
     }
 }
