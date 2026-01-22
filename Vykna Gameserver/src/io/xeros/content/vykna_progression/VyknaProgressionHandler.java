@@ -164,8 +164,26 @@ public final class VyknaProgressionHandler {
     }
 
     private static void updateLeaderboard(Player player, VyknaProgressionPlayerState state) {
-        String name = player == null ? "unknown" : player.playerName;
+        String name = resolvePlayerName(player);
         SCORE_BY_PLAYER.put(name, state.getScoreTotal());
+    }
+
+    private static String resolvePlayerName(Player player) {
+        if (player == null) {
+            return "unknown";
+        }
+        String displayName = player.getDisplayName();
+        if (displayName != null && !displayName.isEmpty()) {
+            return displayName;
+        }
+        String loginName = player.getLoginName();
+        if (loginName != null && !loginName.isEmpty()) {
+            return loginName;
+        }
+        if (player.playerName != null && !player.playerName.isEmpty()) {
+            return player.playerName;
+        }
+        return "unknown";
     }
 
     private static List<LeaderboardEntry> getTopLeaderboard() {

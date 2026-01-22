@@ -2646,13 +2646,22 @@ public class Client extends RSApplet {
 					class9_1.dropdownHover = -1;
 
 					if (class9_1.dropdown.isOpen()) {
+						int dropdownVisibleHeight = class9_1.dropdown.getVisibleHeight();
+						int dropdownFullHeight = class9_1.dropdown.getHeight();
+						int maxScroll = Math.max(0, dropdownFullHeight - dropdownVisibleHeight);
+						if (class9_1.scrollPosition > maxScroll) {
+							class9_1.scrollPosition = maxScroll;
+						}
+						if (class9_1.scrollPosition < 0) {
+							class9_1.scrollPosition = 0;
+						}
 
 						// Inverted keybinds dropdown
 						if (class9_1.type == RSInterface.TYPE_KEYBINDS_DROPDOWN && class9_1.inverted && mouseX >= drawX
 								&& mouseX < drawX + (class9_1.dropdown.getWidth() - 16)
-								&& mouseY >= drawY - class9_1.dropdown.getHeight() - 10 && mouseY < drawY) {
+								&& mouseY >= drawY - dropdownVisibleHeight - 10 && mouseY < drawY) {
 							resetTabInterfaceHover();
-							int yy = mouseY - (drawY - class9_1.dropdown.getHeight());
+							int yy = mouseY - (drawY - dropdownVisibleHeight) + class9_1.scrollPosition;
 
 							if (mouseX > drawX + (class9_1.dropdown.getWidth() / 2)) {
 								class9_1.dropdownHover = ((yy / 15) * 2) + 1;
@@ -2661,9 +2670,9 @@ public class Client extends RSApplet {
 							}
 							flag = true;
 						} else if (!class9_1.inverted && mouseX >= drawX && mouseX < drawX + (class9_1.dropdown.getWidth() - 16)
-								&& mouseY >= drawY + 19 && mouseY < drawY + 19 + class9_1.dropdown.getHeight()) {
+								&& mouseY >= drawY + 19 && mouseY < drawY + 19 + dropdownVisibleHeight) {
 							resetTabInterfaceHover();
-							int yy = mouseY - (drawY + 19);
+							int yy = mouseY - (drawY + 19) + class9_1.scrollPosition;
 
 							if (class9_1.type == RSInterface.TYPE_KEYBINDS_DROPDOWN && class9_1.dropdown.doesSplit()) {
 								if (mouseX > drawX + (class9_1.dropdown.getWidth() / 2)) {
@@ -2672,7 +2681,7 @@ public class Client extends RSApplet {
 									class9_1.dropdownHover = (yy / 15) * 2;
 								}
 							} else {
-								class9_1.dropdownHover = yy / 14; // Regular dropdown hover
+								class9_1.dropdownHover = yy / class9_1.dropdown.getOptionHeight(); // Regular dropdown hover
 							}
 							flag = true;
 						}
@@ -14541,6 +14550,16 @@ public class Client extends RSApplet {
 				} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
 
 							DropdownMenu d = class9_1.dropdown;
+							int visibleHeight = d.getVisibleHeight();
+							int fullHeight = d.getHeight();
+							int optionHeight = d.getOptionHeight();
+							int maxScroll = Math.max(0, fullHeight - visibleHeight);
+							if (class9_1.scrollPosition > maxScroll) {
+								class9_1.scrollPosition = maxScroll;
+							}
+							if (class9_1.scrollPosition < 0) {
+								class9_1.scrollPosition = 0;
+							}
 
 							int bgColour = class9_1.dropdownColours[2];
 							int fontColour = 0xfe971e;
@@ -14569,14 +14588,18 @@ public class Client extends RSApplet {
 								// Up arrow
 								cacheSprite3[29].drawSprite(_x + d.getWidth() - 18, _y + 2);
 
-								DrawingArea.drawPixels(d.getHeight(), _y + 19, _x, class9_1.dropdownColours[0], d.getWidth());
-								DrawingArea.drawPixels(d.getHeight() - 2, _y + 20, _x + 1, class9_1.dropdownColours[1],
+								DrawingArea.drawPixels(visibleHeight, _y + 19, _x, class9_1.dropdownColours[0], d.getWidth());
+								DrawingArea.drawPixels(visibleHeight - 2, _y + 20, _x + 1, class9_1.dropdownColours[1],
 										d.getWidth() - 2);
-								DrawingArea.drawPixels(d.getHeight() - 4, _y + 21, _x + 2, class9_1.dropdownColours[3],
+								DrawingArea.drawPixels(visibleHeight - 4, _y + 21, _x + 2, class9_1.dropdownColours[3],
 										d.getWidth() - 4);
 
-								int yy = 2;
-								for (int i = 0; i < d.getOptions().length; i++) {
+								int yy = 2 - (class9_1.scrollPosition % optionHeight);
+								int startIndex = class9_1.scrollPosition / optionHeight;
+								for (int i = startIndex; i < d.getOptions().length; i++) {
+									if (yy > visibleHeight - optionHeight) {
+										break;
+									}
 									if (class9_1.dropdownHover == i) {
 										if (class9_1.id == 28102) {
 											DrawingArea.drawAlphaBox(_x + 2, _y + 19 + yy, d.getWidth() - 4, 13, 0xd0914d, 80);
@@ -14604,10 +14627,10 @@ public class Client extends RSApplet {
 										}
 
 									}
-									yy += 14;
+									yy += optionHeight;
 								}
-								drawScrollbar(d.getHeight() - 4, class9_1.scrollPosition, _y + 21, _x + d.getWidth() - 18,
-										d.getHeight() - 5);
+								drawScrollbar(visibleHeight - 4, class9_1.scrollPosition, _y + 21, _x + d.getWidth() - 18,
+										fullHeight - 5);
 
 							} else {
 								cacheSprite3[downArrow].drawSprite(_x + d.getWidth() - 18, _y + 2);

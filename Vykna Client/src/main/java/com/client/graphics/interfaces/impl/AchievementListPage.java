@@ -64,6 +64,7 @@ public final class AchievementListPage extends RSInterface {
     // Header / top controls (separate block)
     private static final int TEXT_TITLE = INTERFACE_ID + 2000;
     private static final int CLOSE_BTN_ID = INTERFACE_ID + 2005;
+    private static final int CLOSE_HOVER_ID = INTERFACE_ID + 2006;
     private static final int DROPDOWN_ID = INTERFACE_ID + 2010;
     private static final int TEXT_SHOW_COMPLETED = INTERFACE_ID + 2020;
 
@@ -213,8 +214,11 @@ public final class AchievementListPage extends RSInterface {
         }
 
         if (RSInterface.interfaceCache[TEXT_PROGRESS] != null) {
+            String displayFilter = ALL_FILTER.equalsIgnoreCase(currentFilter) ? "All" : currentFilter;
+            String displayType = currentListType == ProgressionListType.TASKS ? "Tasks" : currentListType.getDisplayName();
             RSInterface.interfaceCache[TEXT_PROGRESS].message =
-                    "Completed: " + stats.getCompleted() + "/" + stats.getTotal();
+                    displayType + " > " + displayFilter + " "
+                            + stats.getCompleted() + "/" + stats.getTotal();
         }
 
         setSkinnedBarPercentage(PROGRESS_BAR_ID, stats.getRatio());
@@ -409,10 +413,10 @@ public final class AchievementListPage extends RSInterface {
         // ---- Close button (top-right) ----
         // Uses the same sprite path style as the rest of the interface. If your client uses cacheSprite3-based
         // close buttons, swap this to RSInterface.closeButton(...) and point at the correct sprite indices.
-        addHoverButtonNew(CLOSE_BTN_ID,
-                SPRITE_ROOT + "Close",
-                SPRITE_ROOT + "CloseHover",
-                16, 16, "Close", 0, 1);
+        addHoverButton(CLOSE_BTN_ID, "Interfaces/HelpInterface/IMAGE", 2,
+                16, 16, "Close", 0, CLOSE_HOVER_ID, 1);
+        addHoveredButton(CLOSE_HOVER_ID, "Interfaces/HelpInterface/IMAGE", 3,
+                16, 16, CLOSE_HOVER_ID + 1);
 
         // ---- Top row controls ----
         dropdownMenu(
@@ -496,7 +500,7 @@ public final class AchievementListPage extends RSInterface {
                         + 2 // combat btn+icon
                         + 2 // mastery btn+icon
                         + 1 // title
-                        + 1 // close
+                        + 2 // close + hover
                         + 1 // dropdown
                         + 1 // show completed
                         + 1 // scroll
@@ -537,6 +541,7 @@ public final class AchievementListPage extends RSInterface {
 
         // Close (top-right of the frame)
         rsi.child(c++, CLOSE_BTN_ID, BG_X + 470, BG_Y + 14);
+        rsi.child(c++, CLOSE_HOVER_ID, BG_X + 470, BG_Y + 14);
 
         // Scroll
         rsi.child(c++, SCROLL_ID, MAIN_X, MAIN_Y + 30);
