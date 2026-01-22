@@ -127,6 +127,9 @@ public class RSApplet extends Applet implements Runnable, MouseListener, MouseMo
 			offsetY = Client.currentScreenMode.equals(ScreenMode.FIXED) ? 503 - 298
 					: Client.currentGameHeight - (Client.currentGameWidth >= 960 ? 37 : 74) - 267;
 
+			if (handleOpenDropdownScrolling(RSInterface.get(tabInterfaceID), rotation, offsetX, offsetY)) {
+				return true;
+			}
 			handleTabInterfaceScrolling(RSInterface.get(tabInterfaceID), rotation, offsetX, offsetY);
 		}
 
@@ -136,6 +139,9 @@ public class RSApplet extends Applet implements Runnable, MouseListener, MouseMo
 					: (Client.currentGameWidth / 2) - 356;
 			offsetY = Client.currentScreenMode.equals(ScreenMode.FIXED)? 4
 					: (Client.currentGameHeight / 2) - 230;
+			if (handleOpenDropdownScrolling(RSInterface.get(Client.openInterfaceID), rotation, offsetX, offsetY)) {
+				return true;
+			}
 			return handleMainInterfaceScrolling(Client.openInterfaceID, offsetX, offsetY, rotation);
 		}
 
@@ -202,6 +208,43 @@ public class RSApplet extends Applet implements Runnable, MouseListener, MouseMo
 			}
 		}
 
+		return false;
+	}
+
+	private boolean handleOpenDropdownScrolling(RSInterface parent, int rotation, int offsetX, int offsetY) {
+		if (parent == null || parent.children == null) {
+			return false;
+		}
+		for (int index = 0; index < parent.children.length; index++) {
+			RSInterface child = RSInterface.interfaceCache[parent.children[index]];
+			if (child == null) {
+				continue;
+			}
+			int childOffsetX = offsetX + parent.childX[index];
+			int childOffsetY = offsetY + parent.childY[index];
+			if (handleOpenDropdownScrolling(child, rotation, childOffsetX, childOffsetY)) {
+				return true;
+			}
+			if (child.dropdown == null || !child.dropdown.isOpen()) {
+				continue;
+			}
+			int dropdownFullHeight = child.dropdown.getHeight();
+			int dropdownVisibleHeight = Math.min(dropdownFullHeight, 140);
+			int maxScroll = Math.max(0, dropdownFullHeight - dropdownVisibleHeight);
+			int dropdownX = childOffsetX;
+			int dropdownY = childOffsetY + 19;
+			if (getMouseX() > dropdownX && getMouseX() < dropdownX + child.dropdown.getWidth()
+					&& getMouseY() > dropdownY && getMouseY() < dropdownY + dropdownVisibleHeight) {
+				child.scrollPosition += rotation * 30;
+				if (child.scrollPosition < 0) {
+					child.scrollPosition = 0;
+				}
+				if (child.scrollPosition > maxScroll) {
+					child.scrollPosition = maxScroll;
+				}
+				return true;
+			}
+		}
 		return false;
 	}
 
