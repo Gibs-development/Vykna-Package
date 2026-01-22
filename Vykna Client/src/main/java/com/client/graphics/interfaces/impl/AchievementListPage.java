@@ -67,6 +67,9 @@ public final class AchievementListPage extends RSInterface {
     private static final int CLOSE_HOVER_ID = INTERFACE_ID + 2006;
     private static final int DROPDOWN_ID = INTERFACE_ID + 2010;
     private static final int TEXT_SHOW_COMPLETED = INTERFACE_ID + 2020;
+    private static final int SEARCH_BG_ID = INTERFACE_ID + 2030;
+    private static final int SEARCH_TEXT_ID = INTERFACE_ID + 2031;
+    private static final int SEARCH_CLEAR_ID = INTERFACE_ID + 2032;
 
     // Scroll + rows (separate block)
     private static final int SCROLL_ID = INTERFACE_ID + 3000;
@@ -428,6 +431,10 @@ public final class AchievementListPage extends RSInterface {
         addHoverText(TEXT_SHOW_COMPLETED, "Show Completed?", "Toggle showing completed tasks",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
 
+        addBox(SEARCH_BG_ID, 0x2b2118, 0x1f1812, 120, 160, 16);
+        addText(SEARCH_TEXT_ID, "Search...", tda, 0, 0x9a8b7a, false, true);
+        addSprite(SEARCH_CLEAR_ID, 0, SPRITE_ROOT + "Close");
+
         // ---- Scroll container ----
         RSInterface scroll = addTabInterface(SCROLL_ID);
         scroll.width = 390;
@@ -503,6 +510,7 @@ public final class AchievementListPage extends RSInterface {
                         + 2 // close + hover
                         + 1 // dropdown
                         + 1 // show completed
+                        + 3 // search box
                         + 1 // scroll
                         + 1 // progress text
                         + 4 // progress bar parts
@@ -559,6 +567,9 @@ public final class AchievementListPage extends RSInterface {
         // Top row (draw last so the dropdown popup renders above everything)
         rsi.child(c++, DROPDOWN_ID, MAIN_X, MAIN_Y + 2);
         rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 2);
+        rsi.child(c++, SEARCH_BG_ID, MAIN_X + 230, MAIN_Y + 2);
+        rsi.child(c++, SEARCH_TEXT_ID, MAIN_X + 236, MAIN_Y + 4);
+        rsi.child(c++, SEARCH_CLEAR_ID, MAIN_X + 230 + 142, MAIN_Y + 2);
 
         // Populate initial list
 
