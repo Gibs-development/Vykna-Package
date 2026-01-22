@@ -34,13 +34,17 @@ public final class VyknaProgressionHandler {
         if (player == null) return;
 
         player.getPA().showInterface(ACHIEVEMENTS_INTERFACE_ID);
+        addProgress(player, "open_progression", 1);
+    }
+
+    public static void sendInitialData(Player player) {
+        if (player == null) return;
         sendListTypes(player);
         sendListData(player, ProgressionListType.TASKS);
         sendListData(player, ProgressionListType.SKILLS);
         sendListData(player, ProgressionListType.COMBAT);
         updateLeaderboard(player, player.getVyknaProgressionState());
         sendSummaryData(player);
-        addProgress(player, "open_progression", 1);
     }
 
 

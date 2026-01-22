@@ -217,7 +217,7 @@ public final class AchievementListPage extends RSInterface {
             String displayFilter = ALL_FILTER.equalsIgnoreCase(currentFilter) ? "All" : currentFilter;
             String displayType = currentListType == ProgressionListType.TASKS ? "Tasks" : currentListType.getDisplayName();
             RSInterface.interfaceCache[TEXT_PROGRESS].message =
-                    displayType + " > " + displayFilter + " "
+                    displayType + " > " + displayFilter + " > "
                             + stats.getCompleted() + "/" + stats.getTotal();
         }
 
