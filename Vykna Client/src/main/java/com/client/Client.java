@@ -2681,7 +2681,7 @@ public class Client extends RSApplet {
 									class9_1.dropdownHover = (yy / 15) * 2;
 								}
 							} else {
-								class9_1.dropdownHover = yy / 14; // Regular dropdown hover
+								class9_1.dropdownHover = yy / class9_1.dropdown.getOptionHeight(); // Regular dropdown hover
 							}
 							flag = true;
 						}
