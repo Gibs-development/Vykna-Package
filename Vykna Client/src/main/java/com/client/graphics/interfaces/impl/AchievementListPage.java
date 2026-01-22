@@ -64,8 +64,12 @@ public final class AchievementListPage extends RSInterface {
     // Header / top controls (separate block)
     private static final int TEXT_TITLE = INTERFACE_ID + 2000;
     private static final int CLOSE_BTN_ID = INTERFACE_ID + 2005;
+    private static final int CLOSE_HOVER_ID = INTERFACE_ID + 2006;
     private static final int DROPDOWN_ID = INTERFACE_ID + 2010;
     private static final int TEXT_SHOW_COMPLETED = INTERFACE_ID + 2020;
+    private static final int SEARCH_BG_ID = INTERFACE_ID + 2030;
+    private static final int SEARCH_TEXT_ID = INTERFACE_ID + 2031;
+    private static final int SEARCH_CLEAR_ID = INTERFACE_ID + 2032;
 
     // Scroll + rows (separate block)
     private static final int SCROLL_ID = INTERFACE_ID + 3000;
@@ -78,7 +82,7 @@ public final class AchievementListPage extends RSInterface {
     private static final int PROGRESS_BAR_ID = INTERFACE_ID + 4010;
 
     // Dropdown colors (dark)
-    private static final int[] DARK_DROPDOWN_COLORS = { 0x1a1a1a, 0x2a2a2a, 0x202224, 0x2b2e32, 0x34383d };
+    private static final int[] DARK_DROPDOWN_COLORS = { 0x2b2118, 0x3a2a1c, 0x4a3624, 0x5a4331, 0x6a503b };
 
     private static final String ALL_FILTER = "All";
     private static final int DROPDOWN_WIDTH = 166;
@@ -120,6 +124,8 @@ public final class AchievementListPage extends RSInterface {
 
     private static ProgressionListType currentListType = ProgressionListType.TASKS;
     private static String currentFilter = ALL_FILTER;
+    private static boolean showCompleted = true;
+    private static String progressionSearchQuery = "";
 
     // Scroll layout (shared by build + refresh)
     private static final int ROW_H = 48;
@@ -142,6 +148,14 @@ public final class AchievementListPage extends RSInterface {
 
     private AchievementListPage() {}
 
+    public static int getSearchTextId() {
+        return SEARCH_TEXT_ID;
+    }
+
+    public static int getSearchClearId() {
+        return SEARCH_CLEAR_ID;
+    }
+
     private static void addGridSpriteValueIndex(int id, String atlasSpritePath,
                                                 int gridCols, int gridRows, int cellSize,
                                                 int valueIndex, String tooltip) {
@@ -162,6 +176,7 @@ public final class AchievementListPage extends RSInterface {
         r.gridCols = gridCols;
         r.gridRows = gridRows;
         r.gridCellSize = cellSize;
+        r.gridUseValueIndex = true;
 
         r.valueIndex = valueIndex; // dummy
         r.configId = -1;
@@ -176,12 +191,15 @@ public final class AchievementListPage extends RSInterface {
         List<ProgressionEntryDefinition> entries = VyknaProgressionDefinitions.getEntries(currentListType);
         List<TaskRow> rows = new ArrayList<>();
         for (ProgressionEntryDefinition entry : entries) {
+            if (!showCompleted && entry.isCompleted()) {
+                continue;
+            }
             if (!ALL_FILTER.equalsIgnoreCase(currentFilter)
                     && !normalizeFilter(entry.getSubcategory()).equalsIgnoreCase(currentFilter)) {
                 continue;
             }
-            String status = entry.isCompleted() ? "Completed" : "Incomplete";
-            rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+            rows.add(new TaskRow(formatStatus(entry.getName(), entry.isCompleted()),
+                    formatStatus(entry.getDescription(), entry.isCompleted()),
                     entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
                     entry.getProgressCurrent(), entry.getRequirementTarget()));
         }
@@ -190,31 +208,33 @@ public final class AchievementListPage extends RSInterface {
             currentFilter = ALL_FILTER;
             rows = new ArrayList<>();
             for (ProgressionEntryDefinition entry : entries) {
-                String status = entry.isCompleted() ? "Completed" : "Incomplete";
-                rows.add(new TaskRow(entry.getName(), entry.getDescription() + " (" + status + ")",
+                if (!showCompleted && entry.isCompleted()) {
+                    continue;
+                }
+                rows.add(new TaskRow(formatStatus(entry.getName(), entry.isCompleted()),
+                        formatStatus(entry.getDescription(), entry.isCompleted()),
                         entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
                         entry.getProgressCurrent(), entry.getRequirementTarget()));
             }
         }
 
-        int completed = 0;
-        for (TaskRow task : rows) {
-            if (task.completed) completed++;
+        VyknaProgressionDefinitions.CompletionStats stats;
+        if (ALL_FILTER.equalsIgnoreCase(currentFilter)) {
+            stats = VyknaProgressionDefinitions.getStatsForType(currentListType);
+        } else {
+            stats = VyknaProgressionDefinitions.getStatsForSubcategory(currentListType, currentFilter);
         }
-        int total = rows.size();
 
         if (RSInterface.interfaceCache[TEXT_PROGRESS] != null) {
+            String displayFilter = ALL_FILTER.equalsIgnoreCase(currentFilter) ? "All" : currentFilter;
+            String displayType = currentListType == ProgressionListType.TASKS ? "Tasks" : currentListType.getDisplayName();
             RSInterface.interfaceCache[TEXT_PROGRESS].message =
-                    "Completed: " + completed + "/" + total;
+                    displayType + " > " + displayFilter + " > "
+                            + stats.getCompleted() + "/" + stats.getTotal();
         }
 
-        // Hide the bottom progress bar for now (no progress bars in this stage).
-        for (int i = 0; i < 4; i++) {
-            RSInterface bar = RSInterface.interfaceCache[PROGRESS_BAR_ID + i];
-            if (bar != null) {
-                bar.interfaceHidden = true;
-            }
-        }
+        setSkinnedBarPercentage(PROGRESS_BAR_ID, stats.getRatio());
+        setSkinnedBarVisible(PROGRESS_BAR_ID, true);
 
         RSInterface scroll = RSInterface.interfaceCache[SCROLL_ID];
         if (scroll != null) {
@@ -236,7 +256,10 @@ public final class AchievementListPage extends RSInterface {
                 RSInterface.interfaceCache[base + 3].message = active ? "<icon=0>" + rows.get(i).points : "";
             }
             if (RSInterface.interfaceCache[base + 0] != null) {
-                RSInterface.interfaceCache[base + 0].valueIndex = active ? rows.get(i).spriteIndex : 1;
+                if (active) {
+                    RSInterface.interfaceCache[base + 0].valueIndex = rows.get(i).spriteIndex;
+                }
+                RSInterface.interfaceCache[base + 0].interfaceHidden = !active;
             }
 
             final int barBgId = base + 6;
@@ -279,13 +302,55 @@ public final class AchievementListPage extends RSInterface {
         }
     }
 
-    public static void applyServerPayload(int listTypeId) {
-        currentListType = ProgressionListType.fromId(listTypeId);
-        updateDropdownOptions(VyknaProgressionDefinitions.getSubcategories(currentListType));
-        if (RSInterface.interfaceCache[TEXT_TITLE] != null) {
-            RSInterface.interfaceCache[TEXT_TITLE].message = currentListType.getDisplayName() + " Progression";
+    public static void setShowCompleted(boolean showCompletedFlag) {
+        showCompleted = showCompletedFlag;
+        updateShowCompletedText();
+        refreshList(currentFilter);
+    }
+
+    private static void updateShowCompletedText() {
+        if (RSInterface.interfaceCache[TEXT_SHOW_COMPLETED] != null) {
+            RSInterface.interfaceCache[TEXT_SHOW_COMPLETED].message =
+                    showCompleted ? "Hide Completed" : "Show Completed";
         }
-        refreshList(ALL_FILTER);
+    }
+
+    public static void setSearchQuery(String query) {
+        if (query != null) {
+            progressionSearchQuery = query.trim();
+        }
+        updateSearchText();
+        refreshList(currentFilter);
+    }
+
+    public static void clearSearchQuery() {
+        progressionSearchQuery = "";
+        updateSearchText();
+        refreshList(currentFilter);
+    }
+
+    public static void updateSearchText() {
+        if (RSInterface.interfaceCache[SEARCH_TEXT_ID] != null) {
+            RSInterface.interfaceCache[SEARCH_TEXT_ID].message =
+                    progressionSearchQuery.isEmpty() ? "Search..." : progressionSearchQuery;
+        }
+    }
+
+    public static void applyServerPayload(int listTypeId) {
+        applyServerPayload(listTypeId, 0);
+    }
+
+    public static void applyServerPayload(int listTypeId, int pageIndex) {
+        currentListType = ProgressionListType.fromId(listTypeId);
+        if (pageIndex == 0) {
+            updateDropdownOptions(VyknaProgressionDefinitions.getSubcategories(currentListType));
+            if (RSInterface.interfaceCache[TEXT_TITLE] != null) {
+                RSInterface.interfaceCache[TEXT_TITLE].message = currentListType.getDisplayName() + " Progression";
+            }
+            refreshList(ALL_FILTER);
+        } else {
+            refreshList(currentFilter);
+        }
     }
 
     private static void updateDropdownOptions(List<String> subcategories) {
@@ -368,7 +433,7 @@ public final class AchievementListPage extends RSInterface {
         addSprite(NAV_SKILL_ICON, 0, SPRITE_ROOT + "SkillingIcon");
 
         addHoverButtonNew(NAV_COMBAT_BTN, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
-                36, 36, "Combat Achievements", 0, 1);
+                36, 36, "Combat Progressions", 0, 1);
         addSprite(NAV_COMBAT_ICON, 0, SPRITE_ROOT + "CombatIcon");
 
         addHoverButtonNew(NAV_MASTERY_BTN, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
@@ -376,15 +441,15 @@ public final class AchievementListPage extends RSInterface {
         addSprite(NAV_MASTERY_ICON, 0, SPRITE_ROOT + "MasteryIcon");
 
         // ---- Title ----
-        addText(TEXT_TITLE, "Task System", tda, 2, 0xE3AE19, false, true);
+        addText(TEXT_TITLE, "Progression System", tda, 2, 0xE3AE19, false, true);
 
         // ---- Close button (top-right) ----
         // Uses the same sprite path style as the rest of the interface. If your client uses cacheSprite3-based
         // close buttons, swap this to RSInterface.closeButton(...) and point at the correct sprite indices.
-        addHoverButtonNew(CLOSE_BTN_ID,
-                SPRITE_ROOT + "Close",
-                SPRITE_ROOT + "CloseHover",
-                16, 16, "Close", 0, 1);
+        addHoverButton(CLOSE_BTN_ID, "Interfaces/HelpInterface/IMAGE", 2,
+                16, 16, "Close", 0, CLOSE_HOVER_ID, 1);
+        addHoveredButton(CLOSE_HOVER_ID, "Interfaces/HelpInterface/IMAGE", 3,
+                16, 16, CLOSE_HOVER_ID + 1);
 
         // ---- Top row controls ----
         dropdownMenu(
@@ -395,6 +460,11 @@ public final class AchievementListPage extends RSInterface {
 
         addHoverText(TEXT_SHOW_COMPLETED, "Show Completed?", "Toggle showing completed tasks",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
+
+        addBox(SEARCH_BG_ID, 0x2b2118, 0x1f1812, 120, 160, 16);
+        addHoverText(SEARCH_TEXT_ID, "Search...", "Search progressions", tda, 0, 0x9a8b7a, false, true, 160, 16);
+        addHoverButtonNew(SEARCH_CLEAR_ID, SPRITE_ROOT + "Close", SPRITE_ROOT + "CloseHover",
+                16, 16, "Clear", 0, 1);
 
         // ---- Scroll container ----
         RSInterface scroll = addTabInterface(SCROLL_ID);
@@ -416,12 +486,12 @@ public final class AchievementListPage extends RSInterface {
 
             int valueIndex = (i % 4) + 1;
             addBox(boxId, 0x3a3228, 0x2c261f, 120, scroll.width - 12, ROW_H - 6);
-            addGridSpriteValueIndex(base + 0, RECENT_ATLAS, 2, 2, ICON_SIZE, valueIndex, "");
+            addGridSpriteValueIndex(base + 0, RECENT_ATLAS, 6, 6, ICON_SIZE, valueIndex, "");
 
             addText(base + 1, "", tda, 0, 0xE3AE19, false, true);
             addText(base + 2, "", tda, 0, 0xFFFAE5, false, true);
             addText(base + 3, "", tda, 0, 0xFFFAE5, true, true); // points, right aligned
-            addHoverText(base + 4, "", "View task", tda, 0, 0xFFFFFF, false, true, scroll.width, ROW_H);
+            addHoverText(base + 4, "", "View progression", tda, 0, 0xFFFFFF, false, true, scroll.width, ROW_H);
 
             // Per-row progress (hidden if target <= 0)
             addBox(barBgId, 0x2c261f, 0x1f1a15, 120, ROW_BAR_W, ROW_BAR_H);
@@ -468,9 +538,10 @@ public final class AchievementListPage extends RSInterface {
                         + 2 // combat btn+icon
                         + 2 // mastery btn+icon
                         + 1 // title
-                        + 1 // close
+                        + 2 // close + hover
                         + 1 // dropdown
                         + 1 // show completed
+                        + 3 // search box
                         + 1 // scroll
                         + 1 // progress text
                         + 4 // progress bar parts
@@ -509,6 +580,7 @@ public final class AchievementListPage extends RSInterface {
 
         // Close (top-right of the frame)
         rsi.child(c++, CLOSE_BTN_ID, BG_X + 470, BG_Y + 14);
+        rsi.child(c++, CLOSE_HOVER_ID, BG_X + 470, BG_Y + 14);
 
         // Scroll
         rsi.child(c++, SCROLL_ID, MAIN_X, MAIN_Y + 30);
@@ -525,10 +597,39 @@ public final class AchievementListPage extends RSInterface {
 
         // Top row (draw last so the dropdown popup renders above everything)
         rsi.child(c++, DROPDOWN_ID, MAIN_X, MAIN_Y + 2);
-        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 2);
+        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 96, MAIN_Y + 2);
+        rsi.child(c++, SEARCH_BG_ID, MAIN_X + 230, MAIN_Y + 2);
+        rsi.child(c++, SEARCH_TEXT_ID, MAIN_X + 236, MAIN_Y + 2);
+        rsi.child(c++, SEARCH_CLEAR_ID, MAIN_X + 230 + 142, MAIN_Y + 2);
 
         // Populate initial list
 
+        updateShowCompletedText();
+        updateSearchText();
         refreshList(ALL_FILTER);
+    }
+
+    private static void setSkinnedBarPercentage(int baseId, double ratio) {
+        double clamped = Math.max(0.0, Math.min(1.0, ratio));
+        RSInterface fill = RSInterface.interfaceCache[baseId + 2];
+        if (fill != null) {
+            fill.progressBar2021Percentage = clamped;
+        }
+    }
+
+    private static void setSkinnedBarVisible(int baseId, boolean visible) {
+        for (int i = 0; i < 4; i++) {
+            RSInterface bar = RSInterface.interfaceCache[baseId + i];
+            if (bar != null) {
+                bar.interfaceHidden = !visible;
+            }
+        }
+    }
+
+    private static String formatStatus(String text, boolean completed) {
+        if (!completed) {
+            return text;
+        }
+        return "<s>" + text + "</s>";
     }
 }

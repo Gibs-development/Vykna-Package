@@ -10,6 +10,10 @@ public class VyknaProgressionPlayerState {
     private final Map<Integer, Integer> progressByEntryId = new HashMap<>();
     private final Set<Integer> completedEntries = new HashSet<>();
     private int pointsTotal;
+    private int scoreTotal;
+    private int lastCompletedEntryId;
+    private int lastCompletedListTypeId;
+    private boolean showCompleted = true;
 
     public int getProgress(int entryId) {
         return progressByEntryId.getOrDefault(entryId, 0);
@@ -45,5 +49,34 @@ public class VyknaProgressionPlayerState {
 
     public void addPoints(int points) {
         pointsTotal += points;
+    }
+
+    public int getScoreTotal() {
+        return scoreTotal;
+    }
+
+    public void addScore(int points) {
+        scoreTotal += points;
+    }
+
+    public int getLastCompletedEntryId() {
+        return lastCompletedEntryId;
+    }
+
+    public int getLastCompletedListTypeId() {
+        return lastCompletedListTypeId;
+    }
+
+    public void setLastCompleted(int entryId, int listTypeId) {
+        this.lastCompletedEntryId = entryId;
+        this.lastCompletedListTypeId = listTypeId;
+    }
+
+    public boolean isShowCompleted() {
+        return showCompleted;
+    }
+
+    public void setShowCompleted(boolean showCompleted) {
+        this.showCompleted = showCompleted;
     }
 }
