@@ -4,6 +4,9 @@ import com.client.graphics.interfaces.MenuItem;
 
 public class DropdownMenu {
 
+	private static final int OPTION_HEIGHT = 14;
+	private static final int MAX_VISIBLE_HEIGHT = 140;
+
 	private final int height;
 	private final int width;
 	private final String[] options;
@@ -14,7 +17,7 @@ public class DropdownMenu {
 
 	public DropdownMenu(int width, boolean split, int defaultOption, String[] options, MenuItem menuIt) {
 		this.width = width;
-		this.height = split ? ((14 * options.length) / 2) + 3 : (14 * options.length) + 3;
+		this.height = split ? ((OPTION_HEIGHT * options.length) / 2) + 3 : (OPTION_HEIGHT * options.length) + 3;
 		this.options = options;
 		this.optionSelected = defaultOption == -1 ? "Select an option" : options[defaultOption];
 		this.open = false;
@@ -24,6 +27,14 @@ public class DropdownMenu {
 
 	public int getHeight() {
 		return this.height;
+	}
+
+	public int getVisibleHeight() {
+		return Math.min(height, MAX_VISIBLE_HEIGHT);
+	}
+
+	public int getOptionHeight() {
+		return OPTION_HEIGHT;
 	}
 
 	public int getWidth() {
