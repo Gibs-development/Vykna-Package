@@ -6301,6 +6301,19 @@ public class Client extends RSApplet {
 			stream.writeWord(7001);
 		}
 
+		if (buttonPressed == AchievementListPage.getSearchTextId()) {
+			inputTaken = true;
+			inputDialogState = 0;
+			messagePromptRaised = true;
+			promptInput = "";
+			friendsListAction = PROGRESSION_SEARCH_ACTION;
+			aString1121 = "Search progressions";
+		}
+
+		if (buttonPressed == AchievementListPage.getSearchClearId()) {
+			AchievementListPage.clearSearchQuery();
+		}
+
 		if (l == 713) {//Money pouch
 			//	inputTaken = true;
 			//	messagePromptRaised = true;
@@ -8512,6 +8525,8 @@ public class Client extends RSApplet {
 		try { return Integer.parseInt(s); } catch (Exception e) { return fallback; }
 	}
 
+	private static final int PROGRESSION_SEARCH_ACTION = 901;
+
 	private void method73() {
 		do {
 			int j = readChar(-796);
@@ -8598,6 +8613,13 @@ public class Client extends RSApplet {
 						sendStringAsLong(promptInput);
 					} else if (friendsListAction == 16) {//staff tab
 						sendStringAsLong(promptInput);
+					} else if (friendsListAction == PROGRESSION_SEARCH_ACTION) {
+						String trimmed = promptInput.trim();
+						if (!trimmed.isEmpty()) {
+							AchievementListPage.setSearchQuery(trimmed);
+						} else {
+							AchievementListPage.updateSearchText();
+						}
 					}
 
 				}

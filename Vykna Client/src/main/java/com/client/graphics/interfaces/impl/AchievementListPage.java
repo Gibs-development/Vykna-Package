@@ -125,6 +125,7 @@ public final class AchievementListPage extends RSInterface {
     private static ProgressionListType currentListType = ProgressionListType.TASKS;
     private static String currentFilter = ALL_FILTER;
     private static boolean showCompleted = true;
+    private static String progressionSearchQuery = "";
 
     // Scroll layout (shared by build + refresh)
     private static final int ROW_H = 48;
@@ -146,6 +147,14 @@ public final class AchievementListPage extends RSInterface {
     }
 
     private AchievementListPage() {}
+
+    public static int getSearchTextId() {
+        return SEARCH_TEXT_ID;
+    }
+
+    public static int getSearchClearId() {
+        return SEARCH_CLEAR_ID;
+    }
 
     private static void addGridSpriteValueIndex(int id, String atlasSpritePath,
                                                 int gridCols, int gridRows, int cellSize,
@@ -306,6 +315,27 @@ public final class AchievementListPage extends RSInterface {
         }
     }
 
+    public static void setSearchQuery(String query) {
+        if (query != null) {
+            progressionSearchQuery = query.trim();
+        }
+        updateSearchText();
+        refreshList(currentFilter);
+    }
+
+    public static void clearSearchQuery() {
+        progressionSearchQuery = "";
+        updateSearchText();
+        refreshList(currentFilter);
+    }
+
+    public static void updateSearchText() {
+        if (RSInterface.interfaceCache[SEARCH_TEXT_ID] != null) {
+            RSInterface.interfaceCache[SEARCH_TEXT_ID].message =
+                    progressionSearchQuery.isEmpty() ? "Search..." : progressionSearchQuery;
+        }
+    }
+
     public static void applyServerPayload(int listTypeId) {
         applyServerPayload(listTypeId, 0);
     }
@@ -432,8 +462,9 @@ public final class AchievementListPage extends RSInterface {
                 tda, 0, 0xE3AE19, false, true, 110, 16);
 
         addBox(SEARCH_BG_ID, 0x2b2118, 0x1f1812, 120, 160, 16);
-        addText(SEARCH_TEXT_ID, "Search...", tda, 0, 0x9a8b7a, false, true);
-        addSprite(SEARCH_CLEAR_ID, 0, SPRITE_ROOT + "Close");
+        addHoverText(SEARCH_TEXT_ID, "Search...", "Search progressions", tda, 0, 0x9a8b7a, false, true, 160, 16);
+        addHoverButtonNew(SEARCH_CLEAR_ID, SPRITE_ROOT + "Close", SPRITE_ROOT + "CloseHover",
+                16, 16, "Clear", 0, 1);
 
         // ---- Scroll container ----
         RSInterface scroll = addTabInterface(SCROLL_ID);
@@ -566,14 +597,15 @@ public final class AchievementListPage extends RSInterface {
 
         // Top row (draw last so the dropdown popup renders above everything)
         rsi.child(c++, DROPDOWN_ID, MAIN_X, MAIN_Y + 2);
-        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 180, MAIN_Y + 2);
+        rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 96, MAIN_Y + 2);
         rsi.child(c++, SEARCH_BG_ID, MAIN_X + 230, MAIN_Y + 2);
-        rsi.child(c++, SEARCH_TEXT_ID, MAIN_X + 236, MAIN_Y + 4);
+        rsi.child(c++, SEARCH_TEXT_ID, MAIN_X + 236, MAIN_Y + 2);
         rsi.child(c++, SEARCH_CLEAR_ID, MAIN_X + 230 + 142, MAIN_Y + 2);
 
         // Populate initial list
 
         updateShowCompletedText();
+        updateSearchText();
         refreshList(ALL_FILTER);
     }
 
