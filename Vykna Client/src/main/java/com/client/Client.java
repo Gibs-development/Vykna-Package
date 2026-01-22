@@ -1925,7 +1925,7 @@ public class Client extends RSApplet {
 		teleOrbHover = fixed ? super.getMouseX() >= 709 && super.getMouseX() <= 734 && super.getMouseY() >= 32 && super.getMouseY() <= 57
 				: super.getMouseX() >= currentGameWidth - 94 && super.getMouseX() <= currentGameWidth - 80 && super.getMouseY() >= 160 && super.getMouseY() <= 173;
 
-		pouchHover = fixed ? super.getMouseX() >= 678 && super.getMouseX() <= 739 && super.getMouseY() >= 129 && super.getMouseY() <= 157 :
+		progressionHover = fixed ? super.getMouseX() >= 678 && super.getMouseX() <= 739 && super.getMouseY() >= 129 && super.getMouseY() <= 157 :
 				super.getMouseX() >= currentGameWidth - 65 && super.getMouseX() <= currentGameWidth && super.getMouseY() >= 154 && super.getMouseY() <= 185;
 	}
 
@@ -1968,7 +1968,7 @@ public class Client extends RSApplet {
 		worldHover = mouseX >= worldLeft && mouseX <= worldRight && mouseY >= worldTop && mouseY <= worldBottom;
 		wikiHover = mouseX >= worldLeft && mouseX <= worldRight && mouseY >= baseY + 160 && mouseY <= baseY + 173;
 		teleOrbHover = mouseX >= teleLeft && mouseX <= teleRight && mouseY >= teleTop && mouseY <= teleBottom;
-		pouchHover = mouseX >= pouchLeft && mouseX <= pouchRight && mouseY >= pouchTop && mouseY <= pouchBottom;
+		progressionHover = mouseX >= pouchLeft && mouseX <= pouchRight && mouseY >= pouchTop && mouseY <= pouchBottom;
 	}
 
 	public void clearOrbHovers() {
@@ -1978,7 +1978,7 @@ public class Client extends RSApplet {
 		worldHover = false;
 		wikiHover = false;
 		teleOrbHover = false;
-		pouchHover = false;
+		progressionHover = false;
 		hpHover = false;
 	}
 
@@ -2006,8 +2006,8 @@ public class Client extends RSApplet {
 		teleOrbHover = hover;
 	}
 
-	public void setPouchHover(boolean hover) {
-		pouchHover = hover;
+	public void setProgressionHover(boolean hover) {
+		progressionHover = hover;
 	}
 
 	private boolean prayHover, prayClicked;
@@ -10864,7 +10864,7 @@ public class Client extends RSApplet {
 		//}
 
 
-		if (pouchHover && drawOrbs ) {
+		if (progressionHover && drawOrbs ) {
 			HoverMenuManager.reset();
 			menuActionName[3] = "Withdraw coins";
 			menuActionID[3] = 713;
@@ -10934,7 +10934,7 @@ public class Client extends RSApplet {
 			menuActionID[1] = 851;
 			menuActionRow = 3;
 		}
-		if (pouchHover && drawOrbs) {
+		if (progressionHover && drawOrbs) {
 			HoverMenuManager.reset();
 			menuActionName[3] = "Withdraw coins";
 			menuActionID[3] = 713;
@@ -16799,44 +16799,26 @@ public class Client extends RSApplet {
 	}
 
 
-	Sprite moneyPouch = new Sprite("/Interfaces/Wiki/964");
-	Sprite moneyPouch1 = new Sprite("/Interfaces/Wiki/965");
-	Sprite moneyPouchCoins = new Sprite("/Interfaces/Wiki/963");
+	Sprite progIconHover = new Sprite("/Interfaces/Wiki/964");
+	Sprite progIconNormal = new Sprite("/Interfaces/Wiki/965");
+//	Sprite moneyPouchCoins = new Sprite("/Interfaces/Wiki/963");
 	private void drawMoneyPouch() {
 
 		int baseY = getOrbBaseY();
 		int minimapBaseX = rs3MinimapOverride ? rs3MinimapBaseX : (currentScreenMode == ScreenMode.FIXED ? 0 : currentGameWidth - 183);
-		if (pouchHover) {
-			DrawingArea.fillCircle((currentScreenMode == ScreenMode.FIXED ? 179 : minimapBaseX + 134), baseY + (currentScreenMode == ScreenMode.FIXED ? 142 : 168), 15, 0x6E6D6D);
-			moneyPouch.drawSprite(((currentScreenMode == ScreenMode.FIXED ? 162 : minimapBaseX + 118)), baseY + (currentScreenMode == ScreenMode.FIXED ? 127 : 153));
-			moneyPouchCoins.drawSprite((currentScreenMode == ScreenMode.FIXED ? 170 : minimapBaseX + 126), baseY + (currentScreenMode == ScreenMode.FIXED ? 134 : 160));
-			String amount = RSInterface.interfaceCache[8135].message;
-			long getAmount = Long.parseLong(amount);
-			smallText.method382(getMoneyOrbColor(getAmount), (currentScreenMode == ScreenMode.FIXED ? 205 : minimapBaseX + 161), formatCoins(getAmount) + "", baseY + (currentScreenMode == ScreenMode.FIXED ? 153 : 178), true);
-		} else {
+		if (progressionHover) {
+		progIconHover.drawSprite(((currentScreenMode == ScreenMode.FIXED ? 162 : minimapBaseX + 118)), baseY + (currentScreenMode == ScreenMode.FIXED ? 127 : 153));
+	} else {
 
-			DrawingArea.fillCircle((currentScreenMode == ScreenMode.FIXED ? 179 : minimapBaseX + 134), baseY + (currentScreenMode == ScreenMode.FIXED ? 142 : 168), 15, 0x6E6D6D);
-			moneyPouch1.drawSprite(((currentScreenMode == ScreenMode.FIXED ? 162 : minimapBaseX + 118)), baseY + (currentScreenMode == ScreenMode.FIXED ? 127 : 153));
-			moneyPouchCoins.drawSprite((currentScreenMode == ScreenMode.FIXED ? 170 : minimapBaseX + 126), baseY + (currentScreenMode == ScreenMode.FIXED ? 134 : 160));
-			String amount = RSInterface.interfaceCache[8135].message;
-			long getAmount = Long.parseLong(amount);
-			smallText.method382(getMoneyOrbColor(getAmount), (currentScreenMode == ScreenMode.FIXED ? 205 : minimapBaseX + 161), formatCoins(getAmount) + "", baseY + (currentScreenMode == ScreenMode.FIXED ? 153 : 178), true);
-		}
+			progIconNormal.drawSprite(((currentScreenMode == ScreenMode.FIXED ? 162 : minimapBaseX + 118)), baseY + (currentScreenMode == ScreenMode.FIXED ? 127 : 153));}
 	}
 
 	public void drawMoneyPouchAt(int baseX, int baseY) {
-		int circleX = baseX + 16;
-		int circleY = baseY + 15;
-		DrawingArea.fillCircle(circleX, circleY, 15, 0x6E6D6D);
-		if (pouchHover) {
-			moneyPouch.drawSprite(baseX, baseY);
+		if (progressionHover) {
+			progIconHover.drawSprite(baseX, baseY);
 		} else {
-			moneyPouch1.drawSprite(baseX, baseY);
+			progIconNormal.drawSprite(baseX, baseY);
 		}
-		moneyPouchCoins.drawSprite(baseX + 8, baseY + 7);
-		String amount = RSInterface.interfaceCache[8135].message;
-		long getAmount = Long.parseLong(amount);
-		smallText.method382(getMoneyOrbColor(getAmount), baseX + 43, formatCoins(getAmount) + "", baseY + 25, true);
 	}
 
 	private void loadPrayerOrb(int xOffset) {
@@ -16927,7 +16909,7 @@ public class Client extends RSApplet {
 	}
 
 	private Sprite venomOrb;
-	private boolean pouchHover;
+	private boolean progressionHover;
 	private void loadAllOrbs(int xOffset) {
 		int baseY = getOrbBaseY();
 		int orbX = currentScreenMode == ScreenMode.FIXED ? xOffset : xOffset + 6;
