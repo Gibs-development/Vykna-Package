@@ -2646,8 +2646,8 @@ public class Client extends RSApplet {
 					class9_1.dropdownHover = -1;
 
 					if (class9_1.dropdown.isOpen()) {
-						int dropdownVisibleHeight = class9_1.dropdown.getVisibleHeight();
 						int dropdownFullHeight = class9_1.dropdown.getHeight();
+						int dropdownVisibleHeight = Math.min(dropdownFullHeight, 140);
 						int maxScroll = Math.max(0, dropdownFullHeight - dropdownVisibleHeight);
 						if (class9_1.scrollPosition > maxScroll) {
 							class9_1.scrollPosition = maxScroll;
@@ -14550,9 +14550,9 @@ public class Client extends RSApplet {
 				} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
 
 							DropdownMenu d = class9_1.dropdown;
-							int visibleHeight = d.getVisibleHeight();
 							int fullHeight = d.getHeight();
-							int optionHeight = d.getOptionHeight();
+							int visibleHeight = Math.min(fullHeight, 140);
+							int optionHeight = 14;
 							int maxScroll = Math.max(0, fullHeight - visibleHeight);
 							if (class9_1.scrollPosition > maxScroll) {
 								class9_1.scrollPosition = maxScroll;
