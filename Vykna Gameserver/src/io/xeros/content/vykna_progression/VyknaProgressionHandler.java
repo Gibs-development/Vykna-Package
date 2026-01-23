@@ -115,6 +115,8 @@ public final class VyknaProgressionHandler {
             return;
         }
         VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        boolean changed = false;
+        boolean completedAny = false;
         for (ProgressionListDefinition definition : VyknaProgressionRegistry.getAll().values()) {
             for (ProgressionEntry entry : definition.getEntries()) {
                 if (!requirementKey.equalsIgnoreCase(entry.getRequirementKey())) {
@@ -123,16 +125,19 @@ public final class VyknaProgressionHandler {
                 int current = state.getProgress(entry.getEntryId());
                 int target = entry.getRequirementTarget();
                 int updated = Math.min(target, current + amount);
-                state.setProgress(entry.getEntryId(), updated);
+                if (updated != current) {
+                    state.setProgress(entry.getEntryId(), updated);
+                    changed = true;
+                }
                 if (updated >= target && !state.isCompleted(entry.getEntryId())) {
-                    state.setCompleted(entry.getEntryId(), true);
-                    state.addPoints(entry.getPoints());
-                    state.addScore(entry.getPoints());
-                    state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
-                    updateLeaderboard(player, state);
-                    sendSummaryData(player);
+                    completeEntry(player, state, entry, true);
+                    completedAny = true;
                 }
             }
+        }
+        if (changed || completedAny) {
+            VyknaProgressionPersistence.markDirty(player);
+            VyknaProgressionPersistence.save(player, completedAny);
         }
     }
 
@@ -165,6 +170,72 @@ public final class VyknaProgressionHandler {
         boolean show = !state.isShowCompleted();
         state.setShowCompleted(show);
         player.getPA().runClientScript(CLIENT_SCRIPT_ID, "toggleCompleted", show ? 1 : 0);
+        VyknaProgressionPersistence.markDirty(player);
+        VyknaProgressionPersistence.save(player, false);
+    }
+
+    public static void refreshDerivedProgress(Player player, boolean showFeedback) {
+        if (player == null) {
+            return;
+        }
+        VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        boolean changed = false;
+        boolean completedAny = false;
+        for (ProgressionListDefinition definition : VyknaProgressionRegistry.getAll().values()) {
+            for (ProgressionEntry entry : definition.getEntries()) {
+                if (!isDerivedKey(entry.getRequirementKey())) {
+                    continue;
+                }
+                int beforeProgress = state.getProgress(entry.getEntryId());
+                boolean beforeCompleted = state.isCompleted(entry.getEntryId());
+                DerivedProgress derived = resolveDerivedProgress(player, state, entry, showFeedback);
+                if (derived == null) {
+                    continue;
+                }
+                if (derived.progress != beforeProgress || derived.completed != beforeCompleted) {
+                    changed = true;
+                }
+                if (derived.completed && !beforeCompleted) {
+                    completedAny = true;
+                }
+            }
+        }
+        if (changed || completedAny) {
+            VyknaProgressionPersistence.markDirty(player);
+            VyknaProgressionPersistence.save(player, completedAny);
+        }
+    }
+
+    public static void refreshDerivedProgressForSkill(Player player, Skill skill, boolean showFeedback) {
+        if (player == null || skill == null) {
+            return;
+        }
+        VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        boolean changed = false;
+        boolean completedAny = false;
+        for (ProgressionListDefinition definition : VyknaProgressionRegistry.getAll().values()) {
+            for (ProgressionEntry entry : definition.getEntries()) {
+                if (!isDerivedKeyForSkill(entry.getRequirementKey(), skill)) {
+                    continue;
+                }
+                int beforeProgress = state.getProgress(entry.getEntryId());
+                boolean beforeCompleted = state.isCompleted(entry.getEntryId());
+                DerivedProgress derived = resolveDerivedProgress(player, state, entry, showFeedback);
+                if (derived == null) {
+                    continue;
+                }
+                if (derived.progress != beforeProgress || derived.completed != beforeCompleted) {
+                    changed = true;
+                }
+                if (derived.completed && !beforeCompleted) {
+                    completedAny = true;
+                }
+            }
+        }
+        if (changed || completedAny) {
+            VyknaProgressionPersistence.markDirty(player);
+            VyknaProgressionPersistence.save(player, completedAny);
+        }
     }
 
     private static void updateLeaderboard(Player player, VyknaProgressionPlayerState state) {
@@ -306,7 +377,7 @@ public final class VyknaProgressionHandler {
 
                 DerivedProgress derivedProgress = null;
                 try {
-                    derivedProgress = resolveDerivedProgress(player, state, entry);
+                    derivedProgress = resolveDerivedProgress(player, state, entry, false);
                 } catch (Exception e) {
                     // isolate derived resolver issues specifically
                     error(player, "resolveDerivedProgress() threw for entryId=" + entry.getEntryId()
@@ -510,7 +581,7 @@ public final class VyknaProgressionHandler {
         }
     }
 
-    private static DerivedProgress resolveDerivedProgress(Player player, VyknaProgressionPlayerState state, ProgressionEntry entry) {
+    private static DerivedProgress resolveDerivedProgress(Player player, VyknaProgressionPlayerState state, ProgressionEntry entry, boolean showFeedback) {
         if (player == null || state == null || entry == null) {
             return null;
         }
@@ -547,14 +618,51 @@ public final class VyknaProgressionHandler {
         int target = entry.getRequirementTarget();
         boolean completed = progress >= target;
         if (completed && !state.isCompleted(entry.getEntryId())) {
-            state.setCompleted(entry.getEntryId(), true);
-            state.addPoints(entry.getPoints());
-            state.addScore(entry.getPoints());
-            state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
-            updateLeaderboard(player, state);
+            completeEntry(player, state, entry, showFeedback);
+            VyknaProgressionPersistence.markDirty(player);
+            VyknaProgressionPersistence.save(player, true);
         }
         state.setProgress(entry.getEntryId(), Math.min(progress, target));
         return new DerivedProgress(Math.min(progress, target), state.isCompleted(entry.getEntryId()));
+    }
+
+    private static boolean isDerivedKey(String key) {
+        if (key == null || key.isEmpty()) {
+            return false;
+        }
+        String lowerKey = key.toLowerCase();
+        return lowerKey.startsWith(KEY_SKILL_LEVEL)
+                || lowerKey.startsWith(KEY_KC)
+                || lowerKey.startsWith(KEY_VISIT)
+                || lowerKey.equals(KEY_TOTAL_LEVEL)
+                || lowerKey.equals(KEY_TOTAL_XP);
+    }
+
+    private static boolean isDerivedKeyForSkill(String key, Skill skill) {
+        if (key == null || key.isEmpty()) {
+            return false;
+        }
+        String lowerKey = key.toLowerCase();
+        if (lowerKey.startsWith(KEY_SKILL_LEVEL)) {
+            String skillName = key.substring(KEY_SKILL_LEVEL.length()).trim();
+            return skill.name().equalsIgnoreCase(skillName);
+        }
+        return lowerKey.equals(KEY_TOTAL_LEVEL) || lowerKey.equals(KEY_TOTAL_XP);
+    }
+
+    private static void completeEntry(Player player, VyknaProgressionPlayerState state, ProgressionEntry entry, boolean showFeedback) {
+        state.setCompleted(entry.getEntryId(), true);
+        state.setCompletedAt(entry.getEntryId(), System.currentTimeMillis());
+        state.addPoints(entry.getPoints());
+        state.addScore(entry.getPoints());
+        state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
+        updateLeaderboard(player, state);
+        sendSummaryData(player);
+        if (showFeedback) {
+            VyknaProgressionToast.showCompleteToast(player, entry);
+            String pointsText = entry.getPoints() > 0 ? " (+" + entry.getPoints() + " points)" : "";
+            player.sendMessage("Congratulations! You just completed: " + entry.getName() + pointsText + ".");
+        }
     }
 
     private static Skill resolveSkill(String name) {
