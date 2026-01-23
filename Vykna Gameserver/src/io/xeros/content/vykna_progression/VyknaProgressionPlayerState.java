@@ -9,11 +9,14 @@ import java.util.Set;
 public class VyknaProgressionPlayerState {
     private final Map<Integer, Integer> progressByEntryId = new HashMap<>();
     private final Set<Integer> completedEntries = new HashSet<>();
+    private final Map<Integer, Long> completedAtByEntryId = new HashMap<>();
     private int pointsTotal;
     private int scoreTotal;
     private int lastCompletedEntryId;
     private int lastCompletedListTypeId;
     private boolean showCompleted = true;
+    private transient boolean dirty;
+    private transient long lastSavedAt;
 
     public int getProgress(int entryId) {
         return progressByEntryId.getOrDefault(entryId, 0);
@@ -35,12 +38,24 @@ public class VyknaProgressionPlayerState {
         }
     }
 
+    public long getCompletedAt(int entryId) {
+        return completedAtByEntryId.getOrDefault(entryId, 0L);
+    }
+
+    public void setCompletedAt(int entryId, long completedAt) {
+        completedAtByEntryId.put(entryId, completedAt);
+    }
+
     public Map<Integer, Integer> getProgressByEntryId() {
         return Collections.unmodifiableMap(progressByEntryId);
     }
 
     public Set<Integer> getCompletedEntries() {
         return Collections.unmodifiableSet(completedEntries);
+    }
+
+    public Map<Integer, Long> getCompletedAtByEntryId() {
+        return Collections.unmodifiableMap(completedAtByEntryId);
     }
 
     public int getPointsTotal() {
@@ -51,12 +66,20 @@ public class VyknaProgressionPlayerState {
         pointsTotal += points;
     }
 
+    public void setPointsTotal(int pointsTotal) {
+        this.pointsTotal = pointsTotal;
+    }
+
     public int getScoreTotal() {
         return scoreTotal;
     }
 
     public void addScore(int points) {
         scoreTotal += points;
+    }
+
+    public void setScoreTotal(int scoreTotal) {
+        this.scoreTotal = scoreTotal;
     }
 
     public int getLastCompletedEntryId() {
@@ -78,5 +101,22 @@ public class VyknaProgressionPlayerState {
 
     public void setShowCompleted(boolean showCompleted) {
         this.showCompleted = showCompleted;
+    }
+
+    public boolean isDirty() {
+        return dirty;
+    }
+
+    public void markDirty() {
+        dirty = true;
+    }
+
+    public long getLastSavedAt() {
+        return lastSavedAt;
+    }
+
+    public void markSaved(long timestamp) {
+        dirty = false;
+        lastSavedAt = timestamp;
     }
 }

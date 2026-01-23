@@ -22,7 +22,7 @@ public final class AchievementCompleteToast extends RSInterface {
 
     // Position (centered on fixed 512px layout)
     private static final int X = (512 - PANEL_W) / 2;
-    private static final int Y = 20;
+    private static final int BASE_Y = 20;
 
     public static final int INTERFACE_ID = 64650;
 
@@ -79,13 +79,30 @@ public final class AchievementCompleteToast extends RSInterface {
         r.totalChildren(6);
 
         int c = 0;
-        r.child(c++, BG_ID,   X,      Y);
-        r.child(c++, ICON_ID, X + 10, Y + 16);
+        r.child(c++, BG_ID,   X,      BASE_Y);
+        r.child(c++, ICON_ID, X + 10, BASE_Y + 16);
 
         int textX = X + 52; // icon (32) + padding
-        r.child(c++, TEXT_TITLE, textX, Y + 12);
-        r.child(c++, TEXT_NAME,  textX, Y + 28);
-        r.child(c++, TEXT_EXTRA, textX, Y + 44);
+        r.child(c++, TEXT_TITLE, textX, BASE_Y + 12);
+        r.child(c++, TEXT_NAME,  textX, BASE_Y + 28);
+        r.child(c++, TEXT_EXTRA, textX, BASE_Y + 44);
+    }
+
+    public static void setToastOffsetY(int offset) {
+        RSInterface root = RSInterface.interfaceCache[INTERFACE_ID];
+        if (root == null || root.childY == null) {
+            return;
+        }
+        // Integration seam: adjust child positions so the toast can slide.
+        root.childY[0] = BASE_Y + offset;       // BG_ID
+        root.childY[1] = BASE_Y + 16 + offset;  // ICON_ID
+        root.childY[2] = BASE_Y + 12 + offset;  // TEXT_TITLE
+        root.childY[3] = BASE_Y + 28 + offset;  // TEXT_NAME
+        root.childY[4] = BASE_Y + 44 + offset;  // TEXT_EXTRA
+    }
+
+    public static int getPanelHeight() {
+        return PANEL_H;
     }
 
     public static void setToastText(String name, String extraLine) {

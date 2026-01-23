@@ -1307,6 +1307,10 @@ public class PlayerAssistant {
 		return currentWalkableInterface != -1;
 	}
 
+	public int getCurrentWalkableInterface() {
+		return currentWalkableInterface;
+	}
+
 	public void removeWalkableInterface() {
 		walkableInterface(-1);
 	}
