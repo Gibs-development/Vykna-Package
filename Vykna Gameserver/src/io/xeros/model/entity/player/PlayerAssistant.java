@@ -1052,6 +1052,9 @@ public class PlayerAssistant {
 			c.getOutStream().writeUnsignedWord(interfaceid);
 			c.flushOutStream();
 			c.openedInterface(interfaceid);
+			if (interfaceid == io.xeros.content.vykna_progression.VyknaProgressionInterfaces.HOME_INTERFACE_ID) {
+				io.xeros.content.vykna_progression.VyknaProgressionHandler.sendInitialData(c);
+			}
 		}
 	}
 
