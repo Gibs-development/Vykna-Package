@@ -33,6 +33,12 @@ public final class VyknaProgressionInterfaces {
     public static final int ROW_START_ID = LIST_INTERFACE_ID + 3100;   // 67604
     public static final int ROW_STRIDE = 30;
 
+    // Completion toast (AchievementCompleteToast in client)
+    public static final int TOAST_INTERFACE_ID = 64650;
+    public static final int TOAST_TEXT_TITLE = TOAST_INTERFACE_ID + 10;
+    public static final int TOAST_TEXT_NAME = TOAST_INTERFACE_ID + 11;
+    public static final int TOAST_TEXT_EXTRA = TOAST_INTERFACE_ID + 12;
+
     // What server needs to set per row:
     // base+1 = title text
     // base+2 = description text

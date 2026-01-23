@@ -115,6 +115,8 @@ public final class VyknaProgressionHandler {
             return;
         }
         VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        boolean changed = false;
+        boolean completedAny = false;
         for (ProgressionListDefinition definition : VyknaProgressionRegistry.getAll().values()) {
             for (ProgressionEntry entry : definition.getEntries()) {
                 if (!requirementKey.equalsIgnoreCase(entry.getRequirementKey())) {
@@ -123,16 +125,19 @@ public final class VyknaProgressionHandler {
                 int current = state.getProgress(entry.getEntryId());
                 int target = entry.getRequirementTarget();
                 int updated = Math.min(target, current + amount);
-                state.setProgress(entry.getEntryId(), updated);
+                if (updated != current) {
+                    state.setProgress(entry.getEntryId(), updated);
+                    changed = true;
+                }
                 if (updated >= target && !state.isCompleted(entry.getEntryId())) {
-                    state.setCompleted(entry.getEntryId(), true);
-                    state.addPoints(entry.getPoints());
-                    state.addScore(entry.getPoints());
-                    state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
-                    updateLeaderboard(player, state);
-                    sendSummaryData(player);
+                    completeEntry(player, state, entry);
+                    completedAny = true;
                 }
             }
+        }
+        if (changed || completedAny) {
+            VyknaProgressionPersistence.markDirty(player);
+            VyknaProgressionPersistence.save(player, completedAny);
         }
     }
 
@@ -165,6 +170,8 @@ public final class VyknaProgressionHandler {
         boolean show = !state.isShowCompleted();
         state.setShowCompleted(show);
         player.getPA().runClientScript(CLIENT_SCRIPT_ID, "toggleCompleted", show ? 1 : 0);
+        VyknaProgressionPersistence.markDirty(player);
+        VyknaProgressionPersistence.save(player, false);
     }
 
     private static void updateLeaderboard(Player player, VyknaProgressionPlayerState state) {
@@ -547,14 +554,25 @@ public final class VyknaProgressionHandler {
         int target = entry.getRequirementTarget();
         boolean completed = progress >= target;
         if (completed && !state.isCompleted(entry.getEntryId())) {
-            state.setCompleted(entry.getEntryId(), true);
-            state.addPoints(entry.getPoints());
-            state.addScore(entry.getPoints());
-            state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
-            updateLeaderboard(player, state);
+            completeEntry(player, state, entry);
+            VyknaProgressionPersistence.markDirty(player);
+            VyknaProgressionPersistence.save(player, true);
         }
         state.setProgress(entry.getEntryId(), Math.min(progress, target));
         return new DerivedProgress(Math.min(progress, target), state.isCompleted(entry.getEntryId()));
+    }
+
+    private static void completeEntry(Player player, VyknaProgressionPlayerState state, ProgressionEntry entry) {
+        state.setCompleted(entry.getEntryId(), true);
+        state.setCompletedAt(entry.getEntryId(), System.currentTimeMillis());
+        state.addPoints(entry.getPoints());
+        state.addScore(entry.getPoints());
+        state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
+        updateLeaderboard(player, state);
+        sendSummaryData(player);
+        VyknaProgressionToast.showCompleteToast(player, entry);
+        String pointsText = entry.getPoints() > 0 ? " (+" + entry.getPoints() + " points)" : "";
+        player.sendMessage("Congratulations! You just completed: " + entry.getName() + pointsText + ".");
     }
 
     private static Skill resolveSkill(String name) {
