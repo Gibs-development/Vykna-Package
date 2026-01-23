@@ -441,9 +441,25 @@ public class Client extends RSApplet {
 		if (toast == null) {
 			return;
 		}
-		DrawingArea.defaultDrawingAreaSize();
+		DrawingArea.setDrawingArea(currentGameHeight, 0, currentGameWidth, 0);
 		// Toast draws last in RS3/resizable so it stays visible above all UI overlays.
 		drawInterface(0, 0, toast, 0);
+		newSmallFont.drawBasicString(
+				"Toast clip=(" + DrawingArea.topX + "," + DrawingArea.topY + ")-(" + DrawingArea.bottomX + "," + DrawingArea.bottomY
+						+ ") canvas=" + currentGameWidth + "x" + currentGameHeight,
+				8, 26, 0xffcc66, 0);
+	}
+
+	private void drawRs3FinalOverlays() {
+		DrawingArea.defaultDrawingAreaSize();
+		if (menuOpen) {
+			int maxX = Math.max(0, currentGameWidth - menuWidth);
+			int maxY = Math.max(0, currentGameHeight - menuHeight);
+			menuOffsetX = clamp(menuOffsetX, 0, maxX);
+			menuOffsetY = clamp(menuOffsetY, 0, maxY);
+			drawMenu(0, 0);
+		}
+		drawAchievementToastOverlay();
 	}
 
 	private void drawRs3FinalOverlays() {
@@ -12262,7 +12278,7 @@ public class Client extends RSApplet {
 		achievementToastTicks = achievementToastTotalTicks;
 		achievementToastOffset = -AchievementCompleteToast.getPanelHeight();
 		layoutModel.update(this);
-		int walkableWidth = currentScreenMode == ScreenMode.FIXED ? 512 : layoutModel.canvasRect.width;
+		int walkableWidth = layoutModel.canvasRect.width;
 		RSInterface toastInterface = RSInterface.interfaceCache[AchievementCompleteToast.INTERFACE_ID];
 		if (currentScreenMode == ScreenMode.FIXED && toastInterface != null && toastInterface.width > 0) {
 			walkableWidth = toastInterface.width;
