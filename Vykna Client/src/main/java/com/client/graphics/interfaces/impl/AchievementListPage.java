@@ -534,12 +534,13 @@ public final class AchievementListPage extends RSInterface {
         addHoverText(TEXT_SHOW_COMPLETED, "Toggle Complete", "Toggle completed progressions",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
 
-        addHoverButtonNew(TOGGLE_COMPLETED_ID, TOGGLE_SPRITE_ROOT + "0", TOGGLE_SPRITE_ROOT + "1",
+        addHoverButtonNew(TOGGLE_COMPLETED_ID, TOGGLE_SPRITE_ROOT, TOGGLE_SPRITE_ROOT,
                 14, 15, "Toggle Complete", 0, 1);
-        toggleOffSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "0");
-        toggleOffHoverSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "1");
-        toggleOnSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "2");
-        toggleOnHoverSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "3");
+        toggleOffSprite = imageLoader(0, TOGGLE_SPRITE_ROOT);
+        toggleOffHoverSprite = imageLoader(1, TOGGLE_SPRITE_ROOT);
+        toggleOnSprite = imageLoader(2, TOGGLE_SPRITE_ROOT);
+        toggleOnHoverSprite = imageLoader(3, TOGGLE_SPRITE_ROOT);
+        updateToggleSprite();
 
         addBox(SEARCH_BG_ID, 0x2b2118, 0x1f1812, 120, 160, 16);
         addHoverText(SEARCH_TEXT_ID, "Search...", "Search progressions", tda, 0, 0x9a8b7a, false, true, 160, 16);
