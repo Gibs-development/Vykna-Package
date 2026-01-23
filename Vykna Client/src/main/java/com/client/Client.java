@@ -509,6 +509,9 @@ public class Client extends RSApplet {
 		drawAchievementToastOverlay();
 	}
 
+
+
+
 	private void drawLayoutDebugOverlay() {
 		if (!interfaceText) {
 			return;
