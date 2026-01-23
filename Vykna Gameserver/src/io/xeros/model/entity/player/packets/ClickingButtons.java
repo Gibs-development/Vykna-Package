@@ -443,25 +443,16 @@ public class ClickingButtons implements PacketType {
 				break;
 
 			case 2204:
-				c.moneyPouchNew = true;
-				c.getOutStream().createFrame(28);//27
+				VyknaProgressionHandler.open(c);
 				break;
-
-
-
-
-			/** Money Pouch */
-			case 2202:
-				c.getDH().sendItemStatement("You have <col=255>" + Misc.format(c.getMoneyPouch()) + " </col>coins stored.", 995);
-				break;
-
-			case 2203:
-			//	c.getDH().sendOption3("Pay by inventory", "Pay by pouch", "-- Cancel --");
-			//	c.dialogueAction = 9080;
-				//c.sendMessage("@red@Soon to be released to runerogue.");
-				c.moneyPouchTickets = true;
-				c.getOutStream().createFrame(28);//27
-				break;
+//
+//			case 2203:
+//			//	c.getDH().sendOption3("Pay by inventory", "Pay by pouch", "-- Cancel --");
+//			//	c.dialogueAction = 9080;
+//				//c.sendMessage("@red@Soon to be released to runerogue.");
+//				c.moneyPouchTickets = true;
+//				c.getOutStream().createFrame(28);//27
+//				break;
 
 
 			case 74172://help quest tab
