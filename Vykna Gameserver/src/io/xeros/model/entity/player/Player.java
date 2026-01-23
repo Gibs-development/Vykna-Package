@@ -2244,6 +2244,7 @@ public class Player extends Entity {
         }
         getDailyRewards().onLogin();
         PlayerSave.login(this);
+        VyknaProgressionHandler.refreshDerivedProgress(this, false);
         correctCoordinates();
         BossPoints.doRefund(this);
         EventChallengeMonthlyReward.onLogin(this);

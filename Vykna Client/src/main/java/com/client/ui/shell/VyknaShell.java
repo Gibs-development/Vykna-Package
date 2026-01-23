@@ -418,11 +418,9 @@ public final class VyknaShell extends JFrame {
             setLayout(null);
         }
 
-        @Override
-        public boolean contains(int x, int y) {
+        private boolean isResizeEdge(int x, int y) {
             if (!shellResizable || maximized) return false;
 
-            // Use the root pane size (reliable) rather than glass size (sometimes 0)
             JRootPane rp = getRootPane();
             if (rp == null) return false;
 
@@ -430,12 +428,47 @@ public final class VyknaShell extends JFrame {
             int h = rp.getHeight();
             if (w <= 0 || h <= 0) return false;
 
-            boolean left = x <= RESIZE_MARGIN;
-            boolean right = x >= w - RESIZE_MARGIN;
-            boolean top = y <= RESIZE_MARGIN;
-            boolean bottom = y >= h - RESIZE_MARGIN;
+            return x <= RESIZE_MARGIN
+                    || y <= RESIZE_MARGIN
+                    || x >= w - RESIZE_MARGIN
+                    || y >= h - RESIZE_MARGIN;
+        }
 
-            return left || right || top || bottom;
+        private void redispatch(MouseEvent e) {
+            JRootPane rp = getRootPane();
+            if (rp == null) return;
+
+            Container content = rp.getContentPane();
+            Point containerPoint = SwingUtilities.convertPoint(this, e.getPoint(), content);
+            Component target = SwingUtilities.getDeepestComponentAt(content, containerPoint.x, containerPoint.y);
+            if (target == null || target == this) return;
+
+            Point targetPoint = SwingUtilities.convertPoint(this, e.getPoint(), target);
+            target.dispatchEvent(new MouseEvent(target, e.getID(), e.getWhen(), e.getModifiersEx(),
+                    targetPoint.x, targetPoint.y, e.getClickCount(), e.isPopupTrigger(), e.getButton()));
+        }
+
+        @Override
+        public boolean contains(int x, int y) {
+            return isResizeEdge(x, y);
+        }
+
+        @Override
+        protected void processMouseEvent(MouseEvent e) {
+            if (!isResizeEdge(e.getX(), e.getY())) {
+                redispatch(e);
+                return;
+            }
+            super.processMouseEvent(e);
+        }
+
+        @Override
+        protected void processMouseMotionEvent(MouseEvent e) {
+            if (!isResizeEdge(e.getX(), e.getY())) {
+                redispatch(e);
+                return;
+            }
+            super.processMouseMotionEvent(e);
         }
 
         @Override
@@ -458,8 +491,23 @@ public final class VyknaShell extends JFrame {
         Point loc = getLocation();
         sidebar.setVisible(!hide);
 
-        pack();
-        setLocation(loc);
+        if (shellMode == ScreenMode.FIXED) {
+            setMinimumSize(new Dimension(0, 0));
+            pack();
+            setLocation(loc);
+            setMinimumSize(getSize());
+        } else {
+            Rectangle bounds = getBounds();
+            int delta = hide ? -SIDEBAR_WIDTH : SIDEBAR_WIDTH;
+            int targetWidth = bounds.width + delta;
+            int minWidth = getMinimumSize().width;
+            if (targetWidth < minWidth) {
+                targetWidth = minWidth;
+            }
+            setBounds(bounds.x, bounds.y, targetWidth, bounds.height);
+            applyResizableSizing();
+        }
+        updateRestoreBounds();
 
         SwingUtilities.invokeLater(() -> ((Component) client).requestFocusInWindow());
     }
@@ -511,12 +559,16 @@ public final class VyknaShell extends JFrame {
         } else {
             gameWrap.setMinimumSize(applied);
         }
-        gameWrap.setMaximumSize(applied);
+        if (shellMode != ScreenMode.RESIZABLE) {
+            gameWrap.setMaximumSize(applied);
+        }
 
         Component gameComponent = (Component) client;
         gameComponent.setPreferredSize(applied);
         gameComponent.setMinimumSize(applied);
-        gameComponent.setMaximumSize(applied);
+        if (shellMode != ScreenMode.RESIZABLE) {
+            gameComponent.setMaximumSize(applied);
+        }
         gameComponent.setSize(applied);
 
         gameWrap.revalidate();
@@ -545,7 +597,7 @@ public final class VyknaShell extends JFrame {
     }
 
     private boolean canResizeShell() {
-        return shellResizable && !maximized;
+        return shellResizable;
     }
 
     private void installResizeHandler(JComponent root) {
@@ -629,7 +681,7 @@ public final class VyknaShell extends JFrame {
     }
 
     void toggleMaximize() {
-        if (!canResizeShell()) {
+        if (!shellResizable && !maximized) {
             return;
         }
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -645,9 +697,7 @@ public final class VyknaShell extends JFrame {
             maximized = false;
         }
         titleBar.setMaximized(maximized);
-        if (!maximized) {
-            restoreBounds = getBounds();
-        }
+        updateRestoreBounds();
         revalidate();
     }
 
@@ -692,7 +742,7 @@ public final class VyknaShell extends JFrame {
         gameWrap.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         ((Component) client).setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        int minW = 765 + (sidebarHidden ? 0 : (SIDEBAR_WIDTH + ICON_STRIP_WIDTH));
+        int minW = 765 + (sidebarHidden ? 0 : SIDEBAR_WIDTH);
         int minH = 503 + 80;
         setMinimumSize(new Dimension(minW, minH));
 
