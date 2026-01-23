@@ -31,6 +31,7 @@ public class RSInterface {
 	public int gridRows;
 	public int gridCellSize;
 	public int valueIndex; // which icon index to use (set by server/client)
+	public boolean gridUseValueIndex;
 
     public static void printEmptyInterfaceSections() {
 		int count = 0;
