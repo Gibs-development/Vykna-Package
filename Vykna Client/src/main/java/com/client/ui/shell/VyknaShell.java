@@ -725,14 +725,14 @@ public final class VyknaShell extends JFrame {
         }
     }
 
-    Rectangle getSidebarBounds() {
+    public Rectangle getSidebarBounds() {
         if (!sidebar.isVisible()) {
             return new Rectangle();
         }
         return SwingUtilities.convertRectangle(sidebar.getParent(), sidebar.getBounds(), getRootPane());
     }
 
-    int getTopBarHeight() {
+    public int getTopBarHeight() {
         return titleBar.getHeight();
     }
 

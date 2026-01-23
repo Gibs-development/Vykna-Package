@@ -438,6 +438,7 @@ public class Client extends RSApplet {
 		if (toast == null) {
 			return;
 		}
+		DrawingArea.defaultDrawingAreaSize();
 		// Toast draws last in RS3/resizable so it stays visible above all UI overlays.
 		drawInterface(0, 0, toast, 0);
 	}
