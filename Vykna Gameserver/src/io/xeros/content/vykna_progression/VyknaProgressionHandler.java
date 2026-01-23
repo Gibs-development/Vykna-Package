@@ -6,7 +6,10 @@ import io.xeros.model.entity.player.Player;
 import io.xeros.util.JsonUtil;
 
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class VyknaProgressionHandler {
 
@@ -17,6 +20,9 @@ public final class VyknaProgressionHandler {
     private static final String KEY_VISIT = "visit:";
     private static final String KEY_TOTAL_LEVEL = "total_level";
     private static final String KEY_TOTAL_XP = "total_xp";
+    private static final int DEFAULT_PAGE_SIZE = 25;
+    private static final int MAX_LIST_JSON_CHARS = 12000;
+    private static final Map<String, Integer> SCORE_BY_PLAYER = new HashMap<>();
 
     public VyknaProgressionHandler(Player player) {
     }
@@ -28,8 +34,17 @@ public final class VyknaProgressionHandler {
         if (player == null) return;
 
         player.getPA().showInterface(ACHIEVEMENTS_INTERFACE_ID);
-        sendListTypes(player);
         addProgress(player, "open_progression", 1);
+    }
+
+    public static void sendInitialData(Player player) {
+        if (player == null) return;
+        sendListTypes(player);
+        sendListData(player, ProgressionListType.TASKS);
+        sendListData(player, ProgressionListType.SKILLS);
+        sendListData(player, ProgressionListType.COMBAT);
+        updateLeaderboard(player, player.getVyknaProgressionState());
+        sendSummaryData(player);
     }
 
 
@@ -58,6 +73,13 @@ public final class VyknaProgressionHandler {
                 return true;
             case VyknaProgressionInterfaces.LIST_TAB_COMBAT:
                 openList(player, ProgressionListType.COMBAT);
+                return true;
+            case VyknaProgressionInterfaces.LIST_TOGGLE_COMPLETED:
+                toggleShowCompleted(player);
+                return true;
+            case VyknaProgressionInterfaces.LIST_CLOSE:
+            case VyknaProgressionInterfaces.HOME_CLOSE:
+                player.getPA().closeAllWindows();
                 return true;
             default:
                 return false;
@@ -105,6 +127,10 @@ public final class VyknaProgressionHandler {
                 if (updated >= target && !state.isCompleted(entry.getEntryId())) {
                     state.setCompleted(entry.getEntryId(), true);
                     state.addPoints(entry.getPoints());
+                    state.addScore(entry.getPoints());
+                    state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
+                    updateLeaderboard(player, state);
+                    sendSummaryData(player);
                 }
             }
         }
@@ -116,6 +142,59 @@ public final class VyknaProgressionHandler {
             listTypes.add(new ListTypePayload(type.getId(), type.getDisplayName()));
         }
         player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listTypes", JsonUtil.toJson(listTypes));
+    }
+
+    private static void sendSummaryData(Player player) {
+        if (player == null) {
+            return;
+        }
+        VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        SummaryPayload payload = new SummaryPayload(
+                state.getScoreTotal(),
+                state.getPointsTotal(),
+                state.getLastCompletedEntryId(),
+                state.getLastCompletedListTypeId(),
+                state.isShowCompleted(),
+                getTopLeaderboard()
+        );
+        player.getPA().runClientScript(CLIENT_SCRIPT_ID, "summaryData", JsonUtil.toJson(payload));
+    }
+
+    private static void toggleShowCompleted(Player player) {
+        VyknaProgressionPlayerState state = player.getVyknaProgressionState();
+        boolean show = !state.isShowCompleted();
+        state.setShowCompleted(show);
+        player.getPA().runClientScript(CLIENT_SCRIPT_ID, "toggleCompleted", show ? 1 : 0);
+    }
+
+    private static void updateLeaderboard(Player player, VyknaProgressionPlayerState state) {
+        String name = resolvePlayerName(player);
+        SCORE_BY_PLAYER.put(name, state.getScoreTotal());
+    }
+
+    private static String resolvePlayerName(Player player) {
+        if (player == null) {
+            return "unknown";
+        }
+        String displayName = player.getDisplayName();
+        if (displayName != null && !displayName.isEmpty()) {
+            return displayName;
+        }
+        String loginName = player.getLoginName();
+        if (loginName != null && !loginName.isEmpty()) {
+            return loginName;
+        }
+        if (player.playerName != null && !player.playerName.isEmpty()) {
+            return player.playerName;
+        }
+        return "unknown";
+    }
+
+    private static List<LeaderboardEntry> getTopLeaderboard() {
+        List<LeaderboardEntry> entries = new ArrayList<>();
+        SCORE_BY_PLAYER.forEach((name, score) -> entries.add(new LeaderboardEntry(name, score)));
+        entries.sort(Comparator.comparingInt(LeaderboardEntry::getScore).reversed());
+        return entries.subList(0, Math.min(3, entries.size()));
     }
 
 // Put these inside the same class as openList/sendListData
@@ -246,36 +325,88 @@ public final class VyknaProgressionHandler {
             }
         }
 
-        ListPayload payload;
-        try {
-            payload = new ListPayload(
-                    definition.getId(),
-                    definition.getSubcategories(),
-                    entries
-            );
-        } catch (Exception e) {
-            error(player, "Failed constructing ListPayload. definitionId=" + safeDefId(definition), e);
-            return;
-        }
+        sendPagedListData(player, definition, entries);
+    }
 
-        String json;
-        try {
-            json = JsonUtil.toJson(payload);
-        } catch (Exception e) {
-            error(player, "JsonUtil.toJson(payload) threw. definitionId=" + safeDefId(definition)
-                    + ", entriesBuilt=" + entries.size(), e);
-            return;
-        }
+    private static void sendPagedListData(Player player, ProgressionListDefinition definition, List<EntryPayload> entries) {
+        int totalEntries = entries.size();
+        int pageSize = DEFAULT_PAGE_SIZE;
+        int pageIndex = 0;
+        int start = 0;
+        int totalPages = Math.max(1, (int) Math.ceil(totalEntries / (double) pageSize));
 
-        debug(player, "Sending clientscript: id=" + CLIENT_SCRIPT_ID
-                + ", key=listData, jsonLength=" + (json == null ? -1 : json.length())
-                + ", entriesBuilt=" + entries.size());
+        debug(player, "Paging list payload: totalEntries=" + totalEntries
+                + ", pageSize=" + pageSize
+                + ", totalPages=" + totalPages
+                + ", maxJsonChars=" + MAX_LIST_JSON_CHARS);
 
-        try {
-            player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listData", json);
-        } catch (Exception e) {
-            error(player, "runClientScript() threw. clientScriptId=" + CLIENT_SCRIPT_ID
-                    + ", definitionId=" + safeDefId(definition), e);
+        while (start < totalEntries) {
+            int end = Math.min(start + pageSize, totalEntries);
+            List<EntryPayload> pageEntries = new ArrayList<>(entries.subList(start, end));
+            ListPayload payload;
+            try {
+                payload = new ListPayload(
+                        definition.getId(),
+                        definition.getSubcategories(),
+                        pageEntries,
+                        pageIndex,
+                        pageSize,
+                        totalEntries,
+                        totalPages
+                );
+            } catch (Exception e) {
+                error(player, "Failed constructing ListPayload page. definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex, e);
+                return;
+            }
+
+            String json;
+            try {
+                json = JsonUtil.toJson(payload);
+            } catch (Exception e) {
+                error(player, "JsonUtil.toJson(payload) threw. definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex
+                        + ", entriesBuilt=" + pageEntries.size(), e);
+                return;
+            }
+
+            if (json != null && json.length() > MAX_LIST_JSON_CHARS && pageSize > 1) {
+                int nextPageSize = Math.max(1, pageSize / 2);
+                debug(player, "Payload page exceeded limit, shrinking pageSize from " + pageSize
+                        + " to " + nextPageSize
+                        + " (jsonLength=" + json.length() + ")");
+                pageSize = nextPageSize;
+                totalPages = Math.max(1, (int) Math.ceil(totalEntries / (double) pageSize));
+                continue;
+            }
+
+            if (json != null && json.length() > MAX_LIST_JSON_CHARS) {
+                debug(player, "Payload page still exceeds safe limit, skipping send. definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex
+                        + ", jsonLength=" + json.length()
+                        + ", entriesBuilt=" + pageEntries.size());
+                start = end;
+                pageIndex++;
+                continue;
+            }
+
+            debug(player, "Sending clientscript page: id=" + CLIENT_SCRIPT_ID
+                    + ", key=listData, pageIndex=" + pageIndex
+                    + ", pageSize=" + pageSize
+                    + ", jsonLength=" + (json == null ? -1 : json.length())
+                    + ", entriesBuilt=" + pageEntries.size());
+
+            try {
+                player.getPA().runClientScript(CLIENT_SCRIPT_ID, "listData", json);
+            } catch (Exception e) {
+                error(player, "runClientScript() threw. clientScriptId=" + CLIENT_SCRIPT_ID
+                        + ", definitionId=" + safeDefId(definition)
+                        + ", pageIndex=" + pageIndex, e);
+                return;
+            }
+
+            start = end;
+            pageIndex++;
         }
     }
 
@@ -301,11 +432,53 @@ public final class VyknaProgressionHandler {
         private final int listTypeId;
         private final List<String> subcategories;
         private final List<EntryPayload> entries;
+        private final int pageIndex;
+        private final int pageSize;
+        private final int totalEntries;
+        private final int totalPages;
 
-        private ListPayload(int listTypeId, List<String> subcategories, List<EntryPayload> entries) {
+        private ListPayload(int listTypeId, List<String> subcategories, List<EntryPayload> entries,
+                            int pageIndex, int pageSize, int totalEntries, int totalPages) {
             this.listTypeId = listTypeId;
             this.subcategories = subcategories;
             this.entries = entries;
+            this.pageIndex = pageIndex;
+            this.pageSize = pageSize;
+            this.totalEntries = totalEntries;
+            this.totalPages = totalPages;
+        }
+    }
+
+    private static final class SummaryPayload {
+        private final int scoreTotal;
+        private final int pointsTotal;
+        private final int lastCompletedEntryId;
+        private final int lastCompletedListTypeId;
+        private final boolean showCompleted;
+        private final List<LeaderboardEntry> leaderboard;
+
+        private SummaryPayload(int scoreTotal, int pointsTotal, int lastCompletedEntryId, int lastCompletedListTypeId,
+                               boolean showCompleted, List<LeaderboardEntry> leaderboard) {
+            this.scoreTotal = scoreTotal;
+            this.pointsTotal = pointsTotal;
+            this.lastCompletedEntryId = lastCompletedEntryId;
+            this.lastCompletedListTypeId = lastCompletedListTypeId;
+            this.showCompleted = showCompleted;
+            this.leaderboard = leaderboard;
+        }
+    }
+
+    private static final class LeaderboardEntry {
+        private final String name;
+        private final int score;
+
+        private LeaderboardEntry(String name, int score) {
+            this.name = name;
+            this.score = score;
+        }
+
+        private int getScore() {
+            return score;
         }
     }
 
@@ -376,6 +549,9 @@ public final class VyknaProgressionHandler {
         if (completed && !state.isCompleted(entry.getEntryId())) {
             state.setCompleted(entry.getEntryId(), true);
             state.addPoints(entry.getPoints());
+            state.addScore(entry.getPoints());
+            state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
+            updateLeaderboard(player, state);
         }
         state.setProgress(entry.getEntryId(), Math.min(progress, target));
         return new DerivedProgress(Math.min(progress, target), state.isCompleted(entry.getEntryId()));
