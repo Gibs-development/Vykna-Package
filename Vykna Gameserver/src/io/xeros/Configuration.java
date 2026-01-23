@@ -181,7 +181,7 @@ public class Configuration {
 	 * Set this to the animation id you want to use for “combat active” idle.
 	 * If you set it to -1, the server won’t override stand animation.
 	 */
-	public static final int COMBAT_ACTIVE_STAND_ANIMATION = 9817; // <-- change to your desired anim id
+	public static final int COMBAT_ACTIVE_STAND_ANIMATION = 9834; // <-- change to your desired anim id
 
 	/**
 	 * dragon ids for the dragon hunter crossbow
@@ -331,16 +331,17 @@ public class Configuration {
 	/**
 	 * The starting location of your server.
 	 */
-	public static final int START_LOCATION_X = 3101;
-	public static final int START_LOCATION_Y = 3509;
+	public static final int START_LOCATION_X = 3165;
+	public static final int START_LOCATION_Y = 3485;
 	public static final Position START_POSITION = new Position(START_LOCATION_X, START_LOCATION_Y);
 
 	/**
 	 * The re-spawn point of when someone dies.
 	 */
-	public static final int RESPAWN_X = 3101;
-	public static final int RESPAWN_Y = 3509;
+	public static final int RESPAWN_X = 3165;
+	public static final int RESPAWN_Y = 3485;
 	public static final int RESPAWN_Z = 0;
+	public static final Position RESPAWN_POSITION = new Position(START_LOCATION_X, START_LOCATION_Y);
 
 	/**
 	 * The re-spawn point of when a duel ends.

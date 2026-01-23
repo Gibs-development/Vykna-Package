@@ -65,8 +65,26 @@
   {
     "id": 5792,
     "position": {
-      "x": 3151 ,
+      "x": 3171 ,
       "y": 3492,
+      "height": 0
+    },
+    "walkingType": "FACE_WEST"
+  },
+  {
+    "id": 6797,
+    "position": {
+      "x": 3169 ,
+      "y": 3473,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 311,
+    "position": {
+      "x": 3171 ,
+      "y": 3487,
       "height": 0
     },
     "walkingType": "FACE_WEST"

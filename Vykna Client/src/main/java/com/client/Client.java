@@ -539,6 +539,21 @@ public class Client extends RSApplet {
 		drawAchievementToastOverlay();
 	}
 
+	private void drawRs3FinalOverlays() {
+		DrawingArea.defaultDrawingAreaSize();
+		if (menuOpen) {
+			int maxX = Math.max(0, currentGameWidth - menuWidth);
+			int maxY = Math.max(0, currentGameHeight - menuHeight);
+			menuOffsetX = clamp(menuOffsetX, 0, maxX);
+			menuOffsetY = clamp(menuOffsetY, 0, maxY);
+			drawMenu(0, 0);
+		}
+		drawAchievementToastOverlay();
+	}
+
+
+
+
 	private void drawLayoutDebugOverlay() {
 		if (!interfaceText) {
 			return;
@@ -5878,6 +5893,7 @@ public class Client extends RSApplet {
 			if (super.getMouseX() > anInt1087 + 5 || super.getMouseX() < anInt1087 - 5 || super.getMouseY() > anInt1088 + 5
 					|| super.getMouseY() < anInt1088 - 5)
 				aBoolean1242 = true;
+			updateRs3InventoryDragHover();
 			if (super.clickMode2 == 0) {
 				updateRs3InventoryDragHover(super.getMouseX(), super.getMouseY());
 				if (activeInterfaceType == 2)
