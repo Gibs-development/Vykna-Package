@@ -12203,9 +12203,9 @@ public class Client extends RSApplet {
 		achievementToastTotalTicks = (TOAST_SLIDE_TICKS * 2) + TOAST_HOLD_TICKS;
 		achievementToastTicks = achievementToastTotalTicks;
 		achievementToastOffset = -AchievementCompleteToast.getPanelHeight();
-		int walkableWidth = currentGameWidth;
+		int walkableWidth = currentScreenMode == ScreenMode.FIXED ? 512 : currentGameWidth;
 		RSInterface toastInterface = RSInterface.interfaceCache[AchievementCompleteToast.INTERFACE_ID];
-		if (toastInterface != null && toastInterface.width > 0) {
+		if (currentScreenMode == ScreenMode.FIXED && toastInterface != null && toastInterface.width > 0) {
 			walkableWidth = toastInterface.width;
 		}
 		int targetX = (walkableWidth - AchievementCompleteToast.getPanelWidth()) / 2;
@@ -15491,7 +15491,9 @@ public class Client extends RSApplet {
 					if (currentScreenMode == ScreenMode.FIXED) {
 						drawInterface(0, 0, rsinterface, 0);
 					} else {
-						if (openWalkableWidgetID == 28000 || openWalkableWidgetID == 28020 || openWalkableWidgetID == 16210
+						if (openWalkableWidgetID == AchievementCompleteToast.INTERFACE_ID) {
+							drawInterface(0, 0, rsinterface, 0);
+						} else if (openWalkableWidgetID == 28000 || openWalkableWidgetID == 28020 || openWalkableWidgetID == 16210
 								|| openWalkableWidgetID == 27500 || openWalkableWidgetID == 196) {
 							/**
 							 * Interfaces to draw at the top right corner nex to the minimap (Ex. Wildy
