@@ -1,5 +1,6 @@
 package com.client.graphics.interfaces.impl;
 
+import com.client.Sprite;
 import com.client.TextDrawingArea;
 import com.client.graphics.interfaces.MenuItem;
 import com.client.graphics.interfaces.RSInterface;
@@ -145,6 +146,10 @@ public final class AchievementListPage extends RSInterface {
     private static final int ROW_FILL_DEFAULT = 0x3a3228;
     private static final int ROW_FILL_COMPLETED = 0x2b241d;
     private static final String TOGGLE_SPRITE_ROOT = "sprites/login/Remember";
+    private static Sprite toggleOffSprite;
+    private static Sprite toggleOffHoverSprite;
+    private static Sprite toggleOnSprite;
+    private static Sprite toggleOnHoverSprite;
 
     /**
      * The interface is built once, so we allocate enough rows for the largest category.
@@ -366,10 +371,21 @@ public final class AchievementListPage extends RSInterface {
         if (toggle == null) {
             return;
         }
-        String base = TOGGLE_SPRITE_ROOT + (showCompleted ? "2" : "0");
-        String hover = TOGGLE_SPRITE_ROOT + (showCompleted ? "3" : "1");
-        toggle.sprite1 = imageLoader(0, base);
-        toggle.sprite2 = imageLoader(0, hover);
+        if (showCompleted) {
+            if (toggleOnSprite != null) {
+                toggle.sprite1 = toggleOnSprite;
+            }
+            if (toggleOnHoverSprite != null) {
+                toggle.sprite2 = toggleOnHoverSprite;
+            }
+        } else {
+            if (toggleOffSprite != null) {
+                toggle.sprite1 = toggleOffSprite;
+            }
+            if (toggleOffHoverSprite != null) {
+                toggle.sprite2 = toggleOffHoverSprite;
+            }
+        }
     }
 
     public static void setSearchQuery(String query) {
@@ -520,6 +536,10 @@ public final class AchievementListPage extends RSInterface {
 
         addHoverButtonNew(TOGGLE_COMPLETED_ID, TOGGLE_SPRITE_ROOT + "0", TOGGLE_SPRITE_ROOT + "1",
                 14, 15, "Toggle Complete", 0, 1);
+        toggleOffSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "0");
+        toggleOffHoverSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "1");
+        toggleOnSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "2");
+        toggleOnHoverSprite = imageLoader(0, TOGGLE_SPRITE_ROOT + "3");
 
         addBox(SEARCH_BG_ID, 0x2b2118, 0x1f1812, 120, 160, 16);
         addHoverText(SEARCH_TEXT_ID, "Search...", "Search progressions", tda, 0, 0x9a8b7a, false, true, 160, 16);
