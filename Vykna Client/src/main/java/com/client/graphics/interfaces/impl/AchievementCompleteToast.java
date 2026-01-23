@@ -21,8 +21,8 @@ public final class AchievementCompleteToast extends RSInterface {
     private static final int PANEL_H = 64;
 
     // Position (centered on fixed 512px layout)
-    private static final int X = (512 - PANEL_W) / 2;
-    private static final int BASE_Y = 20;
+    private static final int BASE_X = (512 - PANEL_W) / 2;
+    private static final int BASE_Y = 8;
 
     public static final int INTERFACE_ID = 64650;
 
@@ -79,13 +79,26 @@ public final class AchievementCompleteToast extends RSInterface {
         r.totalChildren(6);
 
         int c = 0;
-        r.child(c++, BG_ID,   X,      BASE_Y);
-        r.child(c++, ICON_ID, X + 10, BASE_Y + 16);
+        r.child(c++, BG_ID,   BASE_X,      BASE_Y);
+        r.child(c++, ICON_ID, BASE_X + 10, BASE_Y + 16);
 
-        int textX = X + 52; // icon (32) + padding
+        int textX = BASE_X + 52; // icon (32) + padding
         r.child(c++, TEXT_TITLE, textX, BASE_Y + 12);
         r.child(c++, TEXT_NAME,  textX, BASE_Y + 28);
         r.child(c++, TEXT_EXTRA, textX, BASE_Y + 44);
+    }
+
+    public static void setToastOffsetX(int offset) {
+        RSInterface root = RSInterface.interfaceCache[INTERFACE_ID];
+        if (root == null || root.childX == null) {
+            return;
+        }
+        // Integration seam: adjust child positions so the toast can be centered per gameframe width.
+        root.childX[0] = BASE_X + offset;       // BG_ID
+        root.childX[1] = BASE_X + 10 + offset;  // ICON_ID
+        root.childX[2] = BASE_X + 52 + offset;  // TEXT_TITLE
+        root.childX[3] = BASE_X + 52 + offset;  // TEXT_NAME
+        root.childX[4] = BASE_X + 52 + offset;  // TEXT_EXTRA
     }
 
     public static void setToastOffsetY(int offset) {
@@ -103,6 +116,14 @@ public final class AchievementCompleteToast extends RSInterface {
 
     public static int getPanelHeight() {
         return PANEL_H;
+    }
+
+    public static int getPanelWidth() {
+        return PANEL_W;
+    }
+
+    public static int getBaseX() {
+        return BASE_X;
     }
 
     public static void setToastText(String name, String extraLine) {
