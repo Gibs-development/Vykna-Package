@@ -58,6 +58,7 @@ public class InventoryPanel extends PanelManager.TabPanel {
 		if (container == null) {
 			return;
 		}
+		container.isInventoryInterface = true;
 		Rectangle bounds = getBounds();
 		int padX = container.invSpritePadX;
 		int padY = container.invSpritePadY;

@@ -539,6 +539,18 @@ public class Client extends RSApplet {
 		drawAchievementToastOverlay();
 	}
 
+	private void drawRs3FinalOverlays() {
+		DrawingArea.defaultDrawingAreaSize();
+		if (menuOpen) {
+			int maxX = Math.max(0, currentGameWidth - menuWidth);
+			int maxY = Math.max(0, currentGameHeight - menuHeight);
+			menuOffsetX = clamp(menuOffsetX, 0, maxX);
+			menuOffsetY = clamp(menuOffsetY, 0, maxY);
+			drawMenu(0, 0);
+		}
+		drawAchievementToastOverlay();
+	}
+
 
 
 
