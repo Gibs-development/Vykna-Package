@@ -13,6 +13,7 @@ import io.xeros.Configuration;
 import io.xeros.Server;
 import io.xeros.achievements.InterfaceHandler;
 import io.xeros.content.*;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.bosses.grotesqueguardians.GrotesqueInstance;
 
 import io.xeros.content.bosses.nightmare.Nightmare;
@@ -498,6 +499,7 @@ public class Commands implements PacketType {
                         c.playerXP[skill] = c.getPA().getXPForLevel(level) + 5;
                         c.playerLevel[skill] = level;
                         c.getPA().refreshSkill(skill);
+                        VyknaProgressionHandler.refreshDerivedProgress(c, true);
                     }
                 } catch (Exception e) {
                     c.sendMessage("Invalid format [::setlevel 1 99]");
@@ -520,6 +522,7 @@ public class Commands implements PacketType {
                     }
                     c.getPA().refreshSkill(i);
                 }
+                VyknaProgressionHandler.refreshDerivedProgress(c, true);
             }
 
             if (playerCommand.equals("levelup")) {
@@ -530,6 +533,7 @@ public class Commands implements PacketType {
                 for (int i = 0; i <= 6; i++) {
                     c.getPA().addSkillXP(14_000_000, i, true);
                 }
+                VyknaProgressionHandler.refreshDerivedProgress(c, true);
             }
 
             if (playerCommand.equals("master")) {
@@ -543,6 +547,7 @@ public class Commands implements PacketType {
                     c.playerLevel[i] = 99;
                     c.getPA().refreshSkill(i);
                 }
+                VyknaProgressionHandler.refreshDerivedProgress(c, true);
             }
             if (playerCommand.equals("initmm")) {
                 if (!isManagment) {
@@ -568,6 +573,7 @@ public class Commands implements PacketType {
                 for (int i = 0; i < c.playerXP.length; i++) {
                     c.getPA().addSkillXP(EXP_GOAL, i, true);
                 }
+                VyknaProgressionHandler.refreshDerivedProgress(c, true);
             }
 
 

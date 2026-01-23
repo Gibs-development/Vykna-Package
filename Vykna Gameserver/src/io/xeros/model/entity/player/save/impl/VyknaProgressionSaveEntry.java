@@ -3,6 +3,7 @@ package io.xeros.model.entity.player.save.impl;
 import com.google.common.collect.Lists;
 import com.google.gson.Gson;
 import io.xeros.content.vykna_progression.VyknaProgressionPlayerState;
+import io.xeros.content.vykna_progression.VyknaProgressionPersistence;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.save.PlayerSaveEntry;
 import io.xeros.util.JsonUtil;
@@ -47,6 +48,6 @@ public class VyknaProgressionSaveEntry implements PlayerSaveEntry {
 
     @Override
     public void login(Player player) {
-        // No login hooks needed yet.
+        VyknaProgressionPersistence.load(player);
     }
 }
