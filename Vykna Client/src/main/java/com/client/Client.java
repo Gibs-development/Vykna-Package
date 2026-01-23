@@ -498,6 +498,18 @@ public class Client extends RSApplet {
 		return new Point(currentGameWidth - 197, currentGameHeight - 275 - y + 10);
 	}
 
+	private int updateRs3InventoryDragHover(int mouseX, int mouseY) {
+		int targetSlot = getInventorySlotAt(mouseX, mouseY);
+		mouseInvInterfaceIndex = targetSlot;
+		lastActiveInvInterface = targetSlot != -1 ? draggingItemInterfaceId : -1;
+		if (debugUi) {
+			Point origin = getInventoryOriginForDebug();
+			System.out.println("Inv drag end origin=" + origin.x + "," + origin.y + " targetSlot=" + targetSlot
+					+ " draggedSlot=" + itemDraggingSlot + " mouse=" + mouseX + "," + mouseY);
+		}
+		return targetSlot;
+	}
+
 	private void drawAchievementToastOverlay() {
 		if (openWalkableWidgetID != AchievementCompleteToast.INTERFACE_ID) {
 			return;
@@ -5871,14 +5883,7 @@ public class Client extends RSApplet {
 				aBoolean1242 = true;
 			updateRs3InventoryDragHover();
 			if (super.clickMode2 == 0) {
-				int targetSlot = getInventorySlotAt(super.getMouseX(), super.getMouseY());
-				mouseInvInterfaceIndex = targetSlot;
-				lastActiveInvInterface = targetSlot != -1 ? draggingItemInterfaceId : -1;
-				if (debugUi) {
-					Point origin = getInventoryOriginForDebug();
-					System.out.println("Inv drag end origin=" + origin.x + "," + origin.y + " targetSlot=" + targetSlot
-							+ " draggedSlot=" + itemDraggingSlot + " mouse=" + super.getMouseX() + "," + super.getMouseY());
-				}
+				updateRs3InventoryDragHover(super.getMouseX(), super.getMouseY());
 				if (activeInterfaceType == 2)
 					needDrawTabArea = true;
 				if (activeInterfaceType == 3)
