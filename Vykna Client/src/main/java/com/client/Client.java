@@ -2646,13 +2646,22 @@ public class Client extends RSApplet {
 					class9_1.dropdownHover = -1;
 
 					if (class9_1.dropdown.isOpen()) {
+						int dropdownFullHeight = class9_1.dropdown.getHeight();
+						int dropdownVisibleHeight = Math.min(dropdownFullHeight, 140);
+						int maxScroll = Math.max(0, dropdownFullHeight - dropdownVisibleHeight);
+						if (class9_1.scrollPosition > maxScroll) {
+							class9_1.scrollPosition = maxScroll;
+						}
+						if (class9_1.scrollPosition < 0) {
+							class9_1.scrollPosition = 0;
+						}
 
 						// Inverted keybinds dropdown
 						if (class9_1.type == RSInterface.TYPE_KEYBINDS_DROPDOWN && class9_1.inverted && mouseX >= drawX
 								&& mouseX < drawX + (class9_1.dropdown.getWidth() - 16)
-								&& mouseY >= drawY - class9_1.dropdown.getHeight() - 10 && mouseY < drawY) {
+								&& mouseY >= drawY - dropdownVisibleHeight - 10 && mouseY < drawY) {
 							resetTabInterfaceHover();
-							int yy = mouseY - (drawY - class9_1.dropdown.getHeight());
+							int yy = mouseY - (drawY - dropdownVisibleHeight) + class9_1.scrollPosition;
 
 							if (mouseX > drawX + (class9_1.dropdown.getWidth() / 2)) {
 								class9_1.dropdownHover = ((yy / 15) * 2) + 1;
@@ -2661,9 +2670,9 @@ public class Client extends RSApplet {
 							}
 							flag = true;
 						} else if (!class9_1.inverted && mouseX >= drawX && mouseX < drawX + (class9_1.dropdown.getWidth() - 16)
-								&& mouseY >= drawY + 19 && mouseY < drawY + 19 + class9_1.dropdown.getHeight()) {
+								&& mouseY >= drawY + 19 && mouseY < drawY + 19 + dropdownVisibleHeight) {
 							resetTabInterfaceHover();
-							int yy = mouseY - (drawY + 19);
+							int yy = mouseY - (drawY + 19) + class9_1.scrollPosition;
 
 							if (class9_1.type == RSInterface.TYPE_KEYBINDS_DROPDOWN && class9_1.dropdown.doesSplit()) {
 								if (mouseX > drawX + (class9_1.dropdown.getWidth() / 2)) {
@@ -6292,6 +6301,27 @@ public class Client extends RSApplet {
 			stream.writeWord(7001);
 		}
 
+		if (buttonPressed == AchievementListPage.getSearchTextId()) {
+			inputTaken = true;
+			inputDialogState = 0;
+			messagePromptRaised = true;
+			promptInput = "";
+			friendsListAction = PROGRESSION_SEARCH_ACTION;
+			aString1121 = "Search progressions";
+		}
+
+		if (buttonPressed == AchievementListPage.getSearchClearId()) {
+			AchievementListPage.clearSearchQuery();
+		}
+
+		if (buttonPressed == AchievementListPage.getSearchClearTextId()) {
+			AchievementListPage.clearSearchQuery();
+		}
+
+		if (buttonPressed == AchievementListPage.getToggleCompletedId()) {
+			AchievementListPage.setShowCompleted(!AchievementListPage.isShowCompleted());
+		}
+
 		if (l == 713) {//Money pouch
 			//	inputTaken = true;
 			//	messagePromptRaised = true;
@@ -8503,6 +8533,8 @@ public class Client extends RSApplet {
 		try { return Integer.parseInt(s); } catch (Exception e) { return fallback; }
 	}
 
+	private static final int PROGRESSION_SEARCH_ACTION = 901;
+
 	private void method73() {
 		do {
 			int j = readChar(-796);
@@ -8589,6 +8621,13 @@ public class Client extends RSApplet {
 						sendStringAsLong(promptInput);
 					} else if (friendsListAction == 16) {//staff tab
 						sendStringAsLong(promptInput);
+					} else if (friendsListAction == PROGRESSION_SEARCH_ACTION) {
+						String trimmed = promptInput.trim();
+						if (!trimmed.isEmpty()) {
+							AchievementListPage.setSearchQuery(trimmed);
+						} else {
+							AchievementListPage.updateSearchText();
+						}
 					}
 
 				}
@@ -14482,26 +14521,36 @@ public class Client extends RSApplet {
 								continue;
 							}
 
-							// defId from config (server sets), fallback to valueIndex
-							int defId = (class9_1.configId >= 0) ? variousSettings[class9_1.configId] : class9_1.valueIndex;
-							if (class9_1.configId >= 0) {
-								// CHANGE THIS to your actual config/varp array name
-								defId = variousSettings[class9_1.configId];
-							}
-							if (defId < 0) defId = 0;
-
-							// resolve to definition -> spriteIndex
-							com.client.achievements.AchievementDefinitions.AchievementDefinition def =
-									com.client.achievements.AchievementDefinitions.getById(defId);
-
-							int index = def.spriteIndex;
-
 							int size = class9_1.gridCellSize;
 							int cols = class9_1.gridCols;
-							if (size <= 0 || cols <= 0) continue;
+							int rows = class9_1.gridRows;
+							if (size <= 0 || cols <= 0 || rows <= 0) continue;
 
-							int maxIcons = (class9_1.sprite1.myWidth / size) * (class9_1.sprite1.myHeight / size);
+							int maxIcons = cols * rows;
+							int maxIconsBySprite = (class9_1.sprite1.myWidth / size) * (class9_1.sprite1.myHeight / size);
+							if (maxIconsBySprite > 0) {
+								maxIcons = Math.min(maxIcons, maxIconsBySprite);
+							}
 							if (maxIcons <= 0) continue;
+
+							int defId = 0;
+							com.client.achievements.AchievementDefinitions.AchievementDefinition def = null;
+							int index;
+							if (class9_1.gridUseValueIndex) {
+								index = Math.max(class9_1.valueIndex, 1) - 1;
+							} else {
+								// defId from config (server sets), fallback to valueIndex
+								defId = (class9_1.configId >= 0) ? variousSettings[class9_1.configId] : class9_1.valueIndex;
+								if (class9_1.configId >= 0) {
+									// CHANGE THIS to your actual config/varp array name
+									defId = variousSettings[class9_1.configId];
+								}
+								if (defId < 0) defId = 0;
+
+								// resolve to definition -> spriteIndex
+								def = com.client.achievements.AchievementDefinitions.getById(defId);
+								index = def.spriteIndex;
+							}
 
 							if (index < 0 || index >= maxIcons) index = 0;
 
@@ -14525,12 +14574,22 @@ public class Client extends RSApplet {
 							}
 
 							// tooltip if hovered
-							if (hoverId == class9_1.id && defId != 0) {
+							if (!class9_1.gridUseValueIndex && hoverId == class9_1.id && defId != 0 && def != null) {
 								queueAchievementTooltip(def.name, def.description, super.getMouseX(), super.getMouseY());
 							}
 				} else if (class9_1.type == RSInterface.TYPE_DROPDOWN) {
 
 							DropdownMenu d = class9_1.dropdown;
+							int fullHeight = d.getHeight();
+							int visibleHeight = Math.min(fullHeight, 140);
+							int optionHeight = 14;
+							int maxScroll = Math.max(0, fullHeight - visibleHeight);
+							if (class9_1.scrollPosition > maxScroll) {
+								class9_1.scrollPosition = maxScroll;
+							}
+							if (class9_1.scrollPosition < 0) {
+								class9_1.scrollPosition = 0;
+							}
 
 							int bgColour = class9_1.dropdownColours[2];
 							int fontColour = 0xfe971e;
@@ -14559,14 +14618,18 @@ public class Client extends RSApplet {
 								// Up arrow
 								cacheSprite3[29].drawSprite(_x + d.getWidth() - 18, _y + 2);
 
-								DrawingArea.drawPixels(d.getHeight(), _y + 19, _x, class9_1.dropdownColours[0], d.getWidth());
-								DrawingArea.drawPixels(d.getHeight() - 2, _y + 20, _x + 1, class9_1.dropdownColours[1],
+								DrawingArea.drawPixels(visibleHeight, _y + 19, _x, class9_1.dropdownColours[0], d.getWidth());
+								DrawingArea.drawPixels(visibleHeight - 2, _y + 20, _x + 1, class9_1.dropdownColours[1],
 										d.getWidth() - 2);
-								DrawingArea.drawPixels(d.getHeight() - 4, _y + 21, _x + 2, class9_1.dropdownColours[3],
+								DrawingArea.drawPixels(visibleHeight - 4, _y + 21, _x + 2, class9_1.dropdownColours[3],
 										d.getWidth() - 4);
 
-								int yy = 2;
-								for (int i = 0; i < d.getOptions().length; i++) {
+								int yy = 2 - (class9_1.scrollPosition % optionHeight);
+								int startIndex = class9_1.scrollPosition / optionHeight;
+								for (int i = startIndex; i < d.getOptions().length; i++) {
+									if (yy > visibleHeight - optionHeight) {
+										break;
+									}
 									if (class9_1.dropdownHover == i) {
 										if (class9_1.id == 28102) {
 											DrawingArea.drawAlphaBox(_x + 2, _y + 19 + yy, d.getWidth() - 4, 13, 0xd0914d, 80);
@@ -14594,10 +14657,10 @@ public class Client extends RSApplet {
 										}
 
 									}
-									yy += 14;
+									yy += optionHeight;
 								}
-								drawScrollbar(d.getHeight() - 4, class9_1.scrollPosition, _y + 21, _x + d.getWidth() - 18,
-										d.getHeight() - 5);
+								drawScrollbar(visibleHeight - 4, class9_1.scrollPosition, _y + 21, _x + d.getWidth() - 18,
+										fullHeight - 5);
 
 							} else {
 								cacheSprite3[downArrow].drawSprite(_x + d.getWidth() - 18, _y + 2);
