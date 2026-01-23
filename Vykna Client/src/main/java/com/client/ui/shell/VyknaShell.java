@@ -68,6 +68,8 @@ public final class VyknaShell extends JFrame {
     private ResizeDirection resizeDirection = ResizeDirection.NONE;
     private Rectangle restoreBounds;
     private boolean maximized = false;
+    private Rectangle lastNormalBounds;
+    private Rectangle preSidebarOpenBounds;
     private final TitleBar titleBar;
 
     // Icon tabs
@@ -497,14 +499,24 @@ public final class VyknaShell extends JFrame {
             setLocation(loc);
             setMinimumSize(getSize());
         } else {
-            Rectangle bounds = getBounds();
-            int delta = hide ? -SIDEBAR_WIDTH : SIDEBAR_WIDTH;
-            int targetWidth = bounds.width + delta;
-            int minWidth = getMinimumSize().width;
-            if (targetWidth < minWidth) {
-                targetWidth = minWidth;
+            if (!hide) {
+                if (preSidebarOpenBounds == null) {
+                    Rectangle base = maximized && lastNormalBounds != null ? lastNormalBounds : getBounds();
+                    preSidebarOpenBounds = new Rectangle(base);
+                }
+                Rectangle target = new Rectangle(preSidebarOpenBounds);
+                int minWidth = getMinimumSize().width;
+                // Acceptance: W -> (W - SIDEBAR_WIDTH) on open; close restores preSidebarOpenBounds exactly.
+                target.width = Math.max(minWidth, target.width - SIDEBAR_WIDTH);
+                if (maximized) {
+                    maximized = false;
+                    titleBar.setMaximized(false);
+                }
+                setBounds(target);
+            } else if (preSidebarOpenBounds != null) {
+                setBounds(preSidebarOpenBounds);
+                preSidebarOpenBounds = null;
             }
-            setBounds(bounds.x, bounds.y, targetWidth, bounds.height);
             applyResizableSizing();
         }
         updateRestoreBounds();
@@ -687,12 +699,13 @@ public final class VyknaShell extends JFrame {
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
         Rectangle screenBounds = env.getMaximumWindowBounds();
         if (!maximized) {
-            restoreBounds = getBounds();
+            lastNormalBounds = getBounds();
+            restoreBounds = lastNormalBounds;
             setBounds(screenBounds);
             maximized = true;
         } else {
-            if (restoreBounds != null) {
-                setBounds(restoreBounds);
+            if (lastNormalBounds != null) {
+                setBounds(lastNormalBounds);
             }
             maximized = false;
         }
@@ -707,8 +720,20 @@ public final class VyknaShell extends JFrame {
 
     void updateRestoreBounds() {
         if (!maximized) {
-            restoreBounds = getBounds();
+            lastNormalBounds = getBounds();
+            restoreBounds = lastNormalBounds;
         }
+    }
+
+    Rectangle getSidebarBounds() {
+        if (!sidebar.isVisible()) {
+            return new Rectangle();
+        }
+        return SwingUtilities.convertRectangle(sidebar.getParent(), sidebar.getBounds(), getRootPane());
+    }
+
+    int getTopBarHeight() {
+        return titleBar.getHeight();
     }
 
     private void applyFixedSizing() {
