@@ -433,51 +433,69 @@ public class Client extends RSApplet {
 		return false;
 	}
 
-	private void updateRs3InventoryDragHover() {
-		if (!isRs3InterfaceStyle() || draggingItemInterfaceId != 3214) {
-			return;
-		}
-		if (panelManager == null) {
-			return;
-		}
-		com.client.ui.panel.UiPanel panel = panelManager.getPanel(com.client.ui.panel.PanelManager.PANEL_ID_INVENTORY);
-		if (!(panel instanceof InventoryPanel)) {
-			return;
-		}
-		InventoryPanel inventoryPanel = (InventoryPanel) panel;
-		RSInterface container = RSInterface.interfaceCache[draggingItemInterfaceId];
+	private int getInventorySlotAt(int mouseX, int mouseY) {
+		int interfaceId = 3214;
+		RSInterface container = RSInterface.interfaceCache[interfaceId];
 		if (container == null) {
-			return;
+			return -1;
 		}
-		Point origin = inventoryPanel.getInventoryOrigin(this);
-		int mouseX = super.getMouseX();
-		int mouseY = super.getMouseY();
-		int relX = mouseX - origin.x;
-		int relY = mouseY - origin.y;
-		int cellWidth = 32 + container.invSpritePadX;
-		int cellHeight = 32 + container.invSpritePadY;
-		int hoveredSlot = -1;
-		if (relX >= 0 && relY >= 0 && cellWidth > 0 && cellHeight > 0) {
-			int col = relX / cellWidth;
-			int row = relY / cellHeight;
-			if (col >= 0 && row >= 0 && col < container.width && row < container.height) {
-				int slotX = col * cellWidth;
-				int slotY = row * cellHeight;
-				if (relX >= slotX && relX < slotX + 32 && relY >= slotY && relY < slotY + 32) {
-					int index = row * container.width + col;
-					if (index >= 0 && container.inventoryItemId != null && index < container.inventoryItemId.length) {
-						hoveredSlot = index;
-					}
-				}
+		int originX;
+		int originY;
+		if (isRs3InterfaceStyle() && panelManager != null) {
+			UiPanel panel = panelManager.getPanel(PanelManager.PANEL_ID_INVENTORY);
+			if (panel instanceof InventoryPanel) {
+				Point origin = ((InventoryPanel) panel).getInventoryOrigin(this);
+				originX = origin.x;
+				originY = origin.y;
+			} else {
+				return -1;
+			}
+		} else {
+			if (currentScreenMode == ScreenMode.FIXED) {
+				originX = 547;
+				originY = 205;
+			} else {
+				int y = stackTabs() ? 73 : 37;
+				originX = currentGameWidth - 197;
+				originY = currentGameHeight - 275 - y + 10;
 			}
 		}
-		mouseInvInterfaceIndex = hoveredSlot;
-		lastActiveInvInterface = hoveredSlot >= 0 ? container.id : -1;
-		if (debugInventoryDrag && hoveredSlot != lastInventoryDragDebugSlot) {
-			System.out.println("Drag inv origin=" + origin.x + "," + origin.y + " hoveredSlot=" + hoveredSlot
-					+ " draggedSlot=" + itemDraggingSlot + " mouse=" + mouseX + "," + mouseY);
-			lastInventoryDragDebugSlot = hoveredSlot;
+		int relX = mouseX - originX;
+		int relY = mouseY - originY;
+		int cellWidth = 32 + container.invSpritePadX;
+		int cellHeight = 32 + container.invSpritePadY;
+		if (relX < 0 || relY < 0 || cellWidth <= 0 || cellHeight <= 0) {
+			return -1;
 		}
+		int col = relX / cellWidth;
+		int row = relY / cellHeight;
+		if (col < 0 || row < 0 || col >= container.width || row >= container.height) {
+			return -1;
+		}
+		int slotX = col * cellWidth;
+		int slotY = row * cellHeight;
+		if (relX < slotX || relX >= slotX + 32 || relY < slotY || relY >= slotY + 32) {
+			return -1;
+		}
+		int index = row * container.width + col;
+		if (container.inventoryItemId == null || index < 0 || index >= container.inventoryItemId.length) {
+			return -1;
+		}
+		return index;
+	}
+
+	private Point getInventoryOriginForDebug() {
+		if (isRs3InterfaceStyle() && panelManager != null) {
+			UiPanel panel = panelManager.getPanel(PanelManager.PANEL_ID_INVENTORY);
+			if (panel instanceof InventoryPanel) {
+				return ((InventoryPanel) panel).getInventoryOrigin(this);
+			}
+		}
+		if (currentScreenMode == ScreenMode.FIXED) {
+			return new Point(547, 205);
+		}
+		int y = stackTabs() ? 73 : 37;
+		return new Point(currentGameWidth - 197, currentGameHeight - 275 - y + 10);
 	}
 
 	private void drawAchievementToastOverlay() {
@@ -1975,10 +1993,16 @@ public class Client extends RSApplet {
 						aBoolean1242 = false;
 						anInt989 = 0;
 						draggingItemInterfaceId = j2;
-						itemDraggingSlot = l1;
+						int dragSlot = getInventorySlotAt(super.getSaveClickX(), super.getSaveClickY());
+						itemDraggingSlot = dragSlot != -1 ? dragSlot : l1;
 						activeInterfaceType = 2;
 						anInt1087 = super.getSaveClickX();
 						anInt1088 = super.getSaveClickY();
+						if (debugUi) {
+							Point origin = getInventoryOriginForDebug();
+							System.out.println("Inv drag start origin=" + origin.x + "," + origin.y + " draggedSlot="
+									+ itemDraggingSlot + " mouse=" + super.getSaveClickX() + "," + super.getSaveClickY());
+						}
 						if (RSInterface.interfaceCache[j2].parentID == openInterfaceID)
 							activeInterfaceType = 1;
 						if (RSInterface.interfaceCache[j2].parentID == backDialogID)
@@ -5847,6 +5871,14 @@ public class Client extends RSApplet {
 				aBoolean1242 = true;
 			updateRs3InventoryDragHover();
 			if (super.clickMode2 == 0) {
+				int targetSlot = getInventorySlotAt(super.getMouseX(), super.getMouseY());
+				mouseInvInterfaceIndex = targetSlot;
+				lastActiveInvInterface = targetSlot != -1 ? draggingItemInterfaceId : -1;
+				if (debugUi) {
+					Point origin = getInventoryOriginForDebug();
+					System.out.println("Inv drag end origin=" + origin.x + "," + origin.y + " targetSlot=" + targetSlot
+							+ " draggedSlot=" + itemDraggingSlot + " mouse=" + super.getMouseX() + "," + super.getMouseY());
+				}
 				if (activeInterfaceType == 2)
 					needDrawTabArea = true;
 				if (activeInterfaceType == 3)
@@ -21993,8 +22025,7 @@ public class Client extends RSApplet {
 	private Stream inStream;
 	private int draggingItemInterfaceId;
 	private int itemDraggingSlot;
-	private boolean debugInventoryDrag = true;
-	private int lastInventoryDragDebugSlot = -2;
+	private boolean debugUi = true;
 	private int activeInterfaceType;
 	private int anInt1087;
 	private int anInt1088;
