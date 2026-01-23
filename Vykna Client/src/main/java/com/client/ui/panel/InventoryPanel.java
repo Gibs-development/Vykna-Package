@@ -128,6 +128,14 @@ public class InventoryPanel extends PanelManager.TabPanel {
 		return new Point(CONTENT_PADDING, CONTENT_PADDING);
 	}
 
+	public Point getInventoryOrigin(Client client) {
+		applyResponsiveLayout(client);
+		Rectangle bounds = getBounds();
+		int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+		Point containerOffset = getContainerOffset();
+		return new Point(bounds.x + containerOffset.x, bounds.y + headerHeight + containerOffset.y);
+	}
+
 	@Override
 	public boolean isScrollable() {
 		return false;
