@@ -68,7 +68,7 @@ public final class AchievementListPage extends RSInterface {
     private static final int CLOSE_HOVER_ID = INTERFACE_ID + 2006;
     private static final int DROPDOWN_ID = INTERFACE_ID + 2010;
     private static final int TEXT_SHOW_COMPLETED = INTERFACE_ID + 2020;
-    private static final int TOGGLE_COMPLETED_ID = INTERFACE_ID + 2021;
+    private static final int TOGGLE_COMPLETED_ID = INTERFACE_ID + 2080;
     private static final int SEARCH_BG_ID = INTERFACE_ID + 2030;
     private static final int SEARCH_TEXT_ID = INTERFACE_ID + 2031;
     private static final int SEARCH_CLEAR_ID = INTERFACE_ID + 2032;
