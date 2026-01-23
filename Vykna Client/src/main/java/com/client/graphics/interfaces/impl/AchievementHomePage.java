@@ -2,6 +2,12 @@ package com.client.graphics.interfaces.impl;
 
 import com.client.TextDrawingArea;
 import com.client.graphics.interfaces.RSInterface;
+import com.client.vykna_progression.ProgressionEntryDefinition;
+import com.client.vykna_progression.ProgressionListType;
+import com.client.vykna_progression.ProgressionSummaryPayload;
+import com.client.vykna_progression.VyknaProgressionDefinitions;
+
+import java.util.List;
 
 /**
  * Achievement home page (interface 35000).
@@ -23,6 +29,8 @@ public final class AchievementHomePage extends RSInterface {
 	private static final String SPRITE_ROOT = "interfaces/vykna_progression/";
 	@SuppressWarnings("unused")
 	private static final int LIST_SIZE = 200;
+	private static final int CLOSE_BTN_ID = 35005;
+	private static final int CLOSE_HOVER_ID = 35006;
 
 	private AchievementHomePage() {
 	}
@@ -58,6 +66,7 @@ public final class AchievementHomePage extends RSInterface {
 		r.gridCols = gridCols;
 		r.gridRows = gridRows;
 		r.gridCellSize = cellSize;
+		r.gridUseValueIndex = true;
 
 		r.valueIndex = valueIndex; // dummy defId (1..4)
 		r.configId = -1;          // later: set configId and ignore valueIndex
@@ -95,7 +104,7 @@ public final class AchievementHomePage extends RSInterface {
 		addSprite(35033, 0, SPRITE_ROOT + "SkillingIcon");
 
 		addHoverButtonNew(35040, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
-				36, 36, "Combat Achievements", 0, 1);
+				36, 36, "Combat Progressions", 0, 1);
 		addSprite(35043, 0, SPRITE_ROOT + "CombatIcon");
 
 		addHoverButtonNew(35050, SPRITE_ROOT + "LeftTabStandard", SPRITE_ROOT + "LeftTabHover",
@@ -104,21 +113,27 @@ public final class AchievementHomePage extends RSInterface {
 
 		// ---- Home Page Text + Progress Bars ----
 		addText(35100, "Overview", tda, 1, 0xE3AE19, false, true);
-		addText(35101, "Achievements Completed", tda, 0, 0xFFFAE5, false, true);
+		addText(35101, "Progressions Completed", tda, 0, 0xFFFAE5, false, true);
 		addText(35102, "0/0", tda, 0, 0xFFFAE5, true, true);
 
 		// main completion bar 203x11
 		addSkinProgressBar2021(35200, 203, 11);
 
-		// ---- Most recent redundant_achievement (replaces old 4-icon grid) ----
-		addText(35110, "Most recent redundant_achievement", tda, 0, 0xFFFAE5, false, true);
+		// ---- Close button (top-right of the frame) ----
+		addHoverButton(CLOSE_BTN_ID, "Interfaces/HelpInterface/IMAGE", 2,
+				16, 16, "Close", 0, CLOSE_HOVER_ID, 1);
+		addHoveredButton(CLOSE_HOVER_ID, "Interfaces/HelpInterface/IMAGE", 3,
+				16, 16, CLOSE_HOVER_ID + 1);
+
+		// ---- Most recent progression (replaces old 4-icon grid) ----
+		addText(35110, "Most recent progression", tda, 0, 0xFFFAE5, false, true);
 		addText(35111, "A FRIEND IN NEED", tda, 0, 0xE3AE19, false, true);
 		addText(35112, "Complete a quest for a local.", tda, 0, 0xFFFAE5, false, true);
 
 		// 1 recent icon (36x36) pulled from the atlas.
-		// Atlas layout: 2 cols x 2 rows, each cell 36x36.
+		// Atlas layout: 6 cols x 6 rows, each cell 36x36.
 		final String RECENT_ATLAS = SPRITE_ROOT + "AchievementRecentAtlas";
-		addGridSpriteValueIndex(35300, RECENT_ATLAS, 2, 2, 36, 1, "");
+		addGridSpriteValueIndex(35300, RECENT_ATLAS, 6, 6, 36, 1, "");
 
 		addText(35120, "You're almost finished...", tda, 0, 0xFFFAE5, false, true);
 		// Two "close to finish" achievements (dummy client-side)
@@ -127,9 +142,9 @@ public final class AchievementHomePage extends RSInterface {
 		addText(35123, "RANK: MASTER FINIX", tda, 0, 0xE3AE19, false, true);
 		addText(35124, "Finish the remaining objectives.", tda, 0, 0xFFFAE5, false, true);
 
-		// Icons for those two achievements (pulled from the same 2x2 atlas for now)
-		addGridSpriteValueIndex(35301, RECENT_ATLAS, 2, 2, 36, 2, "");
-		addGridSpriteValueIndex(35302, RECENT_ATLAS, 2, 2, 36, 3, "");
+		// Icons for those two achievements (pulled from the same 6x6 atlas)
+		addGridSpriteValueIndex(35301, RECENT_ATLAS, 6, 6, 36, 2, "");
+		addGridSpriteValueIndex(35302, RECENT_ATLAS, 6, 6, 36, 3, "");
 		addSkinProgressBar2021(35210, 186, 11);
 		addSkinProgressBar2021(35220, 186, 11);
 
@@ -144,7 +159,7 @@ public final class AchievementHomePage extends RSInterface {
 		addSkinProgressBar2021(35280, 69, 7);
 
 		// ---- NEW: Achievement Summary + Ranks + Scores + Clickable list ----
-		addText(35160, "Achievement Summary", tda, 1, 0xE3AE19, false, true);
+		addText(35160, "Progression Summary", tda, 1, 0xE3AE19, false, true);
 
 		addText(35161, "Rank 1: Player", tda, 0, 0xFFFAE5, false, true);
 		addText(35162, "Score:", tda, 0, 0xFFFAE5, false, true);
@@ -168,11 +183,15 @@ public final class AchievementHomePage extends RSInterface {
 
 		// ---- Children ----
 		// Keep this count exact; otherwise you'll hit "Null child of index" errors.
-		rsi.totalChildren(75);
+		rsi.totalChildren(77);
 		int c = 0;
 
 		// BG
 		rsi.child(c++, 35001, BG_X, BG_Y);
+
+		// Close (top-right of the frame)
+		rsi.child(c++, CLOSE_BTN_ID, BG_X + 470, BG_Y + 14);
+		rsi.child(c++, CLOSE_HOVER_ID, BG_X + 470, BG_Y + 14);
 
 		// Selected tab (Home)
 		rsi.child(c++, 35010, NAV_X, NAV_Y);
@@ -303,19 +322,183 @@ public final class AchievementHomePage extends RSInterface {
 		rsi.child(c++, 35174,322+23, 155); // Collections
 		rsi.child(c++, 35175, 410+23, 155); // Mastery
 
-		// Dummy % values (client-side visual testing)
-		RSInterface.interfaceCache[35202].progressBar2021Percentage = 0.65;
-		RSInterface.interfaceCache[35212].progressBar2021Percentage = 0.42;
-		RSInterface.interfaceCache[35222].progressBar2021Percentage = 0.18;
-
-		RSInterface.interfaceCache[35232].progressBar2021Percentage = 0.90;
-		RSInterface.interfaceCache[35242].progressBar2021Percentage = 0.60;
-		RSInterface.interfaceCache[35252].progressBar2021Percentage = 0.25;
-		RSInterface.interfaceCache[35262].progressBar2021Percentage = 0.80;
-		RSInterface.interfaceCache[35272].progressBar2021Percentage = 0.10;
-		RSInterface.interfaceCache[35282].progressBar2021Percentage = 0.45;
-
-		System.out.println("AchievementHomePage final child count = " + c);
+		refreshProgressions();
+		System.out.println("ProgressionHomePage final child count = " + c);
 	}
 
+	public static void refreshProgressions() {
+		VyknaProgressionDefinitions.CompletionStats overall = VyknaProgressionDefinitions.getOverallStats();
+		if (RSInterface.interfaceCache[35102] != null) {
+			RSInterface.interfaceCache[35102].message = overall.getCompleted() + "/" + overall.getTotal();
+		}
+		setSkinnedBarPercentage(35200, overall.getRatio());
+
+		VyknaProgressionDefinitions.CompletionStats tasks = VyknaProgressionDefinitions.getStatsForType(ProgressionListType.TASKS);
+		VyknaProgressionDefinitions.CompletionStats skilling = VyknaProgressionDefinitions.getStatsForType(ProgressionListType.SKILLING);
+		VyknaProgressionDefinitions.CompletionStats combat = VyknaProgressionDefinitions.getStatsForType(ProgressionListType.COMBAT);
+
+		setSkinnedBarPercentage(35240, tasks.getRatio());
+		setSkinnedBarPercentage(35250, skilling.getRatio());
+		setSkinnedBarPercentage(35260, combat.getRatio());
+
+		setSkinnedBarPercentage(35230, 0.0);
+		setSkinnedBarPercentage(35270, 0.0);
+		setSkinnedBarPercentage(35280, 0.0);
+
+		boolean hasEntries = overall.getTotal() > 0;
+		updateMostRecent(hasEntries);
+		updateLeaderboard();
+		updateCategoryCounts();
+
+		List<ProgressionEntryDefinition> closest = VyknaProgressionDefinitions.getClosestIncomplete(2);
+		updateAlmostFinishedEntry(0, closest, hasEntries);
+		updateAlmostFinishedEntry(1, closest, hasEntries);
+	}
+
+	private static void updateAlmostFinishedEntry(int index, List<ProgressionEntryDefinition> closest, boolean hasEntries) {
+		int titleId = (index == 0) ? 35121 : 35123;
+		int descId = (index == 0) ? 35122 : 35124;
+		int iconId = (index == 0) ? 35301 : 35302;
+		int barBaseId = (index == 0) ? 35210 : 35220;
+
+		if (index >= closest.size()) {
+			if (RSInterface.interfaceCache[titleId] != null) {
+				RSInterface.interfaceCache[titleId].message = hasEntries ? "Nothing yet!" : "Loading...";
+			}
+			if (RSInterface.interfaceCache[descId] != null) RSInterface.interfaceCache[descId].message = "";
+			if (RSInterface.interfaceCache[iconId] != null) RSInterface.interfaceCache[iconId].interfaceHidden = true;
+			setSkinnedBarVisible(barBaseId, false);
+			return;
+		}
+
+		ProgressionEntryDefinition entry = closest.get(index);
+		ProgressionListType type = ProgressionListType.fromId(entry.getListTypeId());
+		String category = type.getDisplayName();
+		int target = entry.getRequirementTarget();
+		int current = Math.max(0, Math.min(entry.getProgressCurrent(), target));
+		double ratio = target <= 0 ? 0.0 : current / (double) target;
+
+		if (RSInterface.interfaceCache[titleId] != null) {
+			RSInterface.interfaceCache[titleId].message = entry.getName() + " (" + category + ")";
+		}
+		if (RSInterface.interfaceCache[descId] != null) {
+			RSInterface.interfaceCache[descId].message = current + "/" + target;
+		}
+		if (RSInterface.interfaceCache[iconId] != null) {
+			RSInterface.interfaceCache[iconId].valueIndex = entry.getSpriteIndex();
+			RSInterface.interfaceCache[iconId].interfaceHidden = false;
+		}
+		setSkinnedBarVisible(barBaseId, true);
+		setSkinnedBarPercentage(barBaseId, ratio);
+	}
+
+	private static void updateMostRecent(boolean hasEntries) {
+		ProgressionSummaryPayload summary = VyknaProgressionDefinitions.getSummaryPayload();
+		if (summary == null || summary.getLastCompletedEntryId() <= 0) {
+			if (RSInterface.interfaceCache[35111] != null) {
+				RSInterface.interfaceCache[35111].message = hasEntries ? "Nothing yet!" : "Loading...";
+			}
+			if (RSInterface.interfaceCache[35112] != null) {
+				RSInterface.interfaceCache[35112].message = "";
+			}
+			if (RSInterface.interfaceCache[35300] != null) {
+				RSInterface.interfaceCache[35300].interfaceHidden = true;
+			}
+			return;
+		}
+
+		ProgressionEntryDefinition entry = VyknaProgressionDefinitions.getEntryById(
+				summary.getLastCompletedListTypeId(), summary.getLastCompletedEntryId());
+		if (entry == null) {
+			if (RSInterface.interfaceCache[35111] != null) {
+				RSInterface.interfaceCache[35111].message = hasEntries ? "Nothing yet!" : "Loading...";
+			}
+			if (RSInterface.interfaceCache[35112] != null) {
+				RSInterface.interfaceCache[35112].message = "";
+			}
+			if (RSInterface.interfaceCache[35300] != null) {
+				RSInterface.interfaceCache[35300].interfaceHidden = true;
+			}
+			return;
+		}
+
+		if (RSInterface.interfaceCache[35111] != null) {
+			RSInterface.interfaceCache[35111].message = entry.getName();
+		}
+		if (RSInterface.interfaceCache[35112] != null) {
+			RSInterface.interfaceCache[35112].message = entry.getDescription();
+		}
+		if (RSInterface.interfaceCache[35300] != null) {
+			RSInterface.interfaceCache[35300].valueIndex = entry.getSpriteIndex();
+			RSInterface.interfaceCache[35300].interfaceHidden = false;
+		}
+	}
+
+	private static void updateLeaderboard() {
+		ProgressionSummaryPayload summary = VyknaProgressionDefinitions.getSummaryPayload();
+		List<ProgressionSummaryPayload.LeaderboardEntry> entries =
+				summary == null ? null : summary.getLeaderboard();
+		for (int i = 0; i < 3; i++) {
+			int nameId = 35161 + (i * 2);
+			int scoreId = 35162 + (i * 2);
+			if (entries != null && i < entries.size() && entries.get(i) != null) {
+				ProgressionSummaryPayload.LeaderboardEntry entry = entries.get(i);
+				String name = entry.getName();
+				if (name == null || name.trim().isEmpty()) {
+					name = "Unknown";
+				}
+				if (RSInterface.interfaceCache[nameId] != null) {
+					RSInterface.interfaceCache[nameId].message = "Rank " + (i + 1) + ": " + name;
+				}
+				if (RSInterface.interfaceCache[scoreId] != null) {
+					RSInterface.interfaceCache[scoreId].message = "Score: " + entry.getScore();
+				}
+			} else {
+				if (RSInterface.interfaceCache[nameId] != null) {
+					RSInterface.interfaceCache[nameId].message = "Rank " + (i + 1) + ": Nothing yet!";
+				}
+				if (RSInterface.interfaceCache[scoreId] != null) {
+					RSInterface.interfaceCache[scoreId].message = "Score: 0";
+				}
+			}
+		}
+	}
+
+	private static void updateCategoryCounts() {
+		if (RSInterface.interfaceCache[35170] != null) {
+			RSInterface.interfaceCache[35170].message = "Quests";
+		}
+		if (RSInterface.interfaceCache[35171] != null) {
+			RSInterface.interfaceCache[35171].message = "Tasks";
+		}
+		if (RSInterface.interfaceCache[35172] != null) {
+			RSInterface.interfaceCache[35172].message = "Skilling";
+		}
+		if (RSInterface.interfaceCache[35173] != null) {
+			RSInterface.interfaceCache[35173].message = "Combat";
+		}
+		if (RSInterface.interfaceCache[35174] != null) {
+			RSInterface.interfaceCache[35174].message = "Collections";
+		}
+		if (RSInterface.interfaceCache[35175] != null) {
+			RSInterface.interfaceCache[35175].message = "Mastery";
+		}
+	}
+
+	private static void setSkinnedBarPercentage(int baseId, double ratio) {
+		double clamped = Math.max(0.0, Math.min(1.0, ratio));
+		RSInterface fill = RSInterface.interfaceCache[baseId + 2];
+		if (fill != null) {
+			fill.progressBar2021Percentage = clamped;
+		}
+	}
+
+	private static void setSkinnedBarVisible(int baseId, boolean visible) {
+		for (int i = 0; i < 4; i++) {
+			RSInterface bar = RSInterface.interfaceCache[baseId + i];
+			if (bar != null) {
+				bar.interfaceHidden = !visible;
+			}
+		}
+	}
 }
