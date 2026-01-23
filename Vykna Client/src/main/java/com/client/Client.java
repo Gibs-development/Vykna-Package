@@ -759,14 +759,16 @@ public class Client extends RSApplet {
 				worldViewportWidth = 516;
 				worldViewportHeight = 338;
 				rs3ViewportBounds = null;
-			} else if (isRs3InterfaceStyle()) {
-				ensureRs3ViewportBounds();
-				worldViewportWidth = rs3ViewportBounds.width;
-				worldViewportHeight = rs3ViewportBounds.height;
 			} else {
+				if (isRs3InterfaceStyle()) {
+					// Keep RS3 viewport bounds for layout, but render via the full-size buffer to keep overlays visible.
+					ensureRs3ViewportBounds();
+				} else {
+					rs3ViewportBounds = null;
+				}
+				// Single-buffer path prevents resizable UI overlays (toasts) from being clipped or drawn offscreen.
 				worldViewportWidth = currentGameWidth;
 				worldViewportHeight = currentGameHeight;
-				rs3ViewportBounds = null;
 			}
 			if (currentScreenMode == ScreenMode.FIXED) {
 				cameraZoom = 600;
@@ -913,8 +915,7 @@ public class Client extends RSApplet {
 
 	private void updateGameScreen() {
 		if (getUserSettings().isAntiAliasing()) {
-			antialiasingPixels = new int[Client.worldViewportWidth * worldViewportHeight << 2];
-			antialiasingDepth  = new float[Client.worldViewportWidth * worldViewportHeight << 2];
+			ensureAntiAliasingBuffers(Client.worldViewportWidth, worldViewportHeight);
 		}
 		Rasterizer.method365(Client.worldViewportWidth << 1, worldViewportHeight << 1);
 		antialiasingOffsets = Rasterizer.anIntArray1472;
@@ -5541,16 +5542,16 @@ public class Client extends RSApplet {
 			return;
 		}
 		if (currentScreenMode != ScreenMode.FIXED && currentScreenMode != ScreenMode.FULLSCREEN) {
-			if (currentGameWidth != getWidth()) {
-				currentGameWidth = getWidth();
-				worldViewportWidth = getWidth();
+			int newWidth = getWidth();
+			int newHeight = getHeight();
+			if (newWidth > 0 && newHeight > 0
+					&& (currentGameWidth != newWidth || currentGameHeight != newHeight)) {
+				currentGameWidth = newWidth;
+				currentGameHeight = newHeight;
+				worldViewportWidth = newWidth;
+				worldViewportHeight = newHeight;
 				graphics = getGraphics();
-				updateGameScreen();
-			}
-			if (currentGameHeight != getHeight()) {
-				currentGameHeight = getHeight();
-				worldViewportHeight = getHeight();
-				graphics = getGraphics();
+				// Avoid double buffer rebuilds when both dimensions change during live resize.
 				updateGameScreen();
 			}
 		}

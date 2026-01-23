@@ -497,9 +497,15 @@ public final class VyknaShell extends JFrame {
             setLocation(loc);
             setMinimumSize(getSize());
         } else {
+            Rectangle bounds = getBounds();
+            int delta = hide ? -SIDEBAR_WIDTH : SIDEBAR_WIDTH;
+            int targetWidth = bounds.width + delta;
+            int minWidth = getMinimumSize().width;
+            if (targetWidth < minWidth) {
+                targetWidth = minWidth;
+            }
+            setBounds(bounds.x, bounds.y, targetWidth, bounds.height);
             applyResizableSizing();
-            pack();
-            setLocation(loc);
         }
         updateRestoreBounds();
 
@@ -591,7 +597,7 @@ public final class VyknaShell extends JFrame {
     }
 
     private boolean canResizeShell() {
-        return shellResizable && !maximized;
+        return shellResizable;
     }
 
     private void installResizeHandler(JComponent root) {
@@ -675,7 +681,7 @@ public final class VyknaShell extends JFrame {
     }
 
     void toggleMaximize() {
-        if (!canResizeShell()) {
+        if (!shellResizable && !maximized) {
             return;
         }
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -691,9 +697,7 @@ public final class VyknaShell extends JFrame {
             maximized = false;
         }
         titleBar.setMaximized(maximized);
-        if (!maximized) {
-            restoreBounds = getBounds();
-        }
+        updateRestoreBounds();
         revalidate();
     }
 
@@ -738,7 +742,7 @@ public final class VyknaShell extends JFrame {
         gameWrap.setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
         ((Component) client).setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
-        int minW = 765 + (sidebarHidden ? 0 : (SIDEBAR_WIDTH + ICON_STRIP_WIDTH));
+        int minW = 765 + (sidebarHidden ? 0 : SIDEBAR_WIDTH);
         int minH = 503 + 80;
         setMinimumSize(new Dimension(minW, minH));
 
