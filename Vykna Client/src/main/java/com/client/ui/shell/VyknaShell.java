@@ -511,12 +511,16 @@ public final class VyknaShell extends JFrame {
         } else {
             gameWrap.setMinimumSize(applied);
         }
-        gameWrap.setMaximumSize(applied);
+        if (shellMode != ScreenMode.RESIZABLE) {
+            gameWrap.setMaximumSize(applied);
+        }
 
         Component gameComponent = (Component) client;
         gameComponent.setPreferredSize(applied);
         gameComponent.setMinimumSize(applied);
-        gameComponent.setMaximumSize(applied);
+        if (shellMode != ScreenMode.RESIZABLE) {
+            gameComponent.setMaximumSize(applied);
+        }
         gameComponent.setSize(applied);
 
         gameWrap.revalidate();

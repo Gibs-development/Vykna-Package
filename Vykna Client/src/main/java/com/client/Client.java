@@ -12203,7 +12203,12 @@ public class Client extends RSApplet {
 		achievementToastTotalTicks = (TOAST_SLIDE_TICKS * 2) + TOAST_HOLD_TICKS;
 		achievementToastTicks = achievementToastTotalTicks;
 		achievementToastOffset = -AchievementCompleteToast.getPanelHeight();
-		int targetX = (currentGameWidth - AchievementCompleteToast.getPanelWidth()) / 2;
+		int walkableWidth = currentGameWidth;
+		RSInterface toastInterface = RSInterface.interfaceCache[AchievementCompleteToast.INTERFACE_ID];
+		if (toastInterface != null && toastInterface.width > 0) {
+			walkableWidth = toastInterface.width;
+		}
+		int targetX = (walkableWidth - AchievementCompleteToast.getPanelWidth()) / 2;
 		AchievementCompleteToast.setToastOffsetX(targetX - AchievementCompleteToast.getBaseX());
 		AchievementCompleteToast.setToastOffsetY(achievementToastOffset);
 	}
