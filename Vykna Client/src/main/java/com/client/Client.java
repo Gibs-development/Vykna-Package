@@ -326,7 +326,6 @@ public class Client extends RSApplet {
 			panelManager.drawEditOverlays(this);
 			newSmallFont.drawBasicString("EDIT MODE", 8, 14, 0xffcc66, 0);
 		}
-		drawAchievementToastOverlay();
 		drawLayoutDebugOverlay();
 	}
 
@@ -368,6 +367,10 @@ public class Client extends RSApplet {
 	}
 
 	private void updateUiGraphicsBuffer() {
+		if (isRs3InterfaceStyle()) {
+			uiGraphicsBuffer = null;
+			return;
+		}
 		boolean needsUiBuffer = isRs3InterfaceStyle()
 				&& currentScreenMode != ScreenMode.FIXED
 				&& (worldViewportWidth != currentGameWidth || worldViewportHeight != currentGameHeight);
@@ -441,6 +444,18 @@ public class Client extends RSApplet {
 		DrawingArea.defaultDrawingAreaSize();
 		// Toast draws last in RS3/resizable so it stays visible above all UI overlays.
 		drawInterface(0, 0, toast, 0);
+	}
+
+	private void drawRs3FinalOverlays() {
+		DrawingArea.defaultDrawingAreaSize();
+		if (menuOpen) {
+			int maxX = Math.max(0, currentGameWidth - menuWidth);
+			int maxY = Math.max(0, currentGameHeight - menuHeight);
+			menuOffsetX = clamp(menuOffsetX, 0, maxX);
+			menuOffsetY = clamp(menuOffsetY, 0, maxY);
+			drawMenu(0, 0);
+		}
+		drawAchievementToastOverlay();
 	}
 
 	private void drawLayoutDebugOverlay() {
@@ -1732,7 +1747,7 @@ public class Client extends RSApplet {
 
 		}
 		DrawingArea.defaultDrawingAreaSize();
-		if (menuOpen) {
+		if (menuOpen && !isRs3InterfaceStyle()) {
 			drawMenu(xOffset, rs3ChatOverride ? yOffset : (currentScreenMode == ScreenMode.FIXED ? 338 : 0));
 		}
 		//tried here
@@ -4169,7 +4184,7 @@ public class Client extends RSApplet {
 		//}
 
 
-		if (menuOpen) {
+		if (menuOpen && !isRs3InterfaceStyle()) {
 			drawMenu(fixedMode ? 516 : 0, fixedMode ? 168 : 0);
 		}
 
@@ -13550,7 +13565,7 @@ public class Client extends RSApplet {
 		if (!menuOpen) {
 			processRightClick();
 			drawTopLeftTooltip();
-		} else {
+		} else if (!isRs3InterfaceStyle()) {
 			drawMenu(0, 0);
 		}
 
@@ -15658,7 +15673,7 @@ public class Client extends RSApplet {
 			processRightClick();
 			drawTopLeftTooltip();
 			drawAttrHoverOverlay();
-		} else if (menuScreenArea == 0) {
+		} else if (!isRs3InterfaceStyle() && menuScreenArea == 0) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 0 : 0, currentScreenMode == ScreenMode.FIXED ? 0 : 0);
 		}
 
@@ -16540,7 +16555,7 @@ public class Client extends RSApplet {
 			// if (drawOrbs)
 			// loadAllOrbs(currentScreenMode == ScreenMode.FIXED ? 0 : currentGameWidth -
 			// 217);
-			if (menuOpen) {
+			if (menuOpen && !isRs3InterfaceStyle()) {
 				drawMenu(currentScreenMode == ScreenMode.FIXED ? 516 : 0, 0);
 			}
 			mainGameGraphicsBuffer.setCanvas();
@@ -16785,7 +16800,7 @@ public class Client extends RSApplet {
 			}
 
 		}
-		if (menuOpen) {
+		if (menuOpen && !isRs3InterfaceStyle()) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 516 : 0, 0);
 		}
 		mainGameGraphicsBuffer.setCanvas();
@@ -21288,7 +21303,7 @@ public class Client extends RSApplet {
 			displayGroundItems();
 		}
 
-		boolean useUiBuffer = uiGraphicsBuffer != null && isRs3InterfaceStyle() && currentScreenMode != ScreenMode.FIXED;
+		boolean useUiBuffer = uiGraphicsBuffer != null && !isRs3InterfaceStyle() && currentScreenMode != ScreenMode.FIXED;
 
 		if (loggedIn) {
 			if (!inCutScene) {
@@ -21320,6 +21335,9 @@ public class Client extends RSApplet {
 		}
 
 		processExperienceCounter();
+		if (isRs3InterfaceStyle()) {
+			drawRs3FinalOverlays();
+		}
 
 		if (useUiBuffer) {
 			// Compose final frame into the UI buffer:
