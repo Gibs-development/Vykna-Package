@@ -894,10 +894,6 @@ public class PanelManager {
 			panels.add(new WorldMapPanel(PANEL_ID_WORLD_MAP, new Rectangle(orbsX + 183, orbsContentY + 143, WORLD_MAP_SIZE, WORLD_MAP_SIZE)));
 			panels.add(new TeleportPanel(PANEL_ID_TELEPORT, new Rectangle(orbsX + 123, orbsContentY + 160, TELEPORT_WIDTH, TELEPORT_HEIGHT)));
 			panels.add(new XpPanel(PANEL_ID_XP_PANEL, new Rectangle(Client.currentGameWidth - 365, PANEL_MARGIN, XP_PANEL_WIDTH, XP_PANEL_HEIGHT)));
-			panels.add(new ActionBarPanel(PANEL_ID_ACTION_BAR, new Rectangle(
-					Math.max(PANEL_MARGIN, (Client.currentGameWidth - ACTION_BAR_WIDTH) / 2),
-					Math.max(PANEL_MARGIN, Client.currentGameHeight - ACTION_BAR_HEIGHT - PANEL_MARGIN),
-					ACTION_BAR_WIDTH, ACTION_BAR_HEIGHT)));
 			int tabBarX = Math.max(PANEL_MARGIN, minimapX - TAB_BAR_PANEL_WIDTH - PANEL_PADDING);
 			int tabBarY = minimapY;
 			panels.add(new TabBarPanel(PANEL_ID_TAB_BAR, new Rectangle(tabBarX, tabBarY, TAB_BAR_PANEL_WIDTH, TAB_BAR_PANEL_HEIGHT)));

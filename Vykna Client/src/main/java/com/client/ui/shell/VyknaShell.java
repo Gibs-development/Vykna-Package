@@ -768,7 +768,7 @@ public final class VyknaShell extends JFrame {
         ((Component) client).setMaximumSize(new Dimension(Integer.MAX_VALUE, Integer.MAX_VALUE));
 
         int minW = 765 + (sidebarHidden ? 0 : SIDEBAR_WIDTH);
-        int minH = 503 + 80;
+        int minH = 503;
         setMinimumSize(new Dimension(minW, minH));
 
         revalidate();

@@ -367,10 +367,6 @@ public class Client extends RSApplet {
 	}
 
 	private void updateUiGraphicsBuffer() {
-		if (isRs3InterfaceStyle()) {
-			uiGraphicsBuffer = null;
-			return;
-		}
 		boolean needsUiBuffer = isRs3InterfaceStyle()
 				&& currentScreenMode != ScreenMode.FIXED
 				&& (worldViewportWidth != currentGameWidth || worldViewportHeight != currentGameHeight);
@@ -433,84 +429,6 @@ public class Client extends RSApplet {
 		return false;
 	}
 
-	private int getInventorySlotAt(int mouseX, int mouseY) {
-		int interfaceId = 3214;
-		RSInterface container = RSInterface.interfaceCache[interfaceId];
-		if (container == null) {
-			return -1;
-		}
-		int originX;
-		int originY;
-		if (isRs3InterfaceStyle() && panelManager != null) {
-			UiPanel panel = panelManager.getPanel(PanelManager.PANEL_ID_INVENTORY);
-			if (panel instanceof InventoryPanel) {
-				Point origin = ((InventoryPanel) panel).getInventoryOrigin(this);
-				originX = origin.x;
-				originY = origin.y;
-			} else {
-				return -1;
-			}
-		} else {
-			if (currentScreenMode == ScreenMode.FIXED) {
-				originX = 547;
-				originY = 205;
-			} else {
-				int y = stackTabs() ? 73 : 37;
-				originX = currentGameWidth - 197;
-				originY = currentGameHeight - 275 - y + 10;
-			}
-		}
-		int relX = mouseX - originX;
-		int relY = mouseY - originY;
-		int cellWidth = 32 + container.invSpritePadX;
-		int cellHeight = 32 + container.invSpritePadY;
-		if (relX < 0 || relY < 0 || cellWidth <= 0 || cellHeight <= 0) {
-			return -1;
-		}
-		int col = relX / cellWidth;
-		int row = relY / cellHeight;
-		if (col < 0 || row < 0 || col >= container.width || row >= container.height) {
-			return -1;
-		}
-		int slotX = col * cellWidth;
-		int slotY = row * cellHeight;
-		if (relX < slotX || relX >= slotX + 32 || relY < slotY || relY >= slotY + 32) {
-			return -1;
-		}
-		int index = row * container.width + col;
-		if (container.inventoryItemId == null || index < 0 || index >= container.inventoryItemId.length) {
-			return -1;
-		}
-		return index;
-	}
-
-	private Point getInventoryOriginForDebug() {
-		if (isRs3InterfaceStyle() && panelManager != null) {
-			UiPanel panel = panelManager.getPanel(PanelManager.PANEL_ID_INVENTORY);
-			if (panel instanceof InventoryPanel) {
-				return ((InventoryPanel) panel).getInventoryOrigin(this);
-			}
-		}
-		if (currentScreenMode == ScreenMode.FIXED) {
-			return new Point(547, 205);
-		}
-		int y = stackTabs() ? 73 : 37;
-		return new Point(currentGameWidth - 197, currentGameHeight - 275 - y + 10);
-	}
-
-	private int updateRs3InventoryDragHover(int mouseX, int mouseY) {
-		int targetSlot = getInventorySlotAt(mouseX, mouseY);
-		mouseInvInterfaceIndex = targetSlot;
-		lastActiveInvInterface = targetSlot != -1 ? draggingItemInterfaceId : -1;
-		if (debugUi && targetSlot != lastDragHoverSlot) {
-			lastDragHoverSlot = targetSlot;
-			Point origin = getInventoryOriginForDebug();
-			System.out.println("Inv drag hover origin=" + origin.x + "," + origin.y + " targetSlot=" + targetSlot
-					+ " draggedSlot=" + itemDraggingSlot + " mouse=" + mouseX + "," + mouseY);
-		}
-		return targetSlot;
-	}
-
 	private void drawAchievementToastOverlay() {
 		if (openWalkableWidgetID != AchievementCompleteToast.INTERFACE_ID) {
 			return;
@@ -519,41 +437,10 @@ public class Client extends RSApplet {
 		if (toast == null) {
 			return;
 		}
-		DrawingArea.setDrawingArea(currentGameHeight, 0, currentGameWidth, 0);
+		DrawingArea.defaultDrawingAreaSize();
 		// Toast draws last in RS3/resizable so it stays visible above all UI overlays.
 		drawInterface(0, 0, toast, 0);
-		newSmallFont.drawBasicString(
-				"Toast clip=(" + DrawingArea.topX + "," + DrawingArea.topY + ")-(" + DrawingArea.bottomX + "," + DrawingArea.bottomY
-						+ ") canvas=" + currentGameWidth + "x" + currentGameHeight,
-				8, 26, 0xffcc66, 0);
 	}
-
-	private void drawRs3FinalOverlays() {
-		DrawingArea.defaultDrawingAreaSize();
-		if (menuOpen) {
-			int maxX = Math.max(0, currentGameWidth - menuWidth);
-			int maxY = Math.max(0, currentGameHeight - menuHeight);
-			menuOffsetX = clamp(menuOffsetX, 0, maxX);
-			menuOffsetY = clamp(menuOffsetY, 0, maxY);
-			drawMenu(0, 0);
-		}
-		drawAchievementToastOverlay();
-	}
-
-	private void drawRs3FinalOverlays() {
-		DrawingArea.defaultDrawingAreaSize();
-		if (menuOpen) {
-			int maxX = Math.max(0, currentGameWidth - menuWidth);
-			int maxY = Math.max(0, currentGameHeight - menuHeight);
-			menuOffsetX = clamp(menuOffsetX, 0, maxX);
-			menuOffsetY = clamp(menuOffsetY, 0, maxY);
-			drawMenu(0, 0);
-		}
-		drawAchievementToastOverlay();
-	}
-
-
-
 
 	private void drawLayoutDebugOverlay() {
 		if (!interfaceText) {
@@ -1844,7 +1731,7 @@ public class Client extends RSApplet {
 
 		}
 		DrawingArea.defaultDrawingAreaSize();
-		if (menuOpen && !isRs3InterfaceStyle()) {
+		if (menuOpen) {
 			drawMenu(xOffset, rs3ChatOverride ? yOffset : (currentScreenMode == ScreenMode.FIXED ? 338 : 0));
 		}
 		//tried here
@@ -2018,16 +1905,10 @@ public class Client extends RSApplet {
 						aBoolean1242 = false;
 						anInt989 = 0;
 						draggingItemInterfaceId = j2;
-						int dragSlot = getInventorySlotAt(super.getSaveClickX(), super.getSaveClickY());
-						itemDraggingSlot = dragSlot != -1 ? dragSlot : l1;
+						itemDraggingSlot = l1;
 						activeInterfaceType = 2;
 						anInt1087 = super.getSaveClickX();
 						anInt1088 = super.getSaveClickY();
-						if (debugUi) {
-							Point origin = getInventoryOriginForDebug();
-							System.out.println("Inv drag start origin=" + origin.x + "," + origin.y + " draggedSlot="
-									+ itemDraggingSlot + " mouse=" + super.getSaveClickX() + "," + super.getSaveClickY());
-						}
 						if (RSInterface.interfaceCache[j2].parentID == openInterfaceID)
 							activeInterfaceType = 1;
 						if (RSInterface.interfaceCache[j2].parentID == backDialogID)
@@ -3105,7 +2986,6 @@ public class Client extends RSApplet {
 										bars.setConsume(StatusBars.Restore.get(itemDef.id));//status bars
 
 										boolean hasDestroyOption = false;
-										boolean hasExamineOption = false;
 										if (itemSelected == 1 && class9_1.isInventoryInterface) {
 											if (class9_1.id != anInt1284 || k2 != anInt1283) {
 												menuActionName[menuActionRow] = "Use " + selectedItemName + " with @lre@"
@@ -3133,9 +3013,6 @@ public class Client extends RSApplet {
 															&& itemDef.inventoryOptions[l3] != null) {
 														menuActionName[menuActionRow] = itemDef.inventoryOptions[l3]
 																+ " @lre@" + itemDef.name;
-														if (itemDef.inventoryOptions[l3].contains("Examine")) {
-															hasExamineOption = true;
-														}
 
 														if (HoverMenuManager.shouldDraw(itemDef.id)) {
 															HoverMenuManager.showMenu = true;
@@ -3207,9 +3084,6 @@ public class Client extends RSApplet {
 
 														menuActionName[menuActionRow] = itemDef.inventoryOptions[i4]
 																+ " @lre@" + itemDef.name;
-														if (itemDef.inventoryOptions[i4].contains("Examine")) {
-															hasExamineOption = true;
-														}
 
 														if (itemDef.inventoryOptions[i4].contains("Wield")
 																|| itemDef.inventoryOptions[i4].contains("Wear")
@@ -3302,9 +3176,6 @@ public class Client extends RSApplet {
 															continue;
 														if (class9_1.actions[j4] != null) {
 															menuActionName[menuActionRow] = class9_1.actions[j4] + " @lre@" + itemDef.name;
-															if (class9_1.actions[j4].contains("Examine")) {
-																hasExamineOption = true;
-															}
 															if (class9_1.id != 1688/*equipment*/) {
 																if (j4 == 0)
 																	menuActionID[menuActionRow] = 632;
@@ -3350,19 +3221,6 @@ public class Client extends RSApplet {
 													}
 												}
 											}
-										}
-
-										if (class9_1.isInventoryInterface && !hasExamineOption) {
-											if (myPlayer.isAdminRights()) {
-												menuActionName[menuActionRow] = "Examine @lre@" + itemDef.name + " @whi@(" + (itemID) + ")";
-											} else {
-												menuActionName[menuActionRow] = "Examine @lre@" + itemDef.name;
-											}
-											menuActionID[menuActionRow] = 1126;
-											menuActionCmd1[menuActionRow] = itemDef.id;
-											menuActionCmd2[menuActionRow] = k2;
-											menuActionCmd3[menuActionRow] = class9_1.id;
-											menuActionRow++;
 										}
 
 										if (class9_1.parentID >= 58040 && class9_1.parentID <= 58048
@@ -4310,7 +4168,7 @@ public class Client extends RSApplet {
 		//}
 
 
-		if (menuOpen && !isRs3InterfaceStyle()) {
+		if (menuOpen) {
 			drawMenu(fixedMode ? 516 : 0, fixedMode ? 168 : 0);
 		}
 
@@ -5894,9 +5752,7 @@ public class Client extends RSApplet {
 			if (super.getMouseX() > anInt1087 + 5 || super.getMouseX() < anInt1087 - 5 || super.getMouseY() > anInt1088 + 5
 					|| super.getMouseY() < anInt1088 - 5)
 				aBoolean1242 = true;
-			updateRs3InventoryDragHover();
 			if (super.clickMode2 == 0) {
-				updateRs3InventoryDragHover(super.getMouseX(), super.getMouseY());
 				if (activeInterfaceType == 2)
 					needDrawTabArea = true;
 				if (activeInterfaceType == 3)
@@ -5955,11 +5811,6 @@ public class Client extends RSApplet {
 									stream.writeWord(i);
 									stream.writeWord(RSInterface.get(draggingItemInterfaceId).inventoryItemId[itemDraggingSlot]);
 								}
-								if (debugUi) {
-									System.out.println("Inv drag end interface=" + draggingItemInterfaceId
-											+ " draggedSlot=" + itemDraggingSlot + " targetSlot=" + mouseInvInterfaceIndex
-											+ " swapFired=true (bank tab)");
-								}
 								return;
 							}
 						}
@@ -6015,11 +5866,6 @@ public class Client extends RSApplet {
 								stream.method424(insertMode);
 								stream.method433(itemDraggingSlot);
 								stream.method431(mouseInvInterfaceIndex);
-								if (debugUi) {
-									System.out.println("Inv drag end interface=" + draggingItemInterfaceId
-											+ " draggedSlot=" + itemDraggingSlot + " targetSlot=" + mouseInvInterfaceIndex
-											+ " swapFired=true");
-								}
 							} else if (class9.allowInvDraggingToOtherContainers && lastActiveInvInterface != draggingItemInterfaceId) {
 								if (lastActiveInvInterface != -1 && draggingItemInterfaceId != -1) {
 									RSInterface draggingFrom = RSInterface.interfaceCache[draggingItemInterfaceId];
@@ -6051,11 +5897,6 @@ public class Client extends RSApplet {
 										stream.method424(insertMode);
 										stream.writeWord(fromSlot);
 										stream.writeWord(toSlot);
-										if (debugUi) {
-											System.out.println("Inv drag end interface=" + draggingItemInterfaceId
-													+ " draggedSlot=" + itemDraggingSlot + " targetSlot=" + mouseInvInterfaceIndex
-													+ " swapFired=true (cross-container)");
-										}
 									}
 								}
 							}
@@ -12405,7 +12246,7 @@ public class Client extends RSApplet {
 		achievementToastTicks = achievementToastTotalTicks;
 		achievementToastOffset = -AchievementCompleteToast.getPanelHeight();
 		layoutModel.update(this);
-		int walkableWidth = layoutModel.canvasRect.width;
+		int walkableWidth = currentScreenMode == ScreenMode.FIXED ? 512 : layoutModel.canvasRect.width;
 		RSInterface toastInterface = RSInterface.interfaceCache[AchievementCompleteToast.INTERFACE_ID];
 		if (currentScreenMode == ScreenMode.FIXED && toastInterface != null && toastInterface.width > 0) {
 			walkableWidth = toastInterface.width;
@@ -13708,7 +13549,7 @@ public class Client extends RSApplet {
 		if (!menuOpen) {
 			processRightClick();
 			drawTopLeftTooltip();
-		} else if (!isRs3InterfaceStyle()) {
+		} else {
 			drawMenu(0, 0);
 		}
 
@@ -15816,7 +15657,7 @@ public class Client extends RSApplet {
 			processRightClick();
 			drawTopLeftTooltip();
 			drawAttrHoverOverlay();
-		} else if (!isRs3InterfaceStyle() && menuScreenArea == 0) {
+		} else if (menuScreenArea == 0) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 0 : 0, currentScreenMode == ScreenMode.FIXED ? 0 : 0);
 		}
 
@@ -16698,7 +16539,7 @@ public class Client extends RSApplet {
 			// if (drawOrbs)
 			// loadAllOrbs(currentScreenMode == ScreenMode.FIXED ? 0 : currentGameWidth -
 			// 217);
-			if (menuOpen && !isRs3InterfaceStyle()) {
+			if (menuOpen) {
 				drawMenu(currentScreenMode == ScreenMode.FIXED ? 516 : 0, 0);
 			}
 			mainGameGraphicsBuffer.setCanvas();
@@ -16943,7 +16784,7 @@ public class Client extends RSApplet {
 			}
 
 		}
-		if (menuOpen && !isRs3InterfaceStyle()) {
+		if (menuOpen) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 516 : 0, 0);
 		}
 		mainGameGraphicsBuffer.setCanvas();
@@ -17714,8 +17555,8 @@ public class Client extends RSApplet {
 		int bob = (int)(Math.sin(loopCycle / 12.0) * 3.0);
 		int pulse = (int)(Math.sin(loopCycle / 18.0) * 18.0) + 35; // 17..53-ish alpha
 
-		int x = 386 - (logo2021.myWidth / 2) + 8;
-		int y = 85 - (logo2021.myHeight / 2) + 35 + bob;
+		int x = 386 - (logo2021.myWidth / 2) + 8-20 + 5;
+		int y = 85 - (logo2021.myHeight / 2) + 35- 20 + bob;
 
 		try {
 			// faint glow (optional)
@@ -17732,26 +17573,40 @@ public class Client extends RSApplet {
 	}
 	private void drawSkullEyeGlowFx(int baseX, int baseY) {
 		// pulse 0..1
-		float p = 0.5f + 0.5f * (float)Math.sin(loopCycle / 10f);
+		float p = 0.5f + 0.5f * (float) Math.sin(loopCycle / 10f);
 
-		int alpha = 70 + (int)(60 * p); // 70..130
+		// Slightly stronger range works better for green glows (they read darker)
+		int alphaOuter = 75 + (int) (90 * p);  // 75..165
+		int alphaInner = 95 + (int) (60 * p);  // 95..155
+
 		int radiusOuter = 18;
 		int radiusInner = 10;
 
 		// TODO: set these to your exact eye pixel positions (screen coords)
-		int leftEyeX  = baseX + -9;
-		int leftEyeY  = baseY + 152;
-		int rightEyeX = baseX + +21;
-		int rightEyeY = baseY + 152;
+		int leftEyeX  = baseX + -9-20+10;
+		int leftEyeY  = baseY + 132;
+		int rightEyeX = baseX + +21-20+10;
+		int rightEyeY = baseY + 132;
 
-		// Outer warm bloom
-		drawSoftGlow(leftEyeX, leftEyeY, radiusOuter, 0x360801, alpha);
-		drawSoftGlow(rightEyeX, rightEyeY, radiusOuter, 0x360801, alpha);
+		// Mossy green palette
+		// Outer = deep olive haze, mid = moss green, core = lime/pale green-white
+		int outerCol = 0x0E2A06; // deep olive / moss shadow
+		int midCol   = 0x2F8A1D; // moss green
+		int coreCol  = 0xBFF96A; // hot lime core (reads bright)
 
-		// Inner hot core
-		drawSoftGlow(leftEyeX, leftEyeY, radiusInner, 0xff312a, 110);
-		drawSoftGlow(rightEyeX, rightEyeY, radiusInner, 0xff312a, 110);
+		// Outer bloom (soft, dark haze)
+		drawSoftGlow(leftEyeX, leftEyeY, radiusOuter, outerCol, alphaOuter);
+		drawSoftGlow(rightEyeX, rightEyeY, radiusOuter, outerCol, alphaOuter);
+
+		// Add a mid layer so it feels like green fire rather than a flat green LED
+		drawSoftGlow(leftEyeX, leftEyeY, radiusInner + 4, midCol, (alphaOuter + alphaInner) / 2);
+		drawSoftGlow(rightEyeX, rightEyeY, radiusInner + 4, midCol, (alphaOuter + alphaInner) / 2);
+
+		// Inner hot core (brighter, slightly tighter)
+		drawSoftGlow(leftEyeX, leftEyeY, radiusInner, coreCol, alphaInner);
+		drawSoftGlow(rightEyeX, rightEyeY, radiusInner, coreCol, alphaInner);
 	}
+
 	private static final class Ember {
 		float x, y;
 		float vx, vy;
@@ -17803,26 +17658,71 @@ public class Client extends RSApplet {
 	}
 
 	private void renderEmbers() {
+		// Brazier-green palette (outer haze -> mid -> core)
+		final int OUTER = 0x0B1F05; // deep olive haze
+		final int MID   = 0x2F8A1D; // moss green
+		final int CORE  = 0xBFF96A; // lime-ish core
+
 		for (Ember e : embers) {
 			if (e == null || !e.active) continue;
 
 			float age = 1f - (e.life / e.maxLife); // 0..1
 			float fade = (age < 0.2f) ? (age / 0.2f) : (1f - (age - 0.2f) / 0.8f);
-			if (fade < 0f) fade = 0f;
+			if (fade <= 0f) continue;
 
-			// reduced intensity
-			int alpha = (int)(95 * fade);              // was 140
-			int radius = Math.max(3, (int)(e.size * 0.80f)); // slightly smaller
+			// "Heat" is highest early, then cools
+			float heat = 1f - age; // 1..0
+			if (heat < 0f) heat = 0f;
+			if (heat > 1f) heat = 1f;
 
-			drawSoftGlow((int)e.x, (int)e.y, radius, e.rgb, alpha);
+			// Much less glowy: tighter + lower alpha
+			int baseRadius = Math.max(2, (int)(e.size * 0.55f));
+			int rOuter = Math.max(2, baseRadius);          // small haze
+			int rMid   = Math.max(2, baseRadius - 1);      // small body
+			int rCore  = 1;                                // tiny hotspot
 
-			// core reduced too
-			drawSoftGlow((int)e.x, (int)e.y,
-					Math.max(2, radius / 3),
-					0xff312a,                          // warmer core, less yellow than FFD6A0
-					(int)(70 * fade));                 // was 110
+			int aOuter = (int)(50 * fade);                 // subtle haze
+			int aMid   = (int)((45 + 25 * heat) * fade);   // slightly hotter early
+			int aCore  = (int)((55 + 35 * heat) * fade);   // crisp core, not bloom
+
+			// Color shift with heat so fresh embers look hotter (more lime),
+			// older ones look mossy/darker.
+			int midCol  = lerpRgb(MID, CORE, clamp01(heat * 0.9f));
+			int coreCol = lerpRgb(CORE, 0xF6FFEC, clamp01(heat * 0.6f)); // pale green-white hint
+
+			// Outer haze (very subtle)
+			if (aOuter > 0)
+				drawSoftGlow((int)e.x, (int)e.y, rOuter, OUTER, aOuter);
+
+			// Ember body (main visible bit)
+			if (aMid > 0)
+				drawSoftGlow((int)e.x, (int)e.y, rMid, midCol, aMid);
+
+			// Tiny hotspot for definition (keeps it "spark" not "orb")
+			if (aCore > 0)
+				drawSoftGlow((int)e.x, (int)e.y, rCore, coreCol, aCore);
 		}
 	}
+
+	private static float clamp01(float v) {
+		return v < 0f ? 0f : (v > 1f ? 1f : v);
+	}
+
+	// Linear RGB lerp, 317-friendly.
+	private static int lerpRgb(int a, int b, float t) {
+		if (t <= 0f) return a;
+		if (t >= 1f) return b;
+
+		int ar = (a >> 16) & 0xFF, ag = (a >> 8) & 0xFF, ab = a & 0xFF;
+		int br = (b >> 16) & 0xFF, bg = (b >> 8) & 0xFF, bb = b & 0xFF;
+
+		int r = ar + (int)((br - ar) * t);
+		int g = ag + (int)((bg - ag) * t);
+		int bl = ab + (int)((bb - ab) * t);
+
+		return (r << 16) | (g << 8) | bl;
+	}
+
 
 
 	private final Ember[] embers = new Ember[120];
@@ -18283,27 +18183,55 @@ public class Client extends RSApplet {
 		private int[] buildPalette() {
 			int[] p = new int[256];
 
-			// Dark -> red -> orange -> yellow -> white
+			// Utility: linear blend from (sr,sg,sb) -> (er,eg,eb) across 64 entries.
+			// (Using integer math to stay 317-friendly.)
 			for (int i = 0; i < 64; i++) {
-				int r = i * 4;
-				p[i] = (r << 16);
+				int t = i; // 0..63
+
+				// Ramp 0: black -> deep moss (cool outer flame)
+				{
+					int sr = 0x00, sg = 0x00, sb = 0x00;
+					int er = 0x10, eg = 0x40, eb = 0x08;
+					int r = (sr * (63 - t) + er * t) / 63;
+					int g = (sg * (63 - t) + eg * t) / 63;
+					int b = (sb * (63 - t) + eb * t) / 63;
+					p[i] = (r << 16) | (g << 8) | b;
+				}
+
+				// Ramp 1: deep moss -> moss green
+				{
+					int sr = 0x10, sg = 0x40, sb = 0x08;
+					int er = 0x3C, eg = 0xA8, eb = 0x20;
+					int r = (sr * (63 - t) + er * t) / 63;
+					int g = (sg * (63 - t) + eg * t) / 63;
+					int b = (sb * (63 - t) + eb * t) / 63;
+					p[64 + i] = (r << 16) | (g << 8) | b;
+				}
+
+				// Ramp 2: moss green -> lime/yellow-green flame
+				{
+					int sr = 0x3C, sg = 0xA8, sb = 0x20;
+					int er = 0xC8, eg = 0xF0, eb = 0x60;
+					int r = (sr * (63 - t) + er * t) / 63;
+					int g = (sg * (63 - t) + eg * t) / 63;
+					int b = (sb * (63 - t) + eb * t) / 63;
+					p[128 + i] = (r << 16) | (g << 8) | b;
+				}
+
+				// Ramp 3: hot core -> near-white with a green tint (not flat white)
+				{
+					int sr = 0xC8, sg = 0xF0, sb = 0x60;
+					int er = 0xF6, eg = 0xFF, eb = 0xEC; // pale green-white
+					int r = (sr * (63 - t) + er * t) / 63;
+					int g = (sg * (63 - t) + eg * t) / 63;
+					int b = (sb * (63 - t) + eb * t) / 63;
+					p[192 + i] = (r << 16) | (g << 8) | b;
+				}
 			}
-			for (int i = 0; i < 64; i++) {
-				int g = i * 4;
-				p[64 + i] = (0xFF << 16) | (g << 8);
-			}
-			for (int i = 0; i < 64; i++) {
-				int b = i * 4;
-				p[128 + i] = (0xFF << 16) | (0xFF << 8) | b;
-			}
-			for (int i = 0; i < 64; i++) {
-				int c = 0xFF;
-				int t = i * 4;
-				// white-ish ramp
-				p[192 + i] = (c << 16) | (c << 8) | c;
-			}
+
 			return p;
 		}
+
 
 		/** Call once per frame/tick */
 		public void update() {
@@ -18480,10 +18408,10 @@ public class Client extends RSApplet {
 // If your client has Rasterizer2D / DrawingArea pixels, use that.
 // Most bases: DrawingArea.pixels + DrawingArea.width.
 			brazierFlameLeft.draw(DrawingArea.pixels, DrawingArea.width,
-					brazierLeftX + flameOffsetX, brazierLeftY + flameOffsetY -24, 190);
+					brazierLeftX + flameOffsetX, brazierLeftY + flameOffsetY -24+20-8, 190);
 
 			brazierFlameRight.draw(DrawingArea.pixels, DrawingArea.width,
-					brazierRightX + flameOffsetX, brazierRightY + flameOffsetY - 24, 190);
+					brazierRightX + flameOffsetX, brazierRightY + flameOffsetY - 24+20-8, 190);
 			tickAndDrawLoginParticles();
 			//	logo2021.drawAdvancedSprite(386 - (logo2021.myWidth / 2),85 - (logo2021.myHeight / 2));
 		}
@@ -21446,7 +21374,7 @@ public class Client extends RSApplet {
 			displayGroundItems();
 		}
 
-		boolean useUiBuffer = uiGraphicsBuffer != null && !isRs3InterfaceStyle() && currentScreenMode != ScreenMode.FIXED;
+		boolean useUiBuffer = uiGraphicsBuffer != null && isRs3InterfaceStyle() && currentScreenMode != ScreenMode.FIXED;
 
 		if (loggedIn) {
 			if (!inCutScene) {
@@ -21456,11 +21384,13 @@ public class Client extends RSApplet {
 						if (!useUiBuffer) {
 							DrawingArea.defaultDrawingAreaSize();
 							drawRs3Panels();
+							drawAchievementToastOverlay();
 						}
 					} else {
 						drawMinimap();
 						drawTabArea();
 						drawChatArea();
+						drawAchievementToastOverlay();
 					}
 				}
 			}
@@ -21478,9 +21408,6 @@ public class Client extends RSApplet {
 		}
 
 		processExperienceCounter();
-		if (isRs3InterfaceStyle()) {
-			drawRs3FinalOverlays();
-		}
 
 		if (useUiBuffer) {
 			// Compose final frame into the UI buffer:
@@ -22058,8 +21985,6 @@ public class Client extends RSApplet {
 	private Stream inStream;
 	private int draggingItemInterfaceId;
 	private int itemDraggingSlot;
-	private int lastDragHoverSlot = -1;
-	private boolean debugUi = true;
 	private int activeInterfaceType;
 	private int anInt1087;
 	private int anInt1088;
