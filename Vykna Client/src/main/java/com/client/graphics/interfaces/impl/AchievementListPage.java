@@ -209,6 +209,9 @@ public final class AchievementListPage extends RSInterface {
         List<ProgressionEntryDefinition> entries = VyknaProgressionDefinitions.getEntries(currentListType);
         List<TaskRow> rows = new ArrayList<>();
         for (ProgressionEntryDefinition entry : entries) {
+            if (!showCompleted && entry.isCompleted()) {
+                continue;
+            }
             if (!ALL_FILTER.equalsIgnoreCase(currentFilter)
                     && !normalizeFilter(entry.getSubcategory()).equalsIgnoreCase(currentFilter)) {
                 continue;

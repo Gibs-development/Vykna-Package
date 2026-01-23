@@ -17,7 +17,7 @@ public class MoneyPouchPanel extends WidgetPanel {
 
 	@Override
 	public boolean handleMouse(Client client, int mouseX, int mouseY) {
-		client.setPouchHover(true);
+		client.setProgressionHover(true);
 		client.processRs3OrbActions(bounds().x + mouseX, bounds().y + mouseY, bounds().x, bounds().y);
 		return true;
 	}
