@@ -502,9 +502,10 @@ public class Client extends RSApplet {
 		int targetSlot = getInventorySlotAt(mouseX, mouseY);
 		mouseInvInterfaceIndex = targetSlot;
 		lastActiveInvInterface = targetSlot != -1 ? draggingItemInterfaceId : -1;
-		if (debugUi) {
+		if (debugUi && targetSlot != lastDragHoverSlot) {
+			lastDragHoverSlot = targetSlot;
 			Point origin = getInventoryOriginForDebug();
-			System.out.println("Inv drag end origin=" + origin.x + "," + origin.y + " targetSlot=" + targetSlot
+			System.out.println("Inv drag hover origin=" + origin.x + "," + origin.y + " targetSlot=" + targetSlot
 					+ " draggedSlot=" + itemDraggingSlot + " mouse=" + mouseX + "," + mouseY);
 		}
 		return targetSlot;
@@ -5954,6 +5955,11 @@ public class Client extends RSApplet {
 									stream.writeWord(i);
 									stream.writeWord(RSInterface.get(draggingItemInterfaceId).inventoryItemId[itemDraggingSlot]);
 								}
+								if (debugUi) {
+									System.out.println("Inv drag end interface=" + draggingItemInterfaceId
+											+ " draggedSlot=" + itemDraggingSlot + " targetSlot=" + mouseInvInterfaceIndex
+											+ " swapFired=true (bank tab)");
+								}
 								return;
 							}
 						}
@@ -6009,6 +6015,11 @@ public class Client extends RSApplet {
 								stream.method424(insertMode);
 								stream.method433(itemDraggingSlot);
 								stream.method431(mouseInvInterfaceIndex);
+								if (debugUi) {
+									System.out.println("Inv drag end interface=" + draggingItemInterfaceId
+											+ " draggedSlot=" + itemDraggingSlot + " targetSlot=" + mouseInvInterfaceIndex
+											+ " swapFired=true");
+								}
 							} else if (class9.allowInvDraggingToOtherContainers && lastActiveInvInterface != draggingItemInterfaceId) {
 								if (lastActiveInvInterface != -1 && draggingItemInterfaceId != -1) {
 									RSInterface draggingFrom = RSInterface.interfaceCache[draggingItemInterfaceId];
@@ -6040,6 +6051,11 @@ public class Client extends RSApplet {
 										stream.method424(insertMode);
 										stream.writeWord(fromSlot);
 										stream.writeWord(toSlot);
+										if (debugUi) {
+											System.out.println("Inv drag end interface=" + draggingItemInterfaceId
+													+ " draggedSlot=" + itemDraggingSlot + " targetSlot=" + mouseInvInterfaceIndex
+													+ " swapFired=true (cross-container)");
+										}
 									}
 								}
 							}
@@ -22042,6 +22058,7 @@ public class Client extends RSApplet {
 	private Stream inStream;
 	private int draggingItemInterfaceId;
 	private int itemDraggingSlot;
+	private int lastDragHoverSlot = -1;
 	private boolean debugUi = true;
 	private int activeInterfaceType;
 	private int anInt1087;

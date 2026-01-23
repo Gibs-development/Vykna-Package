@@ -692,7 +692,8 @@ public class RSInterface {
 		rsi.inventoryItemId = new int[w * h];
 		rsi.inventoryAmounts = new int[w * h];
 		rsi.usableItemInterface = false;
-		rsi.isInventoryInterface = false;
+		rsi.isInventoryInterface = drag;
+		rsi.aBoolean259 = drag;
 		rsi.invSpritePadX = x;
 		rsi.invSpritePadY = y;
 		rsi.spritesX = new int[20];
