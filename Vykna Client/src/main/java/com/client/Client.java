@@ -6314,6 +6314,14 @@ public class Client extends RSApplet {
 			AchievementListPage.clearSearchQuery();
 		}
 
+		if (buttonPressed == AchievementListPage.getSearchClearTextId()) {
+			AchievementListPage.clearSearchQuery();
+		}
+
+		if (buttonPressed == AchievementListPage.getToggleCompletedId()) {
+			AchievementListPage.setShowCompleted(!AchievementListPage.isShowCompleted());
+		}
+
 		if (l == 713) {//Money pouch
 			//	inputTaken = true;
 			//	messagePromptRaised = true;

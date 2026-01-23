@@ -67,9 +67,11 @@ public final class AchievementListPage extends RSInterface {
     private static final int CLOSE_HOVER_ID = INTERFACE_ID + 2006;
     private static final int DROPDOWN_ID = INTERFACE_ID + 2010;
     private static final int TEXT_SHOW_COMPLETED = INTERFACE_ID + 2020;
+    private static final int TOGGLE_COMPLETED_ID = INTERFACE_ID + 2021;
     private static final int SEARCH_BG_ID = INTERFACE_ID + 2030;
     private static final int SEARCH_TEXT_ID = INTERFACE_ID + 2031;
     private static final int SEARCH_CLEAR_ID = INTERFACE_ID + 2032;
+    private static final int SEARCH_CLEAR_TEXT_ID = INTERFACE_ID + 2033;
 
     // Scroll + rows (separate block)
     private static final int SCROLL_ID = INTERFACE_ID + 3000;
@@ -140,6 +142,9 @@ public final class AchievementListPage extends RSInterface {
     private static final int ROW_BAR_H = 12;
     private static final int TITLE_COLOR_DEFAULT = 0xE3AE19;
     private static final int TITLE_COLOR_HIGHLIGHT = 0xF6D577;
+    private static final int ROW_FILL_DEFAULT = 0x3a3228;
+    private static final int ROW_FILL_COMPLETED = 0x2b241d;
+    private static final String TOGGLE_SPRITE_ROOT = "sprites/login/Remember";
 
     /**
      * The interface is built once, so we allocate enough rows for the largest category.
@@ -159,6 +164,14 @@ public final class AchievementListPage extends RSInterface {
 
     public static int getSearchClearId() {
         return SEARCH_CLEAR_ID;
+    }
+
+    public static int getSearchClearTextId() {
+        return SEARCH_CLEAR_TEXT_ID;
+    }
+
+    public static int getToggleCompletedId() {
+        return TOGGLE_COMPLETED_ID;
     }
 
     private static void addGridSpriteValueIndex(int id, String atlasSpritePath,
@@ -285,6 +298,11 @@ public final class AchievementListPage extends RSInterface {
                 }
                 RSInterface.interfaceCache[base + 0].interfaceHidden = !active;
             }
+            if (RSInterface.interfaceCache[base + 5] != null) {
+                RSInterface.interfaceCache[base + 5].fillColor = active && rows.get(i).completed
+                        ? ROW_FILL_COMPLETED
+                        : ROW_FILL_DEFAULT;
+            }
 
             final int barBgId = base + 6;
             final int barFillId = base + 7;
@@ -329,14 +347,29 @@ public final class AchievementListPage extends RSInterface {
     public static void setShowCompleted(boolean showCompletedFlag) {
         showCompleted = showCompletedFlag;
         updateShowCompletedText();
+        updateToggleSprite();
         refreshList(currentFilter);
+    }
+
+    public static boolean isShowCompleted() {
+        return showCompleted;
     }
 
     private static void updateShowCompletedText() {
         if (RSInterface.interfaceCache[TEXT_SHOW_COMPLETED] != null) {
-            RSInterface.interfaceCache[TEXT_SHOW_COMPLETED].message =
-                    showCompleted ? "Hide Completed" : "Show Completed";
+            RSInterface.interfaceCache[TEXT_SHOW_COMPLETED].message = "Toggle Complete";
         }
+    }
+
+    private static void updateToggleSprite() {
+        RSInterface toggle = RSInterface.interfaceCache[TOGGLE_COMPLETED_ID];
+        if (toggle == null) {
+            return;
+        }
+        String base = TOGGLE_SPRITE_ROOT + (showCompleted ? "2" : "0");
+        String hover = TOGGLE_SPRITE_ROOT + (showCompleted ? "3" : "1");
+        toggle.sprite1 = imageLoader(0, base);
+        toggle.sprite2 = imageLoader(0, hover);
     }
 
     public static void setSearchQuery(String query) {
@@ -482,13 +515,17 @@ public final class AchievementListPage extends RSInterface {
                 DARK_DROPDOWN_COLORS, false, tda, 1
         );
 
-        addHoverText(TEXT_SHOW_COMPLETED, "Show Completed?", "Toggle showing completed tasks",
+        addHoverText(TEXT_SHOW_COMPLETED, "Toggle Complete", "Toggle completed progressions",
                 tda, 0, 0xE3AE19, false, true, 110, 16);
+
+        addHoverButtonNew(TOGGLE_COMPLETED_ID, TOGGLE_SPRITE_ROOT + "0", TOGGLE_SPRITE_ROOT + "1",
+                14, 15, "Toggle Complete", 0, 1);
 
         addBox(SEARCH_BG_ID, 0x2b2118, 0x1f1812, 120, 160, 16);
         addHoverText(SEARCH_TEXT_ID, "Search...", "Search progressions", tda, 0, 0x9a8b7a, false, true, 160, 16);
         addHoverButtonNew(SEARCH_CLEAR_ID, SPRITE_ROOT + "Close", SPRITE_ROOT + "CloseHover",
                 16, 16, "Clear", 0, 1);
+        addHoverText(SEARCH_CLEAR_TEXT_ID, "Clear Search", "Clear search", tda, 0, 0xE3AE19, false, true, 72, 16);
 
         // ---- Scroll container ----
         RSInterface scroll = addTabInterface(SCROLL_ID);
@@ -509,7 +546,7 @@ public final class AchievementListPage extends RSInterface {
             final int barTextId = base + 8;
 
             int valueIndex = (i % 4) + 1;
-            addBox(boxId, 0x3a3228, 0x2c261f, 120, scroll.width - 12, ROW_H - 6);
+            addBox(boxId, ROW_FILL_DEFAULT, 0x2c261f, 120, scroll.width - 12, ROW_H - 6);
             addGridSpriteValueIndex(base + 0, RECENT_ATLAS, 6, 6, ICON_SIZE, valueIndex, "");
 
             addText(base + 1, "", tda, 0, 0xE3AE19, false, true);
@@ -565,7 +602,9 @@ public final class AchievementListPage extends RSInterface {
                         + 2 // close + hover
                         + 1 // dropdown
                         + 1 // show completed
+                        + 1 // completed toggle
                         + 3 // search box
+                        + 1 // clear search text
                         + 1 // scroll
                         + 1 // progress text
                         + 4 // progress bar parts
@@ -622,14 +661,17 @@ public final class AchievementListPage extends RSInterface {
         // Top row (draw last so the dropdown popup renders above everything)
         rsi.child(c++, DROPDOWN_ID, MAIN_X, MAIN_Y + 2);
         rsi.child(c++, TEXT_SHOW_COMPLETED, MAIN_X + 96, MAIN_Y + 2);
+        rsi.child(c++, TOGGLE_COMPLETED_ID, MAIN_X + 76, MAIN_Y + 2);
         rsi.child(c++, SEARCH_BG_ID, MAIN_X + 230, MAIN_Y + 2);
         rsi.child(c++, SEARCH_TEXT_ID, MAIN_X + 236, MAIN_Y + 2);
         rsi.child(c++, SEARCH_CLEAR_ID, MAIN_X + 230 + 142, MAIN_Y + 2);
+        rsi.child(c++, SEARCH_CLEAR_TEXT_ID, MAIN_X + 230 + 162, MAIN_Y + 2);
 
         // Populate initial list
 
         updateShowCompletedText();
         updateSearchText();
+        updateToggleSprite();
         refreshList(ALL_FILTER);
     }
 
