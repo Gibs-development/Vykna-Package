@@ -58,6 +58,7 @@ import io.xeros.model.collisionmap.PathChecker;
 import io.xeros.model.collisionmap.Region;
 import io.xeros.model.collisionmap.WorldObject;
 import io.xeros.model.cycleevent.CycleEventHandler;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.model.cycleevent.DelayEvent;
 import io.xeros.model.cycleevent.impl.WheatPortalEvent;
 import io.xeros.model.definitions.ItemDef;
@@ -3184,6 +3185,7 @@ public class PlayerAssistant {
 		} else {
 			setSkillLevel(i, c.playerLevel[i], c.playerXP[i]);
 		}
+		VyknaProgressionHandler.refreshDerivedProgressForSkill(c, Skill.forId(i), true);
 	}
 
 	public void refreshSkills() {

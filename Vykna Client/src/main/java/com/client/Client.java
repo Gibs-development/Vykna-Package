@@ -12192,13 +12192,17 @@ public class Client extends RSApplet {
 		AchievementCompleteToast.setToastText(name, extraLine);
 		AchievementCompleteToast.setToastIconIndex(iconIndex);
 
+		startAchievementToastAnimation();
+
+		achievementToastPrevWalkable = openWalkableWidgetID;
+		openWalkableWidgetID = AchievementCompleteToast.INTERFACE_ID;
+	}
+
+	private void startAchievementToastAnimation() {
 		achievementToastTotalTicks = (TOAST_SLIDE_TICKS * 2) + TOAST_HOLD_TICKS;
 		achievementToastTicks = achievementToastTotalTicks;
 		achievementToastOffset = -AchievementCompleteToast.getPanelHeight();
 		AchievementCompleteToast.setToastOffsetY(achievementToastOffset);
-
-		achievementToastPrevWalkable = openWalkableWidgetID;
-		openWalkableWidgetID = AchievementCompleteToast.INTERFACE_ID;
 	}
 
 
@@ -19823,6 +19827,10 @@ public class Client extends RSApplet {
 						i3 = -1; // Changed to unsigned short so need to manually make it -1
 					if (i3 >= 0)
 						method60(i3);
+					if (i3 == AchievementCompleteToast.INTERFACE_ID) {
+						achievementToastPrevWalkable = openWalkableWidgetID;
+						startAchievementToastAnimation();
+					}
 					openWalkableWidgetID = i3;
 					incomingPacket = -1;
 					return true;
