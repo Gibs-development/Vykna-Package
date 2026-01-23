@@ -118,6 +118,13 @@ public class PanelManager {
 		if (!client.isRs3EditModeActive()) {
 			return;
 		}
+		UiPanel hovered = getTopmostPanelAt(client.getMouseX(), client.getMouseY());
+		if (hovered != null && hovered.isVisible() && hovered != activePanel) {
+			drawPanelOutline(hovered, 0x66ccff);
+		}
+		if (activePanel != null && activePanel.isVisible()) {
+			drawPanelOutline(activePanel, 0xffcc66);
+		}
 		for (UiPanel panel : panels) {
 			if (!panel.isVisible()) {
 				continue;
@@ -127,6 +134,14 @@ public class PanelManager {
 			}
 			drawResizeHandle(client, panel);
 		}
+	}
+
+	private void drawPanelOutline(UiPanel panel, int color) {
+		Rectangle bounds = panel.getBounds();
+		if (bounds.width <= 0 || bounds.height <= 0) {
+			return;
+		}
+		DrawingArea.drawBoxOutline(bounds.x, bounds.y, bounds.width, bounds.height, color);
 	}
 
 	public boolean handleMouse(Client client, int mouseX, int mouseY) {
@@ -481,6 +496,14 @@ public class PanelManager {
 
 	public boolean isMouseOverPanel(int mouseX, int mouseY) {
 		return getTopmostPanelAt(mouseX, mouseY) != null;
+	}
+
+	public int getActivePanelId() {
+		return activePanel != null ? activePanel.getId() : -1;
+	}
+
+	public Rectangle getActivePanelBounds() {
+		return activePanel != null ? new Rectangle(activePanel.getBounds()) : null;
 	}
 
 	private UiPanel getTopmostPanelAt(int mouseX, int mouseY) {
