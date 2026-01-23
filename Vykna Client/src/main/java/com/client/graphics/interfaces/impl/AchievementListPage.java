@@ -95,23 +95,25 @@ public final class AchievementListPage extends RSInterface {
         private final int points;
         private final boolean completed;
         private final int spriteIndex;
+        private final boolean highlightTitle;
 
         // Optional per-task progress (e.g. 21/50). If target <= 0, bar is hidden.
         private final int progressCurrent;
         private final int progressTarget;
 
-        private TaskRow(String title, String description, int points, boolean completed, int spriteIndex) {
+        private TaskRow(String title, String description, int points, boolean completed, int spriteIndex, boolean highlightTitle) {
             this.title = title;
             this.description = description;
             this.points = points;
             this.completed = completed;
             this.spriteIndex = spriteIndex;
+            this.highlightTitle = highlightTitle;
             this.progressCurrent = 0;
             this.progressTarget = 0;
         }
 
         private TaskRow(String title, String description, int points, boolean completed, int spriteIndex,
-                        int progressCurrent, int progressTarget) {
+                        int progressCurrent, int progressTarget, boolean highlightTitle) {
             this.title = title;
             this.description = description;
             this.points = points;
@@ -119,6 +121,7 @@ public final class AchievementListPage extends RSInterface {
             this.spriteIndex = spriteIndex;
             this.progressCurrent = progressCurrent;
             this.progressTarget = progressTarget;
+            this.highlightTitle = highlightTitle;
         }
     }
 
@@ -135,6 +138,8 @@ public final class AchievementListPage extends RSInterface {
     // Per-row progress bar
     private static final int ROW_BAR_W = 120;
     private static final int ROW_BAR_H = 12;
+    private static final int TITLE_COLOR_DEFAULT = 0xE3AE19;
+    private static final int TITLE_COLOR_HIGHLIGHT = 0xF6D577;
 
     /**
      * The interface is built once, so we allocate enough rows for the largest category.
@@ -204,10 +209,11 @@ public final class AchievementListPage extends RSInterface {
             if (!showCompleted && entry.isCompleted()) {
                 continue;
             }
+            boolean highlightTitle = hasSearchQuery() && matchesQuery(progressionSearchQuery, entry);
             rows.add(new TaskRow(formatStatus(entry.getName(), entry.isCompleted()),
                     formatStatus(entry.getDescription(), entry.isCompleted()),
                     entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
-                    entry.getProgressCurrent(), entry.getRequirementTarget()));
+                    entry.getProgressCurrent(), entry.getRequirementTarget(), highlightTitle));
         }
 
         if (rows.isEmpty() && !ALL_FILTER.equalsIgnoreCase(currentFilter)) {
@@ -220,16 +226,17 @@ public final class AchievementListPage extends RSInterface {
                 if (!showCompleted && entry.isCompleted()) {
                     continue;
                 }
+                boolean highlightTitle = hasSearchQuery() && matchesQuery(progressionSearchQuery, entry);
                 rows.add(new TaskRow(formatStatus(entry.getName(), entry.isCompleted()),
                         formatStatus(entry.getDescription(), entry.isCompleted()),
                         entry.getPoints(), entry.isCompleted(), entry.getSpriteIndex(),
-                        entry.getProgressCurrent(), entry.getRequirementTarget()));
+                        entry.getProgressCurrent(), entry.getRequirementTarget(), highlightTitle));
             }
         }
 
         if (rows.isEmpty()) {
             rows.add(new TaskRow("No results", "Try a different term or clear the search.",
-                    0, false, 1));
+                    0, false, 1, false));
         }
 
         VyknaProgressionDefinitions.CompletionStats stats;
@@ -262,6 +269,9 @@ public final class AchievementListPage extends RSInterface {
 
             if (RSInterface.interfaceCache[base + 1] != null) {
                 RSInterface.interfaceCache[base + 1].message = active ? rows.get(i).title : "";
+                RSInterface.interfaceCache[base + 1].textColor = active && rows.get(i).highlightTitle
+                        ? TITLE_COLOR_HIGHLIGHT
+                        : TITLE_COLOR_DEFAULT;
             }
             if (RSInterface.interfaceCache[base + 2] != null) {
                 RSInterface.interfaceCache[base + 2].message = active ? rows.get(i).description : "";
@@ -655,5 +665,9 @@ public final class AchievementListPage extends RSInterface {
         String name = entry.getName() == null ? "" : entry.getName().toLowerCase();
         String description = entry.getDescription() == null ? "" : entry.getDescription().toLowerCase();
         return name.contains(normalized) || description.contains(normalized);
+    }
+
+    private static boolean hasSearchQuery() {
+        return progressionSearchQuery != null && !progressionSearchQuery.trim().isEmpty();
     }
 }
