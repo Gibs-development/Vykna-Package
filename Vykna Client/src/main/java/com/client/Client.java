@@ -539,6 +539,9 @@ public class Client extends RSApplet {
 		drawAchievementToastOverlay();
 	}
 
+
+
+
 	private void drawLayoutDebugOverlay() {
 		if (!interfaceText) {
 			return;
@@ -5878,6 +5881,7 @@ public class Client extends RSApplet {
 			if (super.getMouseX() > anInt1087 + 5 || super.getMouseX() < anInt1087 - 5 || super.getMouseY() > anInt1088 + 5
 					|| super.getMouseY() < anInt1088 - 5)
 				aBoolean1242 = true;
+			updateRs3InventoryDragHover();
 			if (super.clickMode2 == 0) {
 				updateRs3InventoryDragHover(super.getMouseX(), super.getMouseY());
 				if (activeInterfaceType == 2)
