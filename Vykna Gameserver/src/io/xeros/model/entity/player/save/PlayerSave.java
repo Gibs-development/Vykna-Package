@@ -58,6 +58,7 @@ import io.xeros.model.items.ItemAttributes;
 import io.xeros.model.items.bank.BankItem;
 import io.xeros.model.items.bank.BankTab;
 import io.xeros.model.entity.player.save.impl.VyknaProgressionSaveEntry;
+import io.xeros.content.vykna_progression.VyknaProgressionPersistence;
 import io.xeros.util.Misc;
 import io.xeros.util.PasswordHashing;
 import io.xeros.util.Reflection;
@@ -1435,6 +1436,8 @@ public class PlayerSave {
             if (!p.isBot())
                 logger.debug("Saving game for {}", p);
             Misc.createDirectory(getSaveDirectory());
+            // Hook Vykna progression JSON saves into the main player save flow.
+            VyknaProgressionPersistence.save(p, true);
 
 
             int tbTime = (int) (p.teleBlockStartMillis - System.currentTimeMillis() + p.teleBlockLength);

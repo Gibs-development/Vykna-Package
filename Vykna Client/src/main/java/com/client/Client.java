@@ -5474,6 +5474,10 @@ public class Client extends RSApplet {
 	}
 
 	private GameTimer gameTimer;
+	private static final int TOAST_SLIDE_TICKS = 20;
+	private static final int TOAST_HOLD_TICKS = 140;
+	private int achievementToastTotalTicks = 0;
+	private int achievementToastOffset = 0;
 	private static int toastIconForType(String type) {
 		if (type == null) return 0; // default icon index (Tasks)
 
@@ -5494,12 +5498,29 @@ public class Client extends RSApplet {
 		}
 		if (achievementToastTicks > 0) {
 			achievementToastTicks--;
+			int elapsed = achievementToastTotalTicks - achievementToastTicks;
+			int panelHeight = AchievementCompleteToast.getPanelHeight();
+			if (elapsed <= TOAST_SLIDE_TICKS) {
+				float t = Math.min(1f, elapsed / (float) TOAST_SLIDE_TICKS);
+				achievementToastOffset = Math.round((-panelHeight) * (1f - t));
+				AchievementCompleteToast.setToastOffsetY(achievementToastOffset);
+			} else if (achievementToastTicks <= TOAST_SLIDE_TICKS) {
+				float t = Math.min(1f, achievementToastTicks / (float) TOAST_SLIDE_TICKS);
+				achievementToastOffset = Math.round((-panelHeight) * (1f - t));
+				AchievementCompleteToast.setToastOffsetY(achievementToastOffset);
+			} else {
+				if (achievementToastOffset != 0) {
+					achievementToastOffset = 0;
+					AchievementCompleteToast.setToastOffsetY(achievementToastOffset);
+				}
+			}
 			if (achievementToastTicks == 0) {
 				// restore whatever was there before
 				if (openWalkableWidgetID == AchievementCompleteToast.INTERFACE_ID) {
 					openWalkableWidgetID = achievementToastPrevWalkable;
 				}
 				achievementToastPrevWalkable = -1;
+				AchievementCompleteToast.setToastOffsetY(0);
 			}
 		}
 
@@ -12171,10 +12192,17 @@ public class Client extends RSApplet {
 		AchievementCompleteToast.setToastText(name, extraLine);
 		AchievementCompleteToast.setToastIconIndex(iconIndex);
 
-		achievementToastTicks = 150;
+		startAchievementToastAnimation();
 
 		achievementToastPrevWalkable = openWalkableWidgetID;
 		openWalkableWidgetID = AchievementCompleteToast.INTERFACE_ID;
+	}
+
+	private void startAchievementToastAnimation() {
+		achievementToastTotalTicks = (TOAST_SLIDE_TICKS * 2) + TOAST_HOLD_TICKS;
+		achievementToastTicks = achievementToastTotalTicks;
+		achievementToastOffset = -AchievementCompleteToast.getPanelHeight();
+		AchievementCompleteToast.setToastOffsetY(achievementToastOffset);
 	}
 
 
@@ -19799,6 +19827,10 @@ public class Client extends RSApplet {
 						i3 = -1; // Changed to unsigned short so need to manually make it -1
 					if (i3 >= 0)
 						method60(i3);
+					if (i3 == AchievementCompleteToast.INTERFACE_ID) {
+						achievementToastPrevWalkable = openWalkableWidgetID;
+						startAchievementToastAnimation();
+					}
 					openWalkableWidgetID = i3;
 					incomingPacket = -1;
 					return true;
