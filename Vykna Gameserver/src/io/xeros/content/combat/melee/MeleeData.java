@@ -405,7 +405,7 @@ public class MeleeData {
 			return 400;
 		}
 		if (weaponName.contains("scim")) {
-				return 9827;
+				return 9836;
 			}
 		switch (c.playerEquipment[Player.playerWeapon]) { // if you don't want to use strings
 
