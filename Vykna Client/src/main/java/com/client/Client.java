@@ -326,7 +326,6 @@ public class Client extends RSApplet {
 			panelManager.drawEditOverlays(this);
 			newSmallFont.drawBasicString("EDIT MODE", 8, 14, 0xffcc66, 0);
 		}
-		drawAchievementToastOverlay();
 		drawLayoutDebugOverlay();
 	}
 
@@ -368,6 +367,10 @@ public class Client extends RSApplet {
 	}
 
 	private void updateUiGraphicsBuffer() {
+		if (isRs3InterfaceStyle()) {
+			uiGraphicsBuffer = null;
+			return;
+		}
 		boolean needsUiBuffer = isRs3InterfaceStyle()
 				&& currentScreenMode != ScreenMode.FIXED
 				&& (worldViewportWidth != currentGameWidth || worldViewportHeight != currentGameHeight);
@@ -430,6 +433,53 @@ public class Client extends RSApplet {
 		return false;
 	}
 
+	private void updateRs3InventoryDragHover() {
+		if (!isRs3InterfaceStyle() || draggingItemInterfaceId != 3214) {
+			return;
+		}
+		if (panelManager == null) {
+			return;
+		}
+		com.client.ui.panel.UiPanel panel = panelManager.getPanel(com.client.ui.panel.PanelManager.PANEL_ID_INVENTORY);
+		if (!(panel instanceof InventoryPanel)) {
+			return;
+		}
+		InventoryPanel inventoryPanel = (InventoryPanel) panel;
+		RSInterface container = RSInterface.interfaceCache[draggingItemInterfaceId];
+		if (container == null) {
+			return;
+		}
+		Point origin = inventoryPanel.getInventoryOrigin(this);
+		int mouseX = super.getMouseX();
+		int mouseY = super.getMouseY();
+		int relX = mouseX - origin.x;
+		int relY = mouseY - origin.y;
+		int cellWidth = 32 + container.invSpritePadX;
+		int cellHeight = 32 + container.invSpritePadY;
+		int hoveredSlot = -1;
+		if (relX >= 0 && relY >= 0 && cellWidth > 0 && cellHeight > 0) {
+			int col = relX / cellWidth;
+			int row = relY / cellHeight;
+			if (col >= 0 && row >= 0 && col < container.width && row < container.height) {
+				int slotX = col * cellWidth;
+				int slotY = row * cellHeight;
+				if (relX >= slotX && relX < slotX + 32 && relY >= slotY && relY < slotY + 32) {
+					int index = row * container.width + col;
+					if (index >= 0 && container.inventoryItemId != null && index < container.inventoryItemId.length) {
+						hoveredSlot = index;
+					}
+				}
+			}
+		}
+		mouseInvInterfaceIndex = hoveredSlot;
+		lastActiveInvInterface = hoveredSlot >= 0 ? container.id : -1;
+		if (debugInventoryDrag && hoveredSlot != lastInventoryDragDebugSlot) {
+			System.out.println("Drag inv origin=" + origin.x + "," + origin.y + " hoveredSlot=" + hoveredSlot
+					+ " draggedSlot=" + itemDraggingSlot + " mouse=" + mouseX + "," + mouseY);
+			lastInventoryDragDebugSlot = hoveredSlot;
+		}
+	}
+
 	private void drawAchievementToastOverlay() {
 		if (openWalkableWidgetID != AchievementCompleteToast.INTERFACE_ID) {
 			return;
@@ -438,9 +488,25 @@ public class Client extends RSApplet {
 		if (toast == null) {
 			return;
 		}
-		DrawingArea.defaultDrawingAreaSize();
+		DrawingArea.setDrawingArea(currentGameHeight, 0, currentGameWidth, 0);
 		// Toast draws last in RS3/resizable so it stays visible above all UI overlays.
 		drawInterface(0, 0, toast, 0);
+		newSmallFont.drawBasicString(
+				"Toast clip=(" + DrawingArea.topX + "," + DrawingArea.topY + ")-(" + DrawingArea.bottomX + "," + DrawingArea.bottomY
+						+ ") canvas=" + currentGameWidth + "x" + currentGameHeight,
+				8, 26, 0xffcc66, 0);
+	}
+
+	private void drawRs3FinalOverlays() {
+		DrawingArea.defaultDrawingAreaSize();
+		if (menuOpen) {
+			int maxX = Math.max(0, currentGameWidth - menuWidth);
+			int maxY = Math.max(0, currentGameHeight - menuHeight);
+			menuOffsetX = clamp(menuOffsetX, 0, maxX);
+			menuOffsetY = clamp(menuOffsetY, 0, maxY);
+			drawMenu(0, 0);
+		}
+		drawAchievementToastOverlay();
 	}
 
 	private void drawLayoutDebugOverlay() {
@@ -1732,7 +1798,7 @@ public class Client extends RSApplet {
 
 		}
 		DrawingArea.defaultDrawingAreaSize();
-		if (menuOpen) {
+		if (menuOpen && !isRs3InterfaceStyle()) {
 			drawMenu(xOffset, rs3ChatOverride ? yOffset : (currentScreenMode == ScreenMode.FIXED ? 338 : 0));
 		}
 		//tried here
@@ -2987,6 +3053,7 @@ public class Client extends RSApplet {
 										bars.setConsume(StatusBars.Restore.get(itemDef.id));//status bars
 
 										boolean hasDestroyOption = false;
+										boolean hasExamineOption = false;
 										if (itemSelected == 1 && class9_1.isInventoryInterface) {
 											if (class9_1.id != anInt1284 || k2 != anInt1283) {
 												menuActionName[menuActionRow] = "Use " + selectedItemName + " with @lre@"
@@ -3014,6 +3081,9 @@ public class Client extends RSApplet {
 															&& itemDef.inventoryOptions[l3] != null) {
 														menuActionName[menuActionRow] = itemDef.inventoryOptions[l3]
 																+ " @lre@" + itemDef.name;
+														if (itemDef.inventoryOptions[l3].contains("Examine")) {
+															hasExamineOption = true;
+														}
 
 														if (HoverMenuManager.shouldDraw(itemDef.id)) {
 															HoverMenuManager.showMenu = true;
@@ -3085,6 +3155,9 @@ public class Client extends RSApplet {
 
 														menuActionName[menuActionRow] = itemDef.inventoryOptions[i4]
 																+ " @lre@" + itemDef.name;
+														if (itemDef.inventoryOptions[i4].contains("Examine")) {
+															hasExamineOption = true;
+														}
 
 														if (itemDef.inventoryOptions[i4].contains("Wield")
 																|| itemDef.inventoryOptions[i4].contains("Wear")
@@ -3177,6 +3250,9 @@ public class Client extends RSApplet {
 															continue;
 														if (class9_1.actions[j4] != null) {
 															menuActionName[menuActionRow] = class9_1.actions[j4] + " @lre@" + itemDef.name;
+															if (class9_1.actions[j4].contains("Examine")) {
+																hasExamineOption = true;
+															}
 															if (class9_1.id != 1688/*equipment*/) {
 																if (j4 == 0)
 																	menuActionID[menuActionRow] = 632;
@@ -3222,6 +3298,19 @@ public class Client extends RSApplet {
 													}
 												}
 											}
+										}
+
+										if (class9_1.isInventoryInterface && !hasExamineOption) {
+											if (myPlayer.isAdminRights()) {
+												menuActionName[menuActionRow] = "Examine @lre@" + itemDef.name + " @whi@(" + (itemID) + ")";
+											} else {
+												menuActionName[menuActionRow] = "Examine @lre@" + itemDef.name;
+											}
+											menuActionID[menuActionRow] = 1126;
+											menuActionCmd1[menuActionRow] = itemDef.id;
+											menuActionCmd2[menuActionRow] = k2;
+											menuActionCmd3[menuActionRow] = class9_1.id;
+											menuActionRow++;
 										}
 
 										if (class9_1.parentID >= 58040 && class9_1.parentID <= 58048
@@ -4169,7 +4258,7 @@ public class Client extends RSApplet {
 		//}
 
 
-		if (menuOpen) {
+		if (menuOpen && !isRs3InterfaceStyle()) {
 			drawMenu(fixedMode ? 516 : 0, fixedMode ? 168 : 0);
 		}
 
@@ -5753,6 +5842,7 @@ public class Client extends RSApplet {
 			if (super.getMouseX() > anInt1087 + 5 || super.getMouseX() < anInt1087 - 5 || super.getMouseY() > anInt1088 + 5
 					|| super.getMouseY() < anInt1088 - 5)
 				aBoolean1242 = true;
+			updateRs3InventoryDragHover();
 			if (super.clickMode2 == 0) {
 				if (activeInterfaceType == 2)
 					needDrawTabArea = true;
@@ -12247,7 +12337,7 @@ public class Client extends RSApplet {
 		achievementToastTicks = achievementToastTotalTicks;
 		achievementToastOffset = -AchievementCompleteToast.getPanelHeight();
 		layoutModel.update(this);
-		int walkableWidth = currentScreenMode == ScreenMode.FIXED ? 512 : layoutModel.canvasRect.width;
+		int walkableWidth = layoutModel.canvasRect.width;
 		RSInterface toastInterface = RSInterface.interfaceCache[AchievementCompleteToast.INTERFACE_ID];
 		if (currentScreenMode == ScreenMode.FIXED && toastInterface != null && toastInterface.width > 0) {
 			walkableWidth = toastInterface.width;
@@ -13550,7 +13640,7 @@ public class Client extends RSApplet {
 		if (!menuOpen) {
 			processRightClick();
 			drawTopLeftTooltip();
-		} else {
+		} else if (!isRs3InterfaceStyle()) {
 			drawMenu(0, 0);
 		}
 
@@ -15658,7 +15748,7 @@ public class Client extends RSApplet {
 			processRightClick();
 			drawTopLeftTooltip();
 			drawAttrHoverOverlay();
-		} else if (menuScreenArea == 0) {
+		} else if (!isRs3InterfaceStyle() && menuScreenArea == 0) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 0 : 0, currentScreenMode == ScreenMode.FIXED ? 0 : 0);
 		}
 
@@ -16540,7 +16630,7 @@ public class Client extends RSApplet {
 			// if (drawOrbs)
 			// loadAllOrbs(currentScreenMode == ScreenMode.FIXED ? 0 : currentGameWidth -
 			// 217);
-			if (menuOpen) {
+			if (menuOpen && !isRs3InterfaceStyle()) {
 				drawMenu(currentScreenMode == ScreenMode.FIXED ? 516 : 0, 0);
 			}
 			mainGameGraphicsBuffer.setCanvas();
@@ -16785,7 +16875,7 @@ public class Client extends RSApplet {
 			}
 
 		}
-		if (menuOpen) {
+		if (menuOpen && !isRs3InterfaceStyle()) {
 			drawMenu(currentScreenMode == ScreenMode.FIXED ? 516 : 0, 0);
 		}
 		mainGameGraphicsBuffer.setCanvas();
@@ -21288,7 +21378,7 @@ public class Client extends RSApplet {
 			displayGroundItems();
 		}
 
-		boolean useUiBuffer = uiGraphicsBuffer != null && isRs3InterfaceStyle() && currentScreenMode != ScreenMode.FIXED;
+		boolean useUiBuffer = uiGraphicsBuffer != null && !isRs3InterfaceStyle() && currentScreenMode != ScreenMode.FIXED;
 
 		if (loggedIn) {
 			if (!inCutScene) {
@@ -21320,6 +21410,9 @@ public class Client extends RSApplet {
 		}
 
 		processExperienceCounter();
+		if (isRs3InterfaceStyle()) {
+			drawRs3FinalOverlays();
+		}
 
 		if (useUiBuffer) {
 			// Compose final frame into the UI buffer:
@@ -21897,6 +21990,8 @@ public class Client extends RSApplet {
 	private Stream inStream;
 	private int draggingItemInterfaceId;
 	private int itemDraggingSlot;
+	private boolean debugInventoryDrag = true;
+	private int lastInventoryDragDebugSlot = -2;
 	private int activeInterfaceType;
 	private int anInt1087;
 	private int anInt1088;
