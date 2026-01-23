@@ -11,7 +11,7 @@ import java.util.Map;
 import java.util.WeakHashMap;
 
 public final class VyknaProgressionToast {
-    private static final int TOAST_DURATION_CYCLES = 5; // ~3 seconds on 600ms cycles.
+    private static final int TOAST_DURATION_CYCLES = 7; // ~4 seconds on 600ms cycles.
     private static final int TOAST_EVENT_ID = 932_001;
     private static final Map<Player, ToastQueue> QUEUES = new WeakHashMap<>();
 
