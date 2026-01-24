@@ -8,6 +8,7 @@ import java.awt.Point;
 import java.awt.Rectangle;
 
 public class InventoryPanel extends PanelManager.TabPanel {
+	public static final int RS3_INVENTORY_INTERFACE_ID = 52000;
 	private static final int INVENTORY_CONTAINER_ID = 3214;
 	private static final int CONTENT_PADDING = 4;
 

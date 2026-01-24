@@ -88,6 +88,7 @@ public class PanelManager {
 	private UiPanel pendingGroupPanel;
 
 	public void ensureRs3Layout(Client client) {
+		ensureRs3InventoryInterface(client);
 		if (layoutWidth == Client.currentGameWidth && layoutHeight == Client.currentGameHeight && !panels.isEmpty()) {
 			return;
 		}
@@ -101,6 +102,17 @@ public class PanelManager {
 		applySavedGroups(client);
 		layoutWidth = Client.currentGameWidth;
 		layoutHeight = Client.currentGameHeight;
+	}
+
+	private void ensureRs3InventoryInterface(Client client) {
+		if (client == null || !client.isRs3InterfaceStyleActive()) {
+			return;
+		}
+		int inventoryIndex = 3;
+		int inventoryInterfaceId = Client.tabInterfaceIDs[inventoryIndex];
+		if (inventoryInterfaceId == 3213 || inventoryInterfaceId == 3214) {
+			Client.tabInterfaceIDs[inventoryIndex] = InventoryPanel.RS3_INVENTORY_INTERFACE_ID;
+		}
 	}
 
 	public void drawPanels(Client client) {
