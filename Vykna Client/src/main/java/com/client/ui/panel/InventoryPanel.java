@@ -35,13 +35,25 @@ public class InventoryPanel extends PanelManager.TabPanel {
 
 	@Override
 	public boolean handleMouse(Client client, int mouseX, int mouseY) {
-		applyResponsiveLayout(client, false);
+		applyResponsiveLayout(client);
+		return super.handleMouse(client, mouseX, mouseY);
+	}
+
+	@Override
+	protected boolean allowPanelChromeCapture(Client client, int mouseX, int mouseY) {
 		Rectangle bounds = getBounds();
 		int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
-		if (mouseY >= bounds.y && mouseY <= bounds.y + headerHeight) {
-			return super.handleMouse(client, mouseX, mouseY);
+		boolean inHeader = mouseX >= bounds.x && mouseX <= bounds.x + bounds.width
+				&& mouseY >= bounds.y && mouseY <= bounds.y + headerHeight;
+		if (inHeader) {
+			return true;
 		}
-		return false;
+		int gripSize = 6;
+		boolean nearLeft = mouseX >= bounds.x && mouseX <= bounds.x + gripSize;
+		boolean nearRight = mouseX >= bounds.x + bounds.width - gripSize && mouseX <= bounds.x + bounds.width;
+		boolean nearTop = mouseY >= bounds.y && mouseY <= bounds.y + gripSize;
+		boolean nearBottom = mouseY >= bounds.y + bounds.height - gripSize && mouseY <= bounds.y + bounds.height;
+		return nearLeft || nearRight || nearTop || nearBottom;
 	}
 
 	@Override
@@ -141,6 +153,10 @@ public class InventoryPanel extends PanelManager.TabPanel {
 		// Do NOT save layout during draw/mouse; only save from onResize when changed.
 		// (fromResize is provided as a hint but we gate save in onResize.)
 		return true;
+	}
+
+	private void applyResponsiveLayout(Client client) {
+		applyResponsiveLayout(client, false);
 	}
 
 	private void drawSlotGrid(Client client) {
