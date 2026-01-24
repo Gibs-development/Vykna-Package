@@ -230,6 +230,10 @@ public class PanelManager {
 						mouseDownLastFrame = mouseDown;
 						return;
 					}
+					DockCandidate candidate = findDockCandidate(activePanel);
+					if (candidate != null) {
+						activePanel.setPosition(candidate.bounds.x, candidate.bounds.y);
+					}
 				}
 				Rectangle target = new Rectangle(activePanel.getBounds());
 				if (!isPlacementValid(target, activePanel)) {
