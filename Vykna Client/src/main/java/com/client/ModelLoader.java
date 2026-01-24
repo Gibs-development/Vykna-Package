@@ -4,11 +4,234 @@ public class ModelLoader {
     private static final boolean DEBUG_667 = true;
 
     public static void decode667(Model def, byte[] data) {
-        // 667 models follow the RS2 "new format" handled by read622Model.
         if (DEBUG_667) {
             System.out.println("[667 decode] model=" + def.getModelId() + " bytes=" + (data == null ? 0 : data.length));
         }
-        def.read622Model(data, def.getModelId());
+        if (data == null || data.length < 3) {
+            if (DEBUG_667) {
+                System.out.println("[667 decode] invalid data; skipping");
+            }
+            return;
+        }
+
+        int n = data.length;
+        int b1 = data[n - 2];
+        int b2 = data[n - 1];
+
+        Decoder[] preferred;
+        if (b2 == -3 && b1 == -1) {
+            preferred = new Decoder[] { TYPE3 };
+        } else if (b2 == -2 && b1 == -1) {
+            preferred = new Decoder[] { TYPE2 };
+        } else if (b2 == -1 && b1 == -1) {
+            preferred = new Decoder[] { TYPE1 };
+        } else {
+            preferred = new Decoder[] { OLD_FORMAT };
+        }
+
+        Decoder[] fallbacks = new Decoder[] {
+            READ_622,
+            TYPE3,
+            TYPE2,
+            TYPE1,
+            OLD_FORMAT
+        };
+
+        if (tryDecoders(def, data, preferred, fallbacks)) {
+            return;
+        }
+
+        if (DEBUG_667) {
+            System.out.println("[667 decode] all decoders failed sanity checks for model " + def.getModelId());
+        }
+    }
+
+    private interface Decoder {
+        String name();
+        void decode(Model def, byte[] data);
+    }
+
+    private static final Decoder TYPE3 = new Decoder() {
+        @Override
+        public String name() {
+            return "type3";
+        }
+
+        @Override
+        public void decode(Model def, byte[] data) {
+            ModelLoader.decodeType3(def, data);
+        }
+    };
+
+    private static final Decoder TYPE2 = new Decoder() {
+        @Override
+        public String name() {
+            return "type2";
+        }
+
+        @Override
+        public void decode(Model def, byte[] data) {
+            ModelLoader.decodeType2(def, data);
+        }
+    };
+
+    private static final Decoder TYPE1 = new Decoder() {
+        @Override
+        public String name() {
+            return "type1";
+        }
+
+        @Override
+        public void decode(Model def, byte[] data) {
+            ModelLoader.decodeType1(def, data);
+        }
+    };
+
+    private static final Decoder OLD_FORMAT = new Decoder() {
+        @Override
+        public String name() {
+            return "old";
+        }
+
+        @Override
+        public void decode(Model def, byte[] data) {
+            ModelLoader.decodeOldFormat(def, data);
+        }
+    };
+
+    private static final Decoder READ_622 = new Decoder() {
+        @Override
+        public String name() {
+            return "read622";
+        }
+
+        @Override
+        public void decode(Model def, byte[] data) {
+            def.read622Model(data, def.getModelId());
+        }
+    };
+
+    private static boolean tryDecoders(Model def, byte[] data, Decoder[] preferred, Decoder[] fallbacks) {
+        java.util.LinkedHashSet<String> tried = new java.util.LinkedHashSet<>();
+        Decoder[] attempts = new Decoder[preferred.length + fallbacks.length];
+        System.arraycopy(preferred, 0, attempts, 0, preferred.length);
+        System.arraycopy(fallbacks, 0, attempts, preferred.length, fallbacks.length);
+
+        for (Decoder decoder : attempts) {
+            if (!tried.add(decoder.name())) {
+                continue;
+            }
+            resetModel(def);
+            try {
+                decoder.decode(def, data);
+            } catch (Exception ex) {
+                if (DEBUG_667) {
+                    System.out.println("[667 decode] " + decoder.name() + " threw: " + ex.getMessage());
+                }
+                continue;
+            }
+            if (isSane(def)) {
+                if (DEBUG_667) {
+                    System.out.println("[667 decode] succeeded with " + decoder.name());
+                }
+                return true;
+            }
+            if (DEBUG_667) {
+                System.out.println("[667 decode] decoder " + decoder.name() + " produced invalid geometry");
+            }
+        }
+        return false;
+    }
+
+    private static void resetModel(Model def) {
+        def.verticesCount = 0;
+        def.trianglesCount = 0;
+        def.texturesCount = 0;
+        def.verticesX = null;
+        def.verticesY = null;
+        def.verticesZ = null;
+        def.trianglesX = null;
+        def.trianglesY = null;
+        def.trianglesZ = null;
+        def.colorsX = null;
+        def.colorsY = null;
+        def.colorsZ = null;
+        def.types = null;
+        def.face_render_priorities = null;
+        def.alphas = null;
+        def.colors = null;
+        def.face_priority = 0;
+        def.texturesX = null;
+        def.texturesY = null;
+        def.texturesZ = null;
+        def.vertexData = null;
+        def.triangleData = null;
+        def.vertexGroups = null;
+        def.faceGroups = null;
+        def.materials = null;
+        def.textures = null;
+        def.textureTypes = null;
+        def.animayaGroups = null;
+        def.animayaScales = null;
+    }
+
+    private static boolean isSane(Model def) {
+        if (def.verticesCount <= 0 || def.trianglesCount <= 0) {
+            return false;
+        }
+        if (def.verticesX == null || def.verticesY == null || def.verticesZ == null) {
+            return false;
+        }
+        if (def.trianglesX == null || def.trianglesY == null || def.trianglesZ == null) {
+            return false;
+        }
+        if (def.verticesX.length < def.verticesCount
+            || def.verticesY.length < def.verticesCount
+            || def.verticesZ.length < def.verticesCount) {
+            return false;
+        }
+        if (def.trianglesX.length < def.trianglesCount
+            || def.trianglesY.length < def.trianglesCount
+            || def.trianglesZ.length < def.trianglesCount) {
+            return false;
+        }
+
+        int vCount = def.verticesCount;
+        int check = Math.min(def.trianglesCount, 2000);
+        int bad = 0;
+        for (int i = 0; i < check; i++) {
+            int a = def.trianglesX[i];
+            int b = def.trianglesY[i];
+            int c = def.trianglesZ[i];
+            if (a < 0 || a >= vCount || b < 0 || b >= vCount || c < 0 || c >= vCount) {
+                bad++;
+            }
+        }
+        if (bad > check / 4) {
+            return false;
+        }
+
+        int minX = Integer.MAX_VALUE;
+        int maxX = Integer.MIN_VALUE;
+        int minY = Integer.MAX_VALUE;
+        int maxY = Integer.MIN_VALUE;
+        int minZ = Integer.MAX_VALUE;
+        int maxZ = Integer.MIN_VALUE;
+        for (int i = 0; i < def.verticesCount; i++) {
+            int x = def.verticesX[i];
+            int y = def.verticesY[i];
+            int z = def.verticesZ[i];
+            if (x < minX) minX = x;
+            if (x > maxX) maxX = x;
+            if (y < minY) minY = y;
+            if (y > maxY) maxY = y;
+            if (z < minZ) minZ = z;
+            if (z > maxZ) maxZ = z;
+        }
+        long spanX = Math.abs((long) maxX - minX);
+        long spanY = Math.abs((long) maxY - minY);
+        long spanZ = Math.abs((long) maxZ - minZ);
+        return spanX + spanY + spanZ >= 10;
     }
 
 
