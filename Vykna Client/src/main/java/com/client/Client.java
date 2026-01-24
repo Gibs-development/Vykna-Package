@@ -574,6 +574,9 @@ public class Client extends RSApplet {
 		if (panel instanceof InventoryPanel) {
 			((InventoryPanel) panel).resetCachedLayout();
 		}
+		if (tabInterfaceIDs[3] == InventoryPanel.RS3_INVENTORY_INTERFACE_ID) {
+			tabInterfaceIDs[3] = 3213;
+		}
 	}
 
 	private boolean screenFlashDrawing;

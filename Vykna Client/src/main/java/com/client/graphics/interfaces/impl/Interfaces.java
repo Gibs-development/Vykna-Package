@@ -14,6 +14,7 @@ import com.client.graphics.interfaces.daily.DailyRewards;
 import com.client.graphics.interfaces.dropdown.KeybindingMenu;
 import com.client.graphics.interfaces.eventcalendar.EventCalendar;
 import com.client.graphics.interfaces.settings.SettingsInterface;
+import com.client.ui.panel.InventoryPanel;
 
 public final class Interfaces extends RSInterface {
 
@@ -108,6 +109,7 @@ public final class Interfaces extends RSInterface {
         pollResults(defaultTextDrawingAreas);
 		SlayerRewards.initializeInterfaces(defaultTextDrawingAreas);
 		new LootViewer().load(defaultTextDrawingAreas);
+		buildRs3InventoryWrapper();
 
 		taskInterface = new TaskInterface();
 		taskInterface.actions.loadAchievements();
@@ -142,6 +144,12 @@ public final class Interfaces extends RSInterface {
 		new PerduLostPropertyShop().build();
 		new LeaderboardInterface().build();
 		new QuestInterface().build();
+	}
+
+	private static void buildRs3InventoryWrapper() {
+		RSInterface wrapper = addTabInterface(InventoryPanel.RS3_INVENTORY_INTERFACE_ID);
+		wrapper.totalChildren(1);
+		wrapper.child(0, 3214, 0, 0);
 	}
 
 	public static void questInterface(TextDrawingArea[] TDA) {
