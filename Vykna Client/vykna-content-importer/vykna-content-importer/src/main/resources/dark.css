@@ -1,0 +1,26 @@
+.root {
+    -fx-base: #2b2b2b;
+    -fx-background: #2b2b2b;
+    -fx-control-inner-background: #3c3f41;
+    -fx-accent: #6f7cff;
+    -fx-focus-color: #6f7cff;
+    -fx-faint-focus-color: rgba(111,124,255,0.25);
+    -fx-text-fill: #dddddd;
+}
+
+.label, .button, .tab-label, .menu-item, .check-box, .radio-button {
+    -fx-text-fill: #dddddd;
+}
+
+.text-field, .text-area {
+    -fx-text-fill: #dddddd;
+    -fx-prompt-text-fill: #888888;
+}
+
+.list-view, .table-view, .tree-view {
+    -fx-control-inner-background: #3c3f41;
+}
+
+.tab-pane .tab-header-area {
+    -fx-background-color: #2b2b2b;
+}
