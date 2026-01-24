@@ -250,6 +250,13 @@ public class PanelManager {
 				} else {
 					preferredBounds.put(activePanel.getId(), new Rectangle(activePanel.getBounds()));
 				}
+				if (resizing && activePanel instanceof TabBarPanel) {
+					TabBarPanel tabBarPanel = (TabBarPanel) activePanel;
+					Rectangle bounds = tabBarPanel.getBounds();
+					Dimension snapped = tabBarPanel.getSnappedSize(client, bounds);
+					tabBarPanel.setSize(snapped.width, snapped.height);
+					preferredBounds.put(tabBarPanel.getId(), new Rectangle(tabBarPanel.getBounds()));
+				}
 			}
 			dragging = false;
 			resizing = false;
