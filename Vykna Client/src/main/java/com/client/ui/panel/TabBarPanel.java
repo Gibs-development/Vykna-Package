@@ -78,6 +78,9 @@ public class TabBarPanel extends PanelManager.BasePanel {
 	@Override
 	public boolean handleClick(Client client, int mouseX, int mouseY) {
 		Rectangle bounds = getBounds();
+		if (mouseX < 0 || mouseY < 0 || mouseX > bounds.width || mouseY > bounds.height) {
+			return false;
+		}
 		int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
 		int startX = bounds.x + ICON_PADDING;
 		int startY = bounds.y + headerHeight + ICON_PADDING;

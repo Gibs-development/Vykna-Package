@@ -421,8 +421,10 @@ public class PanelManager {
 					newY = bottom - newHeight;
 				}
 			}
-			newWidth = Math.max(activePanel.getMinWidth(), newWidth);
-			newHeight = Math.max(activePanel.getMinHeight(), newHeight);
+			if (!(activePanel instanceof TabBarPanel)) {
+				newWidth = Math.max(activePanel.getMinWidth(), newWidth);
+				newHeight = Math.max(activePanel.getMinHeight(), newHeight);
+			}
 			newX = clamp(newX, 0, Client.currentGameWidth - newWidth);
 			newY = clamp(newY, 0, Client.currentGameHeight - newHeight);
 			if (resizeHandle == ResizeHandle.TOP_LEFT) {
@@ -431,8 +433,10 @@ public class PanelManager {
 			} else if (resizeHandle == ResizeHandle.TOP_RIGHT) {
 				newHeight = bottom - newY;
 			}
-			newWidth = clamp(newWidth, activePanel.getMinWidth(), Client.currentGameWidth - newX);
-			newHeight = clamp(newHeight, activePanel.getMinHeight(), Client.currentGameHeight - newY);
+			if (!(activePanel instanceof TabBarPanel)) {
+				newWidth = clamp(newWidth, activePanel.getMinWidth(), Client.currentGameWidth - newX);
+				newHeight = clamp(newHeight, activePanel.getMinHeight(), Client.currentGameHeight - newY);
+			}
 			activePanel.setPosition(newX, newY);
 			activePanel.setSize(newWidth, newHeight);
 			activePanel.onResize(client);
