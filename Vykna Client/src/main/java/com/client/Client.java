@@ -78,12 +78,25 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
-
+/*
+ * RS3 inventory dragging fix:
+ * Root cause: RS3 panel clicks returned early in processMenuClick, so drag state variables were never
+ * initialized (panelManager.handleClick executed the action immediately), breaking drag in RS3 only.
+ * Fix: allow processMenuClick to run for RS3 panel clicks so drag state can be set and actions are
+ * handled once, preventing RS3 panel clicks from bypassing drag state or double-firing actions.
+ *
+ * Test plan:
+ * - RS3: drag within inventory (slot 0 -> slot 27) and verify swap/insert behavior.
+ * - RS3: drag stackable vs non-stackable items within inventory.
+ * - RS3: drag between inventory and equipment if supported by the client.
+ * - RS3: drag to drop if legacy supports it.
+ * - RS3: verify right-click menu still appears and left-click use still works.
+ * - Legacy: repeat inventory drag to confirm no regression.
+ */
 public class Client extends RSApplet {
 
 	private static final Logger logger = LoggerFactory.getLogger("Client");
+	private static final boolean DEBUG_RS3_DRAG = false;
 	private final PanelManager panelManager = new PanelManager();
 	private final Deque<Point> uiOffsetStack = new ArrayDeque<>();
 	private int uiOffsetX;
@@ -1817,13 +1830,10 @@ public class Client extends RSApplet {
 	public boolean processMenuClick() {
 		if (activeInterfaceType != 0)
 			return false;
+		boolean rs3PanelClick = false;
 		if (isRs3InterfaceStyle() && !menuOpen) {
 			panelManager.ensureRs3Layout(this);
-			if (panelManager.isMouseOverPanel(super.getSaveClickX(), super.getSaveClickY())) {
-				if (super.clickMode3 != 2) {
-					return false;
-				}
-			}
+			rs3PanelClick = panelManager.isMouseOverPanel(super.getSaveClickX(), super.getSaveClickY());
 		}
 		int j = super.clickMode3;
 		if (spellSelected == 1 && super.getSaveClickX() >= 516 && super.getSaveClickY() >= 160 && super.getSaveClickX() <= 765
@@ -1896,15 +1906,22 @@ public class Client extends RSApplet {
 				}
 			}
 			return true;
-		} else {
-			if (j == 1 && menuActionRow > 0) {
-				int i1 = menuActionID[menuActionRow - 1];
-				if (i1 == 632 || i1 == 78 || i1 == 867 || i1 == 431 || i1 == 53 || i1 == 74 || i1 == 454 || i1 == 539
-						|| i1 == 493 || i1 == 847 || i1 == 447 || i1 == 1125) {
-					int l1 = menuActionCmd2[menuActionRow - 1];
-					int j2 = menuActionCmd3[menuActionRow - 1];
-					RSInterface class9 = RSInterface.interfaceCache[j2];
-					if (class9.aBoolean259 || class9.aBoolean235) {
+			} else {
+				if (j == 1 && menuActionRow > 0) {
+					int i1 = menuActionID[menuActionRow - 1];
+					boolean dragAction = i1 == 632 || i1 == 78 || i1 == 867 || i1 == 431 || i1 == 53 || i1 == 74
+							|| i1 == 454 || i1 == 539 || i1 == 493 || i1 == 847 || i1 == 447 || i1 == 1125;
+					boolean canStartDrag = false;
+					if (dragAction) {
+						int l1 = menuActionCmd2[menuActionRow - 1];
+						int j2 = menuActionCmd3[menuActionRow - 1];
+						RSInterface class9 = RSInterface.interfaceCache[j2];
+						canStartDrag = class9.aBoolean259 || class9.aBoolean235;
+						if (canStartDrag) {
+							if (DEBUG_RS3_DRAG) {
+								logger.debug("RS3 drag down: interface={}, slot={}, actionId={}, mouse=({}, {})",
+										j2, l1, i1, super.getSaveClickX(), super.getSaveClickY());
+							}
 						aBoolean1242 = false;
 						anInt989 = 0;
 						draggingItemInterfaceId = j2;
@@ -1914,18 +1931,26 @@ public class Client extends RSApplet {
 						anInt1088 = super.getSaveClickY();
 						if (RSInterface.interfaceCache[j2].parentID == openInterfaceID)
 							activeInterfaceType = 1;
-						if (RSInterface.interfaceCache[j2].parentID == backDialogID)
-							activeInterfaceType = 3;
+							if (RSInterface.interfaceCache[j2].parentID == backDialogID)
+								activeInterfaceType = 3;
+							return true;
+						}
+					}
+					if (rs3PanelClick && (!dragAction || !canStartDrag)) {
+						doAction(menuActionRow - 1);
 						return true;
 					}
 				}
-			}
-			if (j == 1 && (anInt1253 == 1 || menuHasAddFriend(menuActionRow - 1)) && menuActionRow > 2)
-				j = 2;
-			if (j == 1 && menuActionRow > 0)
-				doAction(menuActionRow - 1);
-			if (j == 2 && menuActionRow > 0)
-				determineMenuSize();
+				if (j == 1 && (anInt1253 == 1 || menuHasAddFriend(menuActionRow - 1)) && menuActionRow > 2)
+					j = 2;
+				if (j == 1 && menuActionRow > 0 && !rs3PanelClick)
+					doAction(menuActionRow - 1);
+				if (j == 2 && menuActionRow > 0) {
+					determineMenuSize();
+					if (rs3PanelClick) {
+						return true;
+					}
+				}
 			minimapHovers();
 			return false;
 		}
@@ -2989,6 +3014,7 @@ public class Client extends RSApplet {
 										bars.setConsume(StatusBars.Restore.get(itemDef.id));//status bars
 
 										boolean hasDestroyOption = false;
+										boolean inventoryHasExamine = false;
 										if (itemSelected == 1 && class9_1.isInventoryInterface) {
 											if (class9_1.id != anInt1284 || k2 != anInt1283) {
 												menuActionName[menuActionRow] = "Use " + selectedItemName + " with @lre@"
@@ -3014,8 +3040,12 @@ public class Client extends RSApplet {
 												for (int l3 = 4; l3 >= 3; l3--)
 													if (itemDef.inventoryOptions != null
 															&& itemDef.inventoryOptions[l3] != null) {
-														menuActionName[menuActionRow] = itemDef.inventoryOptions[l3]
+														String inventoryOption = itemDef.inventoryOptions[l3];
+														menuActionName[menuActionRow] = inventoryOption
 																+ " @lre@" + itemDef.name;
+														if (inventoryOption.contains("Examine")) {
+															inventoryHasExamine = true;
+														}
 
 														if (HoverMenuManager.shouldDraw(itemDef.id)) {
 															HoverMenuManager.showMenu = true;
@@ -3085,18 +3115,22 @@ public class Client extends RSApplet {
 															hintMenu = false;
 														}
 
-														menuActionName[menuActionRow] = itemDef.inventoryOptions[i4]
+														String inventoryOption = itemDef.inventoryOptions[i4];
+														menuActionName[menuActionRow] = inventoryOption
 																+ " @lre@" + itemDef.name;
 
-														if (itemDef.inventoryOptions[i4].contains("Wield")
-																|| itemDef.inventoryOptions[i4].contains("Wear")
-																|| itemDef.inventoryOptions[i4].contains("Value")
-																|| itemDef.inventoryOptions[i4].contains("Examine")) {
+														if (inventoryOption.contains("Wield")
+																|| inventoryOption.contains("Wear")
+																|| inventoryOption.contains("Value")
+																|| inventoryOption.contains("Examine")) {
 															HoverMenuManager.showMenu = true;
 															HoverMenuManager.hintName = itemDef.name;
 															HoverMenuManager.hintId = itemDef.id;
 														} else {
 															HoverMenuManager.reset();
+														}
+														if (inventoryOption.contains("Examine")) {
+															inventoryHasExamine = true;
 														}
 														if (HoverMenuManager.showMenu && HoverMenuManager.drawType() == 1) {
 															//HoverMenuManager.drawHintMenu();
@@ -3118,6 +3152,19 @@ public class Client extends RSApplet {
 														}
 													}
 
+											}
+
+											if (class9_1.isInventoryInterface && !inventoryHasExamine) {
+												if (myPlayer.isAdminRights()) {
+													menuActionName[menuActionRow] = "Examine @lre@" + itemDef.name + " @whi@(" + (itemID) + ")";
+												} else {
+													menuActionName[menuActionRow] = "Examine @lre@" + itemDef.name;
+												}
+												menuActionID[menuActionRow] = 1125;
+												menuActionCmd1[menuActionRow] = itemDef.id;
+												menuActionCmd2[menuActionRow] = k2;
+												menuActionCmd3[menuActionRow] = class9_1.id;
+												menuActionRow++;
 											}
 
 											if (class9_1.actions != null) {
@@ -5752,6 +5799,9 @@ public class Client extends RSApplet {
 		}
 		if (activeInterfaceType != 0) {
 			anInt989++;
+			// Drag pipeline vars/methods: buildInterfaceMenu -> mouseInvInterfaceIndex/lastActiveInvInterface;
+			// processMenuClick sets draggingItemInterfaceId/itemDraggingSlot/activeInterfaceType;
+			// aBoolean1242 + anInt989 gate drag threshold in this block (getDragSetting()).
 			if (super.getMouseX() > anInt1087 + 5 || super.getMouseX() < anInt1087 - 5 || super.getMouseY() > anInt1088 + 5
 					|| super.getMouseY() < anInt1088 - 5)
 				aBoolean1242 = true;
@@ -5762,6 +5812,10 @@ public class Client extends RSApplet {
 					inputTaken = true;
 				activeInterfaceType = 0;
 				if (aBoolean1242 && anInt989 >= getDragSetting(draggingItemInterfaceId)) {
+					if (DEBUG_RS3_DRAG) {
+						logger.debug("RS3 drag release: fromInterface={}, fromSlot={}, toInterface={}, toSlot={}",
+								draggingItemInterfaceId, itemDraggingSlot, lastActiveInvInterface, mouseInvInterfaceIndex);
+					}
 					lastActiveInvInterface = -1;
 					processRightClick();
 
