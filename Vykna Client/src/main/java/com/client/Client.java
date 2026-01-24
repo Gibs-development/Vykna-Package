@@ -1303,6 +1303,12 @@ public class Client extends RSApplet {
 				messageRect = new Rectangle(xOffset + padding, messageTop, Math.max(0, chatAreaWidth - padding * 2), messageHeight);
 			}
 		}
+		int dialogBaseX = xOffset + 20;
+		int dialogBaseY = yOffset + 20;
+		if (rs3ChatOverride && messageRect != null) {
+			dialogBaseX = messageRect.x + 4;
+			dialogBaseY = messageRect.y + 4;
+		}
 
 		Rasterizer.anIntArray1472 = anIntArray1180;
 
@@ -1444,9 +1450,9 @@ public class Client extends RSApplet {
 				newBoldFont.drawCenteredString(aString844, xOffset + 259, 60 + yOffset, 0, -1);
 				newBoldFont.drawCenteredString("Click to continue", xOffset + 259, 80 + yOffset, 128, -1);
 			} else if (backDialogID != -1) {
-				drawInterface(0, xOffset + 20, RSInterface.interfaceCache[backDialogID], 20 + yOffset);
+				drawInterface(0, dialogBaseX, RSInterface.interfaceCache[backDialogID], dialogBaseY);
 			} else if (dialogID != -1) {
-				drawInterface(0, xOffset + 20, RSInterface.interfaceCache[dialogID], 20 + yOffset);
+				drawInterface(0, dialogBaseX, RSInterface.interfaceCache[dialogID], dialogBaseY);
 			} else {
 				int j77 = rs3ChatOverride ? 0 : -3;
 				int j = 0;
@@ -1464,7 +1470,7 @@ public class Client extends RSApplet {
 					messageClipLeft = messageRect.x;
 					messageClipRight = messageRect.x + messageRect.width;
 					messageBaseX = messageRect.x + 2;
-					messageBaseY = messageRect.y - 7;
+					messageBaseY = messageRect.y;
 				}
 				DrawingArea.setDrawingArea(messageClipBottom, messageClipLeft, messageClipRight, messageClipTop);
 				int publicChatColor = isRs3InterfaceStyle() ? 0x33ff66 : 255;
@@ -1474,7 +1480,7 @@ public class Client extends RSApplet {
 						int chatType = chatTypes[k];
 						int yPos;
 						if (rs3ChatOverride && messageRect != null) {
-							yPos = messageAreaHeight - 14 - j77 * 14 + anInt1089;
+							yPos = messageAreaHeight - 6 - j77 * 14 + anInt1089;
 						} else {
 							yPos = (70 - j77 * 14) + anInt1089 + 5;
 						}
@@ -1668,7 +1674,7 @@ public class Client extends RSApplet {
 				int scrollY = 6 + yOffset;
 				if (rs3ChatOverride && messageRect != null) {
 					scrollHeight = messageRect.height;
-					scrollX = messageRect.x + messageRect.width - 12;
+					scrollX = messageRect.x + messageRect.width - 16;
 					scrollY = messageRect.y;
 				}
 				if (chatAreaScrollLength < scrollHeight - 3)
@@ -1776,7 +1782,8 @@ public class Client extends RSApplet {
 		if (backDialogID != -1 || inputDialogState == 3) {
 			return;
 		}
-		if (rs3ChatOverride && rs3ChatMessageRect != null) {
+		boolean rs3ChatLayout = isRs3InterfaceStyle() && rs3ChatMessageRect != null;
+		if (rs3ChatLayout) {
 			baseX = rs3ChatMessageRect.x;
 			baseY = rs3ChatMessageRect.y;
 			width = rs3ChatMessageRect.width;
@@ -1785,7 +1792,7 @@ public class Client extends RSApplet {
 		int chatAreaWidth = width;
 		int chatAreaHeight = height;
 		int scrollHeight = getChatScrollHeight(chatAreaHeight);
-		if (rs3ChatOverride && rs3ChatMessageRect != null) {
+		if (rs3ChatLayout) {
 			scrollHeight = Math.max(40, chatAreaHeight);
 		}
 		int scrollInputHeight = Math.max(80, scrollHeight - 4);
@@ -1793,8 +1800,15 @@ public class Client extends RSApplet {
 		int scrollTop = baseY + (currentScreenMode == ScreenMode.FIXED ? 4 : 6);
 		int scrollInputTop = baseY + 10;
 		int scrollBarX = baseX + chatAreaWidth - 38;
-		if (mouseX > scrollBarX && mouseX < baseX + chatAreaWidth && mouseY > scrollTop)
-			method65(chatAreaWidth - 22, scrollInputHeight, mouseX, mouseY - scrollInputTop, aClass9_1059, 0, false, chatAreaScrollLength);
+		if (rs3ChatLayout) {
+			scrollTop = baseY;
+			scrollInputTop = baseY;
+			scrollBarX = baseX + chatAreaWidth - 16;
+		}
+		if (mouseX > scrollBarX && mouseX < baseX + chatAreaWidth && mouseY > scrollTop) {
+			int scrollHandleX = rs3ChatLayout ? scrollBarX : chatAreaWidth - 22;
+			method65(scrollHandleX, scrollInputHeight, mouseX, mouseY - scrollInputTop, aClass9_1059, 0, false, chatAreaScrollLength);
+		}
 		int i = chatAreaScrollLength - scrollInputHeight - aClass9_1059.scrollPosition;
 		if (i < 0)
 			i = 0;
@@ -3556,6 +3570,23 @@ public class Client extends RSApplet {
 		int baseY = currentScreenMode == ScreenMode.FIXED ? 338 : currentGameHeight - CHAT_AREA_HEIGHT;
 		processChatModeClick(super.getMouseX(), super.getMouseY(), super.getSaveClickX(), super.getSaveClickY(),
 				super.clickMode3 == 1, 0, baseY, CHAT_AREA_WIDTH, CHAT_AREA_HEIGHT);
+	}
+
+	public boolean handleRs3ChatWheel(int mouseX, int mouseY, int rotation) {
+		if (!isRs3InterfaceStyle() || rs3ChatMessageRect == null) {
+			return false;
+		}
+		if (!rs3ChatMessageRect.contains(mouseX, mouseY) && !rs3ChatInputMode) {
+			return false;
+		}
+		int scrollPos = anInt1089 - rotation * 30;
+		if (scrollPos < 0) {
+			scrollPos = 0;
+		}
+		if (anInt1089 != scrollPos) {
+			anInt1089 = scrollPos;
+		}
+		return true;
 	}
 
 	public void processRs3ChatModeClick(int mouseX, int mouseY, int clickX, int clickY, boolean clicked, int baseX, int baseY, int width, int height) {
@@ -9901,12 +9932,14 @@ public class Client extends RSApplet {
 		return sb.toString();
 	}
 	private void buildChatAreaMenu(int j) {
+		boolean rs3ChatLayout = isRs3InterfaceStyle() && rs3ChatMessageRect != null;
+		int messageHeight = rs3ChatLayout ? rs3ChatMessageRect.height : 0;
 		int l = 0;
 		for (int i1 = 0; i1 < 500; i1++) {
 			if (chatMessages[i1] == null)
 				continue;
 			int j1 = chatTypes[i1];
-			int k1 = (70 - l * 14 + 42) + anInt1089 + 4 + 5;
+			int k1 = rs3ChatLayout ? (messageHeight - 6 - l * 14) + anInt1089 : (70 - l * 14 + 42) + anInt1089 + 4 + 5;
 			if (k1 < -23)
 				break;
 			String s = chatNames[i1];
@@ -10910,7 +10943,15 @@ public class Client extends RSApplet {
 			anInt886 = 0;
 			anInt1315 = 0;
 			/* Chat area clicking */
-			if (currentScreenMode == ScreenMode.FIXED) {
+			if (isRs3InterfaceStyle() && rs3ChatMessageRect != null) {
+				if (rs3ChatMessageRect.contains(getMouseX(), getMouseY())) {
+					if (backDialogID != -1)
+						buildInterfaceMenu(rs3ChatMessageRect.x + 4, RSInterface.interfaceCache[backDialogID], getMouseX(),
+								rs3ChatMessageRect.y + 4, getMouseY(), 0);
+					else
+						buildChatAreaMenu(getMouseY() - rs3ChatMessageRect.y);
+				}
+			} else if (currentScreenMode == ScreenMode.FIXED) {
 				if (getMouseX() > 0 && getMouseY() > 338 && getMouseX() < 490 && getMouseY() < 463) {
 					if (backDialogID != -1)
 						buildInterfaceMenu(20, RSInterface.interfaceCache[backDialogID], getMouseX(), 358, getMouseY(), 0);
