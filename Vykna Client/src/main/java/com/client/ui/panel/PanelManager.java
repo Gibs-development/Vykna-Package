@@ -191,25 +191,69 @@ public class PanelManager {
 		}
 		return false;
 	}
-
-	public boolean handleClick(Client client, int mouseX, int mouseY, boolean mouseClicked) {
-		if (!mouseClicked || dragging || resizing) {
-			return false;
-		}
-		for (int index = panels.size() - 1; index >= 0; index--) {
-			UiPanel panel = panels.get(index);
+	public boolean isMouseOverPanelChrome(int mouseX, int mouseY, Client client) {
+		for (UiPanel panel : panels) {
 			if (!panel.isVisible()) {
 				continue;
 			}
+
 			Rectangle bounds = panel.getBounds();
-			if (panel.contains(mouseX, mouseY)) {
-				panel.handleClick(client, mouseX - bounds.x, mouseY - bounds.y);
-				client.performMenuActionIfAvailable();
+			if (!bounds.contains(mouseX, mouseY)) {
+				continue;
+			}
+
+			int headerHeight = getPanelHeaderHeight(client, panel);
+
+			// Header / tab strip ONLY
+			if (mouseY >= bounds.y && mouseY < bounds.y + headerHeight) {
 				return true;
 			}
 		}
 		return false;
 	}
+
+	public boolean handleClick(Client client, int mouseX, int mouseY, boolean mouseClicked) {
+		if (!mouseClicked || dragging || resizing) {
+			return false;
+		}
+
+		for (int index = panels.size() - 1; index >= 0; index--) {
+			UiPanel panel = panels.get(index);
+			if (!panel.isVisible()) {
+				continue;
+			}
+
+			Rectangle bounds = panel.getBounds();
+			if (!panel.contains(mouseX, mouseY)) {
+				continue;
+			}
+
+			// Make clicked panel topmost
+			bringToFront(panel);
+
+			int headerH = getPanelHeaderHeight(client, panel);
+			boolean inHeader = mouseY >= bounds.y && mouseY < bounds.y + headerH;
+
+			// CRITICAL:
+			// If this is a TabPanel (inventory, prayer, etc) and we're NOT in the header,
+			// do NOT consume the click. Let processMenuClick handle it (drag init lives there).
+			if (!inHeader && panel instanceof TabPanel) {
+				return false;
+			}
+
+			// Forward local coords (includes header clicks -> GroupPanel can switch tabs)
+			panel.handleClick(client, mouseX - bounds.x, mouseY - bounds.y);
+
+			// If a panel created a menu action and wants it executed, do it.
+			// (TabPanel content won't reach here because we returned false above.)
+			client.performMenuActionIfAvailable();
+			return true;
+		}
+
+		return false;
+	}
+
+
 
 	public void handleEditModeInput(Client client, int mouseX, int mouseY, boolean mouseDown) {
 		boolean rs3Mode = client.isRs3InterfaceStyleActive();
@@ -305,8 +349,9 @@ public class PanelManager {
 					resizeHandle = handle;
 					dockCandidate = null;
 					resizing = true;
-				} else if (hit != null && hit.draggable()) {
-					if (hit instanceof GroupPanel && isHeaderArea(hit, mouseX, mouseY)) {
+				} else if (hit != null && hit.draggable() && isHeaderArea(hit, mouseX, mouseY)) {
+					// Only capture drag from the panel chrome/header in edit mode.
+					if (hit instanceof GroupPanel) {
 						GroupPanel group = (GroupPanel) hit;
 						if (group.getPanels().size() > 1) {
 							UiPanel candidate = group.getPanelAtTabPosition(mouseX - group.getBounds().x);
@@ -316,6 +361,7 @@ public class PanelManager {
 							}
 						}
 					}
+
 					activePanel = hit;
 					bringToFront(hit);
 					Rectangle bounds = hit.getBounds();
@@ -325,8 +371,15 @@ public class PanelManager {
 					dockCandidate = null;
 					dragging = true;
 				} else {
+					// Clicked inside content area (not header/resize/close) -> let panels click normally.
+					if (hit != null) {
+						Rectangle b = hit.getBounds();
+						hit.handleClick(client, mouseX - b.x, mouseY - b.y);
+						client.performMenuActionIfAvailable();
+					}
 					activePanel = null;
 				}
+
 			} else {
 				activePanel = null;
 			}
@@ -1161,7 +1214,10 @@ public class PanelManager {
 			if (panels.isEmpty()) {
 				return false;
 			}
+
 			int headerHeight = getPanelHeaderHeight(client, this);
+
+			// Header tab switching (group-local coords)
 			if (mouseY < headerHeight) {
 				UiPanel selected = getPanelAtTabIndex(getTabIndexAt(mouseX));
 				if (selected != null && selected != activePanel) {
@@ -1172,12 +1228,24 @@ public class PanelManager {
 				}
 				return true;
 			}
+
 			if (activePanel == null) {
 				return false;
 			}
+
+			/*
+			 * IMPORTANT:
+			 * mouseX / mouseY are already GROUP-LOCAL here.
+			 * We must convert to CHILD-LOCAL, not absolute.
+			 */
 			Rectangle childBounds = activePanel.getBounds();
-			return activePanel.handleClick(client, mouseX - (childBounds.x - bounds.x), mouseY - (childBounds.y - bounds.y));
+
+			int childLocalX = mouseX - (childBounds.x - bounds.x);
+			int childLocalY = mouseY - (childBounds.y - bounds.y);
+
+			return activePanel.handleClick(client, childLocalX, childLocalY);
 		}
+
 
 		@Override
 		public boolean handleRightClick(Client client, int mouseX, int mouseY) {

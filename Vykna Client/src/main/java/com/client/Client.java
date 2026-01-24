@@ -1951,9 +1951,11 @@ public class Client extends RSApplet {
 						}
 					}
 					if (rs3PanelClick && (!dragAction || !canStartDrag)) {
-						doAction(menuActionRow - 1);
-						return true;
+						// RS3 panel click: don't doAction here,
+						// let PanelManager.handleClick run in mainGameProcessor.
+						return false;
 					}
+
 				}
 				if (j == 1 && (anInt1253 == 1 || menuHasAddFriend(menuActionRow - 1)) && menuActionRow > 2)
 					j = 2;
