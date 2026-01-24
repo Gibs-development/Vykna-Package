@@ -4,6 +4,7 @@ import com.client.Client;
 import com.client.DrawingArea;
 import com.client.Sprite;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 
 public class TabBarPanel extends PanelManager.BasePanel {
@@ -107,6 +108,32 @@ public class TabBarPanel extends PanelManager.BasePanel {
 	@Override
 	public boolean isScrollable() {
 		return false;
+	}
+
+	public Dimension getSnappedSize(Client client, Rectangle bounds) {
+		int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+		int[][] layouts = {
+				{14, 1},
+				{1, 14},
+				{7, 2},
+				{2, 7}
+		};
+		int bestWidth = bounds.width;
+		int bestHeight = bounds.height;
+		int bestDelta = Integer.MAX_VALUE;
+		for (int[] layout : layouts) {
+			int columns = layout[0];
+			int rows = layout[1];
+			int width = ICON_PADDING * 2 + columns * ICON_SIZE + (columns - 1) * ICON_PADDING;
+			int height = headerHeight + ICON_PADDING * 2 + rows * ICON_SIZE + (rows - 1) * ICON_PADDING;
+			int delta = Math.abs(bounds.width - width) + Math.abs(bounds.height - height);
+			if (delta < bestDelta) {
+				bestDelta = delta;
+				bestWidth = width;
+				bestHeight = height;
+			}
+		}
+		return new Dimension(bestWidth, bestHeight);
 	}
 
 	private static final class TabEntry {

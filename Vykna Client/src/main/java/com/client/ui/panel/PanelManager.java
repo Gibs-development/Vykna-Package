@@ -230,6 +230,10 @@ public class PanelManager {
 						mouseDownLastFrame = mouseDown;
 						return;
 					}
+					DockCandidate candidate = findDockCandidate(activePanel);
+					if (candidate != null) {
+						activePanel.setPosition(candidate.bounds.x, candidate.bounds.y);
+					}
 				}
 				Rectangle target = new Rectangle(activePanel.getBounds());
 				if (!isPlacementValid(target, activePanel)) {
@@ -249,6 +253,13 @@ public class PanelManager {
 					updatePreferredBounds((GroupPanel) activePanel);
 				} else {
 					preferredBounds.put(activePanel.getId(), new Rectangle(activePanel.getBounds()));
+				}
+				if (resizing && activePanel instanceof TabBarPanel) {
+					TabBarPanel tabBarPanel = (TabBarPanel) activePanel;
+					Rectangle bounds = tabBarPanel.getBounds();
+					Dimension snapped = tabBarPanel.getSnappedSize(client, bounds);
+					tabBarPanel.setSize(snapped.width, snapped.height);
+					preferredBounds.put(tabBarPanel.getId(), new Rectangle(tabBarPanel.getBounds()));
 				}
 			}
 			dragging = false;

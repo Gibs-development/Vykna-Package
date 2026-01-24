@@ -11,9 +11,12 @@ public class InventoryPanel extends PanelManager.TabPanel {
 	public static final int RS3_INVENTORY_INTERFACE_ID = 52000;
 	private static final int INVENTORY_CONTAINER_ID = 3214;
 	private static final int CONTENT_PADDING = 4;
+	private static final int INVENTORY_SLOT_SIZE = 32;
+	private static final int INVENTORY_MIN_COLUMNS = 2;
+	private static final int INVENTORY_MAX_COLUMNS = 8;
 
 	public InventoryPanel(int id, Rectangle bounds) {
-		super(id, 3, bounds, "Inventory", true, false, 140, 200 + PanelManager.PANEL_HEADER_HEIGHT);
+		super(id, 3, bounds, "Inventory", true, true, 140, 200 + PanelManager.PANEL_HEADER_HEIGHT);
 	}
 
 	@Override
@@ -38,10 +41,26 @@ public class InventoryPanel extends PanelManager.TabPanel {
 
 	@Override
 	public void onResize(Client client) {
+		RSInterface rsInterface = getInventoryWrapper();
+		if (rsInterface == null) {
+			return;
+		}
+		applyInventoryLayout(client, rsInterface, getContentBounds(client));
 	}
 
 	public Dimension clampSizeForResize(int width, int height, Client client) {
-		return new Dimension(width, height);
+		RSInterface container = RSInterface.interfaceCache[INVENTORY_CONTAINER_ID];
+		int padX = container == null ? 0 : container.invSpritePadX;
+		int padY = container == null ? 0 : container.invSpritePadY;
+		int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+		int contentWidth = Math.max(1, width - CONTENT_PADDING * 2);
+		int columns = clampColumns(contentWidth, padX);
+		int rows = (int) Math.ceil(28D / columns);
+		int requiredContentHeight = rows * INVENTORY_SLOT_SIZE + Math.max(0, rows - 1) * padY;
+		int minContentWidth = INVENTORY_MIN_COLUMNS * INVENTORY_SLOT_SIZE + (INVENTORY_MIN_COLUMNS - 1) * padX;
+		int minWidth = minContentWidth + CONTENT_PADDING * 2;
+		int minHeight = headerHeight + requiredContentHeight + CONTENT_PADDING * 2;
+		return new Dimension(Math.max(width, minWidth), Math.max(height, minHeight));
 	}
 
 	private Point getContainerOffset() {
@@ -72,6 +91,18 @@ public class InventoryPanel extends PanelManager.TabPanel {
 		return false;
 	}
 
+	@Override
+	protected int getContentPadding(Client client, Rectangle bounds) {
+		return CONTENT_PADDING;
+	}
+
+	@Override
+	protected void updateInterfaceLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
+		rsInterface.width = bounds.width;
+		rsInterface.height = bounds.height;
+		applyInventoryLayout(client, rsInterface, bounds);
+	}
+
 	private void ensureInventoryContainerFlags() {
 		RSInterface container = RSInterface.interfaceCache[INVENTORY_CONTAINER_ID];
 		if (container == null) {
@@ -79,6 +110,48 @@ public class InventoryPanel extends PanelManager.TabPanel {
 		}
 		container.isInventoryInterface = true;
 		container.aBoolean259 = true;
+	}
+
+	private void applyInventoryLayout(Client client, RSInterface rsInterface, Rectangle bounds) {
+		RSInterface container = RSInterface.interfaceCache[INVENTORY_CONTAINER_ID];
+		if (container == null) {
+			return;
+		}
+		int padX = container.invSpritePadX;
+		int padY = container.invSpritePadY;
+		int contentWidth = Math.max(1, bounds.width);
+		int columns = clampColumns(contentWidth, padX);
+		int rows = (int) Math.ceil(28D / columns);
+		int requiredHeight = rows * INVENTORY_SLOT_SIZE + Math.max(0, rows - 1) * padY;
+		rsInterface.height = Math.max(bounds.height, requiredHeight);
+		int targetSize = columns * rows;
+		if (container.inventoryItemId == null || container.inventoryItemId.length != targetSize) {
+			int[] oldItems = container.inventoryItemId == null ? new int[0] : container.inventoryItemId;
+			int[] oldAmounts = container.inventoryAmounts == null ? new int[0] : container.inventoryAmounts;
+			container.inventoryItemId = new int[targetSize];
+			container.inventoryAmounts = new int[targetSize];
+			for (int index = 0; index < Math.min(28, targetSize); index++) {
+				if (index < oldItems.length) {
+					container.inventoryItemId[index] = oldItems[index];
+					container.inventoryAmounts[index] = oldAmounts[index];
+				}
+			}
+		}
+		container.width = columns;
+		container.height = rows;
+	}
+
+	private RSInterface getInventoryWrapper() {
+		int interfaceId = Client.tabInterfaceIDs[getTabIndex()];
+		if (interfaceId <= 0) {
+			return null;
+		}
+		return RSInterface.interfaceCache[interfaceId];
+	}
+
+	private int clampColumns(int contentWidth, int padX) {
+		return Math.max(INVENTORY_MIN_COLUMNS,
+				Math.min(INVENTORY_MAX_COLUMNS, (contentWidth + padX) / (INVENTORY_SLOT_SIZE + padX)));
 	}
 
 	public static void resetInventoryContainer() {
