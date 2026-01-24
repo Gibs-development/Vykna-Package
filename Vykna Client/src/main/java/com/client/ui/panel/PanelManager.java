@@ -548,6 +548,18 @@ public class PanelManager {
 	public void bringToFront(UiPanel panel) {
 		panels.remove(panel);
 		panels.add(panel);
+		if (panel instanceof MinimapBasePanel) {
+			List<UiPanel> overlays = new ArrayList<>();
+			for (UiPanel candidate : panels) {
+				if (candidate instanceof WidgetPanel || candidate instanceof OrbsPanel) {
+					overlays.add(candidate);
+				}
+			}
+			for (UiPanel overlay : overlays) {
+				panels.remove(overlay);
+				panels.add(overlay);
+			}
+		}
 	}
 
 	private UiPanel findGroupTarget(UiPanel panel, int mouseX, int mouseY, Client client) {
@@ -816,11 +828,27 @@ public class PanelManager {
 			if (panel == ignore || !panel.isVisible()) {
 				continue;
 			}
+			if (allowOverlap(ignore, panel)) {
+				continue;
+			}
 			if (bounds.intersects(panel.getBounds())) {
 				return false;
 			}
 		}
 		return true;
+	}
+
+	private boolean allowOverlap(UiPanel moving, UiPanel other) {
+		if (moving == null || other == null) {
+			return false;
+		}
+		boolean movingMinimap = moving instanceof MinimapBasePanel;
+		boolean otherMinimap = other instanceof MinimapBasePanel;
+		if (!movingMinimap && !otherMinimap) {
+			return false;
+		}
+		UiPanel overlay = movingMinimap ? other : moving;
+		return overlay instanceof WidgetPanel || overlay instanceof OrbsPanel;
 	}
 
 	private Rectangle resolveCollision(Rectangle bounds, UiPanel ignore) {
@@ -867,7 +895,7 @@ public class PanelManager {
 		private static final int PANEL_PADDING = 8;
 		private static final int PANEL_MARGIN = 10;
 		private static final int MINIMAP_PANEL_WIDTH = 200;
-		private static final int MINIMAP_PANEL_HEIGHT = 200 + PANEL_HEADER_HEIGHT;
+		private static final int MINIMAP_PANEL_HEIGHT = 200;
 		private static final int COMPASS_SIZE = 36;
 		private static final int ORB_SIZE = 52;
 		private static final int XP_BUTTON_WIDTH = 24;
@@ -909,11 +937,11 @@ public class PanelManager {
 			int minimapX = Math.max(PANEL_MARGIN, Client.currentGameWidth - MINIMAP_PANEL_WIDTH - PANEL_MARGIN);
 			int minimapY = PANEL_MARGIN;
 			int orbsX = minimapX - PANEL_PADDING;
-			int orbsContentY = minimapY + MINIMAP_PANEL_HEIGHT + PANEL_PADDING + PANEL_HEADER_HEIGHT;
+			int orbsContentY = minimapY + MINIMAP_PANEL_HEIGHT + PANEL_PADDING;
 			int chatX = PANEL_MARGIN;
 			int chatY = Math.max(PANEL_MARGIN, Client.currentGameHeight - CHAT_PANEL_HEIGHT - PANEL_MARGIN);
 			panels.add(new MinimapBasePanel(PANEL_ID_MINIMAP_BASE, new Rectangle(minimapX, minimapY, MINIMAP_PANEL_WIDTH, MINIMAP_PANEL_HEIGHT)));
-			panels.add(new CompassPanel(PANEL_ID_COMPASS, new Rectangle(minimapX + 6, minimapY + PANEL_HEADER_HEIGHT + 6, COMPASS_SIZE, COMPASS_SIZE)));
+			panels.add(new CompassPanel(PANEL_ID_COMPASS, new Rectangle(minimapX + 6, minimapY + 6, COMPASS_SIZE, COMPASS_SIZE)));
 			panels.add(new HpOrbPanel(PANEL_ID_HP_ORB, new Rectangle(orbsX + 7, orbsContentY + 41, ORB_SIZE, ORB_SIZE)));
 			panels.add(new PrayerOrbPanel(PANEL_ID_PRAYER_ORB, new Rectangle(orbsX + 7, orbsContentY + 75, ORB_SIZE, ORB_SIZE)));
 			panels.add(new RunOrbPanel(PANEL_ID_RUN_ORB, new Rectangle(orbsX + 31, orbsContentY + 132, ORB_SIZE, 30)));
@@ -2095,7 +2123,7 @@ public class PanelManager {
 		if (!panel.drawsBackground() && !(panel instanceof MinimapBasePanel)) {
 			return;
 		}
-		if (!isHeaderVisible(client, panel)) {
+		if (!isHeaderVisible(client, panel) && !(panel instanceof MinimapBasePanel)) {
 			return;
 		}
 		Rectangle bounds = panel.getBounds();
@@ -2104,7 +2132,7 @@ public class PanelManager {
 	}
 
 	private ResizeHandle getResizeHandle(Client client, UiPanel panel, int mouseX, int mouseY) {
-		if (!panel.drawsBackground()) {
+		if (!panel.drawsBackground() && !(panel instanceof MinimapBasePanel)) {
 			return null;
 		}
 		Rectangle bounds = panel.getBounds();
@@ -2189,6 +2217,9 @@ public class PanelManager {
 	static int getPanelHeaderHeight(Client client, UiPanel panel) {
 		if (client == null || !client.isRs3InterfaceStyleActive()) {
 			return PANEL_HEADER_HEIGHT;
+		}
+		if (panel instanceof MinimapBasePanel) {
+			return 0;
 		}
 		if (panel instanceof GroupPanel) {
 			return PANEL_HEADER_HEIGHT;
