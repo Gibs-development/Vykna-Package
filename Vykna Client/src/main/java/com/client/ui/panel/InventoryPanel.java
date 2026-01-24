@@ -36,7 +36,12 @@ public class InventoryPanel extends PanelManager.TabPanel {
 	@Override
 	public boolean handleMouse(Client client, int mouseX, int mouseY) {
 		applyResponsiveLayout(client, false);
-		return super.handleMouse(client, mouseX, mouseY);
+		Rectangle bounds = getBounds();
+		int headerHeight = PanelManager.getPanelHeaderHeight(client, this);
+		if (mouseY >= bounds.y && mouseY <= bounds.y + headerHeight) {
+			return super.handleMouse(client, mouseX, mouseY);
+		}
+		return false;
 	}
 
 	@Override
