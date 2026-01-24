@@ -41,6 +41,10 @@ public class Model extends Renderable {
         lightDecay = null;
     }
 
+    int getModelId() {
+        return modelId;
+    }
+
     public void convertTexturesTo317(short[] textureIds, int[] texa, int[] texb, int[] texc, byte[] texture_coordinates) {
         int set = 0;
         int set2 = 0;
