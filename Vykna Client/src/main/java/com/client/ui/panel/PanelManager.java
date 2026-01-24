@@ -267,37 +267,43 @@ public class PanelManager {
 				return;
 			}
 			ResizeHandle handle = hit != null && hit.resizable() ? getResizeHandle(client, hit, mouseX, mouseY) : null;
-			if (handle != null) {
-				activePanel = hit;
-				bringToFront(hit);
-				Rectangle bounds = hit.getBounds();
-				resizeStartBounds = new Rectangle(bounds);
-				resizeStartX = mouseX;
-				resizeStartY = mouseY;
-				resizeStartWidth = bounds.width;
-				resizeStartHeight = bounds.height;
-				resizeHandle = handle;
-				dockCandidate = null;
-				resizing = true;
-			} else if (hit != null && hit.draggable()) {
-				if (hit instanceof GroupPanel && isHeaderArea(hit, mouseX, mouseY)) {
-					GroupPanel group = (GroupPanel) hit;
-					if (group.getPanels().size() > 1) {
-						UiPanel candidate = group.getPanelAtTabPosition(mouseX - group.getBounds().x);
-						if (candidate != null && candidate != group.getActivePanel()) {
-							pendingGroupDetach = group;
-							pendingGroupPanel = candidate;
+			boolean allowChromeCapture = !(hit instanceof TabPanel)
+					|| ((TabPanel) hit).allowPanelChromeCapture(client, mouseX, mouseY);
+			if (allowChromeCapture) {
+				if (handle != null) {
+					activePanel = hit;
+					bringToFront(hit);
+					Rectangle bounds = hit.getBounds();
+					resizeStartBounds = new Rectangle(bounds);
+					resizeStartX = mouseX;
+					resizeStartY = mouseY;
+					resizeStartWidth = bounds.width;
+					resizeStartHeight = bounds.height;
+					resizeHandle = handle;
+					dockCandidate = null;
+					resizing = true;
+				} else if (hit != null && hit.draggable()) {
+					if (hit instanceof GroupPanel && isHeaderArea(hit, mouseX, mouseY)) {
+						GroupPanel group = (GroupPanel) hit;
+						if (group.getPanels().size() > 1) {
+							UiPanel candidate = group.getPanelAtTabPosition(mouseX - group.getBounds().x);
+							if (candidate != null && candidate != group.getActivePanel()) {
+								pendingGroupDetach = group;
+								pendingGroupPanel = candidate;
+							}
 						}
 					}
+					activePanel = hit;
+					bringToFront(hit);
+					Rectangle bounds = hit.getBounds();
+					dragStartBounds = new Rectangle(bounds);
+					dragOffsetX = mouseX - bounds.x;
+					dragOffsetY = mouseY - bounds.y;
+					dockCandidate = null;
+					dragging = true;
+				} else {
+					activePanel = null;
 				}
-				activePanel = hit;
-				bringToFront(hit);
-				Rectangle bounds = hit.getBounds();
-				dragStartBounds = new Rectangle(bounds);
-				dragOffsetX = mouseX - bounds.x;
-				dragOffsetY = mouseY - bounds.y;
-				dockCandidate = null;
-				dragging = true;
 			} else {
 				activePanel = null;
 			}
@@ -1426,6 +1432,10 @@ public class PanelManager {
 			client.pushUiOffset(contentBounds.x, contentBounds.y);
 			client.buildInterfaceMenuWithOffset(0, rsInterface, adjustedMouseX, 0, adjustedMouseY, getScrollPosition(rsInterface, contentBounds));
 			client.popUiOffset();
+			return true;
+		}
+
+		protected boolean allowPanelChromeCapture(Client client, int mouseX, int mouseY) {
 			return true;
 		}
 
