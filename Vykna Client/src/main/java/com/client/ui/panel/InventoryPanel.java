@@ -17,11 +17,13 @@ public class InventoryPanel extends PanelManager.TabPanel {
 
 	@Override
 	public void draw(Client client) {
+		ensureInventoryContainerFlags();
 		super.draw(client);
 	}
 
 	@Override
 	public boolean handleMouse(Client client, int mouseX, int mouseY) {
+		ensureInventoryContainerFlags();
 		return super.handleMouse(client, mouseX, mouseY);
 	}
 
@@ -69,11 +71,22 @@ public class InventoryPanel extends PanelManager.TabPanel {
 		return false;
 	}
 
+	private void ensureInventoryContainerFlags() {
+		RSInterface container = RSInterface.interfaceCache[INVENTORY_CONTAINER_ID];
+		if (container == null) {
+			return;
+		}
+		container.isInventoryInterface = true;
+		container.aBoolean259 = true;
+	}
+
 	public static void resetInventoryContainer() {
 		RSInterface container = RSInterface.interfaceCache[INVENTORY_CONTAINER_ID];
 		if (container == null) {
 			return;
 		}
+		container.isInventoryInterface = true;
+		container.aBoolean259 = true;
 		container.width = 4;
 		container.height = 7;
 
