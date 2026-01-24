@@ -824,18 +824,10 @@ public final class NpcDefinition {
 
 		}
 		if (i == 1088) {
-			entityDef.name = "Seren";
-			entityDef.models = new int[] { 38605 };
+			entityDef.name = "667 Test";
+			entityDef.models = new int[] { 58940 };
 			entityDef.actions = new String[5];
 			entityDef.actions = new String[] { "Talk-to", null, "Pick-Up", null, null };
-			entityDef.anInt86 = 65; //WIDTH
-			entityDef.anInt91 = 65; // HEIGH
-			entityDef.originalColors = null;
-			entityDef.newColors = null;
-			entityDef.combatLevel = 0;
-			entityDef.standAnim = 8372;
-			entityDef.walkAnim = 8372;
-			entityDef.models = new int[] { 38605 };
 
 		}
 		if (i == 1089) {

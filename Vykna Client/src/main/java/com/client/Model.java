@@ -14,6 +14,7 @@ public class Model extends Renderable {
     private int modelId = -1;
     public ParticleSystem particleSystem;
     private static final boolean DEBUG_CAPE_PARTICLES = false;
+    private static final int FOREIGN_MODEL_BASE = 50000;
 
     /** True if ANY vertex in this model has a particle attachment (fast early-out at render time). */
     private boolean hasParticleAttachments;
@@ -186,7 +187,13 @@ public class Model extends Renderable {
 
         try {
             byte[] data = aClass21Array1661[model].aByteArray368;
-            if (data[data.length - 1] == -3 && data[data.length - 2] == -1) {
+
+            /* ---------- 667 MODELS ---------- */
+            if (model >= FOREIGN_MODEL_BASE) {
+                ModelLoader.decode667(this, data);
+            }
+            /* ---------- OSRS / 317 MODELS ---------- */
+            else if (data[data.length - 1] == -3 && data[data.length - 2] == -1) {
                 ModelLoader.decodeType3(this, data);
             } else if (data[data.length - 1] == -2 && data[data.length - 2] == -1) {
                 ModelLoader.decodeType2(this, data);
@@ -195,6 +202,7 @@ public class Model extends Renderable {
             } else {
                 ModelLoader.decodeOldFormat(this, data);
             }
+
 
             // ---- Optional scaling for new models ----
             if (newmodel[model]) {

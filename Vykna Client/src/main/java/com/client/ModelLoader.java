@@ -1,6 +1,179 @@
 package com.client;
 
 public class ModelLoader {
+    public static void decode667(Model def, byte[] data) {
+        try {
+            int[] possibleFooters = {23, 24, 26, 28, 30, 32};
+
+            int bestFooter = -1;
+            int verticesCount = -1, trianglesCount = -1;
+
+            // ---- FOOTER SCAN ----
+            for (int footerLen : possibleFooters) {
+                if (data.length < footerLen) continue;
+
+                Buffer test = new Buffer(data);
+                test.setOffset(data.length - footerLen);
+
+                int v = test.readUShort();
+                int t = test.readUShort();
+
+                // sanity checks:
+                if (v > 0 && v < 20000 && t > 0 && t < 20000) {
+                    bestFooter = footerLen;
+                    verticesCount = v;
+                    trianglesCount = t;
+                    break;
+                }
+            }
+
+            System.out.println("=== 667 footer detect: chosen=" + bestFooter +
+                    " v=" + verticesCount + " t=" + trianglesCount);
+
+            if (bestFooter == -1) {
+                System.err.println("NO VALID FOOTER FOUND");
+                return;
+            }
+
+            // ---- Read real footer ----
+            Buffer footer = new Buffer(data);
+            footer.setOffset(data.length - bestFooter);
+
+            verticesCount = footer.readUShort();
+            trianglesCount = footer.readUShort();
+            int textureCount = footer.readUnsignedByte();
+
+            int hasFaceType = footer.readUnsignedByte();
+            int hasPriority = footer.readUnsignedByte();
+            int hasAlpha = footer.readUnsignedByte();
+            int hasTriangleSkin = footer.readUnsignedByte();
+            int hasTexture = footer.readUnsignedByte();
+            int hasVertexSkin = footer.readUnsignedByte();
+
+            int xLen = footer.readUShort();
+            int yLen = footer.readUShort();
+            int zLen = footer.readUShort();
+            int colorLen = footer.readUShort();
+            int indexLen = footer.readUShort();
+
+            System.out.println("Footer OK → decoding model= 50001");
+
+            def.verticesCount = verticesCount;
+            def.trianglesCount = trianglesCount;
+            def.texturesCount = 0;
+
+            def.verticesX = new int[verticesCount];
+            def.verticesY = new int[verticesCount];
+            def.verticesZ = new int[verticesCount];
+
+            def.trianglesX = new int[trianglesCount];
+            def.trianglesY = new int[trianglesCount];
+            def.trianglesZ = new int[trianglesCount];
+
+            def.colors = new short[trianglesCount];
+
+            // --- offsets ---
+            int offset = 0;
+
+            int vertexFlagsOff = offset; offset += verticesCount;
+            int vxOff = offset; offset += xLen;
+            int vyOff = offset; offset += yLen;
+            int vzOff = offset; offset += zLen;
+
+            int vertexSkinOff = offset;
+            if (hasVertexSkin == 1) offset += verticesCount;
+
+            int faceColorOff = offset; offset += colorLen;
+
+            int faceTypeOff = offset;
+            if (hasFaceType == 1) offset += trianglesCount;
+
+            int facePriorityOff = offset;
+            if (hasPriority == 255) offset += trianglesCount;
+
+            int faceAlphaOff = offset;
+            if (hasAlpha == 1) offset += trianglesCount;
+
+            int faceIndexOff = offset;
+
+            // --- buffers ---
+            Buffer flagsBuf = new Buffer(data);
+            Buffer vxBuf = new Buffer(data);
+            Buffer vyBuf = new Buffer(data);
+            Buffer vzBuf = new Buffer(data);
+            Buffer vSkinBuf = new Buffer(data);
+            Buffer colorBuf = new Buffer(data);
+            Buffer typeBuf = new Buffer(data);
+            Buffer indexBuf = new Buffer(data);
+            Buffer alphaBuf = new Buffer(data);
+
+            flagsBuf.setOffset(vertexFlagsOff);
+            vxBuf.setOffset(vxOff);
+            vyBuf.setOffset(vyOff);
+            vzBuf.setOffset(vzOff);
+            if (hasVertexSkin == 1) vSkinBuf.setOffset(vertexSkinOff);
+
+            colorBuf.setOffset(faceColorOff);
+            if (hasFaceType == 1) typeBuf.setOffset(faceTypeOff);
+            if (hasAlpha == 1) alphaBuf.setOffset(faceAlphaOff);
+            indexBuf.setOffset(faceIndexOff);
+
+            // --- vertices ---
+            int x = 0, y = 0, z = 0;
+            for (int i = 0; i < verticesCount; i++) {
+                int flags = flagsBuf.readUnsignedByte();
+
+                if ((flags & 1) != 0) x += vxBuf.readSmart();
+                if ((flags & 2) != 0) y += vyBuf.readSmart();
+                if ((flags & 4) != 0) z += vzBuf.readSmart();
+
+                def.verticesX[i] = x;
+                def.verticesY[i] = y;
+                def.verticesZ[i] = z;
+            }
+
+            // --- colors ---
+            for (int i = 0; i < trianglesCount; i++) {
+                def.colors[i] = (short) colorBuf.readUShort();
+            }
+
+            // --- triangles ---
+            int a = 0, b = 0, c = 0, last = 0;
+            for (int i = 0; i < trianglesCount; i++) {
+                int type = (hasFaceType == 1) ? typeBuf.readUnsignedByte() : 1;
+
+                if (type == 1) {
+                    a = indexBuf.readSmart() + last;
+                    b = indexBuf.readSmart() + a;
+                    c = indexBuf.readSmart() + b;
+                    last = c;
+                } else if (type == 2) {
+                    b = c;
+                    c = indexBuf.readSmart() + last;
+                    last = c;
+                } else if (type == 3) {
+                    a = c;
+                    c = indexBuf.readSmart() + last;
+                    last = c;
+                } else if (type == 4) {
+                    int t = a; a = b; b = t;
+                    c = indexBuf.readSmart() + last;
+                    last = c;
+                }
+
+                def.trianglesX[i] = a;
+                def.trianglesY[i] = b;
+                def.trianglesZ[i] = c;
+            }
+
+        } catch (Throwable t) {
+            System.err.println("667 decode crash:");
+            t.printStackTrace();
+        }
+    }
+
+
+
 
     public static void decodeType3(Model def, byte[] var1)
     {
@@ -374,6 +547,7 @@ public class ModelLoader {
         }
 
     }
+
 
     public static void decodeType2(Model def, byte[] var1)
     {
