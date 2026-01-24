@@ -53,6 +53,9 @@ public class RSApplet extends Applet implements Runnable, MouseListener, MouseMo
 		Settings settings = Client.getUserSettings();
 		Client client = Client.getInstance();
 		if (settings != null && settings.getInterfaceStyle() == InterfaceStyle.RS3 && client != null) {
+			if (client.handleRs3ChatWheel(getMouseX(), getMouseY(), rotation)) {
+				return;
+			}
 			if (client.getPanelManager().handleMouseWheel(client, getMouseX(), getMouseY(), rotation)) {
 				return;
 			}
