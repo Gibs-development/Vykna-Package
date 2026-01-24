@@ -78,12 +78,25 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-
-
+/*
+ * RS3 inventory dragging fix:
+ * Root cause: RS3 panel clicks returned early in processMenuClick, so drag state variables were never
+ * initialized (panelManager.handleClick executed the action immediately), breaking drag in RS3 only.
+ * Fix: allow processMenuClick to run for RS3 panel clicks so drag state can be set, while skipping
+ * immediate doAction for RS3 panel clicks to avoid duplicate actions. Legacy paths remain unchanged.
+ *
+ * Test plan:
+ * - RS3: drag within inventory (slot 0 -> slot 27) and verify swap/insert behavior.
+ * - RS3: drag stackable vs non-stackable items within inventory.
+ * - RS3: drag between inventory and equipment if supported by the client.
+ * - RS3: drag to drop if legacy supports it.
+ * - RS3: verify right-click menu still appears and left-click use still works.
+ * - Legacy: repeat inventory drag to confirm no regression.
+ */
 public class Client extends RSApplet {
 
 	private static final Logger logger = LoggerFactory.getLogger("Client");
+	private static final boolean DEBUG_RS3_DRAG = false;
 	private final PanelManager panelManager = new PanelManager();
 	private final Deque<Point> uiOffsetStack = new ArrayDeque<>();
 	private int uiOffsetX;
@@ -1817,13 +1830,10 @@ public class Client extends RSApplet {
 	public boolean processMenuClick() {
 		if (activeInterfaceType != 0)
 			return false;
+		boolean rs3PanelClick = false;
 		if (isRs3InterfaceStyle() && !menuOpen) {
 			panelManager.ensureRs3Layout(this);
-			if (panelManager.isMouseOverPanel(super.getSaveClickX(), super.getSaveClickY())) {
-				if (super.clickMode3 != 2) {
-					return false;
-				}
-			}
+			rs3PanelClick = panelManager.isMouseOverPanel(super.getSaveClickX(), super.getSaveClickY());
 		}
 		int j = super.clickMode3;
 		if (spellSelected == 1 && super.getSaveClickX() >= 516 && super.getSaveClickY() >= 160 && super.getSaveClickX() <= 765
@@ -1905,6 +1915,10 @@ public class Client extends RSApplet {
 					int j2 = menuActionCmd3[menuActionRow - 1];
 					RSInterface class9 = RSInterface.interfaceCache[j2];
 					if (class9.aBoolean259 || class9.aBoolean235) {
+						if (DEBUG_RS3_DRAG) {
+							logger.debug("RS3 drag down: interface={}, slot={}, actionId={}, mouse=({}, {})",
+									j2, l1, i1, super.getSaveClickX(), super.getSaveClickY());
+						}
 						aBoolean1242 = false;
 						anInt989 = 0;
 						draggingItemInterfaceId = j2;
@@ -1922,7 +1936,7 @@ public class Client extends RSApplet {
 			}
 			if (j == 1 && (anInt1253 == 1 || menuHasAddFriend(menuActionRow - 1)) && menuActionRow > 2)
 				j = 2;
-			if (j == 1 && menuActionRow > 0)
+			if (j == 1 && menuActionRow > 0 && !(rs3PanelClick && !menuOpen))
 				doAction(menuActionRow - 1);
 			if (j == 2 && menuActionRow > 0)
 				determineMenuSize();
@@ -5752,6 +5766,9 @@ public class Client extends RSApplet {
 		}
 		if (activeInterfaceType != 0) {
 			anInt989++;
+			// Drag pipeline vars/methods: buildInterfaceMenu -> mouseInvInterfaceIndex/lastActiveInvInterface;
+			// processMenuClick sets draggingItemInterfaceId/itemDraggingSlot/activeInterfaceType;
+			// aBoolean1242 + anInt989 gate drag threshold in this block (getDragSetting()).
 			if (super.getMouseX() > anInt1087 + 5 || super.getMouseX() < anInt1087 - 5 || super.getMouseY() > anInt1088 + 5
 					|| super.getMouseY() < anInt1088 - 5)
 				aBoolean1242 = true;
@@ -5762,6 +5779,10 @@ public class Client extends RSApplet {
 					inputTaken = true;
 				activeInterfaceType = 0;
 				if (aBoolean1242 && anInt989 >= getDragSetting(draggingItemInterfaceId)) {
+					if (DEBUG_RS3_DRAG) {
+						logger.debug("RS3 drag release: fromInterface={}, fromSlot={}, toInterface={}, toSlot={}",
+								draggingItemInterfaceId, itemDraggingSlot, lastActiveInvInterface, mouseInvInterfaceIndex);
+					}
 					lastActiveInvInterface = -1;
 					processRightClick();
 
