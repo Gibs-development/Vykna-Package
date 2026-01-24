@@ -408,6 +408,19 @@ public class PanelManager {
 					newY = bottom - newHeight;
 				}
 			}
+			if (activePanel instanceof TabBarPanel) {
+				TabBarPanel tabBarPanel = (TabBarPanel) activePanel;
+				Rectangle snappedBounds = new Rectangle(newX, newY, newWidth, newHeight);
+				Dimension snapped = tabBarPanel.getSnappedSize(client, snappedBounds);
+				newWidth = snapped.width;
+				newHeight = snapped.height;
+				if (resizeHandle == ResizeHandle.TOP_LEFT) {
+					newX = right - newWidth;
+					newY = bottom - newHeight;
+				} else if (resizeHandle == ResizeHandle.TOP_RIGHT) {
+					newY = bottom - newHeight;
+				}
+			}
 			newWidth = Math.max(activePanel.getMinWidth(), newWidth);
 			newHeight = Math.max(activePanel.getMinHeight(), newHeight);
 			newX = clamp(newX, 0, Client.currentGameWidth - newWidth);
