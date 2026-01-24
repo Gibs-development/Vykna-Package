@@ -1,8 +1,13 @@
 package com.client;
 
 public class ModelLoader {
+    private static final boolean DEBUG_667 = true;
+
     public static void decode667(Model def, byte[] data) {
         // 667 models follow the RS2 "new format" handled by read622Model.
+        if (DEBUG_667) {
+            System.out.println("[667 decode] model=" + def.getModelId() + " bytes=" + (data == null ? 0 : data.length));
+        }
         def.read622Model(data, def.getModelId());
     }
 
