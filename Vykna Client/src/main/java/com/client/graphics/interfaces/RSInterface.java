@@ -23,6 +23,7 @@ public class RSInterface {
 	public static final int RED_COLOR = 0xE11010;
 	public transient Sprite[] gridSpriteCache;
 	private static final boolean DEBUG_NPC_PREVIEW = true;
+	private static String lastNpcPreviewDebug;
 
 	public static int emptyInterface = 24_470;
 	public static boolean showIds = false;
@@ -3166,7 +3167,7 @@ public class RSInterface {
 		rsi.width = 100;
 		rsi.height = 90;
 		if (DEBUG_NPC_PREVIEW && id == 32202) {
-			System.out.println("[addNpcModel] id=" + id + " npc=" + npcId + " zoom=" + rsi.modelZoom
+			logNpcPreview("[addNpcModel] id=" + id + " npc=" + npcId + " zoom=" + rsi.modelZoom
 					+ " rot1=" + rsi.modelRotation1 + " rot2=" + rsi.modelRotation2);
 		}
 	}
@@ -3914,7 +3915,7 @@ public class RSInterface {
 		int mediaType = flag ? anInt255 : anInt233;
 		int media = flag ? anInt256 : mediaID;
 		if (DEBUG_NPC_PREVIEW && id == 32202) {
-			System.out.println("[RSInterface.method209] id=" + id
+			logNpcPreview("[RSInterface.method209] id=" + id
 					+ " type=" + type
 					+ " anInt233=" + anInt233
 					+ " mediaID=" + mediaID
@@ -3932,7 +3933,7 @@ public class RSInterface {
 		Model model;
 		if (mediaType == 2) {
 			if (DEBUG_NPC_PREVIEW && id == 32202) {
-				System.out.println("[RSInterface.method209] branch=NPC useNpcFullModel=" + useNpcFullModel);
+				logNpcPreview("[RSInterface.method209] branch=NPC useNpcFullModel=" + useNpcFullModel);
 			}
 			NpcDefinition def = NpcDefinition.forID(media);
 			if (def == null) {
@@ -3946,7 +3947,7 @@ public class RSInterface {
 						: mediaType == 4 ? "ITEM"
 						: mediaType == 5 ? "NONE"
 						: "UNKNOWN";
-				System.out.println("[RSInterface.method209] branch=" + branch);
+				logNpcPreview("[RSInterface.method209] branch=" + branch);
 			}
 			model = method206(mediaType, media);
 		}
@@ -3964,8 +3965,18 @@ public class RSInterface {
 			model_1.method470(k);
 		if (j != -1)
 			model_1.method470(j);
-		model_1.method479(64, 768, -50, -10, -50, true);
+		if (model_1.colors != null) {
+			model_1.method479(64, 768, -50, -10, -50, true);
+		}
 		return model_1;
+	}
+
+	private static void logNpcPreview(String message) {
+		if (message.equals(lastNpcPreviewDebug)) {
+			return;
+		}
+		lastNpcPreviewDebug = message;
+		System.out.println(message);
 	}
 
 	public RSInterface() {
