@@ -1914,7 +1914,9 @@ public class Model extends Renderable {
         }
         if (super.aClass33Array1425 == null) {
             super.aClass33Array1425 = new VertexNormal[verticesCount];
-            for (int l1 = 0; l1 < verticesCount; l1++) {
+        }
+        for (int l1 = 0; l1 < verticesCount; l1++) {
+            if (super.aClass33Array1425[l1] == null) {
                 super.aClass33Array1425[l1] = new VertexNormal();
             }
         }
@@ -2231,6 +2233,9 @@ public class Model extends Renderable {
     }
 
     public final void method480(int i, int j, int k, int l, int i1) {
+        if (super.aClass33Array1425 == null) {
+            super.aClass33Array1425 = new VertexNormal[verticesCount];
+        }
         for (int j1 = 0; j1 < trianglesCount; j1++) {
             int k1 = trianglesX[j1];
             int i2 = trianglesY[j1];
@@ -2238,24 +2243,42 @@ public class Model extends Renderable {
             if (types == null) {
                 int i3 = colors[j1];
                 VertexNormal class33 = super.aClass33Array1425[k1];
+                if (class33 == null) {
+                    class33 = super.aClass33Array1425[k1] = new VertexNormal();
+                }
                 int k2 = i + (k * class33.x + l * class33.y + i1 * class33.z) / (j * class33.magnitude);
                 colorsX[j1] = method481(i3, k2, 0);
                 class33 = super.aClass33Array1425[i2];
+                if (class33 == null) {
+                    class33 = super.aClass33Array1425[i2] = new VertexNormal();
+                }
                 k2 = i + (k * class33.x + l * class33.y + i1 * class33.z) / (j * class33.magnitude);
                 colorsY[j1] = method481(i3, k2, 0);
                 class33 = super.aClass33Array1425[j2];
+                if (class33 == null) {
+                    class33 = super.aClass33Array1425[j2] = new VertexNormal();
+                }
                 k2 = i + (k * class33.x + l * class33.y + i1 * class33.z) / (j * class33.magnitude);
                 colorsZ[j1] = method481(i3, k2, 0);
             } else if ((types[j1] & 1) == 0) {
                 int j3 = colors[j1];
                 int k3 = types[j1];
                 VertexNormal class33_1 = super.aClass33Array1425[k1];
+                if (class33_1 == null) {
+                    class33_1 = super.aClass33Array1425[k1] = new VertexNormal();
+                }
                 int l2 = i + (k * class33_1.x + l * class33_1.y + i1 * class33_1.z) / (j * class33_1.magnitude);
                 colorsX[j1] = method481(j3, l2, k3);
                 class33_1 = super.aClass33Array1425[i2];
+                if (class33_1 == null) {
+                    class33_1 = super.aClass33Array1425[i2] = new VertexNormal();
+                }
                 l2 = i + (k * class33_1.x + l * class33_1.y + i1 * class33_1.z) / (j * class33_1.magnitude);
                 colorsY[j1] = method481(j3, l2, k3);
                 class33_1 = super.aClass33Array1425[j2];
+                if (class33_1 == null) {
+                    class33_1 = super.aClass33Array1425[j2] = new VertexNormal();
+                }
                 l2 = i + (k * class33_1.x + l * class33_1.y + i1 * class33_1.z) / (j * class33_1.magnitude);
                 colorsZ[j1] = method481(j3, l2, k3);
             }
