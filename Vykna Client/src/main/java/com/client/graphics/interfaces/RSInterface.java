@@ -3163,6 +3163,8 @@ public class RSInterface {
 
 		rsi.width = 100;
 		rsi.height = 90;
+		System.out.println("[addNpcModel] id=" + id + " npc=" + npcId + " zoom=" + zoom
+				+ " rot1=" + rsi.modelRotation1 + " rot2=" + rsi.modelRotation2);
 	}
 
 
