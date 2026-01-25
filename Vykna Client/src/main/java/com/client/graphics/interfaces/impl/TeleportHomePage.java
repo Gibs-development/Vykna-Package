@@ -13,7 +13,7 @@ import com.client.graphics.interfaces.RSInterface;
  *
  * NPC Preview:
  * - Uses existing RSInterface#addNpcModel(...) (you already have this in RSInterface.java).
- * - Dummy NPC id is selected from the first NPC that has dialogueModels so you see something immediately.
+ * - Dummy NPC id is selected from the first NPC that has full body models so you see something immediately.
  * - Later, server can update the NPC shown via opcode 75 (sendNpcHeadOnInterface), targeting PREVIEW_NPC_ID.
  *
  * NOTE: Keep interface id < 65535 due to opcode 97 (2-byte interface id).
@@ -244,6 +244,14 @@ public final class TeleportHomePage extends RSInterface {
             npcWidget.anInt257 = -1;
             npcWidget.anInt258 = -1;
             npcWidget.anInt246 = 0;
+            npcWidget.useNpcFullModel = true;
+
+            NpcDefinition previewDef = NpcDefinition.forID(DUMMY_NPC_ID);
+            if (previewDef != null && previewDef.standAnim >= 0) {
+                npcWidget.anInt257 = previewDef.standAnim;
+                npcWidget.anInt258 = previewDef.standAnim;
+                System.out.println("[TeleportHomePage] preview anim=" + previewDef.standAnim);
+            }
 
             npcWidget.width = 100;
             npcWidget.height = 90;
@@ -342,7 +350,7 @@ public final class TeleportHomePage extends RSInterface {
         for (int i = 0; i < searchMax; i++) {
             try {
                 NpcDefinition def = NpcDefinition.forID(i);
-                if (def != null && def.dialogueModels != null && def.dialogueModels.length > 0) {
+                if (def != null && def.models != null && def.models.length > 0) {
                     System.out.println("[TeleportHomePage] preview npc id=" + i);
                     return i;
                 }
