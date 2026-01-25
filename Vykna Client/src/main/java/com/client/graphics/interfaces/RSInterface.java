@@ -22,6 +22,7 @@ public class RSInterface {
 	public static final int WHITE_COLOR = 0xFFFFFF;
 	public static final int RED_COLOR = 0xE11010;
 	public transient Sprite[] gridSpriteCache;
+	private static final boolean DEBUG_NPC_PREVIEW = true;
 
 	public static int emptyInterface = 24_470;
 	public static boolean showIds = false;
@@ -3156,7 +3157,7 @@ public class RSInterface {
 		rsi.anInt255 = 2;
 		rsi.anInt256 = npcId;
 
-		rsi.modelZoom = zoom;
+		rsi.modelZoom = zoom > 0 ? zoom : 900;
 
 		// Your renderer indexes trig arrays by modelRotation1, so keep it in range
 		rsi.modelRotation1 = rot1 & 0x7ff;
@@ -3164,8 +3165,10 @@ public class RSInterface {
 
 		rsi.width = 100;
 		rsi.height = 90;
-		System.out.println("[addNpcModel] id=" + id + " npc=" + npcId + " zoom=" + zoom
-				+ " rot1=" + rsi.modelRotation1 + " rot2=" + rsi.modelRotation2);
+		if (DEBUG_NPC_PREVIEW && id == 32202) {
+			System.out.println("[addNpcModel] id=" + id + " npc=" + npcId + " zoom=" + rsi.modelZoom
+					+ " rot1=" + rsi.modelRotation1 + " rot2=" + rsi.modelRotation2);
+		}
 	}
 
 
@@ -3908,15 +3911,52 @@ public class RSInterface {
 	}
 
 	public Model method209(int j, int k, boolean flag) {
+		int mediaType = flag ? anInt255 : anInt233;
+		int media = flag ? anInt256 : mediaID;
+		if (DEBUG_NPC_PREVIEW && id == 32202) {
+			System.out.println("[RSInterface.method209] id=" + id
+					+ " type=" + type
+					+ " anInt233=" + anInt233
+					+ " mediaID=" + mediaID
+					+ " anInt257=" + anInt257
+					+ " anInt258=" + anInt258
+					+ " anInt246=" + anInt246
+					+ " modelZoom=" + modelZoom
+					+ " modelRotation1=" + modelRotation1
+					+ " modelRotation2=" + modelRotation2
+					+ " selected=" + flag
+					+ " mediaType=" + mediaType
+					+ " media=" + media);
+		}
+
 		Model model;
-		if (flag)
-			model = method206(anInt255, anInt256);
-		else
-			model = method206(anInt233, mediaID);
+		if (mediaType == 2) {
+			if (DEBUG_NPC_PREVIEW && id == 32202) {
+				System.out.println("[RSInterface.method209] branch=NPC useNpcFullModel=" + useNpcFullModel);
+			}
+			NpcDefinition def = NpcDefinition.forID(media);
+			if (def == null) {
+				return null;
+			}
+			model = useNpcFullModel ? def.method164(-1, -1, null) : def.method160();
+		} else {
+			if (DEBUG_NPC_PREVIEW && id == 32202) {
+				String branch = mediaType == 1 ? "IDENTITY"
+						: mediaType == 3 ? "PLAYER"
+						: mediaType == 4 ? "ITEM"
+						: mediaType == 5 ? "NONE"
+						: "UNKNOWN";
+				System.out.println("[RSInterface.method209] branch=" + branch);
+			}
+			model = method206(mediaType, media);
+		}
 		if (model == null)
 			return null;
 		if (k == -1 && j == -1 && model.colors == null)
 			return model;
+		if (model.colors == null) {
+			return model;
+		}
 		Model model_1 = new Model(true, Class36.method532(k) & Class36.method532(j), false, model);
 		if (k != -1 || j != -1)
 			model_1.method469();
