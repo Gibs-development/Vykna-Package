@@ -725,6 +725,10 @@ public class Model extends Renderable {
                 face_render_priorities[i12] = (byte) i2;
             }
         }
+        colors = new short[numTriangles];
+        for (int i12 = 0; i12 < numTriangles; i12++) {
+            colors[i12] = (short) triangleColours2[i12];
+        }
         this.verticesCount = numVertices;
         this.trianglesCount = numTriangles;
         this.verticesX = vertexX;
