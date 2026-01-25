@@ -1914,7 +1914,9 @@ public class Model extends Renderable {
         }
         if (super.aClass33Array1425 == null) {
             super.aClass33Array1425 = new VertexNormal[verticesCount];
-            for (int l1 = 0; l1 < verticesCount; l1++) {
+        }
+        for (int l1 = 0; l1 < verticesCount; l1++) {
+            if (super.aClass33Array1425[l1] == null) {
                 super.aClass33Array1425[l1] = new VertexNormal();
             }
         }
