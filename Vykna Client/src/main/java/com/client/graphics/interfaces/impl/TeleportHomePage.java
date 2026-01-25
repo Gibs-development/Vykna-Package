@@ -245,13 +245,7 @@ public final class TeleportHomePage extends RSInterface {
             npcWidget.anInt258 = -1;
             npcWidget.anInt246 = 0;
             npcWidget.useNpcFullModel = true;
-
-            NpcDefinition previewDef = NpcDefinition.forID(DUMMY_NPC_ID);
-            if (previewDef != null && previewDef.standAnim >= 0) {
-                npcWidget.anInt257 = previewDef.standAnim;
-                npcWidget.anInt258 = previewDef.standAnim;
-                System.out.println("[TeleportHomePage] preview anim=" + previewDef.standAnim);
-            }
+            npcWidget.useNpcStandAnim = true;
 
             npcWidget.width = 100;
             npcWidget.height = 90;
