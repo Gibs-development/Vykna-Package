@@ -1,6 +1,7 @@
 package com.client.graphics.interfaces;
 
 import com.client.*;
+import com.client.definitions.AnimationDefinition;
 import com.client.definitions.ItemDefinition;
 import com.client.definitions.NpcDefinition;
 import com.client.graphics.interfaces.impl.DropdownMenu;
@@ -34,6 +35,7 @@ public class RSInterface {
 	public int gridCellSize;
 	public int valueIndex; // which icon index to use (set by server/client)
 	public boolean gridUseValueIndex;
+	public boolean useNpcStandAnim;
 
     public static void printEmptyInterfaceSections() {
 		int count = 0;
@@ -3153,6 +3155,7 @@ public class RSInterface {
 		rsi.anInt257 = -1;
 		rsi.anInt258 = -1;
 		rsi.anInt246 = 0;
+		rsi.useNpcStandAnim = true;
 
 		// Secondary model fields (selected state) should mirror NPC
 		rsi.anInt255 = 2;
@@ -3939,7 +3942,24 @@ public class RSInterface {
 			if (def == null) {
 				return null;
 			}
-			model = useNpcFullModel ? def.method164(-1, -1, null) : def.method160();
+			if (useNpcStandAnim && def.standAnim >= 0 && def.standAnim < AnimationDefinition.anims.length) {
+				AnimationDefinition anim = AnimationDefinition.anims[def.standAnim];
+				if (anim == null) {
+					model = useNpcFullModel ? def.method164(-1, -1, null) : def.method160();
+				} else {
+				int frameIndex = anInt246;
+				if (frameIndex < 0 || frameIndex >= anim.frameCount) {
+					frameIndex = 0;
+				}
+				int primary = anim.primaryFrameIds[frameIndex];
+				int secondary = anim.secondaryFrameIds != null && frameIndex < anim.secondaryFrameIds.length
+						? anim.secondaryFrameIds[frameIndex]
+						: -1;
+				model = def.method164(secondary, primary, anim.anIntArray357);
+				}
+			} else {
+				model = useNpcFullModel ? def.method164(-1, -1, null) : def.method160();
+			}
 		} else {
 			if (DEBUG_NPC_PREVIEW && id == 32202) {
 				String branch = mediaType == 1 ? "IDENTITY"

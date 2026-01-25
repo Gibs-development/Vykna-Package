@@ -14424,10 +14424,13 @@ public class Client extends RSApplet {
 							int l5 = Rasterizer.anIntArray1471[class9_1.modelRotation1] * class9_1.modelZoom >> 16;
 							boolean flag2 = interfaceIsSelected(class9_1);
 							int i7;
-							if (flag2)
+							if (class9_1.useNpcStandAnim && (flag2 ? class9_1.anInt255 : class9_1.anInt233) == 2) {
+								i7 = -1;
+							} else if (flag2) {
 								i7 = class9_1.anInt258;
-							else
+							} else {
 								i7 = class9_1.anInt257;
+							}
 							Model model;
 							if (i7 == -1) {
 								model = class9_1.method209(-1, -1, flag2);
@@ -15989,15 +15992,24 @@ public class Client extends RSApplet {
 			RSInterface class9_1 = RSInterface.interfaceCache[class9.children[k]];
 			if (class9_1.type == 1)
 				flag1 |= method119(i, class9_1.id);
-			if (class9_1.type == 6 && (class9_1.anInt257 != -1 || class9_1.anInt258 != -1)) {
+			if (class9_1.type == 6 && (class9_1.anInt257 != -1 || class9_1.anInt258 != -1
+					|| (class9_1.useNpcStandAnim && class9_1.anInt233 == 2))) {
 				boolean flag2 = interfaceIsSelected(class9_1);
 				int l;
-				if (flag2)
+				if (class9_1.useNpcStandAnim && class9_1.anInt233 == 2) {
+					int media = flag2 ? class9_1.anInt256 : class9_1.mediaID;
+					NpcDefinition def = NpcDefinition.forID(media);
+					l = def == null ? -1 : def.standAnim;
+				} else if (flag2) {
 					l = class9_1.anInt258;
-				else
+				} else {
 					l = class9_1.anInt257;
-				if (l != -1) {
+				}
+				if (l != -1 && l < AnimationDefinition.anims.length) {
 					AnimationDefinition animation = AnimationDefinition.anims[l];
+					if (animation == null) {
+						continue;
+					}
 					for (class9_1.anInt208 += i; class9_1.anInt208 > animation.method258(class9_1.anInt246);) {
 						class9_1.anInt208 -= animation.method258(class9_1.anInt246) + 1;
 						class9_1.anInt246++;
@@ -20097,6 +20109,11 @@ public class Client extends RSApplet {
 					RSInterface npcInterface = RSInterface.interfaceCache[j11];
 					npcInterface.anInt233 = 2;
 					npcInterface.mediaID = j3;
+					if (npcInterface.useNpcStandAnim) {
+						npcInterface.anInt257 = -1;
+						npcInterface.anInt258 = -1;
+						npcInterface.anInt246 = 0;
+					}
 					if (npcInterface.type == 6 && npcInterface.anInt257 == 0 && npcInterface.anInt258 == 0) {
 						npcInterface.anInt257 = -1;
 						npcInterface.anInt258 = -1;
