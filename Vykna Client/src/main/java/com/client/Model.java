@@ -2233,6 +2233,9 @@ public class Model extends Renderable {
     }
 
     public final void method480(int i, int j, int k, int l, int i1) {
+        if (super.aClass33Array1425 == null) {
+            super.aClass33Array1425 = new VertexNormal[verticesCount];
+        }
         for (int j1 = 0; j1 < trianglesCount; j1++) {
             int k1 = trianglesX[j1];
             int i2 = trianglesY[j1];
