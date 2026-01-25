@@ -99,6 +99,7 @@ public class Client extends RSApplet {
 	private static final boolean DEBUG_RS3_DRAG = false;
 	private final PanelManager panelManager = new PanelManager();
 	private final Deque<Point> uiOffsetStack = new ArrayDeque<>();
+	public Decompressor[] decompressors667;
 	private int uiOffsetX;
 	private int uiOffsetY;
 	// Fullscreen modal UI overlay support
@@ -12623,6 +12624,7 @@ public class Client extends RSApplet {
 			Rasterizer.method367();
 			drawLoadingText(83, "Unpacking config");
 			AnimationDefinition.unpackConfig(streamLoader);
+			AnimationDefinition.unpackConfig667(streamLoader);
 			ObjectDefinition.unpackConfig(streamLoader);
 			FloorUnderlayDefinition.unpackConfig(streamLoader);
 			ItemDefinition.unpackConfig(streamLoader);

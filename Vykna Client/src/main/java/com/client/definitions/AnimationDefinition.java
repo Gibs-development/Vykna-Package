@@ -14,6 +14,153 @@ import java.util.Arrays;
 import java.util.List;
 
 public final class AnimationDefinition {
+	public static final int SEQ_667_BASE = 14000; // you can change this
+	public static final int FRAME_667_BASE = 14000;
+	private void remap667FrameFileIds(int frameBase) {
+		if (primaryFrameIds == null) return;
+
+		for (int i = 0; i < primaryFrameIds.length; i++) {
+			int fid = primaryFrameIds[i];
+			if (fid == -1) continue;
+
+			int file = fid >>> 16;
+			int frame = fid & 0xFFFF;
+
+			primaryFrameIds[i] = ((file + frameBase) << 16) | frame;
+		}
+
+		if (secondaryFrameIds != null) {
+			for (int i = 0; i < secondaryFrameIds.length; i++) {
+				int fid = secondaryFrameIds[i];
+				if (fid == -1) continue;
+
+				int file = fid >>> 16;
+				int frame = fid & 0xFFFF;
+
+				secondaryFrameIds[i] = ((file + frameBase) << 16) | frame;
+			}
+		}
+	}
+
+	public static void unpackConfig667(StreamLoader streamLoader) {
+		byte[] raw = streamLoader.getArchiveData("667seq.dat");
+		if (raw == null) {
+			System.out.println("[667 seq] 667seq.dat not found in cache");
+			return;
+		}
+
+		Stream stream = new Stream(raw);
+		int length = stream.readUShort();
+
+		// Ensure anims array exists and is large enough
+		int needed = SEQ_667_BASE + length + 5;
+		if (anims == null) {
+			anims = new AnimationDefinition[needed];
+		} else if (anims.length < needed) {
+			anims = Arrays.copyOf(anims, needed);
+		}
+
+		System.out.println("[667 seq] loading " + length + " sequences into ids [" + SEQ_667_BASE + ".." + (SEQ_667_BASE + length - 1) + "]");
+
+		for (int j = 0; j < length; j++) {
+			int id = SEQ_667_BASE + j;
+			if (anims[id] == null)
+				anims[id] = new AnimationDefinition();
+
+			anims[id].id = id;
+			anims[id].readValues667(stream);
+			anims[id].remap667FrameFileIds(FRAME_667_BASE);
+
+
+			// Optional: debug
+			// if (j < 5) System.out.println("[667 seq] id=" + id + " frames=" + anims[id].frameCount);
+		}
+	}
+
+	private void readValues667(Stream stream) {
+		int opcode;
+		while ((opcode = stream.readUnsignedByte()) != 0) {
+
+			if (opcode == 1) {
+				frameCount = stream.readUShort();
+
+				primaryFrameIds = new int[frameCount];
+				secondaryFrameIds = new int[frameCount];
+				frameLengths = new int[frameCount];
+
+				// 667 reference: frame ids are DWORDs
+				for (int j = 0; j < frameCount; j++) {
+					primaryFrameIds[j] = stream.readDWord();
+					secondaryFrameIds[j] = -1;
+				}
+
+				// 667 reference: delays are bytes
+				for (int j = 0; j < frameCount; j++) {
+					frameLengths[j] = stream.readUnsignedByte();
+				}
+
+			} else if (opcode == 2) {
+				loopOffset = stream.readUShort();
+
+			} else if (opcode == 3) {
+				int k = stream.readUnsignedByte();
+				anIntArray357 = new int[k + 1];
+				for (int l = 0; l < k; l++)
+					anIntArray357[l] = stream.readUnsignedByte();
+				anIntArray357[k] = 9999999;
+
+			} else if (opcode == 4) {
+				stretches = true;
+
+			} else if (opcode == 5) {
+				priority = stream.readUnsignedByte();
+
+			} else if (opcode == 6) {
+				leftHandItemID = stream.readUShort();
+
+			} else if (opcode == 7) {
+				rightHandItemID = stream.readUShort();
+
+			} else if (opcode == 8) {
+				replayCount = stream.readUnsignedByte();
+
+			} else if (opcode == 9) {
+				precedenceAnimating = stream.readUnsignedByte();
+
+			} else if (opcode == 10) {
+				precedenceWalking = stream.readUnsignedByte();
+
+			} else if (opcode == 11) {
+				resetCycle = stream.readUnsignedByte();
+
+			} else if (opcode == 12) {
+				// Your reference consumes a DWORD here (unknown field)
+				stream.readDWord();
+
+			} else {
+				// For now, just log it so we can add support if needed
+				System.out.println("[667seq] Unrecognised seq config code: " + opcode + " (anim " + id + ")");
+			}
+		}
+
+		// Same post-fixups as your existing readValues()
+		if (frameCount == 0) {
+			frameCount = 1;
+			primaryFrameIds = new int[] { -1 };
+			secondaryFrameIds = new int[] { -1 };
+			frameLengths = new int[] { -1 };
+		}
+
+		if (precedenceAnimating == -1)
+			precedenceAnimating = (anIntArray357 != null) ? 2 : 0;
+
+		if (precedenceWalking == -1)
+			precedenceWalking = (anIntArray357 != null) ? 2 : 0;
+
+		// Optional: your old snippet had these fixes
+		if (leftHandItemID == 65535) leftHandItemID = 0;
+		if (rightHandItemID == 65535) rightHandItemID = 0;
+	}
 
 	public static void unpackConfig(StreamLoader streamLoader) {
 		Stream stream = new Stream(streamLoader.getArchiveData("seq.dat"));
@@ -99,7 +246,6 @@ public final class AnimationDefinition {
 			return 0;
 		}
 	}
-
 	private void readValues(Stream stream) {
 		int i;
 		while ((i = stream.readUnsignedByte()) != 0) {

@@ -2,49 +2,296 @@ package com.client;
 
 public class ModelLoader {
     private static final boolean DEBUG_667 = true;
+    /**
+     * 525/667-era "bitmask" model format (commonly ends with -1, -1).
+     * This is NOT the same as your decodeType1/2/3 variants when the header flag byte > 1 (e.g. 0x0F).
+     *
+     * Decodes enough for in-game rendering: verts, faces, base colors, face types, priorities, alpha.
+     * Consumes other streams (skins/tex ids/etc) so offsets remain correct.
+     */
+    public static void decodeType525(Model def, byte[] data) {
+        Buffer b1 = new Buffer(data);
+        Buffer b2 = new Buffer(data);
+        Buffer b3 = new Buffer(data);
+        Buffer b4 = new Buffer(data);
+        Buffer b5 = new Buffer(data);
+        Buffer b6 = new Buffer(data);
+        Buffer b7 = new Buffer(data);
+
+        // Header lives at end-23 in this family
+        b1.setOffset(data.length - 23);
+
+        int numVertices = b1.readUShort();
+        int numFaces    = b1.readUShort();
+        int numTexTris  = b1.readUnsignedByte();
+
+        int flags       = b1.readUnsignedByte(); // bitmask (often > 1)
+        boolean hasFaceTypes = (flags & 1) != 0;
+
+        int priFlag     = b1.readUnsignedByte(); // 255 = per-face priorities, else constant
+        int alphaFlag   = b1.readUnsignedByte(); // 1 = per-face alpha
+        int triSkinFlag = b1.readUnsignedByte(); // 1 = per-face skin
+        int texFlag     = b1.readUnsignedByte(); // 1 = per-face texture id
+        int vtxSkinFlag = b1.readUnsignedByte(); // 1 = per-vertex skin
+
+        int xDataLen       = b1.readUShort();
+        int yDataLen       = b1.readUShort();
+        int zDataLen       = b1.readUShort();
+        int faceIdxDataLen = b1.readUShort();
+        int miscDataLen    = b1.readUShort();
+
+        // Texture triangle types live at file start (numTexTris bytes).
+        // We only need to consume them to keep offsets correct.
+        if (numTexTris > 0) {
+            def.textureTypes = new byte[numTexTris];
+            b1.setOffset(0);
+            for (int i = 0; i < numTexTris; i++) {
+                def.textureTypes[i] = b1.readByte();
+            }
+        }
+
+        // ---- stream layout ----
+        int off = numTexTris;
+
+        int vertexFlagsOff = off;              off += numVertices;
+
+        int faceTypeOff = off;
+        if (hasFaceTypes) off += numFaces;
+
+        int faceOpcodeOff = off;               off += numFaces;
+
+        int facePriorityOff = off;
+        if (priFlag == 255) off += numFaces;
+
+        int triSkinOff = off;
+        if (triSkinFlag == 1) off += numFaces;
+
+        int vtxSkinOff = off;
+        if (vtxSkinFlag == 1) off += numVertices;
+
+        int alphaOff = off;
+        if (alphaFlag == 1) off += numFaces;
+
+        int faceIdxDataOff = off;              off += faceIdxDataLen;
+
+        int faceTexOff = off;
+        if (texFlag == 1) off += numFaces * 2;
+
+        int miscOff = off;                     off += miscDataLen;
+
+        int faceColorOff = off;                off += numFaces * 2;
+
+        int xDataOff = off;                    off += xDataLen;
+        int yDataOff = off;                    off += yDataLen;
+        int zDataOff = off;                    off += zDataLen;
+
+        // ---- allocate ----
+        def.verticesCount  = numVertices;
+        def.trianglesCount = numFaces;
+        def.texturesCount  = numTexTris;
+
+        def.verticesX = new int[numVertices];
+        def.verticesY = new int[numVertices];
+        def.verticesZ = new int[numVertices];
+
+        def.trianglesX = new int[numFaces];
+        def.trianglesY = new int[numFaces];
+        def.trianglesZ = new int[numFaces];
+
+        def.colors = new short[numFaces];
+
+        if (hasFaceTypes) def.types = new int[numFaces];
+        if (alphaFlag == 1) def.alphas = new int[numFaces];
+
+        // ✅ IMPORTANT: keep skin arrays so Model.method469() can build groups
+        if (vtxSkinFlag == 1) def.vertexData = new int[numVertices];
+        if (triSkinFlag == 1) def.triangleData = new int[numFaces];
+
+        // ---- decode vertices (delta + smart) ----
+        b1.setOffset(vertexFlagsOff);
+        b2.setOffset(xDataOff);
+        b3.setOffset(yDataOff);
+        b4.setOffset(zDataOff);
+        b5.setOffset(vtxSkinOff);
+
+        int vx = 0, vy = 0, vz = 0;
+        for (int v = 0; v < numVertices; v++) {
+            int mask = b1.readUnsignedByte();
+
+            int dx = 0;
+            if ((mask & 1) != 0) dx = b2.readSmart();
+
+            int dy = 0;
+            if ((mask & 2) != 0) dy = b3.readSmart();
+
+            int dz = 0;
+            if ((mask & 4) != 0) dz = b4.readSmart();
+
+            vx += dx; vy += dy; vz += dz;
+
+            def.verticesX[v] = vx;
+            def.verticesY[v] = vy;
+            def.verticesZ[v] = vz;
+
+            // ✅ store vertex skin group
+            if (vtxSkinFlag == 1) {
+                def.vertexData[v] = b5.readUnsignedByte();
+            }
+        }
+
+        // ---- decode face attributes + colors ----
+        b1.setOffset(faceColorOff);
+        b2.setOffset(faceTypeOff);
+        b3.setOffset(triSkinOff);
+        b4.setOffset(alphaOff);
+        b5.setOffset(facePriorityOff);
+        b6.setOffset(faceTexOff);
+        b7.setOffset(miscOff);
+
+        for (int f = 0; f < numFaces; f++) {
+            int col = b1.readUShort();
+
+            if (hasFaceTypes) {
+                int t = (int) b2.readByte(); // signed
+                def.types[f] = t;
+
+                // Classic behavior: type=2 indicates textured face; many clients set color=65535
+                if (t == 2) col = 65535;
+            }
+
+            def.colors[f] = (short) col;
+
+            if (priFlag == 255) {
+                if (def.face_render_priorities == null) def.face_render_priorities = new byte[numFaces];
+                def.face_render_priorities[f] = b5.readByte();
+            } else {
+                def.face_priority = (byte) priFlag;
+            }
+
+            if (alphaFlag == 1) {
+                int a = (int) b4.readByte();
+                if (a < 0) a = 256 + a;
+                def.alphas[f] = a;
+            }
+
+            // ✅ store face skin group
+            if (triSkinFlag == 1) {
+                def.triangleData[f] = b3.readUnsignedByte();
+            }
+
+            if (texFlag == 1) {
+                // consume per-face texture id (ignore for now)
+                b6.readUShort();
+            }
+        }
+
+        // ---- decode triangle indices ----
+        b1.setOffset(faceIdxDataOff);
+        b2.setOffset(faceOpcodeOff);
+
+        int a = 0, b = 0, c = 0;
+        int last = 0;
+
+        for (int f = 0; f < numFaces; f++) {
+            int opcode = b2.readUnsignedByte();
+
+            if (opcode == 1) {
+                a = b1.readSmart() + last; last = a;
+                b = b1.readSmart() + last; last = b;
+                c = b1.readSmart() + last; last = c;
+            } else if (opcode == 2) {
+                b = c;
+                c = b1.readSmart() + last; last = c;
+            } else if (opcode == 3) {
+                a = c;
+                c = b1.readSmart() + last; last = c;
+            } else if (opcode == 4) {
+                int tmp = a;
+                a = b;
+                b = tmp;
+                c = b1.readSmart() + last; last = c;
+            } else {
+                throw new IllegalArgumentException("Bad face opcode " + opcode + " at face " + f);
+            }
+
+            def.trianglesX[f] = a;
+            def.trianglesY[f] = b;
+            def.trianglesZ[f] = c;
+        }
+
+        // ✅ optional: consume texture triangles if you later implement textured rendering.
+        // For now we leave it out, since your renderer works without.
+    }
+
 
     public static void decode667(Model def, byte[] data) {
         if (DEBUG_667) {
             System.out.println("[667 decode] model=" + def.getModelId() + " bytes=" + (data == null ? 0 : data.length));
         }
         if (data == null || data.length < 3) {
-            if (DEBUG_667) {
-                System.out.println("[667 decode] invalid data; skipping");
+            if (DEBUG_667) System.out.println("[667 decode] invalid data; skipping");
+            return;
+        }
+
+        final int n = data.length;
+
+        final int tailSubtype = data[n - 2]; // signed
+        final int tailMarker  = data[n - 1]; // signed
+
+        boolean looksLikeBitmask525 = false;
+        if (tailSubtype == -1 && tailMarker == -1 && n >= 23) {
+            int headerStart = n - 23;
+            int flags = data[headerStart + 5] & 0xFF;
+            looksLikeBitmask525 = flags > 1;
+        }
+
+        Decoder[] preferred;
+
+        if (tailMarker == -1) {
+            if (tailSubtype == -3) {
+                preferred = new Decoder[]{ TYPE3 };
+            } else if (tailSubtype == -2) {
+                preferred = new Decoder[]{ TYPE2 };
+            } else if (tailSubtype == -1) {
+                preferred = looksLikeBitmask525
+                        ? new Decoder[]{ TYPE525, TYPE1 }
+                        : new Decoder[]{ TYPE1 };
+            } else {
+                preferred = new Decoder[]{ OLD_FORMAT };
+            }
+        } else {
+            preferred = new Decoder[]{ OLD_FORMAT };
+        }
+
+        Decoder[] fallbacks = new Decoder[]{
+                READ_622,
+                TYPE3,
+                TYPE525,
+                TYPE2,
+                TYPE1,
+                OLD_FORMAT
+        };
+
+        // ✅ ONE decode attempt
+        if (tryDecoders(def, data, preferred, fallbacks)) {
+
+            // ✅ Build groups ONCE after successful decode
+            try {
+                def.method469();
+            } catch (Throwable t) {
+                if (DEBUG_667) System.out.println("[667 decode] method469 failed: " + t);
             }
             return;
         }
 
-        int n = data.length;
-        int b1 = data[n - 2];
-        int b2 = data[n - 1];
-
-        Decoder[] preferred;
-        if (b2 == -3 && b1 == -1) {
-            preferred = new Decoder[] { TYPE3 };
-        } else if (b2 == -2 && b1 == -1) {
-            preferred = new Decoder[] { TYPE2 };
-        } else if (b2 == -1 && b1 == -1) {
-            preferred = new Decoder[] { TYPE1 };
-        } else {
-            preferred = new Decoder[] { OLD_FORMAT };
-        }
-
-        Decoder[] fallbacks = new Decoder[] {
-            READ_622,
-            TYPE3,
-            TYPE2,
-            TYPE1,
-            OLD_FORMAT
-        };
-
-        if (tryDecoders(def, data, preferred, fallbacks)) {
-            return;
-        }
-
         if (DEBUG_667) {
-            System.out.println("[667 decode] all decoders failed sanity checks for model " + def.getModelId());
+            System.out.println("[667 decode] all decoders failed sanity checks for model " + def.getModelId()
+                    + " tailSubtype=" + tailSubtype + " tailMarker=" + tailMarker
+                    + " bitmask525=" + looksLikeBitmask525);
         }
     }
+
+
 
     private interface Decoder {
         String name();
@@ -955,7 +1202,15 @@ public class ModelLoader {
         }
 
     }
+    private static final Decoder TYPE525 = new Decoder() {
+        @Override
+        public String name() { return "type525"; }
 
+        @Override
+        public void decode(Model def, byte[] data) {
+            ModelLoader.decodeType525(def, data);
+        }
+    };
     public static void decodeType1(Model def, byte[] var1)
     {
         Buffer var2 = new Buffer(var1);
