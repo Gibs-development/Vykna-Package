@@ -1,6 +1,7 @@
 package com.client.graphics.interfaces.impl;
 
 import com.client.TextDrawingArea;
+import com.client.definitions.NpcDefinition;
 import com.client.graphics.interfaces.RSInterface;
 
 /**
@@ -12,7 +13,7 @@ import com.client.graphics.interfaces.RSInterface;
  *
  * NPC Preview:
  * - Uses existing RSInterface#addNpcModel(...) (you already have this in RSInterface.java).
- * - Dummy NPC id is set to 100 so you see something immediately.
+ * - Dummy NPC id is selected from the first NPC that has full body models so you see something immediately.
  * - Later, server can update the NPC shown via opcode 75 (sendNpcHeadOnInterface), targeting PREVIEW_NPC_ID.
  *
  * NOTE: Keep interface id < 65535 due to opcode 97 (2-byte interface id).
@@ -226,7 +227,7 @@ public final class TeleportHomePage extends RSInterface {
         // - method209(...) uses anInt233/mediaID to pick NPC definition
         //
         // This dummy setup renders immediately client-side without any server packet.
-        final int DUMMY_NPC_ID = 1; // change if your cache uses different ids
+        final int DUMMY_NPC_ID = findPreviewNpcId(0);
         addNpcModel(PREVIEW_NPC_ID, DUMMY_NPC_ID, 900, 1, 1);
 
         RSInterface npcWidget = RSInterface.interfaceCache[PREVIEW_NPC_ID];
@@ -243,6 +244,14 @@ public final class TeleportHomePage extends RSInterface {
             npcWidget.anInt257 = -1;
             npcWidget.anInt258 = -1;
             npcWidget.anInt246 = 0;
+            npcWidget.useNpcFullModel = true;
+
+            NpcDefinition previewDef = NpcDefinition.forID(DUMMY_NPC_ID);
+            if (previewDef != null && previewDef.standAnim >= 0) {
+                npcWidget.anInt257 = previewDef.standAnim;
+                npcWidget.anInt258 = previewDef.standAnim;
+                System.out.println("[TeleportHomePage] preview anim=" + previewDef.standAnim);
+            }
 
             npcWidget.width = 100;
             npcWidget.height = 90;
@@ -329,6 +338,28 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, LOOT_BOX_ID, LOOT_X + SHIFT_X, LOOT_Y);
         rsi.child(c++, LOOT_TITLE_ID, LOOT_X + (LOOT_W / 2) + SHIFT_X, LOOT_Y + 8);
         rsi.child(c++, LOOT_GRID_ID, LOOT_X + 9 + SHIFT_X, LOOT_Y + 22);
+    }
+
+    private static int findPreviewNpcId(int fallbackId) {
+        int total = NpcDefinition.totalAmount;
+        if (total <= 0) {
+            System.out.println("[TeleportHomePage] npc defs not loaded; fallback npc=" + fallbackId);
+            return fallbackId;
+        }
+        int searchMax = Math.min(total, 2000);
+        for (int i = 0; i < searchMax; i++) {
+            try {
+                NpcDefinition def = NpcDefinition.forID(i);
+                if (def != null && def.models != null && def.models.length > 0) {
+                    System.out.println("[TeleportHomePage] preview npc id=" + i);
+                    return i;
+                }
+            } catch (Exception e) {
+                // keep scanning for a valid preview npc
+            }
+        }
+        System.out.println("[TeleportHomePage] no dialogue npc found; fallback npc=" + fallbackId);
+        return fallbackId;
     }
 
     private static void setRowText(int row, String text) {
