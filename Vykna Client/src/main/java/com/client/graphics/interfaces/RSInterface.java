@@ -3145,15 +3145,16 @@ public class RSInterface {
 
 		rsi.anInt233 = 2;      // 2 = NPC
 		rsi.mediaID = npcId;   // npc id
+		rsi.useNpcFullModel = true;
 
 		// ✅ CRITICAL: prevent type-6 renderer from trying to animate with anim[0]
 		rsi.anInt257 = -1;
 		rsi.anInt258 = -1;
 		rsi.anInt246 = 0;
 
-		// (Optional but safe) clear secondary model fields
-		rsi.anInt255 = 0;
-		rsi.anInt256 = 0;
+		// Secondary model fields (selected state) should mirror NPC
+		rsi.anInt255 = 2;
+		rsi.anInt256 = npcId;
 
 		rsi.modelZoom = zoom;
 
@@ -3163,6 +3164,8 @@ public class RSInterface {
 
 		rsi.width = 100;
 		rsi.height = 90;
+		System.out.println("[addNpcModel] id=" + id + " npc=" + npcId + " zoom=" + zoom
+				+ " rot1=" + rsi.modelRotation1 + " rot2=" + rsi.modelRotation2);
 	}
 
 
@@ -3861,8 +3864,14 @@ public class RSInterface {
 			return model;
 		if (i == 1)
 			model = Model.method462(j);
-		if (i == 2)
-			model = NpcDefinition.forID(j).method160();
+		if (i == 2) {
+			if (useNpcFullModel) {
+				NpcDefinition def = NpcDefinition.forID(j);
+				model = def == null ? null : def.method164(-1, -1, null);
+			} else {
+				model = NpcDefinition.forID(j).method160();
+			}
+		}
 		if (i == 3)
 			model = Client.myPlayer.method453();
 		if (i == 4)
@@ -3952,6 +3961,7 @@ public class RSInterface {
 	public Sprite sprites[];
 	public static RSInterface interfaceCache[];
 	public int anIntArray212[];
+	public boolean useNpcFullModel;
 	public int contentType;// anInt214
 	public int spritesX[];
 	public int anInt216;
