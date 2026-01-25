@@ -36,7 +36,7 @@ public final class Interfaces extends RSInterface {
 		crystalTele(defaultTextDrawingAreas);
 		tournamentLobby(defaultTextDrawingAreas);
 		pvpTab(defaultTextDrawingAreas);
-	    achievementInterface(defaultTextDrawingAreas);
+	    buildExternalInterfaces(defaultTextDrawingAreas);
 		taskInterface(defaultTextDrawingAreas);
 		AchievementCompleteToast.build(defaultTextDrawingAreas);
 		playerProfiler(defaultTextDrawingAreas);
@@ -4436,8 +4436,9 @@ interfaceId+=5000;
 
 
 
-	public static void achievementInterface(TextDrawingArea[] TDA) {
+	public static void buildExternalInterfaces(TextDrawingArea[] TDA) {
 		AchievementHomePage.build(TDA);
+		TeleportHomePage.build(TDA);
 	}
 
 	public static void taskInterface(TextDrawingArea[] TDA) {

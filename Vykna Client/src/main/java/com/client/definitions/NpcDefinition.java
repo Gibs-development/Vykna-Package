@@ -845,6 +845,21 @@ public final class NpcDefinition {
 			entityDef.models = new int[] { 37142 };
 
 		}
+		if (i == 1090) {
+			entityDef.name = "Ganodermic Beast";
+			entityDef.models = new int[] { 37142 };
+			entityDef.actions = new String[5];
+			entityDef.actions = new String[] { "Talk-to", null, "Pick-Up", null, null };
+			entityDef.anInt86 = 25; //WIDTH
+			entityDef.anInt91 = 25; // HEIGH
+			entityDef.originalColors = null;
+			entityDef.newColors = null;
+			entityDef.combatLevel = 0;
+			entityDef.standAnim = 8307;
+			entityDef.walkAnim = 8306;
+			entityDef.models = new int[] { 37142 };
+
+		}
 		if (i == 2120) {
 			entityDef.name = "Shadow Ranger";
 			entityDef.models = new int[] { 29267 };

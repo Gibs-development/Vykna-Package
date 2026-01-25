@@ -3137,6 +3137,34 @@ public class RSInterface {
 		Interface.textColor = color;
 		Interface.message = text;
 	}
+	public static void addNpcModel(int id, int npcId, int zoom, int rot1, int rot2) {
+		RSInterface rsi = addInterface(id);
+		rsi.id = id;
+		rsi.parentID = id;
+		rsi.type = 6;
+
+		rsi.anInt233 = 2;      // 2 = NPC
+		rsi.mediaID = npcId;   // npc id
+
+		// ✅ CRITICAL: prevent type-6 renderer from trying to animate with anim[0]
+		rsi.anInt257 = -1;
+		rsi.anInt258 = -1;
+		rsi.anInt246 = 0;
+
+		// (Optional but safe) clear secondary model fields
+		rsi.anInt255 = 0;
+		rsi.anInt256 = 0;
+
+		rsi.modelZoom = zoom;
+
+		// Your renderer indexes trig arrays by modelRotation1, so keep it in range
+		rsi.modelRotation1 = rot1 & 0x7ff;
+		rsi.modelRotation2 = rot2 & 0x7ff;
+
+		rsi.width = 100;
+		rsi.height = 90;
+	}
+
 
 	public static void setChildren(int total, RSInterface i) {
 		i.children = new int[total];
