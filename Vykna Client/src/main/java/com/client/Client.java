@@ -20094,8 +20094,16 @@ public class Client extends RSApplet {
 				case 75:
 					int j3 = inStream.method436();
 					int j11 = inStream.method436();
-					RSInterface.interfaceCache[j11].anInt233 = 2;
-					RSInterface.interfaceCache[j11].mediaID = j3;
+					RSInterface npcInterface = RSInterface.interfaceCache[j11];
+					npcInterface.anInt233 = 2;
+					npcInterface.mediaID = j3;
+					if (npcInterface.type == 6 && npcInterface.anInt257 == 0 && npcInterface.anInt258 == 0) {
+						npcInterface.anInt257 = -1;
+						npcInterface.anInt258 = -1;
+						npcInterface.anInt246 = 0;
+					}
+					System.out.println("[opcode75] interface=" + j11 + " npc=" + j3
+							+ " anim1=" + npcInterface.anInt257 + " anim2=" + npcInterface.anInt258);
 					incomingPacket = -1;
 					return true;
 
