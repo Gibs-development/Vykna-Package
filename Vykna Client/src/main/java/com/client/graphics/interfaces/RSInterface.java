@@ -3152,9 +3152,9 @@ public class RSInterface {
 		rsi.anInt258 = -1;
 		rsi.anInt246 = 0;
 
-		// (Optional but safe) clear secondary model fields
-		rsi.anInt255 = 0;
-		rsi.anInt256 = 0;
+		// Secondary model fields (selected state) should mirror NPC
+		rsi.anInt255 = 2;
+		rsi.anInt256 = npcId;
 
 		rsi.modelZoom = zoom;
 

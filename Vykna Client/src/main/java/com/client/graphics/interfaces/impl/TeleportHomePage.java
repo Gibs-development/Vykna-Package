@@ -227,7 +227,7 @@ public final class TeleportHomePage extends RSInterface {
         // - method209(...) uses anInt233/mediaID to pick NPC definition
         //
         // This dummy setup renders immediately client-side without any server packet.
-        final int DUMMY_NPC_ID = findPreviewNpcId(0);
+        final int DUMMY_NPC_ID = findPreviewNpcId(100, 0);
         addNpcModel(PREVIEW_NPC_ID, DUMMY_NPC_ID, 900, 1, 1);
 
         RSInterface npcWidget = RSInterface.interfaceCache[PREVIEW_NPC_ID];
@@ -340,11 +340,22 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, LOOT_GRID_ID, LOOT_X + 9 + SHIFT_X, LOOT_Y + 22);
     }
 
-    private static int findPreviewNpcId(int fallbackId) {
+    private static int findPreviewNpcId(int preferredId, int fallbackId) {
         int total = NpcDefinition.totalAmount;
         if (total <= 0) {
             System.out.println("[TeleportHomePage] npc defs not loaded; fallback npc=" + fallbackId);
             return fallbackId;
+        }
+        if (preferredId >= 0 && preferredId < total) {
+            try {
+                NpcDefinition preferred = NpcDefinition.forID(preferredId);
+                if (preferred != null && preferred.models != null && preferred.models.length > 0) {
+                    System.out.println("[TeleportHomePage] preview npc id=" + preferredId + " (preferred)");
+                    return preferredId;
+                }
+            } catch (Exception e) {
+                // fall back to scan
+            }
         }
         int searchMax = Math.min(total, 2000);
         for (int i = 0; i < searchMax; i++) {
