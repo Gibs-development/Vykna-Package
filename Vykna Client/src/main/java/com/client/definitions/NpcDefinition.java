@@ -860,6 +860,13 @@ public final class NpcDefinition {
 			entityDef.models = new int[] { 37142 };
 
 		}
+		if (i == 5792) {
+			entityDef.models = new int[] { 37142 };
+			entityDef.actions = new String[5];
+			entityDef.actions = new String[] { "Trade", null, null, null, null };
+			entityDef.standAnim = 8307;
+
+		}
 		if (i == 2120) {
 			entityDef.name = "Shadow Ranger";
 			entityDef.models = new int[] { 29267 };

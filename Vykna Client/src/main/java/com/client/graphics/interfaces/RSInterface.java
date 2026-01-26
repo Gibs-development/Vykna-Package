@@ -4084,8 +4084,8 @@ public class RSInterface {
 	public int invAutoScrollInterfaceId;
 	public boolean invAlwaysInfinity;
 	public byte aByte254;
-	private int anInt255;
-	private int anInt256;
+	public int anInt255;
+	public int anInt256;
 	public int anInt257;
 	public int anInt258;
 	public boolean aBoolean259;

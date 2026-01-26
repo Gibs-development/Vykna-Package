@@ -84,7 +84,7 @@ public final class TeleportHomePage extends RSInterface {
     private static final int QUEST_LINE1_ID = INTERFACE_ID + 1441;
 
     // --- Layout constants ---
-    private static final int BG_X = 8, BG_Y = 8;
+    private static final int BG_X = 0, BG_Y = 10;
 
     // Final background art size: 497x322.
     @SuppressWarnings("unused")
@@ -93,33 +93,33 @@ public final class TeleportHomePage extends RSInterface {
     private static final int BG_H = 322;
 
     // Global nudge (tune visually)
-    private static final int SHIFT_X = 12;
+    private static final int SHIFT_X = 10;
 
     // Header
     private static final int TITLE_X = BG_X + 18;
     private static final int TITLE_Y = BG_Y + 10;
 
-    private static final int TABS_Y = BG_Y + 28;
-    private static final int TAB_START_X = BG_X + 54;
+    private static final int TABS_Y = BG_Y + 28+20;
+    private static final int TAB_START_X = BG_X + 10;
     private static final int TAB_GAP = 85;
     private static final int TAB_W = 80;
     private static final int TAB_H = 22;
 
     // Search
-    private static final int SEARCH_W = 142;
-    private static final int SEARCH_X = BG_X + 318;
-    private static final int SEARCH_Y = BG_Y + 26;
+    private static final int SEARCH_W = 100;
+    private static final int SEARCH_X = BG_X + 338+15;
+    private static final int SEARCH_Y = BG_Y + 26+20;
     private static final int SEARCH_CLEAR_X = SEARCH_X + SEARCH_W + 4;
 
     // Left list
-    private static final int LIST_X = BG_X + 18;
-    private static final int LIST_Y = BG_Y + 58;
+    private static final int LIST_X = BG_X + 10;
+    private static final int LIST_Y = BG_Y + 58+20;
     private static final int LIST_W = 150;
     private static final int LIST_H = 232;
 
     // Center preview
-    private static final int PREVIEW_X = BG_X + 190;
-    private static final int PREVIEW_Y = BG_Y + 58;
+    private static final int PREVIEW_X = BG_X + 190-10;
+    private static final int PREVIEW_Y = BG_Y + 58+20;
     private static final int PREVIEW_W = 160;
     private static final int PREVIEW_H = 145;
 
@@ -129,11 +129,11 @@ public final class TeleportHomePage extends RSInterface {
 
     // Right column info
     private static final int INFO_X = BG_X + 350;
-    private static final int INFO_Y = BG_Y + 58;
+    private static final int INFO_Y = BG_Y + 58+20;
 
     // Loot panel
     private static final int LOOT_X = BG_X + 350;
-    private static final int LOOT_Y = BG_Y + 196;
+    private static final int LOOT_Y = BG_Y + 196+20;
     private static final int LOOT_W = 138;
     private static final int LOOT_H = 102;
 
@@ -311,12 +311,12 @@ public final class TeleportHomePage extends RSInterface {
 
         int statsX = PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X;
         int statsBoxX = PREVIEW_X + (PREVIEW_W - STATS_W) / 2 + SHIFT_X;
-        int statsBoxY = PREVIEW_Y + 108;
+        int statsBoxY = PREVIEW_Y + 160;
         rsi.child(c++, STATS_BOX_ID, statsBoxX, statsBoxY);
         rsi.child(c++, STATS_LINE1_ID, statsX, statsBoxY + 8);
         rsi.child(c++, STATS_LINE2_ID, statsX, statsBoxY + 20);
 
-        rsi.child(c++, TELEPORT_BTN_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X - 50, PREVIEW_Y + 145);
+        rsi.child(c++, TELEPORT_BTN_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X - 50, PREVIEW_Y + 205);
 
         rsi.child(c++, DESC_TITLE_ID, INFO_X + SHIFT_X, INFO_Y);
         rsi.child(c++, DESC_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 14);
@@ -329,9 +329,9 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, QUEST_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 104);
         rsi.child(c++, QUEST_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 118);
 
-        rsi.child(c++, LOOT_BOX_ID, LOOT_X + SHIFT_X, LOOT_Y);
-        rsi.child(c++, LOOT_TITLE_ID, LOOT_X + (LOOT_W / 2) + SHIFT_X, LOOT_Y + 8);
-        rsi.child(c++, LOOT_GRID_ID, LOOT_X + 9 + SHIFT_X, LOOT_Y + 22);
+        rsi.child(c++, LOOT_BOX_ID, LOOT_X + SHIFT_X-5, LOOT_Y-8);
+        rsi.child(c++, LOOT_TITLE_ID, LOOT_X + (LOOT_W / 2) + SHIFT_X -5 , LOOT_Y + 8 -8);
+        rsi.child(c++, LOOT_GRID_ID, LOOT_X + 9 + SHIFT_X-5, LOOT_Y + 22-8);
     }
 
     private static int findPreviewNpcId(int preferredId, int fallbackId) {
