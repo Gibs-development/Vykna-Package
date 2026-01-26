@@ -139,6 +139,10 @@ public final class TeleportHomePage extends RSInterface {
 
     private TeleportHomePage() {}
 
+    public static int getSearchClearId() {
+        return SEARCH_CLEAR_ID;
+    }
+
     public static void build(TextDrawingArea[] tda) {
         RSInterface rsi = addTabInterface(INTERFACE_ID);
 
