@@ -12,6 +12,9 @@ import com.client.features.gameframe.ScreenMode;
 import com.client.features.gametimers.GameTimer;
 import com.client.features.gametimers.GameTimerHandler;
 import com.client.features.particles.Particle;
+import com.client.features.particles.ParticleDefinition;
+import com.client.features.particles.ParticleSystem;
+import com.client.features.particles.Vector;
 import com.client.features.settings.InformationFile;
 import com.client.features.settings.Preferences;
 import com.client.graphics.interfaces.Configs;
@@ -9092,6 +9095,35 @@ public class Client extends RSApplet {
 							} catch (Exception e) {
 								pushMessage("Not a valid screenmode.", 0, "");
 							}
+						}
+
+						if (inputString.equals("::auraon")) {
+							setAuraTier(1);
+							pushMessage("Aura enabled (tier 1).", 0, "");
+							inputString = "";
+							inputTaken = true;
+							return;
+						}
+
+						if (inputString.equals("::auraoff")) {
+							setAuraTier(0);
+							pushMessage("Aura disabled.", 0, "");
+							inputString = "";
+							inputTaken = true;
+							return;
+						}
+
+						if (inputString.startsWith("::aura ")) {
+							try {
+								int tier = Integer.parseInt(inputString.split(" ")[1]);
+								setAuraTier(tier);
+								pushMessage("Aura tier set to " + auraTier + ".", 0, "");
+							} catch (Exception e) {
+								pushMessage("Invalid format, use ::aura 0-3.", 0, "");
+							}
+							inputString = "";
+							inputTaken = true;
+							return;
 						}
 
 
@@ -21432,6 +21464,9 @@ public class Client extends RSApplet {
 				Rasterizer.drawFog(SettingsManager.DEFAULT_FOG_COLOR, begin, begin + 1800);
 			}
 
+			// Local-only aura uses the existing particle system for rendering.
+			renderAuraParticles();
+
 			// Draw particles AFTER the whole scene has populated the depth buffer
 			com.client.features.particles.ParticlePostPass.flush();
 
@@ -22317,8 +22352,83 @@ public class Client extends RSApplet {
 	private static final int MAX_ACTIVE_PARTICLES = 6000;
 
 	private final ArrayList<Particle> activeParticles = new ArrayList<>();
+	private static final int MAX_AURA_TIER = 3;
+	private int auraTier = 0;
+	private int auraSystemTier = 0;
+	private ParticleSystem auraSystem;
 	public void addParticle(Particle particle) {
 		particles.add(particle);
+	}
+
+	private void setAuraTier(int tier) {
+		int clamped = Math.max(0, Math.min(MAX_AURA_TIER, tier));
+		if (auraTier == clamped) {
+			return;
+		}
+		auraTier = clamped;
+		if (auraTier == 0) {
+			auraSystem = null;
+			auraSystemTier = 0;
+			return;
+		}
+		auraSystemTier = auraTier;
+		auraSystem = createAuraSystem(auraTier);
+	}
+
+	private ParticleSystem createAuraSystem(int tier) {
+		ParticleDefinition definition = new ParticleDefinition();
+		definition.setAdditive(true);
+		definition.setSprite(new Sprite("light_01"));
+		definition.setStartVelocity(new Vector(0, 2, 0));
+		definition.setEndVelocity(new Vector(0, 0, 0));
+		definition.setGravity(new Vector(0, 1, 0));
+		definition.setLifespan(16);
+		definition.setStartSize(0.12f);
+		definition.setEndSize(0.38f);
+		definition.setStartAlpha(0.45f);
+		definition.setEndAlpha(0.0f);
+		switch (tier) {
+			case 1:
+				definition.setStartColor(0xFFDD55);
+				definition.setEndColor(0xFFAA33);
+				definition.setSpawnRate(5);
+				break;
+			case 2:
+				definition.setStartColor(0xFFCC33);
+				definition.setEndColor(0xFF8800);
+				definition.setSpawnRate(7);
+				break;
+			default:
+				definition.setStartColor(0xFF3300);
+				definition.setEndColor(0x990000);
+				definition.setSpawnRate(9);
+				break;
+		}
+		definition.updateSteps();
+		return new ParticleSystem(definition, false);
+	}
+
+	private void renderAuraParticles() {
+		if (auraTier <= 0 || myPlayer == null) {
+			return;
+		}
+		if (auraSystem == null || auraSystemTier != auraTier) {
+			auraSystemTier = auraTier;
+			auraSystem = createAuraSystem(auraTier);
+		}
+		int baseX = myPlayer.x;
+		int baseZ = myPlayer.y;
+		int baseY = getCenterHeight(plane, baseZ, baseX) + 20;
+		int radius = 28 + (auraTier * 4);
+		auraSystem.clearEmitters();
+		auraSystem.addEmitter(baseX, baseY, baseZ);
+		auraSystem.addEmitter(baseX + radius, baseY, baseZ);
+		auraSystem.addEmitter(baseX - radius, baseY, baseZ);
+		auraSystem.addEmitter(baseX, baseY, baseZ + radius);
+		auraSystem.addEmitter(baseX, baseY, baseZ - radius);
+		auraSystem.addEmitter(baseX + radius, baseY, baseZ + radius);
+		auraSystem.addEmitter(baseX - radius, baseY, baseZ - radius);
+		auraSystem.render();
 	}
 
 	public void resetAllImageProducers(boolean force) {
