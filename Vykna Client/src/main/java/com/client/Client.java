@@ -2706,32 +2706,6 @@ public class Client extends RSApplet {
 				drawX += class9_1.anInt263;
 				drawY += class9_1.anInt265;
 
-				if (class9_1.id == DEBUG_HOVER_BUTTON_ID) {
-					boolean inBounds = mouseX >= drawX && mouseY >= drawY && mouseX < drawX + class9_1.width && mouseY < drawY + class9_1.height;
-					if (debugHoverInBounds != inBounds) {
-						debugHoverInBounds = inBounds;
-						String sprite1Size = class9_1.sprite1 == null ? "null" : class9_1.sprite1.myWidth + "x" + class9_1.sprite1.myHeight;
-						String sprite2Size = class9_1.sprite2 == null ? "null" : class9_1.sprite2.myWidth + "x" + class9_1.sprite2.myHeight;
-						logger.info("HoverDebug[{}] bounds={} mouse=({}, {}) draw=({}, {}) size={}x{} type={} atActionType={} contentType={} hoverType={} mOverInterToTrigger={} parentId={} sprite1={} sprite2={}",
-								class9_1.id,
-								inBounds,
-								mouseX,
-								mouseY,
-								drawX,
-								drawY,
-								class9_1.width,
-								class9_1.height,
-								class9_1.type,
-								class9_1.atActionType,
-								class9_1.contentType,
-								class9_1.hoverType,
-								class9_1.mOverInterToTrigger,
-								class9_1.parentID,
-								sprite1Size,
-								sprite2Size);
-					}
-				}
-
 				if (mouseX >= drawX && mouseY >= drawY && mouseX <= drawX + class9_1.width && mouseY <= drawY + class9_1.height) {
 					if (class9_1.hoverInterfaceId != 0) {
 						drawTabInterfaceHoverParent = class9_1.id;
@@ -2887,7 +2861,6 @@ public class Client extends RSApplet {
 						hoverId = class9_1.id;
 					}
 				}
-
 
 
 				if (class9_1.type == 0) {
@@ -13821,6 +13794,7 @@ public class Client extends RSApplet {
 	};
 
 	public void drawInterface(int scrollPosition, int xPosition, RSInterface rsInterface, int yPosition) {
+		hoverId = -1;
 		drawInterface(scrollPosition, xPosition, rsInterface, yPosition, false);
 	}
 	public void processRs3MinimapClick(int mouseX, int mouseY, int panelBaseX, int panelBaseY, int width, int height) {
@@ -13969,6 +13943,38 @@ public class Client extends RSApplet {
 
 					if (!getUserSettings().isBountyHunter() && Arrays.stream(BOUNTY_INTERFACE_IDS).anyMatch(id -> id == class9_1.id)) {
 						continue;
+					}
+
+					int mouseX = super.getMouseX();
+					int mouseY = super.getMouseY();
+					boolean inBounds = mouseX >= _x && mouseY >= _y && mouseX < _x + class9_1.width && mouseY < _y + class9_1.height;
+					if (class9_1.id == DEBUG_HOVER_BUTTON_ID) {
+						if (debugHoverInBounds != inBounds) {
+							debugHoverInBounds = inBounds;
+							String sprite1Size = class9_1.sprite1 == null ? "null" : class9_1.sprite1.myWidth + "x" + class9_1.sprite1.myHeight;
+							String sprite2Size = class9_1.sprite2 == null ? "null" : class9_1.sprite2.myWidth + "x" + class9_1.sprite2.myHeight;
+							logger.info("HoverDebug[{}] bounds={} mouse=({}, {}) draw=({}, {}) size={}x{} type={} atActionType={} contentType={} hoverType={} mOverInterToTrigger={} parentId={} sprite1={} sprite2={}",
+									class9_1.id,
+									inBounds,
+									mouseX,
+									mouseY,
+									_x,
+									_y,
+									class9_1.width,
+									class9_1.height,
+									class9_1.type,
+									class9_1.atActionType,
+									class9_1.contentType,
+									class9_1.hoverType,
+									class9_1.mOverInterToTrigger,
+									class9_1.parentID,
+									sprite1Size,
+									sprite2Size);
+						}
+					}
+
+					if ((class9_1.type == 5 || class9_1.type == 17) && inBounds && !isPrayerInterface(class9_1)) {
+						hoverId = class9_1.id;
 					}
 
 					if (class9_1.contentType > 0)
