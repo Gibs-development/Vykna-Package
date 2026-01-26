@@ -2667,7 +2667,6 @@ public class Client extends RSApplet {
 	public long drawTabInterfaceHoverTimer;
 
 	public RSInterface lastHovered;
-	private static final int DEBUG_HOVER_BUTTON_ID = com.client.graphics.interfaces.impl.TeleportHomePage.getSearchClearId();
 	private boolean debugHoverInBounds;
 	private boolean debugHoverActive;
 
@@ -6687,14 +6686,6 @@ public class Client extends RSApplet {
 		}
 		if (l == 315) {
 			RSInterface class9 = RSInterface.interfaceCache[buttonPressed];
-			if (buttonPressed == DEBUG_HOVER_BUTTON_ID) {
-				logger.info("HoverDebug[{}] clickAction=315 menuActionCmd2={} menuActionCmd1={} mouse=({}, {})",
-						buttonPressed,
-						j,
-						i1,
-						super.getSaveClickX(),
-						super.getSaveClickY());
-			}
 			boolean flag8 = true;
 			if (class9.type == RSInterface.TYPE_CONFIG || class9.id == 50009) { // Placeholder toggle
 				class9.active = !class9.active;
@@ -13948,30 +13939,6 @@ public class Client extends RSApplet {
 					int mouseX = super.getMouseX();
 					int mouseY = super.getMouseY();
 					boolean inBounds = mouseX >= _x && mouseY >= _y && mouseX < _x + class9_1.width && mouseY < _y + class9_1.height;
-					if (class9_1.id == DEBUG_HOVER_BUTTON_ID) {
-						if (debugHoverInBounds != inBounds) {
-							debugHoverInBounds = inBounds;
-							String sprite1Size = class9_1.sprite1 == null ? "null" : class9_1.sprite1.myWidth + "x" + class9_1.sprite1.myHeight;
-							String sprite2Size = class9_1.sprite2 == null ? "null" : class9_1.sprite2.myWidth + "x" + class9_1.sprite2.myHeight;
-							logger.info("HoverDebug[{}] bounds={} mouse=({}, {}) draw=({}, {}) size={}x{} type={} atActionType={} contentType={} hoverType={} mOverInterToTrigger={} parentId={} sprite1={} sprite2={}",
-									class9_1.id,
-									inBounds,
-									mouseX,
-									mouseY,
-									_x,
-									_y,
-									class9_1.width,
-									class9_1.height,
-									class9_1.type,
-									class9_1.atActionType,
-									class9_1.contentType,
-									class9_1.hoverType,
-									class9_1.mOverInterToTrigger,
-									class9_1.parentID,
-									sprite1Size,
-									sprite2Size);
-						}
-					}
 
 					if ((class9_1.type == 5 || class9_1.type == 17) && inBounds && !isPrayerInterface(class9_1)) {
 						hoverId = class9_1.id;
@@ -14437,10 +14404,6 @@ public class Client extends RSApplet {
 
 							boolean hovered = (hoverId == class9_1.id);
 
-							if (class9_1.id == DEBUG_HOVER_BUTTON_ID && debugHoverActive != hovered) {
-								debugHoverActive = hovered;
-								logger.info("HoverDebug[{}] hoverState={} hoverId={}", class9_1.id, hovered, hoverId);
-							}
 
 							if (hovered || interfaceIsSelected(class9_1) || class9_1.active) {
 								sprite = class9_1.sprite2;
