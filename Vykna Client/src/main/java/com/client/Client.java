@@ -20151,6 +20151,13 @@ public class Client extends RSApplet {
 					RSInterface npcInterface = RSInterface.interfaceCache[j11];
 					npcInterface.anInt233 = 2;
 					npcInterface.mediaID = j3;
+					if (npcInterface.autoNpcZoom) {
+						npcInterface.modelZoom = RSInterface.autoZoomForNpc(
+								j3,
+								npcInterface.width,
+								npcInterface.height
+						);
+					}
 					if (npcInterface.useNpcStandAnim) {
 						npcInterface.anInt257 = -1;
 						npcInterface.anInt258 = -1;

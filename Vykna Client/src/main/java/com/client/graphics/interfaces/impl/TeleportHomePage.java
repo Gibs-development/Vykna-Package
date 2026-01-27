@@ -1,6 +1,5 @@
 package com.client.graphics.interfaces.impl;
 
-import com.client.Model;
 import com.client.TextDrawingArea;
 import com.client.definitions.NpcDefinition;
 import com.client.graphics.interfaces.RSInterface;
@@ -259,7 +258,7 @@ public final class TeleportHomePage extends RSInterface {
             npcWidget.anInt233 = 2;
             npcWidget.mediaID = DUMMY_NPC_ID;
 
-            npcWidget.modelZoom = autoZoomForNpc(
+            npcWidget.modelZoom = RSInterface.autoZoomForNpc(
                     DUMMY_NPC_ID,
                     npcWidget.width,
                     npcWidget.height
@@ -401,38 +400,6 @@ public final class TeleportHomePage extends RSInterface {
 
         r.tooltip = tooltip;
     }
-    private static final java.util.Map<Integer, Integer> NPC_ZOOM_CACHE = new java.util.HashMap<>();
-
-    // Pick one NPC that looks correct at 900 (man=1, goblin=100, etc)
-    private static final int BASE_NPC_ID = 1;
-    private static final int BASE_ZOOM = 900;
-
-    public static int autoZoomForNpc(int npcId, int targetW, int targetH) {
-        Integer cached = NPC_ZOOM_CACHE.get(npcId);
-        if (cached != null) return cached;
-
-        try {
-            Model baseModel = NpcDefinition.forID(BASE_NPC_ID).method164(-1, -1, null);
-            Model model = NpcDefinition.forID(npcId).method164(-1, -1, null);
-            if (baseModel == null || model == null) return BASE_ZOOM;
-
-            int baseSize = Math.max(1, baseModel.XYZMag);
-            int size = Math.max(1, model.XYZMag);
-
-            // If NPC is bigger than baseline, zoom should be smaller (to fit)
-            // If NPC is smaller than baseline, zoom should be bigger (to fill)
-            int zoom = (BASE_ZOOM * baseSize) / size;
-
-            // clamp sensible
-            zoom = Math.max(350, Math.min(zoom, 1400));
-
-            NPC_ZOOM_CACHE.put(npcId, zoom);
-            return zoom;
-        } catch (Exception e) {
-            return BASE_ZOOM;
-        }
-    }
-
 
     private static int findPreviewNpcId(int preferredId, int fallbackId) {
         int total = NpcDefinition.totalAmount;
