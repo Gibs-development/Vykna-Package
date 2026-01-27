@@ -33,6 +33,7 @@ public class RSInterface {
 	private static final int MIN_NPC_ZOOM = 350;
 	private static final int MAX_NPC_ZOOM = 1600;
 	private static final Map<Integer, Integer> NPC_ZOOM_CACHE = new HashMap<>();
+	private static Integer BASE_MODEL_SPAN;
 
 	public static int emptyInterface = 24_470;
 	public static boolean showIds = false;
@@ -3167,6 +3168,21 @@ public class RSInterface {
 		return clampNpcZoom(zoom);
 	}
 
+	public static int autoZoomForModel(Model model, int targetW, int targetH) {
+		if (model == null) {
+			return BASE_NPC_ZOOM;
+		}
+		int baseSpan = getBaseModelSpan();
+		int span = Math.max(1, Math.max(model.diagonal3DAboveOrigin, Math.max(model.XYZMag, model.modelHeight)));
+		int zoom = (int) ((BASE_NPC_ZOOM * (long) span) / baseSpan);
+
+		int targetMin = Math.min(targetW, targetH);
+		if (targetMin > 0) {
+			zoom = (int) ((zoom * (long) targetMin) / BASE_NPC_WIDGET_MIN);
+		}
+		return clampNpcZoom(zoom);
+	}
+
 	private static int computeNpcBaseZoom(int npcId) {
 		try {
 			Model baseModel = NpcDefinition.forID(BASE_NPC_ID).method164(-1, -1, null);
@@ -3184,6 +3200,24 @@ public class RSInterface {
 		} catch (Exception e) {
 			return BASE_NPC_ZOOM;
 		}
+	}
+
+	private static int getBaseModelSpan() {
+		if (BASE_MODEL_SPAN != null) {
+			return BASE_MODEL_SPAN;
+		}
+		try {
+			Model baseModel = NpcDefinition.forID(BASE_NPC_ID).method164(-1, -1, null);
+			if (baseModel != null) {
+				BASE_MODEL_SPAN = Math.max(1, Math.max(baseModel.diagonal3DAboveOrigin,
+						Math.max(baseModel.XYZMag, baseModel.modelHeight)));
+				return BASE_MODEL_SPAN;
+			}
+		} catch (Exception e) {
+			// ignore
+		}
+		BASE_MODEL_SPAN = 1;
+		return BASE_MODEL_SPAN;
 	}
 
 	private static int clampNpcZoom(int zoom) {

@@ -258,6 +258,9 @@ public final class TeleportHomePage extends RSInterface {
             npcWidget.anInt233 = 2;
             npcWidget.mediaID = DUMMY_NPC_ID;
 
+            npcWidget.width = 100;
+            npcWidget.height = 90;
+            npcWidget.autoNpcZoom = true;
             npcWidget.modelZoom = RSInterface.autoZoomForNpc(
                     DUMMY_NPC_ID,
                     npcWidget.width,
@@ -272,9 +275,6 @@ public final class TeleportHomePage extends RSInterface {
             npcWidget.anInt246 = 0;
             npcWidget.useNpcFullModel = true;
             npcWidget.useNpcStandAnim = true;
-
-            npcWidget.width = 100;
-            npcWidget.height = 90;
         }
 
         // Stats
