@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.function.Consumer;
 
+import static com.client.graphics.interfaces.impl.TeleportHomePage.autoZoomForNpc;
+
 public class RSInterface {
 
 	public static final int DEFAULT_TEXT_COLOR = 0xff9933;
@@ -3160,9 +3162,9 @@ public class RSInterface {
 		// Secondary model fields (selected state) should mirror NPC
 		rsi.anInt255 = 2;
 		rsi.anInt256 = npcId;
-
-		rsi.modelZoom = zoom > 0 ? zoom : 900;
-
+		rsi.width = 100;
+		rsi.height = 90;
+		rsi.modelZoom = autoZoomForNpc(npcId, rsi.width, rsi.height);
 		// Your renderer indexes trig arrays by modelRotation1, so keep it in range
 		rsi.modelRotation1 = rot1 & 0x7ff;
 		rsi.modelRotation2 = rot2 & 0x7ff;
