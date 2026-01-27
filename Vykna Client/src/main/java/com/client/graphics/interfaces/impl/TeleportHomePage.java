@@ -106,7 +106,7 @@ public final class TeleportHomePage extends RSInterface {
     private static final int TITLE_X = BG_X + 18;
     private static final int TITLE_Y = BG_Y + 10;
 
-    private static final int TABS_Y = BG_Y + 28 + 20;
+    private static final int TABS_Y = BG_Y + 28 + 20-8;
     private static final int TAB_START_X = BG_X + 10;
     private static final int TAB_GAP = 85;
     private static final int TAB_W = 80;
@@ -114,10 +114,10 @@ public final class TeleportHomePage extends RSInterface {
 
     private static final int SEARCH_W = 100;
     private static final int SEARCH_X = BG_X + 338 + 15;
-    private static final int SEARCH_Y = BG_Y + 26 + 20;
+    private static final int SEARCH_Y = BG_Y + 26 + 20-5;
     private static final int SEARCH_CLEAR_X = SEARCH_X + SEARCH_W + 4;
 
-    private static final int CLOSE_X = BG_X + 478;
+    private static final int CLOSE_X = BG_X + 470;
     private static final int CLOSE_Y = BG_Y + 10;
 
     private static final int LIST_X = BG_X + 10;
@@ -321,26 +321,26 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, TAB_QUESTS_BTN,   tab0 + (TAB_GAP * 3), tabY);
 
         // Icons inside each tab
-        rsi.child(c++, TAB_MONSTERS_ICON, tab0 + (TAB_GAP * 0) + 6, tabY + 4);
-        rsi.child(c++, TAB_BOSSES_ICON,   tab0 + (TAB_GAP * 1) + 6, tabY + 4);
-        rsi.child(c++, TAB_ACTS_ICON,     tab0 + (TAB_GAP * 2) + 6, tabY + 4);
-        rsi.child(c++, TAB_QUESTS_ICON,   tab0 + (TAB_GAP * 3) + 6, tabY + 4);
+        rsi.child(c++, TAB_MONSTERS_ICON, tab0 + (TAB_GAP * 0) + 6, tabY + 2);
+        rsi.child(c++, TAB_BOSSES_ICON,   tab0 + (TAB_GAP * 1) + 6, tabY + 2);
+        rsi.child(c++, TAB_ACTS_ICON,     tab0 + (TAB_GAP * 2) + 6, tabY + 2);
+        rsi.child(c++, TAB_QUESTS_ICON,   tab0 + (TAB_GAP * 3) + 6, tabY + 2);
 
         // Tab text slightly right
-        rsi.child(c++, TAB_MONSTERS_TXT, tab0 + (TAB_GAP * 0) + (TAB_W / 2) + 8, tabY + 6);
-        rsi.child(c++, TAB_BOSSES_TXT,   tab0 + (TAB_GAP * 1) + (TAB_W / 2) + 8, tabY + 6);
-        rsi.child(c++, TAB_ACTS_TXT,     tab0 + (TAB_GAP * 2) + (TAB_W / 2) + 8, tabY + 6);
-        rsi.child(c++, TAB_QUESTS_TXT,   tab0 + (TAB_GAP * 3) + (TAB_W / 2) + 8, tabY + 6);
+        rsi.child(c++, TAB_MONSTERS_TXT, tab0 + (TAB_GAP * 0) + (TAB_W / 2) + 8, tabY + 4);
+        rsi.child(c++, TAB_BOSSES_TXT,   tab0 + (TAB_GAP * 1) + (TAB_W / 2) + 8, tabY + 4);
+        rsi.child(c++, TAB_ACTS_TXT,     tab0 + (TAB_GAP * 2) + (TAB_W / 2) + 8, tabY + 4);
+        rsi.child(c++, TAB_QUESTS_TXT,   tab0 + (TAB_GAP * 3) + (TAB_W / 2) + 8, tabY + 4);
 
         rsi.child(c++, SEARCH_BG_ID, SEARCH_X + SHIFT_X, SEARCH_Y);
         rsi.child(c++, SEARCH_TEXT_ID, SEARCH_X + 5 + SHIFT_X, SEARCH_Y + 3);
         rsi.child(c++, SEARCH_CLEAR_ID, SEARCH_CLEAR_X + SHIFT_X, SEARCH_Y + 1);
 
-        rsi.child(c++, SCROLL_ID, LIST_X + SHIFT_X, LIST_Y);
+        rsi.child(c++, SCROLL_ID, LIST_X + SHIFT_X, LIST_Y-6);
 
-        rsi.child(c++, PREVIEW_BOX_ID, PREVIEW_X + SHIFT_X, PREVIEW_Y);
-        rsi.child(c++, PREVIEW_NAME_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X, PREVIEW_Y + 8);
-        rsi.child(c++, PREVIEW_NPC_ID, PREVIEW_X + 30 + SHIFT_X, PREVIEW_Y + 26);
+        rsi.child(c++, PREVIEW_BOX_ID, PREVIEW_X + SHIFT_X, PREVIEW_Y-6);
+        rsi.child(c++, PREVIEW_NAME_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X, PREVIEW_Y + 8-6);
+        rsi.child(c++, PREVIEW_NPC_ID, PREVIEW_X + 30 + SHIFT_X, PREVIEW_Y + 26+50-6);
 
         int statsX = PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X;
         int statsBoxX = PREVIEW_X + (PREVIEW_W - STATS_W) / 2 + SHIFT_X;
