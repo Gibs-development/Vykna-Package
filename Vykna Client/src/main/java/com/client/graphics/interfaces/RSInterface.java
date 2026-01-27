@@ -29,8 +29,12 @@ public class RSInterface {
 	private static String lastNpcPreviewDebug;
 	private static final int BASE_NPC_ZOOM = 900;
 	private static final int MIN_NPC_ZOOM = 350;
-	private static final int MAX_NPC_ZOOM = 2200;
+	private static final int MAX_NPC_ZOOM = 3000;
 	private static final int TARGET_FILL_PERCENT = 70;
+	private static final int LARGE_SPAN_THRESHOLD = 2000;
+	private static final int HUGE_SPAN_THRESHOLD = 3000;
+	private static final int LARGE_FILL_PERCENT = 55;
+	private static final int HUGE_FILL_PERCENT = 45;
 	private static final Map<Integer, Integer> NPC_SPAN_CACHE = new HashMap<>();
 
 	public static int emptyInterface = 24_470;
@@ -3184,7 +3188,13 @@ public class RSInterface {
 		if (targetMin <= 0) {
 			return BASE_NPC_ZOOM;
 		}
-		int desiredPixels = Math.max(1, (targetMin * TARGET_FILL_PERCENT) / 100);
+		int fillPercent = TARGET_FILL_PERCENT;
+		if (span >= HUGE_SPAN_THRESHOLD) {
+			fillPercent = HUGE_FILL_PERCENT;
+		} else if (span >= LARGE_SPAN_THRESHOLD) {
+			fillPercent = LARGE_FILL_PERCENT;
+		}
+		int desiredPixels = Math.max(1, (targetMin * fillPercent) / 100);
 		int zoom = (int) ((span * (long) WorldController.focalLength) / desiredPixels);
 		return clampNpcZoom(zoom);
 	}
