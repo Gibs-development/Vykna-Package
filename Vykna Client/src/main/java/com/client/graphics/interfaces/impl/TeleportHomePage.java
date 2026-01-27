@@ -3,6 +3,10 @@ package com.client.graphics.interfaces.impl;
 import com.client.TextDrawingArea;
 import com.client.definitions.NpcDefinition;
 import com.client.graphics.interfaces.RSInterface;
+import com.client.vykna_teleports.TeleportListPayload;
+import com.client.vykna_teleports.TeleportRowIconPayload;
+
+import java.util.List;
 
 /**
  * Teleport interface (client-side layout only; dummy data for now).
@@ -431,6 +435,22 @@ public final class TeleportHomePage extends RSInterface {
             head.gridUseValueIndex = true;
             head.valueIndex = valueIndex;
             head.configId = -1;
+        }
+    }
+
+    public static void applyRowHeadPayload(TeleportListPayload payload) {
+        if (payload == null) {
+            return;
+        }
+        List<TeleportRowIconPayload> entries = payload.getEntries();
+        if (entries == null) {
+            return;
+        }
+        for (TeleportRowIconPayload entry : entries) {
+            if (entry == null) {
+                continue;
+            }
+            setRowHeadIndex(entry.getRowIndex(), entry.getHeadIconIndex());
         }
     }
 

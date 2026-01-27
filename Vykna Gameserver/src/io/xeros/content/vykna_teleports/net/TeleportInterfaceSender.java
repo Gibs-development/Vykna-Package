@@ -19,6 +19,7 @@ public final class TeleportInterfaceSender {
 
     // ---- Client interface ids ----
     public static final int INTERFACE_ID = 31000;
+    private static final int CLIENT_SCRIPT_ID = 5;
 
     // Text targets (from your TeleportHomePage class)
     private static final int PREVIEW_NAME_ID = INTERFACE_ID + 1201;
@@ -40,6 +41,7 @@ public final class TeleportInterfaceSender {
     // Scroll row text IDs (client row base + 1)
     private static final int ROW_START_ID = INTERFACE_ID + 700;
     private static final int ROW_STRIDE = 10;
+    private static final int MAX_ROWS = 100;
 
     private TeleportInterfaceSender() {}
 
@@ -55,22 +57,21 @@ public final class TeleportInterfaceSender {
         List<TeleportDefinition> defs = TeleportDefinitions.byCategory(category);
 
         // Clear ALL 100 rows client-side (avoid stale data)
-        for (int i = 0; i < 100; i++) {
+        for (int i = 0; i < MAX_ROWS; i++) {
             int textId = (ROW_START_ID + (i * ROW_STRIDE)) + 1;
             player.getPA().sendFrame126("", textId);
         }
 
         // Populate visible rows
-        int max = Math.min(defs.size(), 100);
+        int max = Math.min(defs.size(), MAX_ROWS);
         for (int i = 0; i < max; i++) {
             TeleportDefinition def = defs.get(i);
             int textId = (ROW_START_ID + (i * ROW_STRIDE)) + 1;
             player.getPA().sendFrame126(def.getName(), textId);
 
-            // Row head icon index (client-side type=17 uses valueIndex)
-            // You will need a small packet/frame to set that per row later.
-            // For now: client dummy mapping will show something.
         }
+
+        sendRowHeadIcons(player, defs);
 
         // Push first preview by default
         if (!defs.isEmpty()) {
@@ -116,5 +117,34 @@ public final class TeleportInterfaceSender {
         // You already have sendNpcHeadOnInterface(npcId, interfaceId) for chat heads.
         // If you upgraded it to full NPC model: call it here.
         player.getPA().sendNpcHeadOnInterface(def.getNpcId(), PREVIEW_NPC_ID);
+    }
+
+    private static void sendRowHeadIcons(io.xeros.model.entity.player.Player player, List<TeleportDefinition> defs) {
+        List<TeleportRowIconPayload> entries = new java.util.ArrayList<>(MAX_ROWS);
+        int max = Math.min(defs.size(), MAX_ROWS);
+        for (int i = 0; i < MAX_ROWS; i++) {
+            int headIconIndex = i < max ? defs.get(i).getHeadIconIndex() : 0;
+            entries.add(new TeleportRowIconPayload(i, headIconIndex));
+        }
+        TeleportListPayload payload = new TeleportListPayload(entries);
+        player.getPA().runClientScript(CLIENT_SCRIPT_ID, "teleportListData", io.xeros.util.JsonUtil.toJson(payload));
+    }
+
+    private static final class TeleportListPayload {
+        private final List<TeleportRowIconPayload> entries;
+
+        private TeleportListPayload(List<TeleportRowIconPayload> entries) {
+            this.entries = entries;
+        }
+    }
+
+    private static final class TeleportRowIconPayload {
+        private final int rowIndex;
+        private final int headIconIndex;
+
+        private TeleportRowIconPayload(int rowIndex, int headIconIndex) {
+            this.rowIndex = rowIndex;
+            this.headIconIndex = headIconIndex;
+        }
     }
 }
