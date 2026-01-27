@@ -3179,7 +3179,7 @@ public class RSInterface {
 					Math.max(baseModel.XYZMag, baseModel.modelHeight)));
 			int span = Math.max(1, Math.max(model.diagonal3DAboveOrigin,
 					Math.max(model.XYZMag, model.modelHeight)));
-			int zoom = (int) ((BASE_NPC_ZOOM * (long) baseSpan) / span);
+			int zoom = (int) ((BASE_NPC_ZOOM * (long) span) / baseSpan);
 			return clampNpcZoom(zoom);
 		} catch (Exception e) {
 			return BASE_NPC_ZOOM;
