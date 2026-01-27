@@ -3175,6 +3175,7 @@ public class RSInterface {
 		int baseSpan = getBaseModelSpan();
 		int span = Math.max(1, Math.max(model.diagonal3DAboveOrigin, Math.max(model.XYZMag, model.modelHeight)));
 		int zoom = (int) ((BASE_NPC_ZOOM * (long) span) / baseSpan);
+		zoom = applyLargeNpcBias(zoom, span, baseSpan);
 
 		int targetMin = Math.min(targetW, targetH);
 		if (targetMin > 0) {
@@ -3196,6 +3197,7 @@ public class RSInterface {
 			int span = Math.max(1, Math.max(model.diagonal3DAboveOrigin,
 					Math.max(model.XYZMag, model.modelHeight)));
 			int zoom = (int) ((BASE_NPC_ZOOM * (long) span) / baseSpan);
+			zoom = applyLargeNpcBias(zoom, span, baseSpan);
 			return clampNpcZoom(zoom);
 		} catch (Exception e) {
 			return BASE_NPC_ZOOM;
@@ -3218,6 +3220,15 @@ public class RSInterface {
 		}
 		BASE_MODEL_SPAN = 1;
 		return BASE_MODEL_SPAN;
+	}
+
+	private static int applyLargeNpcBias(int zoom, int span, int baseSpan) {
+		if (span <= baseSpan) {
+			return zoom;
+		}
+		double ratio = (double) span / baseSpan;
+		double bias = Math.pow(ratio, 0.25);
+		return (int) Math.round(zoom * bias);
 	}
 
 	private static int clampNpcZoom(int zoom) {
