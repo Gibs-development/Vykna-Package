@@ -35,8 +35,8 @@ public class RSInterface {
 	private static final int HUGE_SPAN_THRESHOLD = 3000;
 	private static final int LARGE_FILL_PERCENT = 55;
 	private static final int HUGE_FILL_PERCENT = 45;
-	private static final double NORMAL_ZOOM_MULTIPLIER = 1.75;
-	private static final double HUGE_ZOOM_MULTIPLIER = 0.75;
+	private static final double NORMAL_ZOOM_MULTIPLIER = 0.6;
+	private static final double HUGE_ZOOM_MULTIPLIER = 1.25;
 	private static final Map<Integer, Integer> NPC_SPAN_CACHE = new HashMap<>();
 
 	public static int emptyInterface = 24_470;
