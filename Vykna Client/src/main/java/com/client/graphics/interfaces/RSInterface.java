@@ -12,10 +12,10 @@ import com.google.common.base.Preconditions;
 import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
-
-import static com.client.graphics.interfaces.impl.TeleportHomePage.autoZoomForNpc;
 
 public class RSInterface {
 
@@ -27,6 +27,12 @@ public class RSInterface {
 	public transient Sprite[] gridSpriteCache;
 	private static final boolean DEBUG_NPC_PREVIEW = false;
 	private static String lastNpcPreviewDebug;
+	private static final int BASE_NPC_ID = 1;
+	private static final int BASE_NPC_ZOOM = 900;
+	private static final int BASE_NPC_WIDGET_MIN = 90;
+	private static final int MIN_NPC_ZOOM = 350;
+	private static final int MAX_NPC_ZOOM = 1600;
+	private static final Map<Integer, Integer> NPC_ZOOM_CACHE = new HashMap<>();
 
 	public static int emptyInterface = 24_470;
 	public static boolean showIds = false;
@@ -38,6 +44,7 @@ public class RSInterface {
 	public int valueIndex; // which icon index to use (set by server/client)
 	public boolean gridUseValueIndex;
 	public boolean useNpcStandAnim;
+	public boolean autoNpcZoom;
 
     public static void printEmptyInterfaceSections() {
 		int count = 0;
@@ -3143,6 +3150,44 @@ public class RSInterface {
 		Interface.textColor = color;
 		Interface.message = text;
 	}
+
+	public static int autoZoomForNpc(int npcId, int targetW, int targetH) {
+		Integer cachedBaseZoom = NPC_ZOOM_CACHE.get(npcId);
+		if (cachedBaseZoom == null) {
+			cachedBaseZoom = computeNpcBaseZoom(npcId);
+			NPC_ZOOM_CACHE.put(npcId, cachedBaseZoom);
+		}
+
+		int targetMin = Math.min(targetW, targetH);
+		if (targetMin <= 0) {
+			targetMin = BASE_NPC_WIDGET_MIN;
+		}
+
+		int zoom = (int) ((cachedBaseZoom * (long) targetMin) / BASE_NPC_WIDGET_MIN);
+		return clampNpcZoom(zoom);
+	}
+
+	private static int computeNpcBaseZoom(int npcId) {
+		try {
+			Model baseModel = NpcDefinition.forID(BASE_NPC_ID).method164(-1, -1, null);
+			Model model = NpcDefinition.forID(npcId).method164(-1, -1, null);
+			if (baseModel == null || model == null) {
+				return BASE_NPC_ZOOM;
+			}
+
+			int baseSpan = Math.max(1, Math.max(baseModel.XYZMag, baseModel.modelHeight));
+			int span = Math.max(1, Math.max(model.XYZMag, model.modelHeight));
+			int zoom = (int) ((BASE_NPC_ZOOM * (long) baseSpan) / span);
+			return clampNpcZoom(zoom);
+		} catch (Exception e) {
+			return BASE_NPC_ZOOM;
+		}
+	}
+
+	private static int clampNpcZoom(int zoom) {
+		return Math.max(MIN_NPC_ZOOM, Math.min(zoom, MAX_NPC_ZOOM));
+	}
+
 	public static void addNpcModel(int id, int npcId, int zoom, int rot1, int rot2) {
 		RSInterface rsi = addInterface(id);
 		rsi.id = id;
@@ -3164,6 +3209,7 @@ public class RSInterface {
 		rsi.anInt256 = npcId;
 		rsi.width = 100;
 		rsi.height = 90;
+		rsi.autoNpcZoom = true;
 		rsi.modelZoom = autoZoomForNpc(npcId, rsi.width, rsi.height);
 		// Your renderer indexes trig arrays by modelRotation1, so keep it in range
 		rsi.modelRotation1 = rot1 & 0x7ff;
