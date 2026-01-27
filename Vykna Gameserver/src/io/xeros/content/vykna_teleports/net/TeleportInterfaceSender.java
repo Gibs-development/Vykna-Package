@@ -54,6 +54,8 @@ public final class TeleportInterfaceSender {
     }
 
     public static void sendCategory(io.xeros.model.entity.player.Player player, TeleportCategory category) {
+        player.getAttributes().set("vykna_tp_category", category);
+        player.getAttributes().setInt("vykna_tp_selected_row", -1);
         List<TeleportDefinition> defs = TeleportDefinitions.byCategory(category);
 
         // Clear ALL 100 rows client-side (avoid stale data)
@@ -77,6 +79,7 @@ public final class TeleportInterfaceSender {
         if (!defs.isEmpty()) {
             sendPreview(player, defs.get(0));
             player.getAttributes().setInt("vykna_tp_selected_id", defs.get(0).getId());
+            player.getAttributes().setInt("vykna_tp_selected_row", 0);
         } else {
             // Empty state
             player.getPA().sendFrame126("No teleports", PREVIEW_NAME_ID);
@@ -85,6 +88,7 @@ public final class TeleportInterfaceSender {
             player.getPA().sendFrame126("", REQ_LINE1_ID);
             player.getPA().sendFrame126("", REQ_LINE2_ID);
             player.getPA().sendFrame126("None", QUEST_LINE1_ID);
+            player.getAttributes().setInt("vykna_tp_selected_id", 0);
         }
     }
 
