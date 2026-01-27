@@ -14462,8 +14462,6 @@ public class Client extends RSApplet {
 							int j4 = Rasterizer.textureInt2;
 							Rasterizer.textureInt1 = _x + class9_1.width / 2;
 							Rasterizer.textureInt2 = _y + class9_1.height / 2;
-							int i5 = Rasterizer.anIntArray1470[class9_1.modelRotation1] * class9_1.modelZoom >> 16;
-							int l5 = Rasterizer.anIntArray1471[class9_1.modelRotation1] * class9_1.modelZoom >> 16;
 							boolean flag2 = interfaceIsSelected(class9_1);
 							int i7;
 							if (class9_1.useNpcStandAnim && (flag2 ? class9_1.anInt255 : class9_1.anInt233) == 2) {
@@ -14485,6 +14483,18 @@ public class Client extends RSApplet {
 								model = class9_1.method209(animation.secondaryFrameIds[class9_1.anInt246],
 										animation.primaryFrameIds[class9_1.anInt246], flag2);
 							}
+							if (class9_1.autoNpcZoom && model != null) {
+								int mediaType = flag2 ? class9_1.anInt255 : class9_1.anInt233;
+								if (mediaType == 2) {
+									class9_1.modelZoom = RSInterface.autoZoomForModel(
+											model,
+											class9_1.width,
+											class9_1.height
+									);
+								}
+							}
+							int i5 = Rasterizer.anIntArray1470[class9_1.modelRotation1] * class9_1.modelZoom >> 16;
+							int l5 = Rasterizer.anIntArray1471[class9_1.modelRotation1] * class9_1.modelZoom >> 16;
 							if (model != null)
 								model.render(class9_1.modelRotation2, 0, class9_1.modelRotation1, 0, i5, l5);
 							Rasterizer.textureInt1 = k3;
@@ -20151,6 +20161,13 @@ public class Client extends RSApplet {
 					RSInterface npcInterface = RSInterface.interfaceCache[j11];
 					npcInterface.anInt233 = 2;
 					npcInterface.mediaID = j3;
+					if (npcInterface.autoNpcZoom) {
+						npcInterface.modelZoom = RSInterface.autoZoomForNpc(
+								j3,
+								npcInterface.width,
+								npcInterface.height
+						);
+					}
 					if (npcInterface.useNpcStandAnim) {
 						npcInterface.anInt257 = -1;
 						npcInterface.anInt258 = -1;
