@@ -2,11 +2,13 @@ package com.client.script.impl;
 
 import com.client.graphics.interfaces.impl.AchievementHomePage;
 import com.client.graphics.interfaces.impl.AchievementListPage;
+import com.client.graphics.interfaces.impl.TeleportHomePage;
 import com.client.utilities.JsonUtil;
 import com.client.vykna_progression.ProgressionListPayload;
 import com.client.vykna_progression.ProgressionListTypePayload;
 import com.client.vykna_progression.ProgressionSummaryPayload;
 import com.client.vykna_progression.VyknaProgressionDefinitions;
+import com.client.vykna_teleports.TeleportListPayload;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
@@ -43,6 +45,13 @@ public class _5_UpdateVyknaProgression {
         if ("toggleCompleted".equalsIgnoreCase(type)) {
             boolean showCompleted = "1".equals(data) || "true".equalsIgnoreCase(data);
             AchievementListPage.setShowCompleted(showCompleted);
+            return;
+        }
+
+        if ("teleportListData".equalsIgnoreCase(type)) {
+            TeleportListPayload payload = JsonUtil.fromJsonString(
+                    data, new TypeToken<TeleportListPayload>() {});
+            TeleportHomePage.applyRowHeadPayload(payload);
             return;
         }
     }
