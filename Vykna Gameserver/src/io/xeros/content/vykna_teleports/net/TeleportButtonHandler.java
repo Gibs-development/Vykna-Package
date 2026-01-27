@@ -47,18 +47,22 @@ public final class TeleportButtonHandler {
         }
 
         if (buttonId == TAB_MONSTERS_BTN) {
+            System.out.println("[Teleports] Tab=MONSTERS");
             TeleportInterfaceSender.sendCategory(player, TeleportCategory.MONSTERS);
             return true;
         }
         if (buttonId == TAB_BOSSES_BTN) {
+            System.out.println("[Teleports] Tab=BOSSES");
             TeleportInterfaceSender.sendCategory(player, TeleportCategory.BOSSES);
             return true;
         }
         if (buttonId == TAB_ACTS_BTN) {
+            System.out.println("[Teleports] Tab=ACTIVITIES");
             TeleportInterfaceSender.sendCategory(player, TeleportCategory.ACTIVITIES);
             return true;
         }
         if (buttonId == TAB_QUESTS_BTN) {
+            System.out.println("[Teleports] Tab=QUESTS");
             TeleportInterfaceSender.sendCategory(player, TeleportCategory.QUESTS);
             return true;
         }
@@ -73,6 +77,8 @@ public final class TeleportButtonHandler {
                 if (i < defs.size()) {
                     TeleportDefinition def = defs.get(i);
                     player.getAttributes().setInt("vykna_tp_selected_id", def.getId());
+                    player.getAttributes().setInt("vykna_tp_selected_row", i);
+                    System.out.println("[Teleports] RowClick row=" + i + " category=" + cat + " teleportId=" + def.getId());
                     TeleportInterfaceSender.sendPreview(player, def);
                 }
                 return true;
