@@ -29,8 +29,8 @@ public class RSInterface {
 	private static String lastNpcPreviewDebug;
 	private static final int BASE_NPC_ZOOM = 900;
 	private static final int MIN_NPC_ZOOM = 350;
-	private static final int MAX_NPC_ZOOM = 1600;
-	private static final int TARGET_FILL_PERCENT = 85;
+	private static final int MAX_NPC_ZOOM = 2200;
+	private static final int TARGET_FILL_PERCENT = 70;
 	private static final Map<Integer, Integer> NPC_SPAN_CACHE = new HashMap<>();
 
 	public static int emptyInterface = 24_470;
