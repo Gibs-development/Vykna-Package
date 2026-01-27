@@ -27,13 +27,11 @@ public class RSInterface {
 	public transient Sprite[] gridSpriteCache;
 	private static final boolean DEBUG_NPC_PREVIEW = false;
 	private static String lastNpcPreviewDebug;
-	private static final int BASE_NPC_ID = 1;
 	private static final int BASE_NPC_ZOOM = 900;
-	private static final int BASE_NPC_WIDGET_MIN = 90;
 	private static final int MIN_NPC_ZOOM = 350;
 	private static final int MAX_NPC_ZOOM = 1600;
-	private static final Map<Integer, Integer> NPC_ZOOM_CACHE = new HashMap<>();
-	private static Integer BASE_MODEL_SPAN;
+	private static final int TARGET_FILL_PERCENT = 85;
+	private static final Map<Integer, Integer> NPC_SPAN_CACHE = new HashMap<>();
 
 	public static int emptyInterface = 24_470;
 	public static boolean showIds = false;
@@ -3153,82 +3151,42 @@ public class RSInterface {
 	}
 
 	public static int autoZoomForNpc(int npcId, int targetW, int targetH) {
-		Integer cachedBaseZoom = NPC_ZOOM_CACHE.get(npcId);
-		if (cachedBaseZoom == null) {
-			cachedBaseZoom = computeNpcBaseZoom(npcId);
-			NPC_ZOOM_CACHE.put(npcId, cachedBaseZoom);
+		Integer cachedSpan = NPC_SPAN_CACHE.get(npcId);
+		if (cachedSpan == null) {
+			cachedSpan = computeNpcSpan(npcId);
+			NPC_SPAN_CACHE.put(npcId, cachedSpan);
 		}
-
-		int targetMin = Math.min(targetW, targetH);
-		if (targetMin <= 0) {
-			targetMin = BASE_NPC_WIDGET_MIN;
-		}
-
-		int zoom = (int) ((cachedBaseZoom * (long) targetMin) / BASE_NPC_WIDGET_MIN);
-		return clampNpcZoom(zoom);
+		return computeZoomForSpan(cachedSpan, targetW, targetH);
 	}
 
 	public static int autoZoomForModel(Model model, int targetW, int targetH) {
 		if (model == null) {
 			return BASE_NPC_ZOOM;
 		}
-		int baseSpan = getBaseModelSpan();
 		int span = Math.max(1, Math.max(model.diagonal3DAboveOrigin, Math.max(model.XYZMag, model.modelHeight)));
-		int zoom = (int) ((BASE_NPC_ZOOM * (long) span) / baseSpan);
-		zoom = applyLargeNpcBias(zoom, span, baseSpan);
-
-		int targetMin = Math.min(targetW, targetH);
-		if (targetMin > 0) {
-			zoom = (int) ((zoom * (long) targetMin) / BASE_NPC_WIDGET_MIN);
-		}
-		return clampNpcZoom(zoom);
+		return computeZoomForSpan(span, targetW, targetH);
 	}
 
-	private static int computeNpcBaseZoom(int npcId) {
+	private static int computeNpcSpan(int npcId) {
 		try {
-			Model baseModel = NpcDefinition.forID(BASE_NPC_ID).method164(-1, -1, null);
 			Model model = NpcDefinition.forID(npcId).method164(-1, -1, null);
-			if (baseModel == null || model == null) {
-				return BASE_NPC_ZOOM;
+			if (model == null) {
+				return 1;
 			}
-
-			int baseSpan = Math.max(1, Math.max(baseModel.diagonal3DAboveOrigin,
-					Math.max(baseModel.XYZMag, baseModel.modelHeight)));
-			int span = Math.max(1, Math.max(model.diagonal3DAboveOrigin,
-					Math.max(model.XYZMag, model.modelHeight)));
-			int zoom = (int) ((BASE_NPC_ZOOM * (long) span) / baseSpan);
-			zoom = applyLargeNpcBias(zoom, span, baseSpan);
-			return clampNpcZoom(zoom);
+			return Math.max(1, Math.max(model.diagonal3DAboveOrigin, Math.max(model.XYZMag, model.modelHeight)));
 		} catch (Exception e) {
+			return 1;
+		}
+	}
+
+	private static int computeZoomForSpan(int span, int targetW, int targetH) {
+		int targetMin = Math.min(targetW, targetH);
+		if (targetMin <= 0) {
 			return BASE_NPC_ZOOM;
 		}
-	}
-
-	private static int getBaseModelSpan() {
-		if (BASE_MODEL_SPAN != null) {
-			return BASE_MODEL_SPAN;
-		}
-		try {
-			Model baseModel = NpcDefinition.forID(BASE_NPC_ID).method164(-1, -1, null);
-			if (baseModel != null) {
-				BASE_MODEL_SPAN = Math.max(1, Math.max(baseModel.diagonal3DAboveOrigin,
-						Math.max(baseModel.XYZMag, baseModel.modelHeight)));
-				return BASE_MODEL_SPAN;
-			}
-		} catch (Exception e) {
-			// ignore
-		}
-		BASE_MODEL_SPAN = 1;
-		return BASE_MODEL_SPAN;
-	}
-
-	private static int applyLargeNpcBias(int zoom, int span, int baseSpan) {
-		if (span <= baseSpan) {
-			return zoom;
-		}
-		double ratio = (double) span / baseSpan;
-		double bias = Math.pow(ratio, 0.25);
-		return (int) Math.round(zoom * bias);
+		int desiredPixels = Math.max(1, (targetMin * TARGET_FILL_PERCENT) / 100);
+		int zoom = (int) ((span * (long) WorldController.focalLength) / desiredPixels);
+		return clampNpcZoom(zoom);
 	}
 
 	private static int clampNpcZoom(int zoom) {
