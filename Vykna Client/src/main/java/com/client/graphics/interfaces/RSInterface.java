@@ -23,7 +23,7 @@ public class RSInterface {
 	public static final int WHITE_COLOR = 0xFFFFFF;
 	public static final int RED_COLOR = 0xE11010;
 	public transient Sprite[] gridSpriteCache;
-	private static final boolean DEBUG_NPC_PREVIEW = true;
+	private static final boolean DEBUG_NPC_PREVIEW = false;
 	private static String lastNpcPreviewDebug;
 
 	public static int emptyInterface = 24_470;

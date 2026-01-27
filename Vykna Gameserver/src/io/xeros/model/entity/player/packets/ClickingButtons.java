@@ -44,6 +44,8 @@ import io.xeros.content.sound.Sfx;
 import io.xeros.content.tradingpost.Listing;
 import io.xeros.content.tutorial.TutorialDialogue;
 import io.xeros.content.vote_panel.VotePanelInterface;
+import io.xeros.content.vykna_teleports.net.TeleportButtonHandler;
+import io.xeros.content.vykna_teleports.net.TeleportInterfaceSender;
 import io.xeros.content.wogw.Wogw;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
@@ -93,6 +95,9 @@ public class ClickingButtons implements PacketType {
 		}
 		// Some interfaces emit legacy action button ids for this packet.
 		if (VyknaProgressionHandler.handleButton(c, realButtonId)) {
+			return;
+		}
+		if (TeleportButtonHandler.handle(c, realButtonId)) {
 			return;
 		}
 
@@ -857,7 +862,7 @@ public class ClickingButtons implements PacketType {
 		case 51023:
 		case 51031:
 		case 51039:
-			c.getTeleportInterface().openInterface();
+			TeleportInterfaceSender.open(c);
 			break;
 
 			case 130131:
