@@ -61,7 +61,7 @@ public final class TeleportMonsters {
                 50,
                 false,
                 1,
-                new TeleportDestination(3242, 3242, 0)
+                new TeleportDestination(3179, 5193, 0)
         ));
 
         defs.add(new TeleportDefinition(

@@ -860,6 +860,17 @@ public final class NpcDefinition {
 			entityDef.models = new int[] { 37142 };
 
 		}
+		if (i == 1091) {
+			entityDef.name = "Crawling Corpse Torso";
+			entityDef.models = new int[] { 52569, 28979 };
+			entityDef.actions = new String[5];
+			entityDef.actions = new String[] { null, "Attack", null, null, null };
+			entityDef.originalColors = null;
+			entityDef.newColors = null;
+			entityDef.combatLevel = 0;
+			entityDef.standAnim = 2752;
+			entityDef.walkAnim = 8306;
+		}
 		if (i == 5792) {
 			entityDef.models = new int[] { 37142 };
 			entityDef.actions = new String[5];
