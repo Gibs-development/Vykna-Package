@@ -313,8 +313,8 @@ public final class TeleportHomePage extends RSInterface {
 
         // Right info
         addText(DESC_TITLE_ID, "<icon=0>Description", tda, 0, 0xE3AE19, false, true);
-        RSInterface descText = addText(DESC_TEXT_ID, "A small green nuisance found across the world.",
-                tda, 0, 0xFFFAE5, false, true);
+        addText(DESC_TEXT_ID, "A small green nuisance found across the world.", tda, 0, 0xFFFAE5, false, true);
+        RSInterface descText = RSInterface.get(DESC_TEXT_ID);
         descText.wrapWidth = DESC_WRAP_WIDTH;
 
         addText(REQ_TITLE_ID, "Requirements", tda, 0, 0xE3AE19, false, true);
