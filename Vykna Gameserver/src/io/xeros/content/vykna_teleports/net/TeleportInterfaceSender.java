@@ -27,8 +27,9 @@ public final class TeleportInterfaceSender {
     private static final int STATS_LINE1_ID = INTERFACE_ID + 1216;
     private static final int STATS_LINE2_ID = INTERFACE_ID + 1217;
 
-    private static final int DESC_LINE1_ID = INTERFACE_ID + 1401;
-    private static final int DESC_LINE2_ID = INTERFACE_ID + 1402;
+    private static final int DESC_TEXT_ID = INTERFACE_ID + 1401;
+    private static final int LOOT_GRID_ID = INTERFACE_ID + 1310;
+    private static final int LOOT_GRID_SLOTS = 6;
 
     private static final int REQ_LINE1_ID = INTERFACE_ID + 1421;
     private static final int REQ_LINE2_ID = INTERFACE_ID + 1422;
@@ -83,12 +84,9 @@ public final class TeleportInterfaceSender {
         player.getPA().sendFrame126("Combat: " + def.getCombatLevel() + "   |   HP: " + def.getHitpoints(), STATS_LINE1_ID);
         player.getPA().sendFrame126("Aggressive: " + (def.isAggressive() ? "Yes" : "No"), STATS_LINE2_ID);
 
-        // Description (2-line simple split)
+        // Description (wrapped client-side)
         String d = def.getDescription() == null ? "" : def.getDescription();
-        String line1 = d.length() > 32 ? d.substring(0, 32) : d;
-        String line2 = d.length() > 32 ? d.substring(32) : "";
-        player.getPA().sendFrame126(line1, DESC_LINE1_ID);
-        player.getPA().sendFrame126(line2, DESC_LINE2_ID);
+        player.getPA().sendFrame126(d, DESC_TEXT_ID);
 
         // Requirements (simple)
         if (def.getRequirements() != null && def.getRequirements().getCombatLevel() != null) {
@@ -105,6 +103,8 @@ public final class TeleportInterfaceSender {
         // You already have sendNpcHeadOnInterface(npcId, interfaceId) for chat heads.
         // If you upgraded it to full NPC model: call it here.
         player.getPA().sendNpcHeadOnInterface(def.getNpcId(), PREVIEW_NPC_ID);
+
+        sendLootPreview(player, def.getNpcId());
     }
 
     private static void sendList(io.xeros.model.entity.player.Player player, List<TeleportDefinition> defs) {
@@ -132,12 +132,12 @@ public final class TeleportInterfaceSender {
         } else {
             // Empty state
             player.getPA().sendFrame126("No teleports", PREVIEW_NAME_ID);
-            player.getPA().sendFrame126("", DESC_LINE1_ID);
-            player.getPA().sendFrame126("", DESC_LINE2_ID);
+            player.getPA().sendFrame126("", DESC_TEXT_ID);
             player.getPA().sendFrame126("", REQ_LINE1_ID);
             player.getPA().sendFrame126("", REQ_LINE2_ID);
             player.getPA().sendFrame126("None", QUEST_LINE1_ID);
             player.getAttributes().setInt("vykna_tp_selected_id", 0);
+            sendLootPreview(player, -1);
         }
     }
 
@@ -159,6 +159,17 @@ public final class TeleportInterfaceSender {
         }
         TeleportListPayload payload = new TeleportListPayload(entries);
         player.getPA().runClientScript(CLIENT_SCRIPT_ID, "teleportListData", io.xeros.util.JsonUtil.toJson(payload));
+    }
+
+    private static void sendLootPreview(io.xeros.model.entity.player.Player player, int npcId) {
+        List<io.xeros.model.items.GameItem> drops = npcId > 0
+                ? io.xeros.Server.getDropManager().getTopRarestDrops(npcId, LOOT_GRID_SLOTS)
+                : java.util.Collections.emptyList();
+        List<io.xeros.model.items.GameItem> container = new java.util.ArrayList<>(LOOT_GRID_SLOTS);
+        for (int i = 0; i < LOOT_GRID_SLOTS; i++) {
+            container.add(i < drops.size() ? drops.get(i) : null);
+        }
+        player.getItems().sendItemContainer(LOOT_GRID_ID, container);
     }
 
     private static final class TeleportListPayload {

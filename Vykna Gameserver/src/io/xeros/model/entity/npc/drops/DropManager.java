@@ -836,6 +836,90 @@ public class DropManager {
         return null;
     }
 
+    public List<GameItem> getTopRarestDrops(int npcId, int limit) {
+        if (limit <= 0) {
+            return new ArrayList<>();
+        }
+        Optional<TableGroup> group = groups.values().stream()
+                .filter(g -> g.getNpcIds().contains(npcId))
+                .findFirst();
+        if (!group.isPresent()) {
+            return new ArrayList<>();
+        }
+        Map<Integer, DropPreviewEntry> entries = new HashMap<>();
+        for (Table table : group.get()) {
+            if (table.isEmpty()) {
+                continue;
+            }
+            double dropChance = calculateDropChance(table);
+            for (Drop drop : table) {
+                if (!isPreviewEligible(drop)) {
+                    continue;
+                }
+                DropPreviewEntry existing = entries.get(drop.getItemId());
+                if (existing == null || dropChance < existing.chance
+                        || (Double.compare(dropChance, existing.chance) == 0
+                        && drop.getMaximumAmount() > existing.drop.getMaximumAmount())) {
+                    entries.put(drop.getItemId(), new DropPreviewEntry(drop, dropChance));
+                }
+            }
+        }
+        return entries.values().stream()
+                .sorted(Comparator.comparingDouble(entry -> entry.chance))
+                .limit(limit)
+                .map(entry -> new GameItem(entry.drop.getItemId(), getPreviewAmount(entry.drop)))
+                .collect(Collectors.toList());
+    }
+
+    private double calculateDropChance(Table table) {
+        if (table.getPolicy() == TablePolicy.CONSTANT) {
+            return 1.0;
+        }
+        int accessibility = table.getAccessibility();
+        if (accessibility <= 0 || table.size() == 0) {
+            return Double.POSITIVE_INFINITY;
+        }
+        return 1.0 / (accessibility * (double) table.size());
+    }
+
+    private boolean isPreviewEligible(Drop drop) {
+        int itemId = drop.getItemId();
+        if (itemId <= 0) {
+            return false;
+        }
+        String name = ItemDef.forId(itemId).getName();
+        if (name == null) {
+            return false;
+        }
+        String lower = name.toLowerCase();
+        if (itemId == 995 || lower.equals("coins") || lower.endsWith(" coins")) {
+            return false;
+        }
+        if (lower.equals("bones") || lower.endsWith(" bones")) {
+            return false;
+        }
+        return !lower.contains("nothing") && !lower.contains("null");
+    }
+
+    private int getPreviewAmount(Drop drop) {
+        int max = drop.getMaximumAmount();
+        if (max > 0) {
+            return max;
+        }
+        int min = drop.getMinimumAmount();
+        return min > 0 ? min : 1;
+    }
+
+    private static final class DropPreviewEntry {
+        private final Drop drop;
+        private final double chance;
+
+        private DropPreviewEntry(Drop drop, double chance) {
+            this.drop = drop;
+            this.chance = chance;
+        }
+    }
+
     public void getDrops(Player player, int id) {
         Optional<TableGroup> group = groups.values().stream().filter(g -> g.getNpcIds().contains(id)).findFirst();
         group.ifPresent(g -> {
