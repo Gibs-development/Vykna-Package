@@ -4305,8 +4305,12 @@ public class Client extends RSApplet {
 		int totalWidth = nameWidth + iconWidth;
 		int baseX = spriteDrawX - (totalWidth / 2);
 		int nameY = spriteDrawY + 7;
-		boolean inCombat = (npc.interactingEntity == maxPlayerCount)
-				|| (myPlayer != null && myPlayer.interactingEntity == npcIndex);
+		int localIndex = unknownInt10;
+		boolean npcTargetsLocal = localIndex >= 0
+				&& (npc.interactingEntity == localIndex
+				|| npc.interactingEntity == localIndex + 32768);
+		boolean localTargetsNpc = myPlayer != null && myPlayer.interactingEntity == npcIndex;
+		boolean inCombat = npcTargetsLocal || localTargetsNpc;
 		if (!inCombat && !isNpcOverlayHovered(spriteDrawX, nameY, totalWidth, statusMask)) {
 			return;
 		}
@@ -20587,11 +20591,11 @@ public class Client extends RSApplet {
 						int hpPercent = inStream.readUnsignedByte();
 						int weaknessId = inStream.readUnsignedByte();
 						int statusMask = inStream.readUShort();
-						NpcOverlayState state1 = getNpcOverlayState(npcIndex);
-						if (state1 != null) {
-							state1.hpPercent = hpPercent;
-							state1.weaknessId = weaknessId;
-							state1.statusBitmask = statusMask;
+						NpcOverlayState state = getNpcOverlayState(npcIndex);
+						if (state != null) {
+							state.hpPercent = hpPercent;
+							state.weaknessId = weaknessId;
+							state.statusBitmask = statusMask;
 						}
 					}
 					incomingPacket = -1;
