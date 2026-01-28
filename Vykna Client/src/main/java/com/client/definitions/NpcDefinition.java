@@ -878,6 +878,18 @@ public final class NpcDefinition {
 			entityDef.standAnim = 8307;
 
 		}
+		if (i == 1092) {
+			entityDef.name = "Starter Gulega";
+			entityDef.combatLevel = 72;
+			entityDef.models = new int[] { 61976 };
+			entityDef.actions = new String[5];
+			entityDef.actions = new String[] { null, "Attack", null, null, null };
+			entityDef.anInt86 = 35; //WIDTH
+			entityDef.anInt91 = 35; // HEIGH
+			entityDef.standAnim = 15015+14000;
+			entityDef.size = 3;
+
+		}
 		if (i == 2120) {
 			entityDef.name = "Shadow Ranger";
 			entityDef.models = new int[] { 29267 };

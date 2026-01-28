@@ -8,6 +8,15 @@
     },
     "walkingType": "WALK"
   },
+  {
+    "id": 1092,
+    "position": {
+      "x": 3151,
+      "y": 5232,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
 
   {
     "id": 7769,
