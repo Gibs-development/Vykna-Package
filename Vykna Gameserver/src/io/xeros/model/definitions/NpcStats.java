@@ -12,6 +12,7 @@ public class NpcStats {
     private static final java.util.logging.Logger log = java.util.logging.Logger.getLogger(NpcStats.class.getName());
     private static Map<Integer, NpcStats> npcStatsMap;
     private static int missing;
+    private static final java.util.Set<Integer> legacyWarnings = new java.util.HashSet<>();
 
     public static void load() {
         try (FileReader fr = new FileReader(new File(Server.getDataDirectory() + "/cfg/npc/npc_stats.json"))) {
@@ -28,6 +29,16 @@ public class NpcStats {
     }
 
     public static NpcStats forId(int npcId) {
+        NpcDefinitionData unified = NpcDefinitionData.forId(npcId);
+        if (unified != null) {
+            return unified.toNpcStats();
+        }
+        if (legacyWarnings.add(npcId)) {
+            log.warning("NpcStats legacy fallback for npcId " + npcId + ". Add a unified npc definition file to data/NpcDefData to override.");
+        }
+        if (npcStatsMap == null) {
+            npcStatsMap = new java.util.HashMap<>();
+        }
         if (!npcStatsMap.containsKey(npcId)) {
             npcStatsMap.put(npcId, DEFAULT);
         }

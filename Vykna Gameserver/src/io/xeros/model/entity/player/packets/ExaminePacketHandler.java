@@ -82,7 +82,7 @@ public class ExaminePacketHandler implements PacketType {
                     NpcCombatDefinition definition = npc.getCombatDefinition();
                     if (definition != null) {
 
-                        c.sendMessage(header + "[" + npc.getDefinition().getName() + "]");
+                        c.sendMessage(header + "[" + npc.getName() + "]");
                         c.sendMessage(header +
                                 "Levels ["
                                 + "Melee: " + definition.getLevel(NpcCombatSkill.ATTACK) + ", "
@@ -112,8 +112,9 @@ public class ExaminePacketHandler implements PacketType {
                                 + "]"
                         );
 
-                    } else
-                        c.sendMessage(header + "[" + npc.getDefinition().getName() + "] has no combat stats.");
+                    } else {
+                        c.sendMessage(header + "[" + npc.getName() + "] has no combat stats.");
+                    }
 
                     if (c.getRights().contains(Right.OWNER)) {
                         c.sendMessage(header + "Position: " + npc.getPosition() + ", Size: " + npc.getSize() + ", ID: " + npc.getNpcId() + ", idx: " + npc.getIndex());
