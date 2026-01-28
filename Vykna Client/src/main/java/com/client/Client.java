@@ -14371,68 +14371,90 @@ public class Client extends RSApplet {
 								if(i4 == 49152)
 									i4 = 0xffffff;
 							}
-							for (int l6 = _y + textDrawingArea.anInt1497; s.length() > 0; l6 += textDrawingArea.anInt1497) {
-								if (s.indexOf("%") != -1) {
-									do {
-										int k7 = s.indexOf("%1");
-										if (k7 == -1)
-											break;
-										if (class9_1.id < 4000 || class9_1.id > 5000 && class9_1.id != 13921
-												&& class9_1.id != 13922 && class9_1.id != 12171 && class9_1.id != 12172)
-											s = s.substring(0, k7) + methodR(extractInterfaceValues(class9_1, 0))
-													+ s.substring(k7 + 2);
-										else
-											s = s.substring(0, k7) + interfaceIntToString(extractInterfaceValues(class9_1, 0))
-													+ s.substring(k7 + 2);
-									} while (true);
-									do {
-										int l7 = s.indexOf("%2");
-										if (l7 == -1)
-											break;
-										s = s.substring(0, l7) + interfaceIntToString(extractInterfaceValues(class9_1, 1))
-												+ s.substring(l7 + 2);
-									} while (true);
-									do {
-										int i8 = s.indexOf("%3");
-										if (i8 == -1)
-											break;
-										s = s.substring(0, i8) + interfaceIntToString(extractInterfaceValues(class9_1, 2))
-												+ s.substring(i8 + 2);
-									} while (true);
-									do {
-										int j8 = s.indexOf("%4");
-										if (j8 == -1)
-											break;
-										s = s.substring(0, j8) + interfaceIntToString(extractInterfaceValues(class9_1, 3))
-												+ s.substring(j8 + 2);
-									} while (true);
-									do {
-										int k8 = s.indexOf("%5");
-										if (k8 == -1)
-											break;
-										s = s.substring(0, k8) + interfaceIntToString(extractInterfaceValues(class9_1, 4))
-												+ s.substring(k8 + 2);
-									} while (true);
+							if (s.indexOf("%") != -1) {
+								do {
+									int k7 = s.indexOf("%1");
+									if (k7 == -1)
+										break;
+									if (class9_1.id < 4000 || class9_1.id > 5000 && class9_1.id != 13921
+											&& class9_1.id != 13922 && class9_1.id != 12171 && class9_1.id != 12172)
+										s = s.substring(0, k7) + methodR(extractInterfaceValues(class9_1, 0))
+												+ s.substring(k7 + 2);
+									else
+										s = s.substring(0, k7) + interfaceIntToString(extractInterfaceValues(class9_1, 0))
+												+ s.substring(k7 + 2);
+								} while (true);
+								do {
+									int l7 = s.indexOf("%2");
+									if (l7 == -1)
+										break;
+									s = s.substring(0, l7) + interfaceIntToString(extractInterfaceValues(class9_1, 1))
+											+ s.substring(l7 + 2);
+								} while (true);
+								do {
+									int i8 = s.indexOf("%3");
+									if (i8 == -1)
+										break;
+									s = s.substring(0, i8) + interfaceIntToString(extractInterfaceValues(class9_1, 2))
+											+ s.substring(i8 + 2);
+								} while (true);
+								do {
+									int j8 = s.indexOf("%4");
+									if (j8 == -1)
+										break;
+									s = s.substring(0, j8) + interfaceIntToString(extractInterfaceValues(class9_1, 3))
+											+ s.substring(j8 + 2);
+								} while (true);
+								do {
+									int k8 = s.indexOf("%5");
+									if (k8 == -1)
+										break;
+									s = s.substring(0, k8) + interfaceIntToString(extractInterfaceValues(class9_1, 4))
+											+ s.substring(k8 + 2);
+								} while (true);
+							}
+							RSFont font = null;
+							if (textDrawingArea == smallText) {
+								font = newSmallFont;
+							} else if (textDrawingArea == aTextDrawingArea_1271) {
+								font = newRegularFont;
+							} else if (textDrawingArea == chatTextDrawingArea) {
+								font = newBoldFont;
+							} else if (textDrawingArea == aTextDrawingArea_1273) {
+								font = newFancyFont;
+							}
+							List<String> lines = new ArrayList<>();
+							if (class9_1.wrapWidth > 0 && font != null) {
+								String[] paragraphs = s.split("\\\\n", -1);
+								for (String paragraph : paragraphs) {
+									if (paragraph.isEmpty()) {
+										lines.add("");
+										continue;
+									}
+									String[] wrapped = font.wrap(paragraph, class9_1.wrapWidth);
+									if (wrapped.length == 0) {
+										lines.add("");
+									} else {
+										lines.addAll(Arrays.asList(wrapped));
+									}
 								}
-								int l8 = s.indexOf("\\n");
-								String s1;
-								if (l8 != -1) {
-									s1 = s.substring(0, l8);
-									s = s.substring(l8 + 2);
-								} else {
-									s1 = s;
-									s = "";
+							} else {
+								while (s.length() > 0) {
+									int l8 = s.indexOf("\\n");
+									String s1;
+									if (l8 != -1) {
+										s1 = s.substring(0, l8);
+										s = s.substring(l8 + 2);
+									} else {
+										s1 = s;
+										s = "";
+									}
+									lines.add(s1);
 								}
-								RSFont font = null;
-								if (textDrawingArea == smallText) {
-									font = newSmallFont;
-								} else if (textDrawingArea == aTextDrawingArea_1271) {
-									font = newRegularFont;
-								} else if (textDrawingArea == chatTextDrawingArea) {
-									font = newBoldFont;
-								} else if (textDrawingArea == aTextDrawingArea_1273) {
-									font = newFancyFont;
-								}
+							}
+							int lineHeight = textDrawingArea.anInt1497 + (class9_1.wrapWidth > 0 ? 2 : 0);
+							for (int lineIndex = 0; lineIndex < lines.size(); lineIndex++) {
+								String s1 = lines.get(lineIndex);
 								if (rsInterface.parentID == 49100 || rsInterface.parentID == 51100 || rsInterface.parentID == 53100) {
 									int parent = rsInterface.parentID == 49100 ? 49100 : rsInterface.parentID == 51100 ? 51100 : 53100;
 									int subId = (class9_1.id - parent) % 100;
@@ -14443,14 +14465,14 @@ public class Client extends RSApplet {
 								if (interfaceStringText) {
 									s1 = "" + class9_1.id;
 								}
-
+								int drawY = _y + textDrawingArea.anInt1497 + (lineIndex * lineHeight);
 								if (class9_1.type == RSInterface.TYPE_TEXT_DRAW_FROM_LEFT) {
 									int width = font.getTextWidth(s1);
-									font.drawBasicString(s1, _x - width, l6, i4, class9_1.textShadow ? 0 : -1);
+									font.drawBasicString(s1, _x - width, drawY, i4, class9_1.textShadow ? 0 : -1);
 								} else if (class9_1.centerText) {
-									font.drawCenteredString(s1, _x + class9_1.width / 2, l6, i4, class9_1.textShadow ? 0 : -1);
+									font.drawCenteredString(s1, _x + class9_1.width / 2, drawY, i4, class9_1.textShadow ? 0 : -1);
 								} else {
-									font.drawBasicString(s1, _x, l6, i4, class9_1.textShadow ? 0 : -1);
+									font.drawBasicString(s1, _x, drawY, i4, class9_1.textShadow ? 0 : -1);
 								}
 							}
 						} else if (class9_1.type == 5) {
