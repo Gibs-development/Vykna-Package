@@ -212,7 +212,7 @@ public final class TeleportHomePage extends RSInterface {
         // Search
         addBox(SEARCH_BG_ID, 0x2b2118, 0x1f1812, 120, SEARCH_W, 18);
         addHoverText(SEARCH_TEXT_ID, "Search...", "Search teleports", tda, 0, 0x9a8b7a, false, true, SEARCH_W, 16);
-        addHoverButtonNew(SEARCH_CLEAR_ID, SPRITE_ROOT + "Close", SPRITE_ROOT + "CloseHover",
+        addHoverButtonNew(SEARCH_CLEAR_ID, SPRITE_ROOT + "Clear", SPRITE_ROOT + "ClearHover",
                 16, 16, "Clear", 0, 1);
 
         // Scroll list
@@ -358,7 +358,7 @@ public final class TeleportHomePage extends RSInterface {
 
         rsi.child(c++, SEARCH_BG_ID, SEARCH_X + SHIFT_X, SEARCH_Y);
         rsi.child(c++, SEARCH_TEXT_ID, SEARCH_X + 5 + SHIFT_X, SEARCH_Y + 3);
-        rsi.child(c++, SEARCH_CLEAR_ID, SEARCH_CLEAR_X + SHIFT_X, SEARCH_Y + 1);
+        rsi.child(c++, SEARCH_CLEAR_ID, SEARCH_CLEAR_X + SHIFT_X, SEARCH_Y + 3);
 
         rsi.child(c++, SCROLL_ID, LIST_X + SHIFT_X, LIST_Y-6);
 
