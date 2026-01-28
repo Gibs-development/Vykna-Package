@@ -1,0 +1,60 @@
+{
+  "id": 1092,
+  "identity": {
+    "name": "Starter Gulega",
+    "size": 3
+  },
+  "combat": {
+    "hp": 100,
+    "combatLevel": 110,
+    "attackSpeed": 4,
+    "attackStyles": [
+      "Melee"
+    ],
+    "attackStyle": "Melee",
+    "aggressive": true,
+    "poisonous": false,
+    "immunities": {
+      "poison": false,
+      "venom": false,
+      "cannon": false,
+      "thralls": false
+    },
+    "levels": {
+      "hitpoints": 100,
+      "attack": 70,
+      "strength": 70,
+      "defence": 70,
+      "range": 1,
+      "magic": 1
+    },
+    "bonuses": {
+      "attack": {
+        "melee": 300,
+        "strength": 300,
+        "magic": 0,
+        "magicDamage": 0,
+        "range": 300,
+        "rangeStrength": 0
+      },
+      "defence": {
+        "stab": 65,
+        "slash": 65,
+        "crush": 65,
+        "magic": 45,
+        "range": 55
+      },
+      "style": {
+        "stab": 0,
+        "slash": 0,
+        "crush": 0,
+        "magic": 0,
+        "range": 0
+      }
+    }
+  },
+  "metadata": {
+    "weakness": "MELEE",
+    "type": "NONE"
+  }
+}

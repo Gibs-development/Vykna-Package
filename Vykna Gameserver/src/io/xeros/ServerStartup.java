@@ -50,6 +50,7 @@ import io.xeros.model.definitions.AnimationLength;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.definitions.ItemStats;
 import io.xeros.model.definitions.NpcDef;
+import io.xeros.model.definitions.NpcDefinitionData;
 import io.xeros.model.definitions.NpcStats;
 import io.xeros.model.definitions.ShopDef;
 import io.xeros.model.entity.npc.NPCRelationship;
@@ -94,6 +95,7 @@ public class ServerStartup {
         ItemDef.load();
         ShopDef.load();
         ShopHandler.load();
+        NpcDefinitionData.load();
         NpcStats.load();
         ItemStats.load();
         NpcDef.load();

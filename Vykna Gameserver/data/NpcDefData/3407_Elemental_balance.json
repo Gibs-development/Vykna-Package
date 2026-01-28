@@ -1,0 +1,60 @@
+{
+  "id": 3407,
+  "identity": {
+    "name": "Elemental balance",
+    "size": 1
+  },
+  "combat": {
+    "hp": 5000,
+    "combatLevel": 546,
+    "attackSpeed": 4,
+    "attackStyles": [
+      "Melee"
+    ],
+    "attackStyle": "Melee",
+    "aggressive": false,
+    "poisonous": false,
+    "immunities": {
+      "poison": false,
+      "venom": false,
+      "cannon": false,
+      "thralls": false
+    },
+    "levels": {
+      "hitpoints": 5000,
+      "attack": 115,
+      "strength": 120,
+      "defence": 110,
+      "range": 1,
+      "magic": 1
+    },
+    "bonuses": {
+      "attack": {
+        "melee": 0,
+        "strength": 0,
+        "magic": 0,
+        "magicDamage": 0,
+        "range": 0,
+        "rangeStrength": 0
+      },
+      "defence": {
+        "stab": 105,
+        "slash": 110,
+        "crush": 130,
+        "magic": 125,
+        "range": 100
+      },
+      "style": {
+        "stab": 0,
+        "slash": 0,
+        "crush": 0,
+        "magic": 0,
+        "range": 0
+      }
+    }
+  },
+  "metadata": {
+    "weakness": "MELEE",
+    "type": "NONE"
+  }
+}
