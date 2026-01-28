@@ -353,6 +353,8 @@ public class Player extends Entity {
 
     public NPC[] npcList = new NPC[maxNPCListSize];
     public int npcListSize;
+    private final int[] npcOverlayHashes = new int[NPCHandler.maxNPCs];
+    private final int[] npcOverlayLastSentTick = new int[NPCHandler.maxNPCs];
 
     private final HashSet<GroundItem> localGroundItems = new HashSet<>();
 
@@ -1337,6 +1339,7 @@ public class Player extends Entity {
         mapRegionX = mapRegionY = -1;
         currentX = currentY = 0;
         resetWalkingQueue();
+        Arrays.fill(npcOverlayHashes, -1);
         if (channel != null) {
             outStream = new Stream(new byte[Configuration.BUFFER_SIZE]);
             outStream.currentOffset = 0;
@@ -1901,6 +1904,8 @@ public class Player extends Entity {
         npcListSize = 0;
         for (int i = 0; i < maxPlayerListSize; i++) playerList[i] = null;
         for (int i = 0; i < maxNPCListSize; i++) npcList[i] = null;
+        Arrays.fill(npcOverlayHashes, -1);
+        Arrays.fill(npcOverlayLastSentTick, 0);
         if (Configuration.DEBUG_MODE && !isBot()) {
             logger.info(Misc.formatPlayerName(getLoginName()) + " is logging out..");
         }
@@ -2963,6 +2968,14 @@ public class Player extends Entity {
 
     public Stream getOutStream() {
         return outStream;
+    }
+
+    public int[] getNpcOverlayHashes() {
+        return npcOverlayHashes;
+    }
+
+    public int[] getNpcOverlayLastSentTick() {
+        return npcOverlayLastSentTick;
     }
 
     public ItemAssistant getItems() {
