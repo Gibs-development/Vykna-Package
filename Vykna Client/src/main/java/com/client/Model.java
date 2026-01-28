@@ -321,9 +321,36 @@ public class Model extends Renderable {
     }
 
     private static final boolean DEBUG_PARTICLES = true;
+    private static final boolean DEBUG_TEXTURE_STRIP = false;
 
     private static void pdebug(String s) {
         if (DEBUG_PARTICLES) System.out.println(s);
+    }
+
+    private static void stripInvalidTextures(Model model) {
+        if (model == null || model.texturesCount <= 0) {
+            return;
+        }
+        boolean missing =
+                model.texturesX == null || model.texturesY == null || model.texturesZ == null
+                        || model.texturesX.length < model.texturesCount
+                        || model.texturesY.length < model.texturesCount
+                        || model.texturesZ.length < model.texturesCount;
+        if (!missing) {
+            return;
+        }
+        int originalCount = model.texturesCount;
+        model.texturesCount = 0;
+        model.texturesX = null;
+        model.texturesY = null;
+        model.texturesZ = null;
+        model.materials = null;
+        model.textures = null;
+        model.textureTypes = null;
+        if (DEBUG_TEXTURE_STRIP) {
+            System.out.println("[Model] Stripped textures for model " + model.getModelId()
+                    + " (originalCount=" + originalCount + ")");
+        }
     }
 
     public void scale2(int i) {
@@ -737,6 +764,11 @@ public class Model extends Renderable {
         trianglesX = facePoint1;
         trianglesY = facePoint2;
         trianglesZ = facePoint3;
+        texturesCount = 0;
+        texturesX = null;
+        texturesY = null;
+        texturesZ = null;
+        textureTypes = null;
         convertTexturesTo317(D, texTrianglesPoint1, texTrianglesPoint2, texTrianglesPoint3, false, x);
     }
 
@@ -886,6 +918,7 @@ public class Model extends Renderable {
             for (int segment_index = 0; segment_index < length; segment_index++) {
                 build = model_segments[segment_index];
                 if (build != null) {
+                    stripInvalidTextures(build);
                     verticesCount += build.verticesCount;
                     trianglesCount += build.trianglesCount;
                     texturesCount += build.texturesCount;
@@ -948,7 +981,7 @@ public class Model extends Renderable {
             if (coordinate_flag)
                 textures = new byte[trianglesCount];
 
-            if (texturesCount > 0 || hasParticleAttachments) {
+            if (texturesCount > 0) {
                 textureTypes = new byte[texturesCount];
                 texturesX = new short[texturesCount];
                 texturesY = new short[texturesCount];
@@ -964,6 +997,7 @@ public class Model extends Renderable {
             for (int segment_index = 0; segment_index < length; segment_index++) {
                 build = model_segments[segment_index];
                 if (build != null) {
+                    stripInvalidTextures(build);
                     for (int face = 0; face < build.trianglesCount; face++) {
                         if (type_flag && build.types != null)
                             types[trianglesCount] = build.types[face];
@@ -1005,11 +1039,13 @@ public class Model extends Renderable {
                         trianglesCount++;
                     }
 
-                    for (int texture_edge = 0; texture_edge < build.texturesCount; texture_edge++) {
-                        texturesX[texturesCount] = (short) method465(build, build.texturesX[texture_edge]);
-                        texturesY[texturesCount] = (short) method465(build, build.texturesY[texture_edge]);
-                        texturesZ[texturesCount] = (short) method465(build, build.texturesZ[texture_edge]);
-                        texturesCount++;
+                    if (build.texturesCount > 0 && texturesX != null) {
+                        for (int texture_edge = 0; texture_edge < build.texturesCount; texture_edge++) {
+                            texturesX[texturesCount] = (short) method465(build, build.texturesX[texture_edge]);
+                            texturesY[texturesCount] = (short) method465(build, build.texturesY[texture_edge]);
+                            texturesZ[texturesCount] = (short) method465(build, build.texturesZ[texture_edge]);
+                            texturesCount++;
+                        }
                     }
                     texture_face += build.texturesCount;
                 }
@@ -1041,6 +1077,7 @@ public class Model extends Renderable {
         for (int k = 0; k < i; k++) {
             Model model = amodel[k];
             if (model != null) {
+                stripInvalidTextures(model);
                 verticesCount += model.verticesCount;
                 trianglesCount += model.trianglesCount;
                 texturesCount += model.texturesCount;
@@ -1080,9 +1117,11 @@ public class Model extends Renderable {
         colorsY = new int[trianglesCount];
         colorsZ = new int[trianglesCount];
 
-        texturesX = new short[texturesCount];
-        texturesY = new short[texturesCount];
-        texturesZ = new short[texturesCount];
+        if (texturesCount > 0) {
+            texturesX = new short[texturesCount];
+            texturesY = new short[texturesCount];
+            texturesZ = new short[texturesCount];
+        }
 
         if (flag1)
             types = new int[trianglesCount];
@@ -1109,6 +1148,7 @@ public class Model extends Renderable {
         for (int j1 = 0; j1 < i; j1++) {
             Model model_1 = amodel[j1];
             if (model_1 != null) {
+                stripInvalidTextures(model_1);
                 int k1 = verticesCount;
                 for (int l1 = 0; l1 < model_1.verticesCount; l1++) {
                     verticesX[verticesCount] = model_1.verticesX[l1];
