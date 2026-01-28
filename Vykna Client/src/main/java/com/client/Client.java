@@ -4105,13 +4105,17 @@ public class Client extends RSApplet {
 	private static final int NPC_OVERLAY_WEAKNESS_EARTH = 4;
 	private static final int NPC_OVERLAY_WEAKNESS_FIRE = 5;
 
-	private static final String[] NPC_OVERLAY_WEAKNESS_SPRITE_NAMES = {
-			"healthbars/npc_weakness_melee",
-			"healthbars/npc_weakness_ranged",
-			"healthbars/npc_weakness_air",
-			"healthbars/npc_weakness_water",
-			"healthbars/npc_weakness_earth",
-			"healthbars/npc_weakness_fire"
+	/**
+	 * NPC overhead overlay sprite IDs (media_archive4).
+	 * Weakness IDs 4000-4005, Status IDs 4010-4015.
+	 */
+	private static final int[] NPC_OVERLAY_WEAKNESS_SPRITES = {
+			4000, // MELEE
+			4001, // RANGED
+			4002, // AIR
+			4003, // WATER
+			4004, // EARTH
+			4005  // FIRE
 	};
 
 	private static final int[] NPC_OVERLAY_STATUS_BITS = {
@@ -4123,13 +4127,13 @@ public class Client extends RSApplet {
 			NPC_OVERLAY_STATUS_DEMON_UNDEAD
 	};
 
-	private static final String[] NPC_OVERLAY_STATUS_SPRITE_NAMES = {
-			"healthbars/npc_status_snare",
-			"healthbars/npc_status_freeze",
-			"healthbars/npc_status_poison",
-			"healthbars/npc_status_venom",
-			"healthbars/npc_status_salve",
-			"healthbars/npc_status_demon_undead"
+	private static final int[] NPC_OVERLAY_STATUS_SPRITES = {
+			4010, // SNARE
+			4011, // FREEZE
+			4012, // POISON
+			4013, // VENOM
+			4014, // SALVE
+			4015  // DEMON/UNDEAD
 	};
 
 	private static final String[] NPC_OVERLAY_STATUS_TOOLTIPS = {
@@ -4203,27 +4207,25 @@ public class Client extends RSApplet {
 	}
 
 	private Sprite getNpcOverlayWeaknessSprite(int weaknessId) {
-		if (weaknessId < 0 || weaknessId >= NPC_OVERLAY_WEAKNESS_SPRITE_NAMES.length) {
+		if (cacheSprite4 == null || weaknessId < 0 || weaknessId >= NPC_OVERLAY_WEAKNESS_SPRITES.length) {
 			return null;
 		}
-		Sprite sprite = npcOverlayWeaknessSprites[weaknessId];
-		if (sprite == null) {
-			sprite = new Sprite(NPC_OVERLAY_WEAKNESS_SPRITE_NAMES[weaknessId]);
-			npcOverlayWeaknessSprites[weaknessId] = sprite;
+		int spriteId = NPC_OVERLAY_WEAKNESS_SPRITES[weaknessId];
+		if (spriteId < 0 || spriteId >= cacheSprite4.length) {
+			return null;
 		}
-		return sprite != null && sprite.myPixels != null ? sprite : null;
+		return cacheSprite4[spriteId];
 	}
 
 	private Sprite getNpcOverlayStatusSprite(int statusIndex) {
-		if (statusIndex < 0 || statusIndex >= NPC_OVERLAY_STATUS_SPRITE_NAMES.length) {
+		if (cacheSprite4 == null || statusIndex < 0 || statusIndex >= NPC_OVERLAY_STATUS_SPRITES.length) {
 			return null;
 		}
-		Sprite sprite = npcOverlayStatusSprites[statusIndex];
-		if (sprite == null) {
-			sprite = new Sprite(NPC_OVERLAY_STATUS_SPRITE_NAMES[statusIndex]);
-			npcOverlayStatusSprites[statusIndex] = sprite;
+		int spriteId = NPC_OVERLAY_STATUS_SPRITES[statusIndex];
+		if (spriteId < 0 || spriteId >= cacheSprite4.length) {
+			return null;
 		}
-		return sprite != null && sprite.myPixels != null ? sprite : null;
+		return cacheSprite4[spriteId];
 	}
 
 	private void drawNpcOverlayHpBar(int x, int y, int hpPercent) {
@@ -22236,8 +22238,6 @@ public class Client extends RSApplet {
 	private String pendingNpcOverlayTooltip;
 	private int pendingNpcOverlayTooltipX;
 	private int pendingNpcOverlayTooltipY;
-	private final Sprite[] npcOverlayWeaknessSprites = new Sprite[NPC_OVERLAY_WEAKNESS_SPRITE_NAMES.length];
-	private final Sprite[] npcOverlayStatusSprites = new Sprite[NPC_OVERLAY_STATUS_SPRITE_NAMES.length];
 	private int anInt839;
 	private int[] anIntArray840;
 	private int dealtWithPacket;

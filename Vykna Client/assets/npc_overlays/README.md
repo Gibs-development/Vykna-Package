@@ -22,26 +22,29 @@ Status icons:
 ## Target dimensions
 - 12x12px (transparent PNG)
 
-## Sprite names (cache sprites/healthbars)
-Weakness names:
-- `npc_weakness_melee.png`
-- `npc_weakness_ranged.png`
-- `npc_weakness_air.png`
-- `npc_weakness_water.png`
-- `npc_weakness_earth.png`
-- `npc_weakness_fire.png`
+## Sprite IDs (media_archive4)
+Weakness IDs:
+- MELEE: 4000
+- RANGED: 4001
+- AIR: 4002
+- WATER: 4003
+- EARTH: 4004
+- FIRE: 4005
 
-Status names:
-- `npc_status_snare.png`
-- `npc_status_freeze.png`
-- `npc_status_poison.png`
-- `npc_status_venom.png`
-- `npc_status_salve.png`
-- `npc_status_demon_undead.png`
+Status IDs:
+- SNARE: 4010
+- FREEZE: 4011
+- POISON: 4012
+- VENOM: 4013
+- SALVE: 4014
+- DEMON/UNDEAD: 4015
 
 ## Placement + packing
-1. Create the PNGs in your client cache sprite folder:
-   - `<cache_dir>/sprites/healthbars/`
-2. Ensure the filenames match the names listed above.
+1. Create the PNGs in your client cache sprite source folder (e.g. `sprites/healthbar`).
+2. Pack the PNGs into the client sprite archive **media_archive4** using your sprite packer tool,
+   preserving the sprite IDs listed above.
+3. Copy the packed files to the client cache:
+   - `<cache_dir>/media_archives/media_archive4.dat`
+   - `<cache_dir>/media_archives/media_archive4.idx`
 
-The client loads these sprites directly from the cache sprite folder at runtime.
+The client loads these sprites via `SpriteLoader4` at runtime.
