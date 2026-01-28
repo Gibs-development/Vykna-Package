@@ -45,9 +45,9 @@
         "range": 55
       },
       "style": {
-        "stab": 100,
-        "slash": 100,
-        "crush": 100,
+        "stab": 0,
+        "slash": 0,
+        "crush": 0,
         "magic": 0,
         "range": 0
       }
