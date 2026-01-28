@@ -3512,8 +3512,8 @@ public class RSInterface {
 		tab.anInt239 = 0;
 	}
 
-	public static void addText(int id, String text, TextDrawingArea tda[], int idx, int color, boolean center,
-			boolean shadow) {
+	public static void addText(int id, String text, TextDrawingArea[] tda, int idx, int color, boolean center,
+                               boolean shadow) {
 		RSInterface tab = addTabInterface(id);
 		tab.parentID = id;
 		tab.id = id;

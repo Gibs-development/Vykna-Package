@@ -317,7 +317,7 @@ public final class TeleportHomePage extends RSInterface {
         RSInterface descText = RSInterface.get(DESC_TEXT_ID);
         descText.wrapWidth = DESC_WRAP_WIDTH;
 
-        addText(REQ_TITLE_ID, "Requirements", tda, 0, 0xE3AE19, false, true);
+        addText(REQ_TITLE_ID, "<icon=0>Requirements", tda, 0, 0xE3AE19, false, true);
         addText(REQ_LINE1_ID, "Combat level: 2", tda, 0, 0xFFFAE5, false, true);
         addText(REQ_LINE2_ID, "HP: 50", tda, 0, 0xFFFAE5, false, true);
 
@@ -379,9 +379,9 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, DESC_TITLE_ID, INFO_X + SHIFT_X, INFO_Y);
         rsi.child(c++, DESC_TEXT_ID, INFO_X + SHIFT_X, INFO_Y + 14);
 
-        rsi.child(c++, REQ_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 52-5);
-        rsi.child(c++, REQ_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 66-5);
-        rsi.child(c++, REQ_LINE2_ID, INFO_X + SHIFT_X, INFO_Y + 80-5);
+        rsi.child(c++, REQ_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 52-3);
+        rsi.child(c++, REQ_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 66-3);
+        rsi.child(c++, REQ_LINE2_ID, INFO_X + SHIFT_X, INFO_Y + 80-3);
 
         rsi.child(c++, QUEST_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 104-10);
         rsi.child(c++, QUEST_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 118-10);

@@ -4,6 +4,7 @@ import io.xeros.content.vykna_teleports.model.TeleportCategory;
 import io.xeros.content.vykna_teleports.model.TeleportDefinition;
 import io.xeros.content.vykna_teleports.model.TeleportDestination;
 import io.xeros.content.vykna_teleports.model.TeleportRequirement;
+import io.xeros.model.entity.player.Player;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -20,7 +21,6 @@ import java.util.List;
 public final class TeleportMonsters {
 
     private static final List<TeleportDefinition> LIST;
-
     static {
         List<TeleportDefinition> defs = new ArrayList<>();
 
@@ -30,13 +30,18 @@ public final class TeleportMonsters {
          */
         defs.add(new TeleportDefinition(
                 1, TeleportCategory.MONSTERS,
-                "Crypt of Saiyuma",
-                "Main training dungeon — mixed low → high mobs with fast respawns.",
-                TeleportRequirement.combatLevel(1),
-                null,
-                1615, // npcId (Abyssal demon) - iconic preview for "main dungeon"
-                120,
-                90,
+                "Slayer Task",
+                "Fast track teleport to your active Slayer Task.",
+                TeleportRequirement.of(
+                        null, // no combat level requirement
+                        List.of(
+                                new TeleportRequirement.SkillReq(18, 85) // Slayer
+                        )
+                ),
+                "Death to Dragith",
+                6797, // npcId (Abyssal demon) - iconic preview for "main dungeon"
+                126,
+                99,
                 true,
                 0, // headIconIndex
                 new TeleportDestination(3000, 3000, 0) // TODO set real coords
@@ -46,10 +51,10 @@ public final class TeleportMonsters {
          * 🪨 Low–Mid Level Training
          */
         defs.add(new TeleportDefinition(
-                2, TeleportCategory.MONSTERS,
-                "Goblins",
-                "A small green nuisance found across the world.",
-                TeleportRequirement.combatLevel(2),
+                1, TeleportCategory.MONSTERS,
+                "Training Crypt",
+                "Start your adventure here, A salve amulet will help.",
+                TeleportRequirement.combatLevel(1),
                 null,
                 100, // TODO verify (varies)
                 2,
