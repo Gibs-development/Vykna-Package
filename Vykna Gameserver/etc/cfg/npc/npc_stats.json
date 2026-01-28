@@ -32,24 +32,7 @@
     "crushDef": 130,
     "rangeDef": 100,
     "magicDef": 125
-  },
-  "1092": {
-    "name": "Warped Gulega",
-    "hitpoints": 100,
-    "combatLevel": 110,
-    "attackSpeed": 4,
-    "attackLevel": 70,
-    "strengthLevel": 70,
-    "defenceLevel": 70,
-    "rangeLevel": 1,
-    "magicLevel": 1,
-    "stabDef": 65,
-    "slashDef": 65,
-    "crushDef": 65,
-    "rangeDef": 55,
-    "magicDef": 45
-  },
-
+  }
 
   "3833": {
     "name": "Koranian",
