@@ -2,6 +2,7 @@ package io.xeros.model.entity.player.packets.action;
 
 import io.xeros.Server;
 import io.xeros.content.tradingpost.Listing;
+import io.xeros.content.vykna_teleports.net.TeleportInterfaceSender;
 import io.xeros.model.entity.player.PacketType;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.save.PlayerSave;
@@ -24,6 +25,10 @@ public class ReceiveString implements PacketType {
 					return;
 				player.sendMessage("@red@Opening wiki ");
 				player.getPA().sendFrame126("https://oldschool.runescape.wiki/w/"+ string.replace(" ", "_"), 12000);
+				break;
+
+			case 8: // teleport search
+				TeleportInterfaceSender.sendSearch(player, string);
 				break;
 
 

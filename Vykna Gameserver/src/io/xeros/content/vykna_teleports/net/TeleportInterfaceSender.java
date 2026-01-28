@@ -56,40 +56,24 @@ public final class TeleportInterfaceSender {
     public static void sendCategory(io.xeros.model.entity.player.Player player, TeleportCategory category) {
         player.getAttributes().set("vykna_tp_category", category);
         player.getAttributes().setInt("vykna_tp_selected_row", -1);
+        player.getAttributes().set("vykna_tp_search_query", "");
         List<TeleportDefinition> defs = TeleportDefinitions.byCategory(category);
 
-        // Clear ALL 100 rows client-side (avoid stale data)
-        for (int i = 0; i < MAX_ROWS; i++) {
-            int textId = (ROW_START_ID + (i * ROW_STRIDE)) + 1;
-            player.getPA().sendFrame126("", textId);
+        sendList(player, defs);
+    }
+
+    public static void sendSearch(io.xeros.model.entity.player.Player player, String query) {
+        String trimmed = query == null ? "" : query.trim();
+        if (trimmed.isEmpty()) {
+            player.getAttributes().set("vykna_tp_search_query", "");
+            TeleportCategory category = getOrDefaultCategory(player, TeleportCategory.MONSTERS);
+            sendCategory(player, category);
+            return;
         }
-
-        // Populate visible rows
-        int max = Math.min(defs.size(), MAX_ROWS);
-        for (int i = 0; i < max; i++) {
-            TeleportDefinition def = defs.get(i);
-            int textId = (ROW_START_ID + (i * ROW_STRIDE)) + 1;
-            player.getPA().sendFrame126(def.getName(), textId);
-
-        }
-
-        sendRowHeadIcons(player, defs);
-
-        // Push first preview by default
-        if (!defs.isEmpty()) {
-            sendPreview(player, defs.get(0));
-            player.getAttributes().setInt("vykna_tp_selected_id", defs.get(0).getId());
-            player.getAttributes().setInt("vykna_tp_selected_row", 0);
-        } else {
-            // Empty state
-            player.getPA().sendFrame126("No teleports", PREVIEW_NAME_ID);
-            player.getPA().sendFrame126("", DESC_LINE1_ID);
-            player.getPA().sendFrame126("", DESC_LINE2_ID);
-            player.getPA().sendFrame126("", REQ_LINE1_ID);
-            player.getPA().sendFrame126("", REQ_LINE2_ID);
-            player.getPA().sendFrame126("None", QUEST_LINE1_ID);
-            player.getAttributes().setInt("vykna_tp_selected_id", 0);
-        }
+        player.getAttributes().set("vykna_tp_search_query", trimmed);
+        player.getAttributes().setInt("vykna_tp_selected_row", -1);
+        List<TeleportDefinition> defs = TeleportDefinitions.searchByName(trimmed);
+        sendList(player, defs);
     }
 
     public static void sendPreview(io.xeros.model.entity.player.Player player, TeleportDefinition def) {
@@ -121,6 +105,49 @@ public final class TeleportInterfaceSender {
         // You already have sendNpcHeadOnInterface(npcId, interfaceId) for chat heads.
         // If you upgraded it to full NPC model: call it here.
         player.getPA().sendNpcHeadOnInterface(def.getNpcId(), PREVIEW_NPC_ID);
+    }
+
+    private static void sendList(io.xeros.model.entity.player.Player player, List<TeleportDefinition> defs) {
+        // Clear ALL 100 rows client-side (avoid stale data)
+        for (int i = 0; i < MAX_ROWS; i++) {
+            int textId = (ROW_START_ID + (i * ROW_STRIDE)) + 1;
+            player.getPA().sendFrame126("", textId);
+        }
+
+        // Populate visible rows
+        int max = Math.min(defs.size(), MAX_ROWS);
+        for (int i = 0; i < max; i++) {
+            TeleportDefinition def = defs.get(i);
+            int textId = (ROW_START_ID + (i * ROW_STRIDE)) + 1;
+            player.getPA().sendFrame126(def.getName(), textId);
+        }
+
+        sendRowHeadIcons(player, defs);
+
+        // Push first preview by default
+        if (!defs.isEmpty()) {
+            sendPreview(player, defs.get(0));
+            player.getAttributes().setInt("vykna_tp_selected_id", defs.get(0).getId());
+            player.getAttributes().setInt("vykna_tp_selected_row", 0);
+        } else {
+            // Empty state
+            player.getPA().sendFrame126("No teleports", PREVIEW_NAME_ID);
+            player.getPA().sendFrame126("", DESC_LINE1_ID);
+            player.getPA().sendFrame126("", DESC_LINE2_ID);
+            player.getPA().sendFrame126("", REQ_LINE1_ID);
+            player.getPA().sendFrame126("", REQ_LINE2_ID);
+            player.getPA().sendFrame126("None", QUEST_LINE1_ID);
+            player.getAttributes().setInt("vykna_tp_selected_id", 0);
+        }
+    }
+
+    private static TeleportCategory getOrDefaultCategory(io.xeros.model.entity.player.Player player, TeleportCategory def) {
+        Object v = player.getAttributes().get("vykna_tp_category");
+        if (v instanceof TeleportCategory) {
+            return (TeleportCategory) v;
+        }
+        player.getAttributes().set("vykna_tp_category", def);
+        return def;
     }
 
     private static void sendRowHeadIcons(io.xeros.model.entity.player.Player player, List<TeleportDefinition> defs) {
