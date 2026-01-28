@@ -83,8 +83,7 @@ public final class TeleportHomePage extends RSInterface {
 
     // Right column info (top-right)
     private static final int DESC_TITLE_ID = INTERFACE_ID + 1400;
-    private static final int DESC_LINE1_ID = INTERFACE_ID + 1401;
-    private static final int DESC_LINE2_ID = INTERFACE_ID + 1402;
+    private static final int DESC_TEXT_ID = INTERFACE_ID + 1401;
 
     private static final int REQ_TITLE_ID  = INTERFACE_ID + 1420;
     private static final int REQ_LINE1_ID  = INTERFACE_ID + 1421;
@@ -140,6 +139,7 @@ public final class TeleportHomePage extends RSInterface {
     private static final int LOOT_Y = BG_Y + 196 + 20;
     private static final int LOOT_W = 138;
     private static final int LOOT_H = 102;
+    private static final int DESC_WRAP_WIDTH = LOOT_W - 8;
 
     // Row head atlas constants
     private static final int HEAD_COLS = 4;
@@ -313,8 +313,9 @@ public final class TeleportHomePage extends RSInterface {
 
         // Right info
         addText(DESC_TITLE_ID, "<icon=0>Description", tda, 0, 0xE3AE19, false, true);
-        addText(DESC_LINE1_ID, "A small green nuisance found", tda, 0, 0xFFFAE5, false, true);
-        addText(DESC_LINE2_ID, "across the world.", tda, 0, 0xFFFAE5, false, true);
+        RSInterface descText = addText(DESC_TEXT_ID, "A small green nuisance found across the world.",
+                tda, 0, 0xFFFAE5, false, true);
+        descText.wrapWidth = DESC_WRAP_WIDTH;
 
         addText(REQ_TITLE_ID, "Requirements", tda, 0, 0xE3AE19, false, true);
         addText(REQ_LINE1_ID, "Combat level: 2", tda, 0, 0xFFFAE5, false, true);
@@ -328,8 +329,8 @@ public final class TeleportHomePage extends RSInterface {
         addText(LOOT_TITLE_ID, "Drops", tda, 1, 0xE3AE19, true, true);
         addToItemGroup(LOOT_GRID_ID, 3, 2, 0, 0, false);
         // ---- Children ----
-        // Previous count 37; +4 tab icons => 41
-        rsi.totalChildren(41);
+        // Previous count 37; +4 tab icons => 41; -1 desc line => 40
+        rsi.totalChildren(40);
         int c = 0;
 
         rsi.child(c++, BG_ID, BG_X + SHIFT_X, BG_Y);
@@ -376,8 +377,7 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, TELEPORT_BTN_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X - 50, PREVIEW_Y + 205+7-1);
 
         rsi.child(c++, DESC_TITLE_ID, INFO_X + SHIFT_X, INFO_Y);
-        rsi.child(c++, DESC_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 14);
-        rsi.child(c++, DESC_LINE2_ID, INFO_X + SHIFT_X, INFO_Y + 28);
+        rsi.child(c++, DESC_TEXT_ID, INFO_X + SHIFT_X, INFO_Y + 14);
 
         rsi.child(c++, REQ_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 52-5);
         rsi.child(c++, REQ_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 66-5);
