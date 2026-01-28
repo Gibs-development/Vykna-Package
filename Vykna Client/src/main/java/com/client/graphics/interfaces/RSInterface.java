@@ -4166,6 +4166,7 @@ public class RSInterface {
 	public boolean isMouseoverTriggered;
 	public int height;
 	public boolean textShadow;
+	public int wrapWidth;
 	public int modelZoom;
 	public int modelRotation1;
 	public int modelRotation2;
