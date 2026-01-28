@@ -4305,11 +4305,6 @@ public class Client extends RSApplet {
 		int totalWidth = nameWidth + iconWidth;
 		int baseX = spriteDrawX - (totalWidth / 2);
 		int nameY = spriteDrawY + 7;
-		boolean inCombat = (npc.interactingEntity == maxPlayerCount)
-				|| (myPlayer != null && myPlayer.interactingEntity == npcIndex);
-		if (!inCombat && !isNpcOverlayHovered(spriteDrawX, nameY, totalWidth, statusMask)) {
-			return;
-		}
 
 		latoBold.drawBasicString(name, baseX, nameY, 0xffff00, 1);
 		if (weaknessSprite != null) {
@@ -4322,29 +4317,6 @@ public class Client extends RSApplet {
 
 		int statusY = barY + NPC_OVERLAY_BAR_H + 3;
 		drawNpcOverlayStatusIcons(statusMask, spriteDrawX, statusY);
-	}
-
-	private boolean isNpcOverlayHovered(int centerX, int nameY, int nameWidth, int statusMask) {
-		int statusCount = 0;
-		for (int i = 0; i < NPC_OVERLAY_STATUS_BITS.length; i++) {
-			if ((statusMask & NPC_OVERLAY_STATUS_BITS[i]) != 0) {
-				statusCount++;
-			}
-		}
-		int statusWidth = statusCount > 0
-				? (statusCount * NPC_OVERLAY_STATUS_ICON_SIZE)
-				+ ((statusCount - 1) * NPC_OVERLAY_STATUS_ICON_GAP)
-				: 0;
-		int overlayWidth = Math.max(nameWidth, Math.max(NPC_OVERLAY_BAR_W, statusWidth));
-		int topY = nameY - 12;
-		int bottomY = nameY + 2 + NPC_OVERLAY_BAR_H
-				+ (statusCount > 0 ? (NPC_OVERLAY_STATUS_ICON_SIZE + 3) : 0);
-		int mouseX = super.getMouseX();
-		int mouseY = super.getMouseY();
-		return mouseX >= centerX - (overlayWidth / 2)
-				&& mouseX <= centerX + (overlayWidth / 2)
-				&& mouseY >= topY
-				&& mouseY <= bottomY;
 	}
 
 	private void queueNpcOverlayTooltip(String text, int mouseX, int mouseY) {
