@@ -42,7 +42,7 @@ public class CombatConfigs {
     public static CombatStyle getCombatStyle(Entity entity) {
         if (entity.isNPC()) {
             NPC n = entity.asNPC();
-            NpcCombatDefinition definition = n.getCombatDefinition();
+            NpcCombatDefinition definition = NpcCombatDefinition.definitions.get(n.getNpcId());
             if (definition != null) {
                 return getCombatStyleForNpc(definition);
             }

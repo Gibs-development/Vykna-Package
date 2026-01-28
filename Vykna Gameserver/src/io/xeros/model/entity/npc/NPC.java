@@ -25,7 +25,6 @@ import io.xeros.model.cycleevent.CycleEvent;
 import io.xeros.model.cycleevent.CycleEventContainer;
 import io.xeros.model.cycleevent.CycleEventHandler;
 import io.xeros.model.definitions.NpcDef;
-import io.xeros.model.definitions.NpcDefinitionData;
 import io.xeros.model.definitions.NpcStats;
 import io.xeros.model.entity.Entity;
 import io.xeros.model.entity.HealthStatus;
@@ -51,7 +50,6 @@ import org.slf4j.LoggerFactory;
 public class NPC extends Entity {
 
 	private static final Logger logger = LoggerFactory.getLogger(NPC.class);
-	private static final Set<Integer> legacyCombatWarnings = new HashSet<>();
     public int parentIndex;
 
 
@@ -182,22 +180,10 @@ public class NPC extends Entity {
 	}
 
 	public void setNpcCombatDefinition() {
-		NpcDefinitionData unified = NpcDefinitionData.forId(this.npcId);
-		if (unified != null) {
-			this.npcCombatDefinition = new NpcCombatDefinition(unified.toNpcCombatDefinition());
-			return;
-		}
-
 		NpcCombatDefinition definition = NpcCombatDefinition.definitions.get(this.npcId);
 		if (definition == null) {
-			if (legacyCombatWarnings.add(this.npcId)) {
-				logger.warn("NpcCombatDefinition legacy fallback for npcId {}. Add a unified npc definition file to data/NpcDefData to override.", this.npcId);
-			}
 			this.npcCombatDefinition = new NpcCombatDefinition(this);
 		} else {
-			if (legacyCombatWarnings.add(this.npcId)) {
-				logger.warn("NpcCombatDefinition legacy fallback for npcId {}. Add a unified npc definition file to data/NpcDefData to override.", this.npcId);
-			}
 			this.npcCombatDefinition = new NpcCombatDefinition(definition);
 		}
 	}
@@ -207,11 +193,6 @@ public class NPC extends Entity {
 	}
 
 	private void fetchDefaultNpcStats() {
-		NpcDefinitionData unified = NpcDefinitionData.forId(npcId);
-		if (unified != null) {
-			setDefaultNpcStats(unified.toNpcStats());
-			return;
-		}
 		if (definition.getCombatLevel() > 0 || NpcStats.forId(npcId).getHitpoints() > 0) {
 			setDefaultNpcStats(NpcStats.forId(npcId));
 		} else {
@@ -1033,10 +1014,6 @@ public class NPC extends Entity {
 	}
 
 	public int getSize() {
-		NpcDefinitionData unified = NpcDefinitionData.forId(npcId);
-		if (unified != null && unified.getIdentity() != null && unified.getIdentity().getSize() != null) {
-			return unified.getIdentity().getSize();
-		}
 		if (definition == null)
 			return 1;
 		return definition.getSize();
@@ -1053,10 +1030,6 @@ public class NPC extends Entity {
 	}
 
 	public String getName() {
-		NpcDefinitionData unified = NpcDefinitionData.forId(npcId);
-		if (unified != null && unified.getIdentity() != null && unified.getIdentity().getName() != null) {
-			return unified.getIdentity().getName();
-		}
 		return getDefinition().getName();
 	}
 
@@ -1268,26 +1241,14 @@ public class NPC extends Entity {
 	}
 
 	public boolean isDemon() {
-		NpcDefinitionData unified = NpcDefinitionData.forId(npcId);
-		if (unified != null && unified.getMetadata() != null && unified.getMetadata().getType() != null) {
-			return unified.getMetadata().getType() == NpcDefinitionData.NpcType.DEMON;
-		}
 		return Misc.linearSearch(Configuration.DEMON_IDS, this.npcId) != -1;
 	}
 
 	public boolean isUndead() {
-		NpcDefinitionData unified = NpcDefinitionData.forId(npcId);
-		if (unified != null && unified.getMetadata() != null && unified.getMetadata().getType() != null) {
-			return unified.getMetadata().getType() == NpcDefinitionData.NpcType.UNDEAD;
-		}
 		return Misc.linearSearch(Configuration.UNDEAD_NPCS, this.npcId) != -1;
 	}
 
 	public boolean isDragon() {
-		NpcDefinitionData unified = NpcDefinitionData.forId(npcId);
-		if (unified != null && unified.getMetadata() != null && unified.getMetadata().getType() != null) {
-			return unified.getMetadata().getType() == NpcDefinitionData.NpcType.DRAGON;
-		}
 		return Misc.linearSearch(Configuration.DRAG_IDS, this.npcId) != -1;
 	}
 
