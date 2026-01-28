@@ -88,7 +88,7 @@ public class ModelLoader {
         // ---- allocate ----
         def.verticesCount  = numVertices;
         def.trianglesCount = numFaces;
-        def.texturesCount  = 0;
+        def.texturesCount  = numTexTris;
 
         def.verticesX = new int[numVertices];
         def.verticesY = new int[numVertices];
