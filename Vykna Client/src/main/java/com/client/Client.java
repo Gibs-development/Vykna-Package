@@ -20591,11 +20591,11 @@ public class Client extends RSApplet {
 						int hpPercent = inStream.readUnsignedByte();
 						int weaknessId = inStream.readUnsignedByte();
 						int statusMask = inStream.readUShort();
-						NpcOverlayState state1 = getNpcOverlayState(npcIndex);
-						if (state1 != null) {
-							state1.hpPercent = hpPercent;
-							state1.weaknessId = weaknessId;
-							state1.statusBitmask = statusMask;
+						NpcOverlayState state = getNpcOverlayState(npcIndex);
+						if (state != null) {
+							state.hpPercent = hpPercent;
+							state.weaknessId = weaknessId;
+							state.statusBitmask = statusMask;
 						}
 					}
 					incomingPacket = -1;
