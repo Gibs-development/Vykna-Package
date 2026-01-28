@@ -338,18 +338,18 @@ public final class TeleportHomePage extends RSInterface {
 
         rsi.child(c++, SCROLL_ID, LIST_X + SHIFT_X, LIST_Y-6);
 
-        rsi.child(c++, PREVIEW_BOX_ID, PREVIEW_X + SHIFT_X, PREVIEW_Y-6);
-        rsi.child(c++, PREVIEW_NAME_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X, PREVIEW_Y + 8-6);
-        rsi.child(c++, PREVIEW_NPC_ID, PREVIEW_X + 30 + SHIFT_X, PREVIEW_Y + 26+50-6);
+        rsi.child(c++, PREVIEW_BOX_ID, PREVIEW_X + SHIFT_X, PREVIEW_Y-600);
+        rsi.child(c++, PREVIEW_NAME_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X, PREVIEW_Y + 8-6 +80+60);
+        rsi.child(c++, PREVIEW_NPC_ID, PREVIEW_X + 30 + SHIFT_X, PREVIEW_Y + 26+50-6+8);
 
         int statsX = PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X;
         int statsBoxX = PREVIEW_X + (PREVIEW_W - STATS_W) / 2 + SHIFT_X;
-        int statsBoxY = PREVIEW_Y + 160;
+        int statsBoxY = PREVIEW_Y + 160+12;
         rsi.child(c++, STATS_BOX_ID, statsBoxX, statsBoxY);
-        rsi.child(c++, STATS_LINE1_ID, statsX, statsBoxY + 8);
-        rsi.child(c++, STATS_LINE2_ID, statsX, statsBoxY + 20);
+        rsi.child(c++, STATS_LINE1_ID, statsX-2, statsBoxY + 8);
+        rsi.child(c++, STATS_LINE2_ID, statsX-2, statsBoxY + 20);
 
-        rsi.child(c++, TELEPORT_BTN_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X - 50, PREVIEW_Y + 205);
+        rsi.child(c++, TELEPORT_BTN_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X - 50, PREVIEW_Y + 205+7-1);
 
         rsi.child(c++, DESC_TITLE_ID, INFO_X + SHIFT_X, INFO_Y);
         rsi.child(c++, DESC_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 14);
