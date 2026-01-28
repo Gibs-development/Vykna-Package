@@ -312,7 +312,7 @@ public final class TeleportHomePage extends RSInterface {
                 100, 22, "Teleport", 0, 1);
 
         // Right info
-        addText(DESC_TITLE_ID, "Description", tda, 0, 0xE3AE19, false, true);
+        addText(DESC_TITLE_ID, "<icon=0>Description", tda, 0, 0xE3AE19, false, true);
         addText(DESC_LINE1_ID, "A small green nuisance found", tda, 0, 0xFFFAE5, false, true);
         addText(DESC_LINE2_ID, "across the world.", tda, 0, 0xFFFAE5, false, true);
 
@@ -320,14 +320,13 @@ public final class TeleportHomePage extends RSInterface {
         addText(REQ_LINE1_ID, "Combat level: 2", tda, 0, 0xFFFAE5, false, true);
         addText(REQ_LINE2_ID, "HP: 50", tda, 0, 0xFFFAE5, false, true);
 
-        addText(QUEST_TITLE_ID, "Quest", tda, 0, 0xE3AE19, false, true);
+        addText(QUEST_TITLE_ID, "<icon=1>Quest", tda, 0, 0xE3AE19, false, true);
         addText(QUEST_LINE1_ID, "None", tda, 0, 0xFFFAE5, false, true);
 
         // Loot
         addBox(LOOT_BOX_ID, 0x2b241d, 0x1f1812, 90, LOOT_W, LOOT_H);
         addText(LOOT_TITLE_ID, "Drops", tda, 1, 0xE3AE19, true, true);
-        addBox(LOOT_GRID_ID, 0x000000, 0x000000, 0, LOOT_W - 18, LOOT_H - 28);
-
+        addToItemGroup(LOOT_GRID_ID, 3, 2, 0, 0, false);
         // ---- Children ----
         // Previous count 37; +4 tab icons => 41
         rsi.totalChildren(41);
@@ -380,14 +379,14 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, DESC_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 14);
         rsi.child(c++, DESC_LINE2_ID, INFO_X + SHIFT_X, INFO_Y + 28);
 
-        rsi.child(c++, REQ_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 52);
-        rsi.child(c++, REQ_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 66);
-        rsi.child(c++, REQ_LINE2_ID, INFO_X + SHIFT_X, INFO_Y + 80);
+        rsi.child(c++, REQ_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 52-5);
+        rsi.child(c++, REQ_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 66-5);
+        rsi.child(c++, REQ_LINE2_ID, INFO_X + SHIFT_X, INFO_Y + 80-5);
 
-        rsi.child(c++, QUEST_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 104);
-        rsi.child(c++, QUEST_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 118);
+        rsi.child(c++, QUEST_TITLE_ID, INFO_X + SHIFT_X, INFO_Y + 104-10);
+        rsi.child(c++, QUEST_LINE1_ID, INFO_X + SHIFT_X, INFO_Y + 118-10);
 
-        rsi.child(c++, LOOT_BOX_ID, LOOT_X + SHIFT_X - 5, LOOT_Y - 8);
+        rsi.child(c++, LOOT_BOX_ID, LOOT_X + SHIFT_X - 500, LOOT_Y - 8);
         rsi.child(c++, LOOT_TITLE_ID, LOOT_X + (LOOT_W / 2) + SHIFT_X - 5, LOOT_Y);
         rsi.child(c++, LOOT_GRID_ID, LOOT_X + 9 + SHIFT_X - 5, LOOT_Y + 14);
     }
