@@ -3871,7 +3871,9 @@ public class Client extends RSApplet {
 						}
 					}
 				} else {
-					NpcDefinition entityDef_1 = ((NPC) obj).desc;
+					NPC npc = (NPC) obj;
+					int npcIndex = npcIndices[j - playerCount];
+					NpcDefinition entityDef_1 = npc.desc;
 					if (entityDef_1.anInt75 >= 0 && entityDef_1.anInt75 < headIcons.length) {
 						npcScreenPos(((Entity) (obj)), ((Entity) (obj)).height + 15);
 						if (spriteDrawX > -1)
@@ -3882,6 +3884,7 @@ public class Client extends RSApplet {
 						if (spriteDrawX > -1)
 							headIconsHint[0].drawSprite(spriteDrawX - 12, spriteDrawY - 28);
 					}
+					drawNpcOverheadOverlay(npc, npcIndex, entityDef_1);
 				}
 				if (((Entity) (obj)).textSpoken != null && (j >= playerCount || publicChatMode == 0
 						|| publicChatMode == 3 || publicChatMode == 1 && isFriendOrSelf(((Player) obj).displayName))) {
@@ -3912,7 +3915,7 @@ public class Client extends RSApplet {
 					showBars |= (p.pressureDisplayed > 0);
 				}
 
-				if (showBars) {
+				if (showBars && obj instanceof Player) {
 					try {
 						npcScreenPos(((Entity) (obj)), ((Entity) (obj)).height + 15);
 						if (spriteDrawX > -1) {
@@ -3922,17 +3925,15 @@ public class Client extends RSApplet {
 							// Clean, bordered health bar (matches the Wrath bar style)
 							drawOverheadHealthBar(barX-10, barY, ((Entity) obj).currentHealth, ((Entity) obj).maxHealth);
 
-							if (obj instanceof Player) {
-								Player p = (Player) obj;
+							Player p = (Player) obj;
 
-								int wrathY = barY + OVERHEAD_HP_H + OVERHEAD_BAR_GAP;
+							int wrathY = barY + OVERHEAD_HP_H + OVERHEAD_BAR_GAP;
 
-								drawOverheadWrathBar(barX-10, wrathY, p.pressureDisplayed);
+							drawOverheadWrathBar(barX-10, wrathY, p.pressureDisplayed);
 
-								// "Wrath-ready" indicator when Wrath >= 80
-								if (p.pressure >= 80) {
-									drawWrathReadyPip(barX + OVERHEAD_W - 2, barY - 2);
-								}
+							// "Wrath-ready" indicator when Wrath >= 80
+							if (p.pressure >= 80) {
+								drawWrathReadyPip(barX + OVERHEAD_W - 2, barY - 2);
 							}
 						}
 					} catch (Exception e) {
@@ -4084,6 +4085,61 @@ public class Client extends RSApplet {
 	private static final int OVERHEAD_HP_H = 2;
 	private static final int OVERHEAD_WRATH_H = 3;
 	private static final int OVERHEAD_BAR_GAP = 2;
+	private static final int NPC_OVERLAY_BAR_W = 60;
+	private static final int NPC_OVERLAY_BAR_H = 6;
+	private static final int NPC_OVERLAY_STATUS_ICON_SIZE = 12;
+	private static final int NPC_OVERLAY_STATUS_ICON_GAP = 2;
+	private static final int NPC_OVERLAY_NAME_ICON_GAP = 2;
+
+	private static final int NPC_OVERLAY_STATUS_SNARE = 1 << 0;
+	private static final int NPC_OVERLAY_STATUS_FREEZE = 1 << 1;
+	private static final int NPC_OVERLAY_STATUS_POISON = 1 << 2;
+	private static final int NPC_OVERLAY_STATUS_VENOM = 1 << 3;
+	private static final int NPC_OVERLAY_STATUS_SALVE = 1 << 4;
+	private static final int NPC_OVERLAY_STATUS_DEMON_UNDEAD = 1 << 5;
+
+	private static final int NPC_OVERLAY_WEAKNESS_MELEE = 0;
+	private static final int NPC_OVERLAY_WEAKNESS_RANGED = 1;
+	private static final int NPC_OVERLAY_WEAKNESS_AIR = 2;
+	private static final int NPC_OVERLAY_WEAKNESS_WATER = 3;
+	private static final int NPC_OVERLAY_WEAKNESS_EARTH = 4;
+	private static final int NPC_OVERLAY_WEAKNESS_FIRE = 5;
+
+	private static final String[] NPC_OVERLAY_WEAKNESS_SPRITE_NAMES = {
+			"healthbars/npc_weakness_melee",
+			"healthbars/npc_weakness_ranged",
+			"healthbars/npc_weakness_air",
+			"healthbars/npc_weakness_water",
+			"healthbars/npc_weakness_earth",
+			"healthbars/npc_weakness_fire"
+	};
+
+	private static final int[] NPC_OVERLAY_STATUS_BITS = {
+			NPC_OVERLAY_STATUS_SNARE,
+			NPC_OVERLAY_STATUS_FREEZE,
+			NPC_OVERLAY_STATUS_POISON,
+			NPC_OVERLAY_STATUS_VENOM,
+			NPC_OVERLAY_STATUS_SALVE,
+			NPC_OVERLAY_STATUS_DEMON_UNDEAD
+	};
+
+	private static final String[] NPC_OVERLAY_STATUS_SPRITE_NAMES = {
+			"healthbars/npc_status_snare",
+			"healthbars/npc_status_freeze",
+			"healthbars/npc_status_poison",
+			"healthbars/npc_status_venom",
+			"healthbars/npc_status_salve",
+			"healthbars/npc_status_demon_undead"
+	};
+
+	private static final String[] NPC_OVERLAY_STATUS_TOOLTIPS = {
+			"Snared",
+			"Frozen",
+			"Poisoned",
+			"Venomed",
+			"Salve susceptible",
+			"Demon/Undead"
+	};
 
 	private void drawOverheadHealthBar(int x, int y, int currentHealth, int maxHealth) {
 		if (maxHealth <= 0) maxHealth = 1;
@@ -4132,6 +4188,168 @@ public class Client extends RSApplet {
 		DrawingArea.drawPixels(1, y + 3, x - 1, 0x000000, 5);
 		DrawingArea.drawPixels(3, y, x - 1, 0x000000, 1);
 		DrawingArea.drawPixels(3, y, x + 3, 0x000000, 1);
+	}
+
+	private NpcOverlayState getNpcOverlayState(int npcIndex) {
+		if (npcIndex < 0 || npcIndex >= npcOverlayStates.length) {
+			return null;
+		}
+		NpcOverlayState state = npcOverlayStates[npcIndex];
+		if (state == null) {
+			state = new NpcOverlayState();
+			npcOverlayStates[npcIndex] = state;
+		}
+		return state;
+	}
+
+	private Sprite getNpcOverlayWeaknessSprite(int weaknessId) {
+		if (weaknessId < 0 || weaknessId >= NPC_OVERLAY_WEAKNESS_SPRITE_NAMES.length) {
+			return null;
+		}
+		Sprite sprite = npcOverlayWeaknessSprites[weaknessId];
+		if (sprite == null) {
+			sprite = new Sprite(NPC_OVERLAY_WEAKNESS_SPRITE_NAMES[weaknessId]);
+			npcOverlayWeaknessSprites[weaknessId] = sprite;
+		}
+		return sprite != null && sprite.myPixels != null ? sprite : null;
+	}
+
+	private Sprite getNpcOverlayStatusSprite(int statusIndex) {
+		if (statusIndex < 0 || statusIndex >= NPC_OVERLAY_STATUS_SPRITE_NAMES.length) {
+			return null;
+		}
+		Sprite sprite = npcOverlayStatusSprites[statusIndex];
+		if (sprite == null) {
+			sprite = new Sprite(NPC_OVERLAY_STATUS_SPRITE_NAMES[statusIndex]);
+			npcOverlayStatusSprites[statusIndex] = sprite;
+		}
+		return sprite != null && sprite.myPixels != null ? sprite : null;
+	}
+
+	private void drawNpcOverlayHpBar(int x, int y, int hpPercent) {
+		if (hpPercent < 0) {
+			hpPercent = 0;
+		}
+		if (hpPercent > 100) {
+			hpPercent = 100;
+		}
+		int fill = (hpPercent * NPC_OVERLAY_BAR_W) / 100;
+		DrawingArea.drawPixels(NPC_OVERLAY_BAR_H, y, x, 0x5a0000, NPC_OVERLAY_BAR_W);
+		if (fill > 0) {
+			DrawingArea.drawPixels(NPC_OVERLAY_BAR_H, y, x, 0x00c853, fill);
+		}
+		drawBarBorder(x, y, NPC_OVERLAY_BAR_W, NPC_OVERLAY_BAR_H);
+	}
+
+	private void drawNpcOverlayStatusIcons(int statusMask, int centerX, int y) {
+		if (statusMask == 0) {
+			return;
+		}
+
+		int visibleCount = 0;
+		for (int i = 0; i < NPC_OVERLAY_STATUS_BITS.length; i++) {
+			if ((statusMask & NPC_OVERLAY_STATUS_BITS[i]) != 0) {
+				visibleCount++;
+			}
+		}
+		if (visibleCount == 0) {
+			return;
+		}
+		int totalWidth = (visibleCount * NPC_OVERLAY_STATUS_ICON_SIZE)
+				+ ((visibleCount - 1) * NPC_OVERLAY_STATUS_ICON_GAP);
+		int startX = centerX - (totalWidth / 2);
+		int drawX = startX;
+		int mouseX = super.getMouseX();
+		int mouseY = super.getMouseY();
+
+		for (int i = 0; i < NPC_OVERLAY_STATUS_BITS.length; i++) {
+			if ((statusMask & NPC_OVERLAY_STATUS_BITS[i]) == 0) {
+				continue;
+			}
+			Sprite icon = getNpcOverlayStatusSprite(i);
+			int iconW = icon == null ? NPC_OVERLAY_STATUS_ICON_SIZE : icon.myWidth;
+			int iconH = icon == null ? NPC_OVERLAY_STATUS_ICON_SIZE : icon.myHeight;
+			int iconY = y;
+			if (icon != null) {
+				icon.drawSprite(drawX, iconY);
+			}
+
+			if (mouseX >= drawX && mouseX <= drawX + iconW && mouseY >= iconY && mouseY <= iconY + iconH) {
+				queueNpcOverlayTooltip(NPC_OVERLAY_STATUS_TOOLTIPS[i], mouseX, mouseY);
+			}
+			drawX += NPC_OVERLAY_STATUS_ICON_SIZE + NPC_OVERLAY_STATUS_ICON_GAP;
+		}
+	}
+
+	private void drawNpcOverheadOverlay(NPC npc, int npcIndex, NpcDefinition definition) {
+		if (definition == null || definition.name == null) {
+			return;
+		}
+		npcScreenPos(npc, npc.height + 15);
+		if (spriteDrawX <= -1) {
+			return;
+		}
+
+		NpcOverlayState state = getNpcOverlayState(npcIndex);
+		int hpPercent = state != null ? state.hpPercent : -1;
+		if (hpPercent < 0 && npc.maxHealth > 0) {
+			hpPercent = (npc.currentHealth * 100) / npc.maxHealth;
+		}
+		int weaknessId = state != null ? state.weaknessId : -1;
+		int statusMask = state != null ? state.statusBitmask : 0;
+
+		String name = definition.name;
+		Sprite weaknessSprite = getNpcOverlayWeaknessSprite(weaknessId);
+		int nameWidth = latoBold.getTextWidth(name);
+		int iconWidth = weaknessSprite != null ? (weaknessSprite.myWidth + NPC_OVERLAY_NAME_ICON_GAP) : 0;
+		int totalWidth = nameWidth + iconWidth;
+		int baseX = spriteDrawX - (totalWidth / 2);
+		int nameY = spriteDrawY + 7;
+
+		latoBold.drawBasicString(name, baseX, nameY, 0xffff00, 1);
+		if (weaknessSprite != null) {
+			int iconY = nameY - weaknessSprite.myHeight + 3;
+			weaknessSprite.drawSprite(baseX + nameWidth + NPC_OVERLAY_NAME_ICON_GAP, iconY);
+		}
+
+		int barY = nameY + 2;
+		drawNpcOverlayHpBar(spriteDrawX - (NPC_OVERLAY_BAR_W / 2), barY, hpPercent);
+
+		int statusY = barY + NPC_OVERLAY_BAR_H + 3;
+		drawNpcOverlayStatusIcons(statusMask, spriteDrawX, statusY);
+	}
+
+	private void queueNpcOverlayTooltip(String text, int mouseX, int mouseY) {
+		if (text == null || text.isEmpty()) {
+			return;
+		}
+		pendingNpcOverlayTooltip = text;
+		pendingNpcOverlayTooltipX = mouseX;
+		pendingNpcOverlayTooltipY = mouseY;
+	}
+
+	private void flushNpcOverlayTooltip() {
+		if (pendingNpcOverlayTooltip == null) {
+			return;
+		}
+		drawNpcOverlayTooltip(pendingNpcOverlayTooltip, pendingNpcOverlayTooltipX, pendingNpcOverlayTooltipY);
+		pendingNpcOverlayTooltip = null;
+	}
+
+	private void drawNpcOverlayTooltip(String text, int mouseX, int mouseY) {
+		int padding = 4;
+		int width = newSmallFont.getTextWidth(text) + padding * 2;
+		int height = 16;
+		int x = mouseX + 12;
+		int y = mouseY + 12;
+		if (x + width > currentGameWidth) {
+			x = currentGameWidth - width - 5;
+		}
+		if (y + height > currentGameHeight) {
+			y = currentGameHeight - height - 5;
+		}
+		UiSkin.drawRs3TooltipBg(x, y, width, height, UiSkin.TOOLTIP_ALPHA);
+		newSmallFont.drawBasicString(text, x + padding, y + 12, 0xffffff, 0);
 	}
 
 	private void delFriend(long l) {
@@ -15885,6 +16103,7 @@ public class Client extends RSApplet {
 		}
 
 		drawScreenBox();
+		flushNpcOverlayTooltip();
 		flushAchievementTooltip();
 		devConsole.draw_console();
 	}
@@ -20333,6 +20552,23 @@ public class Client extends RSApplet {
 					incomingPacket = -1;
 					return true;
 				}
+				case 245: { // NPC_OVERLAY_UPDATE [count:u8] [npcIndex:u16 hpPercent:u8 weaknessId:u8 statusMask:u16]...
+					int updateCount = inStream.readUnsignedByte();
+					for (int idx = 0; idx < updateCount; idx++) {
+						int npcIndex = inStream.readUShort();
+						int hpPercent = inStream.readUnsignedByte();
+						int weaknessId = inStream.readUnsignedByte();
+						int statusMask = inStream.readUShort();
+						NpcOverlayState state = getNpcOverlayState(npcIndex);
+						if (state != null) {
+							state.hpPercent = hpPercent;
+							state.weaknessId = weaknessId;
+							state.statusBitmask = statusMask;
+						}
+					}
+					incomingPacket = -1;
+					return true;
+				}
 
 				case 253:
 					String s = inStream.readString();
@@ -21996,6 +22232,12 @@ public class Client extends RSApplet {
 	public NPC[] npcs;
 	private int npcCount;
 	private int[] npcIndices;
+	private final NpcOverlayState[] npcOverlayStates = new NpcOverlayState[16384];
+	private String pendingNpcOverlayTooltip;
+	private int pendingNpcOverlayTooltipX;
+	private int pendingNpcOverlayTooltipY;
+	private final Sprite[] npcOverlayWeaknessSprites = new Sprite[NPC_OVERLAY_WEAKNESS_SPRITE_NAMES.length];
+	private final Sprite[] npcOverlayStatusSprites = new Sprite[NPC_OVERLAY_STATUS_SPRITE_NAMES.length];
 	private int anInt839;
 	private int[] anIntArray840;
 	private int dealtWithPacket;
