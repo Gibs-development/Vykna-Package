@@ -6467,12 +6467,25 @@ public class Client extends RSApplet {
 			aString1121 = "Search progressions";
 		}
 
+		if (buttonPressed == TeleportHomePage.getSearchTextId()) {
+			inputTaken = true;
+			inputDialogState = 0;
+			messagePromptRaised = true;
+			promptInput = "";
+			friendsListAction = TELEPORT_SEARCH_ACTION;
+			aString1121 = "Search teleports";
+		}
+
 		if (buttonPressed == AchievementListPage.getSearchClearId()) {
 			AchievementListPage.clearSearchQuery();
 		}
 
 		if (buttonPressed == AchievementListPage.getSearchClearTextId()) {
 			AchievementListPage.clearSearchQuery();
+		}
+
+		if (buttonPressed == TeleportHomePage.getSearchClearId()) {
+			TeleportHomePage.clearSearchQuery();
 		}
 
 		if (buttonPressed == AchievementListPage.getToggleCompletedId()) {
@@ -8691,6 +8704,7 @@ public class Client extends RSApplet {
 	}
 
 	private static final int PROGRESSION_SEARCH_ACTION = 901;
+	private static final int TELEPORT_SEARCH_ACTION = 902;
 
 	private void method73() {
 		do {
@@ -8785,6 +8799,14 @@ public class Client extends RSApplet {
 						} else {
 							AchievementListPage.updateSearchText();
 						}
+					} else if (friendsListAction == TELEPORT_SEARCH_ACTION) {
+						String trimmed = promptInput.trim();
+						if (!trimmed.isEmpty()) {
+							TeleportHomePage.setSearchQuery(trimmed);
+						} else {
+							TeleportHomePage.clearSearchQuery();
+						}
+						sendString(8, trimmed);
 					}
 
 				}

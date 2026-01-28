@@ -146,10 +146,35 @@ public final class TeleportHomePage extends RSInterface {
     private static final int HEAD_ROWS = 4;
     private static final int HEAD_CELL = 16;
 
+    private static String searchQuery = "";
+
     private TeleportHomePage() {}
+
+    public static int getSearchTextId() {
+        return SEARCH_TEXT_ID;
+    }
 
     public static int getSearchClearId() {
         return SEARCH_CLEAR_ID;
+    }
+
+    public static void setSearchQuery(String query) {
+        if (query != null) {
+            searchQuery = query.trim();
+        }
+        updateSearchText();
+    }
+
+    public static void clearSearchQuery() {
+        searchQuery = "";
+        updateSearchText();
+    }
+
+    public static void updateSearchText() {
+        if (RSInterface.interfaceCache[SEARCH_TEXT_ID] != null) {
+            RSInterface.interfaceCache[SEARCH_TEXT_ID].message =
+                    searchQuery.isEmpty() ? "Search..." : searchQuery;
+        }
     }
 
     public static void build(TextDrawingArea[] tda) {

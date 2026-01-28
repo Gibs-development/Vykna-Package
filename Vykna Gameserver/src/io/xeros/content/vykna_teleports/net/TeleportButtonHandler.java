@@ -42,28 +42,54 @@ public final class TeleportButtonHandler {
         }
 
         if (buttonId == SEARCH_CLEAR_ID) {
-            // Client-side will clear search UI; server-side can ignore for now.
+            player.getAttributes().set("vykna_tp_search_query", "");
+            TeleportCategory cat = getOrDefaultCategory(player, TeleportCategory.MONSTERS);
+            TeleportInterfaceSender.sendCategory(player, cat);
             return true;
         }
 
         if (buttonId == TAB_MONSTERS_BTN) {
             System.out.println("[Teleports] Tab=MONSTERS");
-            TeleportInterfaceSender.sendCategory(player, TeleportCategory.MONSTERS);
+            player.getAttributes().set("vykna_tp_category", TeleportCategory.MONSTERS);
+            String query = getSearchQuery(player);
+            if (!query.isEmpty()) {
+                TeleportInterfaceSender.sendSearch(player, query);
+            } else {
+                TeleportInterfaceSender.sendCategory(player, TeleportCategory.MONSTERS);
+            }
             return true;
         }
         if (buttonId == TAB_BOSSES_BTN) {
             System.out.println("[Teleports] Tab=BOSSES");
-            TeleportInterfaceSender.sendCategory(player, TeleportCategory.BOSSES);
+            player.getAttributes().set("vykna_tp_category", TeleportCategory.BOSSES);
+            String query = getSearchQuery(player);
+            if (!query.isEmpty()) {
+                TeleportInterfaceSender.sendSearch(player, query);
+            } else {
+                TeleportInterfaceSender.sendCategory(player, TeleportCategory.BOSSES);
+            }
             return true;
         }
         if (buttonId == TAB_ACTS_BTN) {
             System.out.println("[Teleports] Tab=ACTIVITIES");
-            TeleportInterfaceSender.sendCategory(player, TeleportCategory.ACTIVITIES);
+            player.getAttributes().set("vykna_tp_category", TeleportCategory.ACTIVITIES);
+            String query = getSearchQuery(player);
+            if (!query.isEmpty()) {
+                TeleportInterfaceSender.sendSearch(player, query);
+            } else {
+                TeleportInterfaceSender.sendCategory(player, TeleportCategory.ACTIVITIES);
+            }
             return true;
         }
         if (buttonId == TAB_QUESTS_BTN) {
             System.out.println("[Teleports] Tab=QUESTS");
-            TeleportInterfaceSender.sendCategory(player, TeleportCategory.QUESTS);
+            player.getAttributes().set("vykna_tp_category", TeleportCategory.QUESTS);
+            String query = getSearchQuery(player);
+            if (!query.isEmpty()) {
+                TeleportInterfaceSender.sendSearch(player, query);
+            } else {
+                TeleportInterfaceSender.sendCategory(player, TeleportCategory.QUESTS);
+            }
             return true;
         }
 
@@ -71,14 +97,12 @@ public final class TeleportButtonHandler {
         for (int i = 0; i < MAX_ROWS; i++) {
             int rowBtn = (ROW_START_ID + (i * ROW_STRIDE)) + 0;
             if (buttonId == rowBtn) {
-                // Determine current category - simplest approach: store it on player attributes when tabs clicked.
-                TeleportCategory cat = getOrDefaultCategory(player, TeleportCategory.MONSTERS);
-                List<TeleportDefinition> defs = TeleportDefinitions.byCategory(cat);
+                List<TeleportDefinition> defs = getVisibleDefinitions(player);
                 if (i < defs.size()) {
                     TeleportDefinition def = defs.get(i);
                     player.getAttributes().setInt("vykna_tp_selected_id", def.getId());
                     player.getAttributes().setInt("vykna_tp_selected_row", i);
-                    System.out.println("[Teleports] RowClick row=" + i + " category=" + cat + " teleportId=" + def.getId());
+                    System.out.println("[Teleports] RowClick row=" + i + " teleportId=" + def.getId());
                     TeleportInterfaceSender.sendPreview(player, def);
                 }
                 return true;
@@ -106,5 +130,22 @@ public final class TeleportButtonHandler {
         }
         player.getAttributes().set(key, def);
         return def;
+    }
+
+    private static String getSearchQuery(Player player) {
+        Object v = player.getAttributes().get("vykna_tp_search_query");
+        if (v instanceof String) {
+            return ((String) v).trim();
+        }
+        return "";
+    }
+
+    private static List<TeleportDefinition> getVisibleDefinitions(Player player) {
+        String query = getSearchQuery(player);
+        if (!query.isEmpty()) {
+            return TeleportDefinitions.searchByName(query);
+        }
+        TeleportCategory cat = getOrDefaultCategory(player, TeleportCategory.MONSTERS);
+        return TeleportDefinitions.byCategory(cat);
     }
 }

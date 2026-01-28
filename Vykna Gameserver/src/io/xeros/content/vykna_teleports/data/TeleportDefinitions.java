@@ -36,6 +36,20 @@ public final class TeleportDefinitions {
         return ALL.stream().filter(d -> d.getCategory() == category).collect(Collectors.toList());
     }
 
+    public static List<TeleportDefinition> searchByName(String query) {
+        if (query == null) {
+            return Collections.emptyList();
+        }
+        String trimmed = query.trim();
+        if (trimmed.isEmpty()) {
+            return Collections.emptyList();
+        }
+        String needle = trimmed.toLowerCase();
+        return ALL.stream()
+                .filter(def -> def.getName() != null && def.getName().toLowerCase().contains(needle))
+                .collect(Collectors.toList());
+    }
+
     public static TeleportDefinition byId(int id) {
         for (TeleportDefinition def : ALL) {
             if (def.getId() == id) return def;
