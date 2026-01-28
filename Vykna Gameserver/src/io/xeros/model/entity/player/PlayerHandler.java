@@ -456,7 +456,6 @@ public class PlayerHandler {
 		plr.npcListSize = 0;
 
 		HashSet<NPC> hashes = new HashSet<>();
-		List<NPC> spawnedOverlays = new ArrayList<>();
 
 		// Update current list
 		for (int i = 0; i < size; i++) {
@@ -490,7 +489,6 @@ public class PlayerHandler {
 
 			if (plr.npcListSize + 1 < plr.npcList.length) {
 				plr.addNewNPC(npc, str, updateBlock, npc.teleporting);
-				spawnedOverlays.add(npc);
 
 				// Don't add too many npcs in one tick
 				if (newNpcs++ >= 20) {
@@ -509,7 +507,6 @@ public class PlayerHandler {
 			str.finishBitAccess();
 		}
 		str.endFrameVarSizeWord();
-		plr.getPA().sendNpcOverlayUpdates(plr.npcList, plr.npcListSize, spawnedOverlays);
 	}
 
 	private final Stream updateBlock = new Stream(new byte[Configuration.BUFFER_SIZE]);

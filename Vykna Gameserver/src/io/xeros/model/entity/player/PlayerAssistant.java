@@ -66,7 +66,6 @@ import io.xeros.model.definitions.NpcDef;
 import io.xeros.model.entity.Entity;
 import io.xeros.model.entity.npc.NPC;
 import io.xeros.model.entity.npc.NPCHandler;
-import io.xeros.model.entity.npc.NpcOverlay;
 import io.xeros.model.entity.player.broadcasts.Broadcast;
 import io.xeros.model.entity.player.broadcasts.BroadcastManager;
 import io.xeros.model.entity.player.broadcasts.BroadcastType;
@@ -95,7 +94,6 @@ import org.apache.commons.lang3.tuple.Pair;
 public class PlayerAssistant {
 
 	public static int ALCH_WARNING_AMOUNT = 200_000;
-	private static final int NPC_OVERLAY_THROTTLE_TICKS = 3;
 	public final Player c;
 
 	public PlayerAssistant(Player Client) {
@@ -115,71 +113,6 @@ public class PlayerAssistant {
 		c.getOutStream().writeString(message);
 		c.getOutStream().writeDWord(npcIndex);
 		c.getOutStream().endFrameVarSize();
-		c.flushOutStream();
-	}
-
-	public void sendNpcOverlayUpdates(NPC[] npcs, int npcListSize, Collection<NPC> forceUpdates) {
-		if (c.getOutStream() == null || npcListSize <= 0) {
-			return;
-		}
-		Collection<NPC> forced = forceUpdates == null ? Collections.emptySet() : forceUpdates;
-		long tick = Server.getTickCount();
-		int[] hashes = c.getNpcOverlayHashes();
-		int[] lastSent = c.getNpcOverlayLastSentTick();
-
-		int[] indices = new int[npcListSize];
-		int[] hpPercents = new int[npcListSize];
-		int[] weaknessIds = new int[npcListSize];
-		int[] statusMasks = new int[npcListSize];
-		int updateCount = 0;
-
-		for (int i = 0; i < npcListSize; i++) {
-			NPC npc = npcs[i];
-			if (npc == null) {
-				continue;
-			}
-			int npcIndex = npc.getIndex();
-			if (npcIndex < 0 || npcIndex >= hashes.length) {
-				continue;
-			}
-			int hpPercent = NpcOverlay.hpPercent(npc);
-			int weaknessId = NpcOverlay.weaknessId(npc);
-			int statusMask = NpcOverlay.statusMask(npc);
-			int hash = (hpPercent << 24) | (weaknessId << 16) | (statusMask & 0xffff);
-			boolean force = forced.contains(npc);
-
-			if (!force) {
-				if (hashes[npcIndex] == hash) {
-					continue;
-				}
-				if (tick - lastSent[npcIndex] < NPC_OVERLAY_THROTTLE_TICKS) {
-					continue;
-				}
-			}
-
-			indices[updateCount] = npcIndex;
-			hpPercents[updateCount] = hpPercent;
-			weaknessIds[updateCount] = weaknessId;
-			statusMasks[updateCount] = statusMask;
-			hashes[npcIndex] = hash;
-			lastSent[npcIndex] = (int) tick;
-			updateCount++;
-		}
-
-		if (updateCount == 0) {
-			return;
-		}
-
-		Stream out = c.getOutStream();
-		out.createFrameVarSizeWord(NpcOverlay.PACKET_OPCODE);
-		out.writeByte(updateCount);
-		for (int i = 0; i < updateCount; i++) {
-			out.writeUnsignedWord(indices[i]);
-			out.writeByte(hpPercents[i]);
-			out.writeByte(weaknessIds[i]);
-			out.writeUnsignedWord(statusMasks[i]);
-		}
-		out.endFrameVarSizeWord();
 		c.flushOutStream();
 	}
 
