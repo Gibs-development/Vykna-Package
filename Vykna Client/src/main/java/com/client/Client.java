@@ -4090,6 +4090,8 @@ public class Client extends RSApplet {
 	private static final int NPC_OVERLAY_STATUS_ICON_SIZE = 12;
 	private static final int NPC_OVERLAY_STATUS_ICON_GAP = 2;
 	private static final int NPC_OVERLAY_NAME_ICON_GAP = 2;
+	private static final int NPC_OVERLAY_BG_COLOR = 0x1a1a1a;
+	private static final int NPC_OVERLAY_BG_TEXT_COLOR = 0xffffff;
 
 	private static final int NPC_OVERLAY_STATUS_SNARE = 1 << 0;
 	private static final int NPC_OVERLAY_STATUS_FREEZE = 1 << 1;
@@ -4113,6 +4115,9 @@ public class Client extends RSApplet {
 			"healthbars/npc_weakness_earth",
 			"healthbars/npc_weakness_fire"
 	};
+	private static final String[] NPC_OVERLAY_WEAKNESS_FALLBACK_TEXT = {
+			"M", "R", "A", "W", "E", "F"
+	};
 
 	private static final int[] NPC_OVERLAY_STATUS_BITS = {
 			NPC_OVERLAY_STATUS_SNARE,
@@ -4130,6 +4135,9 @@ public class Client extends RSApplet {
 			"healthbars/npc_status_venom",
 			"healthbars/npc_status_salve",
 			"healthbars/npc_status_demon_undead"
+	};
+	private static final String[] NPC_OVERLAY_STATUS_FALLBACK_TEXT = {
+			"S", "F", "P", "V", "A", "D"
 	};
 
 	private static final String[] NPC_OVERLAY_STATUS_TOOLTIPS = {
@@ -4241,6 +4249,37 @@ public class Client extends RSApplet {
 		drawBarBorder(x, y, NPC_OVERLAY_BAR_W, NPC_OVERLAY_BAR_H);
 	}
 
+	private void drawNpcOverlayBackground(int centerX, int nameY, int nameWidth, int statusMask) {
+		int statusCount = 0;
+		for (int i = 0; i < NPC_OVERLAY_STATUS_BITS.length; i++) {
+			if ((statusMask & NPC_OVERLAY_STATUS_BITS[i]) != 0) {
+				statusCount++;
+			}
+		}
+		int statusWidth = statusCount > 0
+				? (statusCount * NPC_OVERLAY_STATUS_ICON_SIZE)
+				+ ((statusCount - 1) * NPC_OVERLAY_STATUS_ICON_GAP)
+				: 0;
+		int overlayWidth = Math.max(nameWidth, Math.max(NPC_OVERLAY_BAR_W, statusWidth));
+		int topY = nameY - 12;
+		int bottomY = nameY + 2 + NPC_OVERLAY_BAR_H
+				+ (statusCount > 0 ? (NPC_OVERLAY_STATUS_ICON_SIZE + 3) : 0);
+		int height = bottomY - topY;
+		int x = centerX - (overlayWidth / 2);
+		DrawingArea.drawPixels(height, topY, x, NPC_OVERLAY_BG_COLOR, overlayWidth);
+		drawBarBorder(x, topY, overlayWidth, height);
+	}
+
+	private void drawNpcOverlayFallbackIcon(String text, int x, int y) {
+		DrawingArea.drawPixels(NPC_OVERLAY_STATUS_ICON_SIZE, y, x, NPC_OVERLAY_BG_COLOR, NPC_OVERLAY_STATUS_ICON_SIZE);
+		drawBarBorder(x, y, NPC_OVERLAY_STATUS_ICON_SIZE, NPC_OVERLAY_STATUS_ICON_SIZE);
+		if (text != null && !text.isEmpty()) {
+			int textX = x + (NPC_OVERLAY_STATUS_ICON_SIZE - newSmallFont.getTextWidth(text)) / 2;
+			int textY = y + NPC_OVERLAY_STATUS_ICON_SIZE - 2;
+			newSmallFont.drawBasicString(text, textX, textY, NPC_OVERLAY_BG_TEXT_COLOR, 0);
+		}
+	}
+
 	private void drawNpcOverlayStatusIcons(int statusMask, int centerX, int y) {
 		if (statusMask == 0) {
 			return;
@@ -4272,6 +4311,8 @@ public class Client extends RSApplet {
 			int iconY = y;
 			if (icon != null) {
 				icon.drawSprite(drawX, iconY);
+			} else {
+				drawNpcOverlayFallbackIcon(NPC_OVERLAY_STATUS_FALLBACK_TEXT[i], drawX, iconY);
 			}
 
 			if (mouseX >= drawX && mouseX <= drawX + iconW && mouseY >= iconY && mouseY <= iconY + iconH) {
@@ -4301,7 +4342,9 @@ public class Client extends RSApplet {
 		String name = definition.name;
 		Sprite weaknessSprite = getNpcOverlayWeaknessSprite(weaknessId);
 		int nameWidth = latoBold.getTextWidth(name);
-		int iconWidth = weaknessSprite != null ? (weaknessSprite.myWidth + NPC_OVERLAY_NAME_ICON_GAP) : 0;
+		int iconWidth = weaknessSprite != null
+				? (weaknessSprite.myWidth + NPC_OVERLAY_NAME_ICON_GAP)
+				: (weaknessId >= 0 ? (NPC_OVERLAY_STATUS_ICON_SIZE + NPC_OVERLAY_NAME_ICON_GAP) : 0);
 		int totalWidth = nameWidth + iconWidth;
 		int baseX = spriteDrawX - (totalWidth / 2);
 		int nameY = spriteDrawY + 7;
@@ -4311,14 +4354,21 @@ public class Client extends RSApplet {
 				|| npc.interactingEntity == localIndex + 32768);
 		boolean localTargetsNpc = myPlayer != null && myPlayer.interactingEntity == npcIndex;
 		boolean inCombat = npcTargetsLocal || localTargetsNpc;
-		if (!inCombat && !isNpcOverlayHovered(spriteDrawX, nameY, totalWidth, statusMask)) {
+		boolean showBecauseStatus = statusMask != 0;
+		if (!inCombat && !showBecauseStatus && !isNpcOverlayHovered(spriteDrawX, nameY, totalWidth, statusMask)) {
 			return;
 		}
 
+		drawNpcOverlayBackground(spriteDrawX, nameY, totalWidth, statusMask);
 		latoBold.drawBasicString(name, baseX, nameY, 0xffff00, 1);
 		if (weaknessSprite != null) {
 			int iconY = nameY - weaknessSprite.myHeight + 3;
 			weaknessSprite.drawSprite(baseX + nameWidth + NPC_OVERLAY_NAME_ICON_GAP, iconY);
+		} else if (weaknessId >= 0 && weaknessId < NPC_OVERLAY_WEAKNESS_FALLBACK_TEXT.length) {
+			int iconY = nameY - NPC_OVERLAY_STATUS_ICON_SIZE + 3;
+			drawNpcOverlayFallbackIcon(NPC_OVERLAY_WEAKNESS_FALLBACK_TEXT[weaknessId],
+					baseX + nameWidth + NPC_OVERLAY_NAME_ICON_GAP,
+					iconY);
 		}
 
 		int barY = nameY + 2;
