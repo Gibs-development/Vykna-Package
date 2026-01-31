@@ -3,6 +3,7 @@ package io.xeros.content.sound;
 import com.google.gson.Gson;
 import com.google.gson.JsonParseException;
 import io.xeros.model.definitions.NpcStats;
+import io.xeros.util.Misc;
 
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,6 +46,22 @@ public final class NpcSoundRegistry {
         return profile != null ? profile : fallbackProfile;
     }
 
+    public int resolveAttackSound(int npcId, String npcName, NpcStats stats) {
+        return pickRandom(resolveProfile(npcId, npcName, stats).getAttack());
+    }
+
+    public int resolveDeathSound(int npcId, String npcName, NpcStats stats) {
+        return pickRandom(resolveProfile(npcId, npcName, stats).getDeath());
+    }
+
+    public int resolveHitSound(int npcId, String npcName, NpcStats stats) {
+        return pickRandom(resolveProfile(npcId, npcName, stats).getHit());
+    }
+
+    public int resolveSpecialSound(int npcId, String npcName, NpcStats stats) {
+        return pickRandom(resolveProfile(npcId, npcName, stats).getSpecial());
+    }
+
     private String resolveCategory(String npcName, NpcStats stats) {
         if (stats != null) {
             if (stats.isDemon()) {
@@ -66,6 +83,16 @@ public final class NpcSoundRegistry {
             }
         }
         return "humanoid";
+    }
+
+    private int pickRandom(int[] soundIds) {
+        if (soundIds == null || soundIds.length == 0) {
+            return 0;
+        }
+        if (soundIds.length == 1) {
+            return soundIds[0];
+        }
+        return soundIds[Misc.random(soundIds.length - 1)];
     }
 
     private static NpcSoundRegistry load() {
