@@ -12795,6 +12795,7 @@ public class Client extends RSApplet {
 			}
 
 			Preferences.load();
+			applyAudioPreferences();
 //			if (getVersion() < 13 && !Configuration.developerMode) {
 //				ClientWindow.popupMessage("You are running Java version " + getVersion() + ".",
 //						"There are some issues reported below version 13.",
