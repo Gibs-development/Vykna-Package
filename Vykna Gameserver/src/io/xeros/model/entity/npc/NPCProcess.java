@@ -18,7 +18,7 @@ import io.xeros.content.minigames.inferno.AncestralGlyph;
 import io.xeros.content.minigames.inferno.InfernoWaveData;
 import io.xeros.content.minigames.rfd.DisposeTypes;
 import io.xeros.content.revenant_event.RevenantEventBossHandler;
-import io.xeros.content.sound.Sfx;
+import io.xeros.content.sound.NpcSoundRegistry;
 import io.xeros.content.world_boss_events.EventBossHandler;
 import io.xeros.content.world_event.Tournament;
 import io.xeros.content.world_event_galvek.GalvekEventBossHandler;
@@ -39,6 +39,7 @@ import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.PlayerHandler;
 import io.xeros.model.world.objects.GlobalObject;
 import io.xeros.util.Misc;
+import io.xeros.model.SoundType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -341,6 +342,10 @@ public class NPCProcess {
                                 npc.selectAutoAttack(c);
                                 npc.attack(c, npc.getCurrentAttack());
                             }
+                            playNpcSound(npc, NpcSoundRegistry.get().resolveAttackSound(
+                                    npc.getNpcId(),
+                                    npc.getDefinition().getName(),
+                                    npc.getNpcStats()));
                         }
                     } else {
                         Player c = PlayerHandler.players[p];
@@ -587,7 +592,10 @@ public class NPCProcess {
                     npc.actionTimer = AnimationLength.getFrameLength(npc.getDeathAnimation());
 
                     Player player = PlayerHandler.getPlayerByIndex(npc.getPlayerAttackingIndex());
-                    player.getPA().sendSound(Sfx.GOBLIN_DEATH);
+                    playNpcSound(npc, NpcSoundRegistry.get().resolveDeathSound(
+                            npc.getNpcId(),
+                            npc.getDefinition().getName(),
+                            npc.getNpcStats()));
                     if (!"Dusk".equals(npc.getDefinition().getName())) { // Dusk animation length is long and we want it that way
                         if (npc.actionTimer > 20) {      // Fix for death animations being too long
                             npc.actionTimer = 20;
@@ -863,6 +871,17 @@ public class NPCProcess {
                         npcHandler.respawn(i, playerOwner);
                     }
                 }
+            }
+        }
+    }
+
+    private void playNpcSound(NPC npc, int soundId) {
+        if (soundId <= 0) {
+            return;
+        }
+        for (Player player : PlayerHandler.players) {
+            if (player != null && player.withinDistance(npc)) {
+                player.getPA().sendSound(soundId, SoundType.SOUND, npc.getIndex());
             }
         }
     }

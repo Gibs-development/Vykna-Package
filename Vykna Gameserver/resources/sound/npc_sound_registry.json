@@ -1,0 +1,54 @@
+{
+  "fallback": {
+    "attack": [2564],
+    "death": [512],
+    "hit": [513, 514, 515]
+  },
+  "categories": {
+    "humanoid": {
+      "attack": [2564, 2564],
+      "death": [512],
+      "hit": [513, 514, 515]
+    },
+    "beast": {
+      "attack": [909, 910, 300],
+      "death": [911, 301],
+      "hit": [912, 302]
+    },
+    "undead": {
+      "attack": [776],
+      "death": [777],
+      "hit": [774, 775]
+    },
+    "demon": {
+      "attack": [400, 397],
+      "death": [398, 401],
+      "hit": [399, 402]
+    },
+    "mechanical": {
+      "attack": [474],
+      "death": [475],
+      "hit": [476]
+    }
+  },
+  "keywords": {
+    "skeleton": "undead",
+    "zombie": "undead",
+    "ghost": "undead",
+    "revenant": "undead",
+    "demon": "demon",
+    "golem": "mechanical",
+    "automaton": "mechanical",
+    "machine": "mechanical",
+    "wolf": "beast",
+    "bear": "beast",
+    "rat": "beast",
+    "spider": "beast",
+    "scorpion": "beast",
+    "cow": "beast",
+    "troll": "beast",
+    "ogre": "beast",
+    "dragon": "beast"
+  },
+  "npcOverrides": {}
+}
