@@ -19613,6 +19613,13 @@ public class Client extends RSApplet {
 					}
 					incomingPacket = -1;
 					return true;
+				case 239:
+					int ambientSoundId = inStream.readUShort();
+					SoundType ambientSoundType = SoundType.values()[inStream.readUnsignedByte()];
+					int ambientDistance = inStream.readUShort();
+					Sound.getSound().playSound(ambientSoundId, ambientSoundType, ambientDistance);
+					incomingPacket = -1;
+					return true;
 				case 10:
 					screenFlashDrawing = true;
 					screenFlashOpacityDownward = false;
