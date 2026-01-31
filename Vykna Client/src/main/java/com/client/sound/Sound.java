@@ -64,9 +64,18 @@ public class Sound {
 
     public float calculateVolume(SoundType soundType, double distanceFromOrigin) {
         double distanceVolume = (12d - distanceFromOrigin) / 12d; // 0.0-1.0
+        if (distanceVolume < 0d) {
+            distanceVolume = 0d;
+        } else if (distanceVolume > 1d) {
+            distanceVolume = 1d;
+        }
         double soundVolume = (soundType.getVolume() / 10d);
-        //System.out.println("volume calculate: " + distanceVolume + " " + soundVolume);
-        return (float) (soundVolume * distanceVolume);     // below 0.5 it gets fuzzy
+        if (soundVolume < 0d) {
+            soundVolume = 0d;
+        } else if (soundVolume > 1d) {
+            soundVolume = 1d;
+        }
+        return (float) (soundVolume * distanceVolume);
     }
 
     private void sound(File soundFile, SoundType soundType, double distanceFromOrigin) throws Exception {
@@ -79,18 +88,22 @@ public class Sound {
             line.open(outFormat, 2200);
             if (line.isControlSupported(FloatControl.Type.MASTER_GAIN))
             {
-                int volume = (int) (30d * calculateVolume(soundType, distanceFromOrigin));
+                float volume = calculateVolume(soundType, distanceFromOrigin);
+                if (volume <= 0f) {
+                    line.close();
+                    return;
+                }
                 FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
                 BooleanControl muteControl = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
-                System.out.println("Volume at playtime: " + volume + ", factor: "  + calculateVolume(soundType, distanceFromOrigin));
-                if (volume < 5)
+                System.out.println("Volume at playtime: " + volume);
+                if (volume <= 0.001f)
                 {
                     muteControl.setValue(true);
                 }
                 else
                 {
                     muteControl.setValue(false);
-                    gainControl.setValue((float) (Math.log((double) volume / 100.0) / Math.log(10.0) * 20.0));
+                    gainControl.setValue((float) (Math.log10(volume) * 20.0));
                 }
             }
             line.start();
