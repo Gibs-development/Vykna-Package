@@ -53,6 +53,7 @@ import io.xeros.content.privatemessaging.FriendsList;
 import io.xeros.content.minigames.raids.Raids;
 import io.xeros.content.miniquests.magearenaii.MageArenaII;
 import io.xeros.content.questing.Questing;
+import io.xeros.content.sound.AmbientSoundManager;
 import io.xeros.content.teleportation.inter.TeleportInterface;
 import io.xeros.content.tutorial.ModeSelection;
 import io.xeros.content.tutorial.TutorialDialogue;
@@ -2543,6 +2544,15 @@ public class Player extends Entity {
     }
 
     public int forcedMusicTrack = -1;
+    private long nextAmbientSoundAt;
+
+    public long getNextAmbientSoundAt() {
+        return nextAmbientSoundAt;
+    }
+
+    public void setNextAmbientSoundAt(long nextAmbientSoundAt) {
+        this.nextAmbientSoundAt = nextAmbientSoundAt;
+    }
 
     public void process() {
         getDonationRewards().tick();
@@ -2621,6 +2631,7 @@ public class Player extends Entity {
         if (getInstance() != null) {
             getInstance().tick(this);
         }
+        AmbientSoundManager.get().pulse(this);
         if (isRunningToggled() && runEnergy <= 0) {
             updateRunningToggled(false);
         }

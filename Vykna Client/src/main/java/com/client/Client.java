@@ -12795,6 +12795,7 @@ public class Client extends RSApplet {
 			}
 
 			Preferences.load();
+			applyAudioPreferences();
 //			if (getVersion() < 13 && !Configuration.developerMode) {
 //				ClientWindow.popupMessage("You are running Java version " + getVersion() + ".",
 //						"There are some issues reported below version 13.",
@@ -19610,6 +19611,13 @@ public class Client extends RSApplet {
 							Sound.getSound().playSound(soundId, incomingSoundType, 0);
 						}
 					}
+					incomingPacket = -1;
+					return true;
+				case 239:
+					int ambientSoundId = inStream.readUShort();
+					SoundType ambientSoundType = SoundType.values()[inStream.readUnsignedByte()];
+					int ambientDistance = inStream.readUShort();
+					Sound.getSound().playSound(ambientSoundId, ambientSoundType, ambientDistance);
 					incomingPacket = -1;
 					return true;
 				case 10:

@@ -60,6 +60,9 @@ final class SizeConstants {
 	static {
 		packetSizes[252] = -2; // CHANNEL_BAR: [type:u8][durationMs:u16]
 	}
+	static {
+		packetSizes[239] = 5; // AMBIENT_SOUND_DISTANCE: [id:u16][type:u8][distance:u16]
+	}
 
 
 //	public static void main(String...args) {

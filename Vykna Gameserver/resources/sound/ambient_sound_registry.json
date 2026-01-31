@@ -1,0 +1,9 @@
+{
+  "objects": {
+    "33320": {
+      "soundId": 2189,
+      "radius": 6,
+      "intervalTicks": 10
+    }
+  }
+}

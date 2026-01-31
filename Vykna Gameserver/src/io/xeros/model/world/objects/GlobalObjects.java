@@ -168,6 +168,28 @@ public class GlobalObjects {
 
     }
 
+    public GlobalObject findNearest(int id, Player player, int radius) {
+        GlobalObject nearest = null;
+        int closestDistance = Integer.MAX_VALUE;
+        for (GlobalObject object : objects) {
+            if (object.getObjectId() != id) {
+                continue;
+            }
+            if (object.getHeight() != player.getHeightLevel()) {
+                continue;
+            }
+            if (!Objects.equals(object.getInstance(), player.getInstance())) {
+                continue;
+            }
+            int distance = player.distanceToPoint(object.getX(), object.getY());
+            if (distance <= radius && distance < closestDistance) {
+                closestDistance = distance;
+                nearest = object;
+            }
+        }
+        return nearest;
+    }
+
     /**
      * All global objects have a unique value associated with them that is referred to as ticks remaining. Every six hundred milliseconds each object has their amount of ticks
      * remaining reduced. Once an object has zero ticks remaining the object is replaced with it's counterpart. If an object has a tick remaining value that is negative, the object

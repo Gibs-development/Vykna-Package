@@ -239,6 +239,28 @@ public class PlayerAssistant {
 		c.flushOutStream();
 	}
 
+	public void sendSound(int soundId, io.xeros.model.SoundType soundType, int entitySource) {
+		if (soundId <= 0 || c.getOutStream() == null) {
+			return;
+		}
+		c.getOutStream().createFrame(12);
+		c.getOutStream().writeWord(soundId);
+		c.getOutStream().writeByte(soundType.ordinal());
+		c.getOutStream().writeWord(entitySource);
+		c.flushOutStream();
+	}
+
+	public void sendAreaSound(int soundId, io.xeros.model.SoundType soundType, int distance) {
+		if (soundId <= 0 || c.getOutStream() == null) {
+			return;
+		}
+		c.getOutStream().createFrame(239);
+		c.getOutStream().writeWord(soundId);
+		c.getOutStream().writeByte(soundType.ordinal());
+		c.getOutStream().writeWord(distance);
+		c.flushOutStream();
+	}
+
 
 	public void destroyInterface(ItemToDestroy itemToDestroy) {
 		c.destroyItem = itemToDestroy;
