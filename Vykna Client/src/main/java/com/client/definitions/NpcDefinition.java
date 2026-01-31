@@ -861,14 +861,14 @@ public final class NpcDefinition {
 
 		}
 		if (i == 1091) {
-			entityDef.name = "Crawling Corpse Torso";
-			entityDef.models = new int[] { 52569, 28979 };
+			entityDef.name = "Starter Rat";
+			entityDef.models = new int[] { 61020, 61011, 61022 };
 			entityDef.actions = new String[5];
 			entityDef.actions = new String[] { null, "Attack", null, null, null };
 			entityDef.originalColors = null;
 			entityDef.newColors = null;
 			entityDef.combatLevel = 0;
-			entityDef.standAnim = 2752;
+			entityDef.standAnim = -1;
 			entityDef.walkAnim = 8306;
 		}
 		if (i == 5792) {
@@ -882,6 +882,18 @@ public final class NpcDefinition {
 			entityDef.name = "Starter Gulega";
 			entityDef.combatLevel = 72;
 			entityDef.models = new int[] { 61976 };
+			entityDef.actions = new String[5];
+			entityDef.actions = new String[] { null, "Attack", null, null, null };
+			entityDef.anInt86 = 35; //WIDTH
+			entityDef.anInt91 = 35; // HEIGH
+			entityDef.standAnim = 15015+14000;
+			entityDef.size = 3;
+
+		}
+		if (i == 1093) {
+			entityDef.name = "Starter Terrorbird";
+			entityDef.combatLevel = 64;
+			entityDef.models = new int[] { 58333, 58338, 58334, 58335 };
 			entityDef.actions = new String[5];
 			entityDef.actions = new String[] { null, "Attack", null, null, null };
 			entityDef.anInt86 = 35; //WIDTH

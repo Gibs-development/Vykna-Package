@@ -2,6 +2,7 @@ package com.client;
 
 public class ModelLoader {
     private static final boolean DEBUG_667 = true;
+    private static final boolean DEBUG_MODEL_VALIDATION = false;
     /**
      * 525/667-era "bitmask" model format (commonly ends with -1, -1).
      * This is NOT the same as your decodeType1/2/3 variants when the header flag byte > 1 (e.g. 0x0F).
@@ -39,6 +40,9 @@ public class ModelLoader {
         int zDataLen       = b1.readUShort();
         int faceIdxDataLen = b1.readUShort();
         int miscDataLen    = b1.readUShort();
+        if (miscDataLen == 0xFFFF) {
+            miscDataLen = 0;
+        }
 
         // Texture triangle types live at file start (numTexTris bytes).
         // We only need to consume them to keep offsets correct.
@@ -221,6 +225,10 @@ public class ModelLoader {
 
         // ✅ optional: consume texture triangles if you later implement textured rendering.
         // For now we leave it out, since your renderer works without.
+
+        if (!validateModelInvariants(def, def.getModelId(), hasFaceTypes, priFlag == 255)) {
+            applyTextureCompatibilityFallback(def, def.getModelId(), "type525");
+        }
     }
 
 
@@ -274,6 +282,10 @@ public class ModelLoader {
 
         // ✅ ONE decode attempt
         if (tryDecoders(def, data, preferred, fallbacks)) {
+
+            if (!validateModelInvariants(def, def.getModelId(), def.types != null, def.face_priority == 255 || def.face_priority == -1)) {
+                applyTextureCompatibilityFallback(def, def.getModelId(), "decode667");
+            }
 
             // ✅ Build groups ONCE after successful decode
             try {
@@ -479,6 +491,74 @@ public class ModelLoader {
         long spanY = Math.abs((long) maxY - minY);
         long spanZ = Math.abs((long) maxZ - minZ);
         return spanX + spanY + spanZ >= 10;
+    }
+
+    private static boolean validateModelInvariants(Model def, int modelId, boolean expectsFaceTypes, boolean expectsPriorities) {
+        boolean ok = true;
+        StringBuilder issues = DEBUG_MODEL_VALIDATION ? new StringBuilder() : null;
+
+        if (def.texturesCount > 0) {
+            if (def.texturesX == null || def.texturesY == null || def.texturesZ == null) {
+                ok = false;
+                if (issues != null) issues.append("textureXYZ null;");
+            } else if (def.texturesX.length < def.texturesCount
+                    || def.texturesY.length < def.texturesCount
+                    || def.texturesZ.length < def.texturesCount) {
+                ok = false;
+                if (issues != null) issues.append("textureXYZ length;");
+            }
+        }
+
+        if (def.textures != null && def.textures.length < def.trianglesCount) {
+            ok = false;
+            if (issues != null) issues.append("textures length;");
+        }
+
+        if (def.materials != null && def.materials.length < def.trianglesCount) {
+            ok = false;
+            if (issues != null) issues.append("materials length;");
+        }
+
+        if (expectsFaceTypes) {
+            if (def.types == null || def.types.length < def.trianglesCount) {
+                ok = false;
+                if (issues != null) issues.append("types;");
+            }
+        } else if (def.types != null && def.types.length < def.trianglesCount) {
+            ok = false;
+            if (issues != null) issues.append("types length;");
+        }
+
+        if (expectsPriorities) {
+            if (def.face_render_priorities == null || def.face_render_priorities.length < def.trianglesCount) {
+                ok = false;
+                if (issues != null) issues.append("priorities;");
+            }
+        } else if (def.face_render_priorities != null && def.face_render_priorities.length < def.trianglesCount) {
+            ok = false;
+            if (issues != null) issues.append("priorities length;");
+        }
+
+        if (!ok && DEBUG_MODEL_VALIDATION) {
+            System.out.println("[model validate] id=" + modelId + " issues=" + issues);
+        }
+        return ok;
+    }
+
+    private static void applyTextureCompatibilityFallback(Model def, int modelId, String reason) {
+        if (def.texturesCount == 0 && def.textures == null && def.texturesX == null && def.materials == null) {
+            return;
+        }
+        def.texturesCount = 0;
+        def.texturesX = null;
+        def.texturesY = null;
+        def.texturesZ = null;
+        def.textureTypes = null;
+        def.textures = null;
+        def.materials = null;
+        if (DEBUG_MODEL_VALIDATION) {
+            System.out.println("[model validate] id=" + modelId + " textures stripped (" + reason + ")");
+        }
     }
 
 
