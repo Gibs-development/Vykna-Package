@@ -874,6 +874,7 @@ public class Model extends Renderable {
             boolean tSkin_flag = false;
             boolean texture_flag = false;
             boolean coordinate_flag = false;
+            boolean texturesSupported = true;
 
             verticesCount = 0;
             trianglesCount = 0;
@@ -905,9 +906,29 @@ public class Model extends Renderable {
                     tSkin_flag |= build.triangleData != null;
                     texture_flag |= build.materials != null;
                     coordinate_flag |= build.textures != null;
+                    if (build.texturesCount > 0) {
+                        if (build.texturesX == null || build.texturesY == null || build.texturesZ == null) {
+                            texturesSupported = false;
+                        } else if (build.texturesX.length < build.texturesCount
+                                || build.texturesY.length < build.texturesCount
+                                || build.texturesZ.length < build.texturesCount) {
+                            texturesSupported = false;
+                        }
+                    }
+                    if (build.textures != null && build.textures.length < build.trianglesCount) {
+                        texturesSupported = false;
+                    }
+                    if (build.materials != null && build.materials.length < build.trianglesCount) {
+                        texturesSupported = false;
+                    }
 
                     anyParticles |= build.hasParticleAttachments || (build.verticesParticle != null) || (build.verticesParticleLayers != null);
                 }
+            }
+            if (!texturesSupported) {
+                texturesCount = 0;
+                texture_flag = false;
+                coordinate_flag = false;
             }
             // Always allocate colors; most pipelines assume colors exists.
             colors = new short[trianglesCount];
@@ -1005,13 +1026,15 @@ public class Model extends Renderable {
                         trianglesCount++;
                     }
 
-                    for (int texture_edge = 0; texture_edge < build.texturesCount; texture_edge++) {
-                        texturesX[texturesCount] = (short) method465(build, build.texturesX[texture_edge]);
-                        texturesY[texturesCount] = (short) method465(build, build.texturesY[texture_edge]);
-                        texturesZ[texturesCount] = (short) method465(build, build.texturesZ[texture_edge]);
-                        texturesCount++;
+                    if (texturesSupported) {
+                        for (int texture_edge = 0; texture_edge < build.texturesCount; texture_edge++) {
+                            texturesX[texturesCount] = (short) method465(build, build.texturesX[texture_edge]);
+                            texturesY[texturesCount] = (short) method465(build, build.texturesY[texture_edge]);
+                            texturesZ[texturesCount] = (short) method465(build, build.texturesZ[texture_edge]);
+                            texturesCount++;
+                        }
+                        texture_face += build.texturesCount;
                     }
-                    texture_face += build.texturesCount;
                 }
             }
         } catch (Exception e) {
@@ -1031,6 +1054,7 @@ public class Model extends Renderable {
         boolean flag4 = false;
         boolean texture_flag = false;
         boolean coordinate_flag = false;
+        boolean texturesSupported = true;
         boolean anyParticles = false;
 
         verticesCount = 0;
@@ -1059,9 +1083,29 @@ public class Model extends Renderable {
                 flag4 |= model.colors != null;
                 texture_flag |= model.materials != null;
                 coordinate_flag |= model.textures != null;
+                if (model.texturesCount > 0) {
+                    if (model.texturesX == null || model.texturesY == null || model.texturesZ == null) {
+                        texturesSupported = false;
+                    } else if (model.texturesX.length < model.texturesCount
+                            || model.texturesY.length < model.texturesCount
+                            || model.texturesZ.length < model.texturesCount) {
+                        texturesSupported = false;
+                    }
+                }
+                if (model.textures != null && model.textures.length < model.trianglesCount) {
+                    texturesSupported = false;
+                }
+                if (model.materials != null && model.materials.length < model.trianglesCount) {
+                    texturesSupported = false;
+                }
 
                 anyParticles |= model.hasParticleAttachments || (model.verticesParticle != null) || (model.verticesParticleLayers != null);
             }
+        }
+        if (!texturesSupported) {
+            texturesCount = 0;
+            texture_flag = false;
+            coordinate_flag = false;
         }
 
         hasParticleAttachments = anyParticles;
@@ -1189,14 +1233,16 @@ public class Model extends Renderable {
                     trianglesCount++;
                 }
 
-                for (int k2 = 0; k2 < model_1.texturesCount; k2++) {
-                    texturesX[texturesCount] = (short) (model_1.texturesX[k2] + k1);
-                    texturesY[texturesCount] = (short) (model_1.texturesY[k2] + k1);
-                    texturesZ[texturesCount] = (short) (model_1.texturesZ[k2] + k1);
-                    texturesCount++;
-                }
+                if (texturesSupported) {
+                    for (int k2 = 0; k2 < model_1.texturesCount; k2++) {
+                        texturesX[texturesCount] = (short) (model_1.texturesX[k2] + k1);
+                        texturesY[texturesCount] = (short) (model_1.texturesY[k2] + k1);
+                        texturesZ[texturesCount] = (short) (model_1.texturesZ[k2] + k1);
+                        texturesCount++;
+                    }
 
-                i1 += model_1.texturesCount;
+                    i1 += model_1.texturesCount;
+                }
             }
         }
 
