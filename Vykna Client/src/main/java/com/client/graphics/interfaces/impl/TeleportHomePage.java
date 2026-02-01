@@ -75,10 +75,12 @@ public final class TeleportHomePage extends RSInterface {
     private static final int STATS_LINE2_ID  = INTERFACE_ID + 1217;
 
     private static final int TELEPORT_BTN_ID = INTERFACE_ID + 1220;
+    private static final int TELEPORT_LABEL_ID = INTERFACE_ID + 1221;
 
     // Loot panel (bottom-right)
     private static final int LOOT_BOX_ID   = INTERFACE_ID + 1300;
     private static final int LOOT_TITLE_ID = INTERFACE_ID + 1301;
+    private static final int LOOT_LABEL_ID = INTERFACE_ID + 1302;
     private static final int LOOT_GRID_ID  = INTERFACE_ID + 1310;
 
     // Right column info (top-right)
@@ -310,6 +312,7 @@ public final class TeleportHomePage extends RSInterface {
         // Teleport button
         addHoverButtonNew(TELEPORT_BTN_ID, SPRITE_ROOT + "TeleportBtn", SPRITE_ROOT + "TeleportBtnHover",
                 100, 22, "Teleport", 0, 1);
+        addText(TELEPORT_LABEL_ID, "Teleport", tda, 1, 0xE3AE19, true, true);
 
         // Right info
         addText(DESC_TITLE_ID, "<icon=0>Description", tda, 0, 0xE3AE19, false, true);
@@ -327,10 +330,11 @@ public final class TeleportHomePage extends RSInterface {
         // Loot
         addBox(LOOT_BOX_ID, 0x2b241d, 0x1f1812, 90, LOOT_W, LOOT_H);
         addText(LOOT_TITLE_ID, "Drops", tda, 1, 0xE3AE19, true, true);
+        addText(LOOT_LABEL_ID, "Drops", tda, 1, 0xE3AE19, true, true);
         addToItemGroup(LOOT_GRID_ID, 3, 2, 0, 0, false);
         // ---- Children ----
-        // Previous count 37; +4 tab icons => 41; -1 desc line => 40
-        rsi.totalChildren(40);
+        // Previous count 37; +4 tab icons => 41; -1 desc line => 40; +2 labels => 42
+        rsi.totalChildren(42);
         int c = 0;
 
         rsi.child(c++, BG_ID, BG_X + SHIFT_X, BG_Y);
@@ -374,6 +378,7 @@ public final class TeleportHomePage extends RSInterface {
         rsi.child(c++, STATS_LINE1_ID, statsX-2, statsBoxY + 8);
         rsi.child(c++, STATS_LINE2_ID, statsX-2, statsBoxY + 20);
 
+        rsi.child(c++, TELEPORT_LABEL_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X, PREVIEW_Y + 200 - 16);
         rsi.child(c++, TELEPORT_BTN_ID, PREVIEW_X + (PREVIEW_W / 2) + SHIFT_X - 50, PREVIEW_Y + 205+7-1);
 
         rsi.child(c++, DESC_TITLE_ID, INFO_X + SHIFT_X, INFO_Y);
@@ -388,6 +393,7 @@ public final class TeleportHomePage extends RSInterface {
 
         rsi.child(c++, LOOT_BOX_ID, LOOT_X + SHIFT_X - 500, LOOT_Y - 8);
         rsi.child(c++, LOOT_TITLE_ID, LOOT_X + (LOOT_W / 2) + SHIFT_X - 5, LOOT_Y);
+        rsi.child(c++, LOOT_LABEL_ID, LOOT_X + (LOOT_W / 2) + SHIFT_X - 5, LOOT_Y - 12);
         rsi.child(c++, LOOT_GRID_ID, LOOT_X + 9 + SHIFT_X - 5, LOOT_Y + 14);
     }
 

@@ -1,0 +1,26 @@
+---
+npc_id: 1103
+common:
+  accessibility: 1
+  items:
+  - name: "bones"
+    minimum: 1
+    maximum: 1
+  - item: 3842
+    minimum: 1
+    maximum: 1
+  - item: 3840
+    minimum: 1
+    maximum: 1
+  - item: 3844
+    minimum: 1
+    maximum: 1
+  - item: 6890
+    minimum: 1
+    maximum: 1
+  - item: 12954
+    minimum: 1
+    maximum: 1
+  - name: "coins"
+    minimum: 30
+    maximum: 120

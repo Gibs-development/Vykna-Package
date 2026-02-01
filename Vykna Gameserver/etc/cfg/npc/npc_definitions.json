@@ -5426,8 +5426,8 @@
     "size": 3
   },
   "1093": {
-    "name": "Jari",
-    "combatLevel": 0,
+    "name": "Warped Terrorbird",
+    "combatLevel": 64,
     "size": 1
   },
   "1094": {
@@ -5461,18 +5461,18 @@
     "size": 1
   },
   "1100": {
-    "name": "Guard",
-    "combatLevel": 0,
+    "name": "Warped Rat",
+    "combatLevel": 16,
     "size": 1
   },
   "1102": {
-    "name": "Elena",
-    "combatLevel": 0,
+    "name": "Warped Fly",
+    "combatLevel": 32,
     "size": 1
   },
   "1103": {
-    "name": "Da Vinci",
-    "combatLevel": 0,
+    "name": "Warped Skoblin",
+    "combatLevel": 83,
     "size": 1
   },
   "1104": {

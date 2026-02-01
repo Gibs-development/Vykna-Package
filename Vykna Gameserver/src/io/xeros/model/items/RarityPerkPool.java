@@ -81,6 +81,26 @@ public enum RarityPerkPool {
         return COMMON;
     }
 
+    public static int minPerksForRarity(int rarityId) {
+        if (rarityId >= 4) {
+            return 2;
+        }
+        return 1;
+    }
+
+    public static int maxPerksForRarity(int rarityId) {
+        if (rarityId >= 4) {
+            return 4;
+        }
+        if (rarityId == 2 || rarityId == 3) {
+            return 3;
+        }
+        if (rarityId == 1) {
+            return 2;
+        }
+        return 1;
+    }
+
     public static List<PerkRoll> rollPerks(int rarityId, int count) {
         if (count <= 0) {
             return Collections.emptyList();

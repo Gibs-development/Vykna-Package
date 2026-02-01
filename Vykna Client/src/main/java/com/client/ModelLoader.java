@@ -3,6 +3,8 @@ package com.client;
 public class ModelLoader {
     private static final boolean DEBUG_667 = true;
     private static final boolean DEBUG_MODEL_VALIDATION = true;
+    private static final boolean DEBUG_MODEL_DECODE = true;
+    private static final int[] DEBUG_MODEL_IDS = null;
     /**
      * 525/667-era "bitmask" model format (commonly ends with -1, -1).
      * This is NOT the same as your decodeType1/2/3 variants when the header flag byte > 1 (e.g. 0x0F).
@@ -222,6 +224,8 @@ public class ModelLoader {
             def.trianglesY[f] = b;
             def.trianglesZ[f] = c;
         }
+        int indexDataCursor = b1.currentOffset;
+        int indexTypeCursor = b2.currentOffset;
 
         // ✅ optional: consume texture triangles if you later implement textured rendering.
         // For now we leave it out, since your renderer works without.
@@ -229,6 +233,29 @@ public class ModelLoader {
         if (!validateModelInvariants(def, def.getModelId(), hasFaceTypes, priFlag == 255)) {
             applyTextureCompatibilityFallback(def, def.getModelId(), "type525");
         }
+
+        debugDecode("type525", def, data, 23,
+                numVertices, numFaces, numTexTris,
+                (hasFaceTypes ? 1 : 0), priFlag, alphaFlag, triSkinFlag, texFlag, vtxSkinFlag, -1,
+                new String[]{
+                        "texTypes", "vertexFlags", "faceTypes", "faceIndexTypes", "facePriorities", "triSkins",
+                        "vtxSkins", "faceAlphas", "faceIndexData", "faceTexIds", "misc", "faceColors",
+                        "xData", "yData", "zData"
+                },
+                new int[]{
+                        0, vertexFlagsOff, faceTypeOff, faceOpcodeOff, facePriorityOff, triSkinOff,
+                        vtxSkinOff, alphaOff, faceIdxDataOff, faceTexOff, miscOff, faceColorOff,
+                        xDataOff, yDataOff, zDataOff
+                },
+                new int[]{
+                        numTexTris, numVertices, (hasFaceTypes ? numFaces : 0), numFaces, (priFlag == 255 ? numFaces : 0), (triSkinFlag == 1 ? numFaces : 0),
+                        (vtxSkinFlag == 1 ? numVertices : 0), (alphaFlag == 1 ? numFaces : 0), faceIdxDataLen, (texFlag == 1 ? numFaces * 2 : 0), miscDataLen, numFaces * 2,
+                        xDataLen, yDataLen, zDataLen
+                },
+                new Buffer[]{b1, b2, b3, b4, b5, b6, b7},
+                new String[]{"b1", "b2", "b3", "b4", "b5", "b6", "b7"},
+                indexDataCursor, indexTypeCursor,
+                null);
     }
 
 
@@ -509,6 +536,12 @@ public class ModelLoader {
                 ok = false;
                 if (issues != null) issues.append("textureXYZ length;");
             }
+
+            // If a model has textured faces but ZERO type0 texture triangles, a 525-style renderer will often skip it entirely.
+            if (hasAnyTexturedFace(def) && !hasAnyType0TextureTriangle(def)) {
+                ok = false;
+                if (issues != null) issues.append("no type0 textris;");
+            }
         }
 
         if (def.textures != null && def.textures.length < def.trianglesCount) {
@@ -546,7 +579,6 @@ public class ModelLoader {
         }
         return ok;
     }
-
     private static void applyTextureCompatibilityFallback(Model def, int modelId, String reason) {
         if (def.texturesCount == 0 && def.textures == null && def.texturesX == null && def.materials == null) {
             return;
@@ -594,6 +626,123 @@ public class ModelLoader {
         }
     }
 
+    private static void debugDecode(String label, Model def, byte[] data, int footerLen,
+                                    int vertices, int faces, int texTris,
+                                    int faceTypeFlag, int priorityFlag, int alphaFlag,
+                                    int triSkinFlag, int texFlag, int vtxSkinFlag, int animayaFlag,
+                                    String[] blockNames, int[] blockOffsets, int[] blockLengths,
+                                    Buffer[] buffers, String[] bufferNames,
+                                    int indexDataCursor, int indexTypeCursor,
+                                    int[] faceIndexTypes) {
+        if (!DEBUG_MODEL_DECODE) {
+            return;
+        }
+        if (DEBUG_MODEL_IDS != null && DEBUG_MODEL_IDS.length > 0) {
+            int id = def.getModelId();
+            boolean match = false;
+            for (int i = 0; i < DEBUG_MODEL_IDS.length; i++) {
+                if (DEBUG_MODEL_IDS[i] == id) {
+                    match = true;
+                    break;
+                }
+            }
+            if (!match) {
+                return;
+            }
+        }
+        StringBuilder sb = new StringBuilder(1024);
+        sb.append("[model decode] ").append(label)
+                .append(" id=").append(def.getModelId())
+                .append(" len=").append(data == null ? 0 : data.length)
+                .append(" footer=").append(footerLen).append('\n');
+        sb.append("  counts: v=").append(vertices).append(" f=").append(faces).append(" t=").append(texTris).append('\n');
+        sb.append("  flags: faceType=").append(faceTypeFlag)
+                .append(" priority=").append(priorityFlag)
+                .append(" alpha=").append(alphaFlag)
+                .append(" triSkin=").append(triSkinFlag)
+                .append(" texFlag=").append(texFlag)
+                .append(" vSkin=").append(vtxSkinFlag);
+        if (animayaFlag >= 0) {
+            sb.append(" animaya=").append(animayaFlag);
+        }
+        sb.append('\n');
+
+        int expectedEnd = (data == null ? 0 : data.length) - footerLen;
+        int computedEnd = 0;
+        boolean oob = false;
+        for (int i = 0; i < blockNames.length; i++) {
+            int off = blockOffsets[i];
+            int len = blockLengths[i];
+            int end = off + len;
+            if (end > computedEnd) computedEnd = end;
+            boolean bad = off < 0 || end > expectedEnd;
+            if (bad) oob = true;
+            sb.append("  ").append(blockNames[i]).append(": off=").append(off)
+                    .append(" len=").append(len)
+                    .append(" end=").append(end);
+            if (bad) sb.append(" OOB");
+            sb.append('\n');
+        }
+        sb.append("  expectedEnd=").append(expectedEnd).append(" computedEnd=").append(computedEnd).append('\n');
+        if (buffers != null && bufferNames != null) {
+            sb.append("  cursors:");
+            for (int i = 0; i < buffers.length; i++) {
+                sb.append(' ').append(bufferNames[i]).append('=').append(buffers[i].currentOffset);
+            }
+            sb.append('\n');
+        }
+        if (def.textures != null) {
+            int firstSigned = -1;
+            int unsignedVal = -1;
+            for (int i = 0; i < def.textures.length; i++) {
+                int raw = def.textures[i];
+                int u = raw & 0xFF;
+                if (u > 127 && raw < 0) {
+                    firstSigned = i;
+                    unsignedVal = u;
+                    break;
+                }
+            }
+            if (firstSigned >= 0) {
+                sb.append("  textureIds: firstSignedIdx=").append(firstSigned)
+                        .append(" raw=").append(def.textures[firstSigned])
+                        .append(" unsigned=").append(unsignedVal).append('\n');
+            } else {
+                sb.append("  textureIds: no signed>127").append('\n');
+            }
+        }
+        if (oob) {
+            sb.append("  bounds: stream slice outside file bounds").append('\n');
+        }
+
+        boolean invalid = false;
+        int badFace = -1;
+        int badType = -1;
+        int badA = -1, badB = -1, badC = -1;
+        for (int i = 0; i < def.trianglesCount; i++) {
+            int a = def.trianglesX[i];
+            int b = def.trianglesY[i];
+            int c = def.trianglesZ[i];
+            if (a < 0 || a >= vertices || b < 0 || b >= vertices || c < 0 || c >= vertices) {
+                invalid = true;
+                badFace = i;
+                badA = a; badB = b; badC = c;
+                if (faceIndexTypes != null) {
+                    badType = faceIndexTypes[i];
+                }
+                break;
+            }
+        }
+        if (invalid) {
+            sb.append("  invalidTri: face=").append(badFace)
+                    .append(" type=").append(badType)
+                    .append(" idx=(").append(badA).append(',').append(badB).append(',').append(badC).append(')')
+                    .append(" idxDataCursor=").append(indexDataCursor)
+                    .append(" idxTypeCursor=").append(indexTypeCursor)
+                    .append('\n');
+        }
+        System.out.println(sb.toString());
+    }
 
 
     public static void decodeType3(Model def, byte[] var1)
@@ -892,9 +1041,17 @@ public class ModelLoader {
         var54 = 0;
 
         int var56;
+        int[] faceIndexTypes = DEBUG_MODEL_DECODE ? new int[var10] : null;
         for (var55 = 0; var55 < var10; ++var55)
         {
-            var56 = var3.readUnsignedByte();
+            int rawType = var3.readUnsignedByte();
+            var56 = rawType;
+            if (var56 < 1 || var56 > 4) {
+                var56 = (var56 & 3) + 1;
+            }
+            if (faceIndexTypes != null) {
+                faceIndexTypes[var55] = var56;
+            }
             if (var56 == 1)
             {
                 var51 = var2.readSmart() + var54;
@@ -938,6 +1095,8 @@ public class ModelLoader {
                 def.trianglesZ[var55] = var53;
             }
         }
+        int indexDataCursor = var2.currentOffset;
+        int indexTypeCursor = var3.currentOffset;
 
         var2.setOffset(var42);
         var3.setOffset(var43);
@@ -966,6 +1125,32 @@ public class ModelLoader {
             var2.readUShort();
             var2.readInt();
         }
+
+        debugDecode("type3", def, var1, 26,
+                var9, var10, var11,
+                var12, var13, var14, var15, var16, var17, var18,
+                new String[]{
+                        "texTypes", "vertexFlags", "xData", "yData", "zData", "vtxSkins+animaya",
+                        "faceColors", "faceTypes", "facePriorities", "faceAlphas", "triSkins",
+                        "materials", "faceTexCoords", "faceIndexData", "faceIndexTypes",
+                        "texTriA", "texTriB", "texTriC", "texTriD", "texTriE", "texTriF"
+                },
+                new int[]{
+                        0, var11, var39, var40, var41, var33,
+                        var38, var58, var31, var34, var32,
+                        var36, var37, var35, var30,
+                        var42, var43, var44, var45, var46, var47
+                },
+                new int[]{
+                        var11, var9, var19, var20, var21, var24,
+                        var10 * 2, (var12 == 1 ? var10 : 0), (var13 == 255 ? var10 : 0), (var14 == 1 ? var10 : 0), (var15 == 1 ? var10 : 0),
+                        (var16 == 1 ? var10 * 2 : 0), var23, var22, var10,
+                        var25 * 6, var26 * 6, var26 * 6, var26 * 2, var26, (var26 * 2 + var27 * 2)
+                },
+                new Buffer[]{var2, var3, var4, var5, var6, var7, var8},
+                new String[]{"b2", "b3", "b4", "b5", "b6", "b7", "b8"},
+                indexDataCursor, indexTypeCursor,
+                faceIndexTypes);
 
     }
 
@@ -1034,6 +1219,7 @@ public class ModelLoader {
         var24 += var18;
         int var35 = var24;
         var24 += var19;
+        int var36 = var24;
         int var10000 = var24 + var20;
         def.verticesCount = var9;
         def.trianglesCount = var10;
@@ -1220,9 +1406,17 @@ public class ModelLoader {
 
         int var45;
         int var46;
+        int[] faceIndexTypes = DEBUG_MODEL_DECODE ? new int[var10] : null;
         for (var44 = 0; var44 < var10; ++var44)
         {
-            var45 = var5.readUnsignedByte();
+            int rawType = var5.readUnsignedByte();
+            var45 = rawType;
+            if (var45 < 1 || var45 > 4) {
+                var45 = (var45 & 3) + 1;
+            }
+            if (faceIndexTypes != null) {
+                faceIndexTypes[var44] = var45;
+            }
             if (var45 == 1)
             {
                 var40 = var4.readSmart() + var43;
@@ -1266,6 +1460,8 @@ public class ModelLoader {
                 def.trianglesZ[var44] = var42;
             }
         }
+        int indexDataCursor = var4.currentOffset;
+        int indexTypeCursor = var5.currentOffset;
 
         var4.setOffset(var33);
 
@@ -1312,6 +1508,29 @@ public class ModelLoader {
         {
             def.types = null;
         }
+
+        debugDecode("type2", def, var1, 23,
+                var9, var10, var11,
+                var12, var13, var14, var15, 0, var16, var17,
+                new String[]{
+                        "vertexFlags", "xData", "yData", "zData", "vtxSkins+animaya",
+                        "faceColors", "faceTypes", "facePriorities", "faceAlphas", "triSkins",
+                        "faceIndexData", "faceIndexTypes", "texTris"
+                },
+                new int[]{
+                        var23, var34, var35, var36, var29,
+                        var32, var28, var26, var30, var27,
+                        var31, var25, var33
+                },
+                new int[]{
+                        var9, var18, var19, var20, var22,
+                        var10 * 2, (var12 == 1 ? var10 : 0), (var13 == 255 ? var10 : 0), (var14 == 1 ? var10 : 0), (var15 == 1 ? var10 : 0),
+                        var21, var10, var11 * 6
+                },
+                new Buffer[]{var4, var5, var6, var7, var8},
+                new String[]{"b4", "b5", "b6", "b7", "b8"},
+                indexDataCursor, indexTypeCursor,
+                faceIndexTypes);
 
     }
     private static final Decoder TYPE525 = new Decoder() {
@@ -1565,11 +1784,9 @@ public class ModelLoader {
 
             if (var14 == 1)
             {
-                def.alphas[var49] = var5.readByte();
-                if (def.alphas[var49] < 0) {
-                    def.alphas[var49] = (256 + def.alphas[var40]);
-                }
+                def.alphas[var49] = var5.readByte() & 0xFF;
             }
+
 
             if (var15 == 1)
             {
@@ -1595,9 +1812,17 @@ public class ModelLoader {
         var52 = 0;
 
         int var54;
+        int[] faceIndexTypes = DEBUG_MODEL_DECODE ? new int[var10] : null;
         for (var53 = 0; var53 < var10; ++var53)
         {
-            var54 = var3.readUnsignedByte();
+            int rawType = var3.readUnsignedByte();
+            var54 = rawType;
+            if (var54 < 1 || var54 > 4) {
+                var54 = (var54 & 3) + 1;
+            }
+            if (faceIndexTypes != null) {
+                faceIndexTypes[var53] = var54;
+            }
             if (var54 == 1)
             {
                 var49 = var2.readSmart() + var52;
@@ -1641,6 +1866,8 @@ public class ModelLoader {
                 def.trianglesZ[var53] = var51;
             }
         }
+        int indexDataCursor = var2.currentOffset;
+        int indexTypeCursor = var3.currentOffset;
 
         var2.setOffset(var40);
         var3.setOffset(var41);
@@ -1670,8 +1897,63 @@ public class ModelLoader {
             var2.readInt();
         }
 
+        int extraLen = (var53 != 0 ? 11 : 1);
+        debugDecode("type1", def, var1, 23,
+                var9, var10, var11,
+                var12, var13, var14, var15, var16, var17, -1,
+                new String[]{
+                        "texTypes", "vertexFlags", "faceTypes", "faceIndexTypes", "facePriorities", "triSkins",
+                        "vtxSkins", "faceAlphas", "faceIndexData", "materials", "faceTexCoords",
+                        "faceColors", "xData", "yData", "zData",
+                        "texTriA", "texTriB", "texTriC", "texTriD", "texTriE", "texTriF", "extra"
+                },
+                new int[]{
+                        0, var11, var56, var28, var29, var30,
+                        var31, var32, var33, var34, var35,
+                        var36, var37, var38, var39,
+                        var40, var41, var42, var43, var44, var45, var26
+                },
+                new int[]{
+                        var11, var9, (var12 == 1 ? var10 : 0), var10, (var13 == 255 ? var10 : 0), (var15 == 1 ? var10 : 0),
+                        (var17 == 1 ? var9 : 0), (var14 == 1 ? var10 : 0), var21, (var16 == 1 ? var10 * 2 : 0), var22,
+                        var10 * 2, var18, var19, var20,
+                        var23 * 6, var24 * 6, var24 * 6, var24 * 2, var24, (var24 * 2 + var25 * 2), extraLen
+                },
+                new Buffer[]{var2, var3, var4, var5, var6, var7, var8},
+                new String[]{"b2", "b3", "b4", "b5", "b6", "b7", "b8"},
+                indexDataCursor, indexTypeCursor,
+                faceIndexTypes);
+
+    }
+    private static boolean hasAnyTexturedFace(Model def) {
+        if (def.materials != null) {
+            for (int i = 0; i < def.trianglesCount; i++) {
+                if (def.materials[i] != -1) {
+                    return true;
+                }
+            }
+        }
+        if (def.textures != null) {
+            for (int i = 0; i < def.trianglesCount; i++) {
+                if (def.textures[i] != -1) {
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
+    private static boolean hasAnyType0TextureTriangle(Model def) {
+        if (def.textureTypes == null) {
+            return false;
+        }
+        for (int i = 0; i < def.texturesCount && i < def.textureTypes.length; i++) {
+            if ((def.textureTypes[i] & 0xFF) == 0) {
+                return true;
+            }
+        }
+        return false;
+    }
     public static void decodeOldFormat(Model def, byte[] var1)
     {
         boolean var2 = false;
@@ -1902,9 +2184,17 @@ public class ModelLoader {
 
         int var43;
         int var44;
+        int[] faceIndexTypes = DEBUG_MODEL_DECODE ? new int[var10] : null;
         for (var42 = 0; var42 < var10; ++var42)
         {
-            var43 = var5.readUnsignedByte();
+            int rawType = var5.readUnsignedByte();
+            var43 = rawType;
+            if (var43 < 1 || var43 > 4) {
+                var43 = (var43 & 3) + 1;
+            }
+            if (faceIndexTypes != null) {
+                faceIndexTypes[var42] = var43;
+            }
             if (var43 == 1)
             {
                 var38 = var4.readSmart() + var41;
@@ -1948,6 +2238,8 @@ public class ModelLoader {
                 def.trianglesZ[var42] = var40;
             }
         }
+        int indexDataCursor = var4.currentOffset;
+        int indexTypeCursor = var5.currentOffset;
 
         var4.setOffset(var31);
 
@@ -1994,6 +2286,29 @@ public class ModelLoader {
         {
             def.types = null;
         }
+
+        debugDecode("old", def, var1, 18,
+                var9, var10, var11,
+                var12, var13, var14, var15, 0, var16, -1,
+                new String[]{
+                        "vertexFlags", "xData", "yData", "zData", "vtxSkins",
+                        "faceColors", "faceTypes", "facePriorities", "faceAlphas", "triSkins",
+                        "faceIndexData", "faceIndexTypes", "texTris"
+                },
+                new int[]{
+                        var21, var32, var33, var22, var27,
+                        var30, var26, var24, var28, var25,
+                        var29, var23, var31
+                },
+                new int[]{
+                        var9, var17, var18, var19, (var16 == 1 ? var9 : 0),
+                        var10 * 2, (var12 == 1 ? var10 : 0), (var13 == 255 ? var10 : 0), (var14 == 1 ? var10 : 0), (var15 == 1 ? var10 : 0),
+                        var20, var10, var11 * 6
+                },
+                new Buffer[]{var4, var5, var6, var7, var8},
+                new String[]{"b4", "b5", "b6", "b7", "b8"},
+                indexDataCursor, indexTypeCursor,
+                faceIndexTypes);
 
     }
 }

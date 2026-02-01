@@ -20,12 +20,12 @@ public final class TeleportBosses {
         List<TeleportDefinition> defs = new ArrayList<>();
 
         defs.add(new TeleportDefinition(
-                4, TeleportCategory.BOSSES,
-                "Giant Mole",
+                1, TeleportCategory.BOSSES,
+                "Dragith Nurn",
                 "A giant subterranean creature lurking beneath Falador Park.",
-                TeleportRequirement.combatLevel(70),
+                TeleportRequirement.combatLevel(50),
                 null,
-                5779, // npcId
+                1121, // npcId
                 230,
                 200,
                 true,

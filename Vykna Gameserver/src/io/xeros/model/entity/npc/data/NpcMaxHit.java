@@ -5,8 +5,16 @@ public class NpcMaxHit {
     public static int getMaxHit(int npcId) {
         switch (npcId) {
 
+            case 1100://Warped Rat
+                return 4;
+            case 1093://Warped Terrorbird
+                return 10;
             case 1101://Powerful sea snake
                 return 35;
+            case 1102://Warped Fly
+                return 6;
+            case 1103://Warped Skoblin
+                return 12;
 
             case 5001://Revenant maledictus normal
             case 11246://Revenant maledictus enranged

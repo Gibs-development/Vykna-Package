@@ -15,6 +15,8 @@ public class Model extends Renderable {
     public ParticleSystem particleSystem;
     private static final boolean DEBUG_CAPE_PARTICLES = false;
     private static final int FOREIGN_MODEL_BASE = 50000;
+    private static final boolean DEBUG_MODEL_LOAD = true;
+    private static final int[] DEBUG_MODEL_IDS = new int[]{64733};
 
     /** True if ANY vertex in this model has a particle attachment (fast early-out at render time). */
     private boolean hasParticleAttachments;
@@ -202,7 +204,29 @@ public class Model extends Renderable {
         }
 
         try {
-            byte[] data = aClass21Array1661[model].aByteArray368;
+            boolean debugModel = false;
+            if (DEBUG_MODEL_LOAD && DEBUG_MODEL_IDS != null) {
+                for (int i = 0; i < DEBUG_MODEL_IDS.length; i++) {
+                    if (DEBUG_MODEL_IDS[i] == model) {
+                        debugModel = true;
+                        break;
+                    }
+                }
+            }
+            if (debugModel) {
+                System.out.println("[Model ctor] id=" + model);
+            }
+            ModelHeader header = aClass21Array1661[model];
+            if (debugModel) {
+                System.out.println("[Model ctor] header=" + (header == null ? "null" : "ok"));
+            }
+            byte[] data = header == null ? null : header.aByteArray368;
+            if (debugModel) {
+                System.out.println("[Model ctor] dataLen=" + (data == null ? 0 : data.length));
+            }
+            if (data == null) {
+                return;
+            }
 
             /* ---------- 667 MODELS ---------- */
             if (model >= FOREIGN_MODEL_BASE) {
@@ -848,8 +872,24 @@ public class Model extends Renderable {
             return null;
         }
         ModelHeader class21 = aClass21Array1661[j];
+        if (DEBUG_MODEL_LOAD && DEBUG_MODEL_IDS != null) {
+            for (int n = 0; n < DEBUG_MODEL_IDS.length; n++) {
+                if (DEBUG_MODEL_IDS[n] == j) {
+                    System.out.println("[Model check] id=" + j + " header=" + (class21 == null ? "null" : "ok") + " data=" + (class21 == null || class21.aByteArray368 == null ? "null" : "ok"));
+                    break;
+                }
+            }
+        }
         if (class21 == null || class21.aByteArray368 == null) {
             aOnDemandFetcherParent_1662.method548(j);
+            if (DEBUG_MODEL_LOAD && DEBUG_MODEL_IDS != null) {
+                for (int n = 0; n < DEBUG_MODEL_IDS.length; n++) {
+                    if (DEBUG_MODEL_IDS[n] == j) {
+                        System.out.println("[Model request] id=" + j + " requested");
+                        break;
+                    }
+                }
+            }
             return null;
         }
         return new Model(j);
@@ -861,8 +901,24 @@ public class Model extends Renderable {
         }
 
         ModelHeader class21 = aClass21Array1661[i];
+        if (DEBUG_MODEL_LOAD && DEBUG_MODEL_IDS != null) {
+            for (int n = 0; n < DEBUG_MODEL_IDS.length; n++) {
+                if (DEBUG_MODEL_IDS[n] == i) {
+                    System.out.println("[Model exists] id=" + i + " header=" + (class21 == null ? "null" : "ok"));
+                    break;
+                }
+            }
+        }
         if (class21 == null) {
             aOnDemandFetcherParent_1662.method548(i);
+            if (DEBUG_MODEL_LOAD && DEBUG_MODEL_IDS != null) {
+                for (int n = 0; n < DEBUG_MODEL_IDS.length; n++) {
+                    if (DEBUG_MODEL_IDS[n] == i) {
+                        System.out.println("[Model request] id=" + i + " requested");
+                        break;
+                    }
+                }
+            }
             return false;
         } else {
             return true;
@@ -1030,7 +1086,7 @@ public class Model extends Renderable {
 
                         if (coordinate_flag) {
                             if (build.textures != null && build.textures[face] != -1) {
-                                textures[trianglesCount] = (byte) (build.textures[face] + texture_face);
+                                textures[trianglesCount] = (byte) ((build.textures[face] & 0xFF) + texture_face);
                             } else {
                                 textures[trianglesCount] = -1;
                             }
@@ -1259,7 +1315,7 @@ public class Model extends Renderable {
 
                     if (coordinate_flag) {
                         if (model_1.textures != null && model_1.textures[i2] != -1) {
-                            textures[trianglesCount] = (byte) (model_1.textures[i2] + texBase); // FIX: use face index + stable base
+                            textures[trianglesCount] = (byte) ((model_1.textures[i2] & 0xFF) + texBase); // FIX: use face index + stable base
                         } else {
                             textures[trianglesCount] = -1;
                         }

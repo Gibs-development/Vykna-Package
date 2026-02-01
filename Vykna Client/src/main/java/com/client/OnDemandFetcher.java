@@ -599,7 +599,7 @@ public final class OnDemandFetcher extends OnDemandFetcherParent implements Runn
 		running = true;
 		waiting = false;
 		aClass19_1358 = new NodeList();
-		gzipInputBuffer = new byte[0x71868];
+		gzipInputBuffer = new byte[0x400000];
 		nodeSubList = new NodeSubList();
 		versions = new int[4][];
 		aClass19_1368 = new NodeList();

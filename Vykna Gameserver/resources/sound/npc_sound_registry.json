@@ -29,6 +29,26 @@
       "attack": [474],
       "death": [475],
       "hit": [476]
+    },
+    "rat": {
+      "attack": [703, 710],
+      "death": [704, 707],
+      "hit": [705, 709]
+    },
+    "fly": {
+      "attack": [551],
+      "death": [553],
+      "hit": [554]
+    },
+    "terrorbird": {
+      "attack": [2032],
+      "death": [2032],
+      "hit": [2032]
+    },
+    "skoblin": {
+      "attack": [462],
+      "death": [463],
+      "hit": [464]
     }
   },
   "keywords": {
@@ -42,13 +62,16 @@
     "machine": "mechanical",
     "wolf": "beast",
     "bear": "beast",
-    "rat": "beast",
+    "rat": "rat",
     "spider": "beast",
     "scorpion": "beast",
     "cow": "beast",
     "troll": "beast",
     "ogre": "beast",
-    "dragon": "beast"
+    "dragon": "beast",
+    "fly": "fly",
+    "terrorbird": "terrorbird",
+    "skoblin": "skoblin"
   },
   "npcOverrides": {}
 }

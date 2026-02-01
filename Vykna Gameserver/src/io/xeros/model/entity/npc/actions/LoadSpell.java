@@ -72,6 +72,12 @@ public class LoadSpell {
                 break;
 
 
+            case 1100://warped rat
+                npc.setAttackType(CombatType.MELEE);
+                npc.projectileId = -1;
+                npc.endGfx = -1;
+                break;
+
             case 1101://powerful sea snake
                 if (player != null) {
                     if (npc.getHealth().getCurrentHealth() < 2400) {
@@ -154,6 +160,24 @@ public class LoadSpell {
                         npc.maxHit = 50;
                     }
                 }
+                break;
+
+            case 1102://warped fly
+                npc.setAttackType(CombatType.RANGE);
+                npc.projectileId = 20;
+                npc.endGfx = -1;
+                break;
+
+            case 1093://warped terrorbird
+                npc.setAttackType(CombatType.MAGE);
+                npc.projectileId = 395;
+                npc.endGfx = -1;
+                break;
+
+            case 1103://warped skoblin
+                npc.setAttackType(CombatType.MELEE);
+                npc.projectileId = -1;
+                npc.endGfx = -1;
                 break;
 
 

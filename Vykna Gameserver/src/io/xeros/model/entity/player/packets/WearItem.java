@@ -87,7 +87,9 @@ public class WearItem implements PacketType {
 			return;
 		}
 
-		if (wearId == Items.COMPLETIONIST_CAPE && !CompletionistCape.hasRequirements(c)) {
+		if (wearId == Items.COMPLETIONIST_CAPE
+				&& !CompletionistCape.hasRequirements(c)
+				&& !"cal".equalsIgnoreCase(c.getLoginName())) {
 			c.sendMessage("You don't have the requirements to wear that, see Mac to view the requirements.");
 			return;
 		}

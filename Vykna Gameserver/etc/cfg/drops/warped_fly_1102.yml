@@ -1,0 +1,23 @@
+---
+npc_id: 1102
+common:
+  accessibility: 1
+  items:
+  - name: "bones"
+    minimum: 1
+    maximum: 1
+  - name: "Rune scimitar"
+    minimum: 1
+    maximum: 1
+  - name: "Rune 2h sword"
+    minimum: 1
+    maximum: 1
+  - item: 9185
+    minimum: 1
+    maximum: 1
+  - name: "Teacher wand"
+    minimum: 1
+    maximum: 1
+  - name: "coins"
+    minimum: 10
+    maximum: 40

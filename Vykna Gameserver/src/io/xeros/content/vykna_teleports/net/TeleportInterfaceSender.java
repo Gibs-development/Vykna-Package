@@ -88,13 +88,8 @@ public final class TeleportInterfaceSender {
         String d = def.getDescription() == null ? "" : def.getDescription();
         player.getPA().sendFrame126(d, DESC_TEXT_ID);
 
-        // Requirements (simple)
-        if (def.getRequirements() != null && def.getRequirements().getCombatLevel() != null) {
-            player.getPA().sendFrame126("Combat level: " + def.getRequirements().getCombatLevel(), REQ_LINE1_ID);
-        } else {
-            player.getPA().sendFrame126("None", REQ_LINE1_ID);
-        }
-        player.getPA().sendFrame126("", REQ_LINE2_ID);
+        // Requirements
+        sendRequirements(player, def);
 
         // Quest
         player.getPA().sendFrame126(def.getQuestName() == null ? "None" : def.getQuestName(), QUEST_LINE1_ID);
@@ -170,6 +165,40 @@ public final class TeleportInterfaceSender {
             container.add(i < drops.size() ? drops.get(i) : null);
         }
         player.getItems().sendItemContainer(LOOT_GRID_ID, container);
+    }
+
+    private static void sendRequirements(io.xeros.model.entity.player.Player player, TeleportDefinition def) {
+        List<String> lines = new java.util.ArrayList<>(2);
+        if (def.getRequirements() != null) {
+            Integer combat = def.getRequirements().getCombatLevel();
+            if (combat != null) {
+                lines.add("Combat level: " + combat);
+            }
+            for (var req : def.getRequirements().getSkills()) {
+                String name = getSkillName(req.getSkillId());
+                lines.add(name + ": " + req.getLevel());
+                if (lines.size() >= 2) break;
+            }
+        }
+
+        if (lines.isEmpty()) {
+            player.getPA().sendFrame126("None", REQ_LINE1_ID);
+            player.getPA().sendFrame126("", REQ_LINE2_ID);
+            return;
+        }
+
+        player.getPA().sendFrame126(lines.get(0), REQ_LINE1_ID);
+        player.getPA().sendFrame126(lines.size() > 1 ? lines.get(1) : "", REQ_LINE2_ID);
+    }
+
+    private static String getSkillName(int skillId) {
+        if (skillId >= 0 && skillId < io.xeros.content.skills.Skill.SKILL_NAMES.length) {
+            String raw = io.xeros.content.skills.Skill.SKILL_NAMES[skillId];
+            if (raw != null && !raw.isEmpty()) {
+                return io.xeros.util.Misc.capitalizeFirstLetter(raw);
+            }
+        }
+        return "Skill " + skillId;
     }
 
     private static final class TeleportListPayload {

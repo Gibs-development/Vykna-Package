@@ -38634,6 +38634,40 @@
     "magicDef": 60
   },
 
+  "1093": {
+    "name": "Warped Terrorbird",
+    "hitpoints": 80,
+    "combatLevel": 64,
+    "attackSpeed": 4,
+    "attackLevel": 1,
+    "strengthLevel": 1,
+    "defenceLevel": 35,
+    "rangeLevel": 1,
+    "magicLevel": 50,
+    "stabDef": 20,
+    "slashDef": 25,
+    "crushDef": 20,
+    "rangeDef": 25,
+    "magicDef": 30
+  },
+
+  "1100": {
+    "name": "Warped Rat",
+    "hitpoints": 30,
+    "combatLevel": 16,
+    "attackSpeed": 4,
+    "attackLevel": 10,
+    "strengthLevel": 10,
+    "defenceLevel": 8,
+    "rangeLevel": 1,
+    "magicLevel": 1,
+    "stabDef": 5,
+    "slashDef": 5,
+    "crushDef": 5,
+    "rangeDef": 5,
+    "magicDef": 5
+  },
+
   "1101": {
     "name": "Powerful sea snake",
     "hitpoints": 3400,
@@ -38657,6 +38691,40 @@
     "bonusMagicDamage": 164,
     "poisonImmune": true,
     "venomImmune": true
+  },
+
+  "1102": {
+    "name": "Warped Fly",
+    "hitpoints": 50,
+    "combatLevel": 32,
+    "attackSpeed": 4,
+    "attackLevel": 1,
+    "strengthLevel": 1,
+    "defenceLevel": 12,
+    "rangeLevel": 20,
+    "magicLevel": 1,
+    "stabDef": 8,
+    "slashDef": 8,
+    "crushDef": 8,
+    "rangeDef": 12,
+    "magicDef": 5
+  },
+
+  "1103": {
+    "name": "Warped Skoblin",
+    "hitpoints": 110,
+    "combatLevel": 83,
+    "attackSpeed": 4,
+    "attackLevel": 55,
+    "strengthLevel": 55,
+    "defenceLevel": 45,
+    "rangeLevel": 1,
+    "magicLevel": 1,
+    "stabDef": 30,
+    "slashDef": 35,
+    "crushDef": 30,
+    "rangeDef": 25,
+    "magicDef": 20
   },
 
   "11293": {

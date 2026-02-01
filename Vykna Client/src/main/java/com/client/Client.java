@@ -1460,7 +1460,7 @@ public class Client extends RSApplet {
 			} else if (dialogID != -1) {
 				drawInterface(0, dialogBaseX, RSInterface.interfaceCache[dialogID], dialogBaseY);
 			} else {
-				int j77 = rs3ChatOverride ? 0 : -3;
+				int j77 = 0;
 				int j = 0;
 				int messageAreaHeight = getChatScrollHeight(chatAreaHeight);
 				int messageClipTop = yOffset + 7;
@@ -1485,11 +1485,7 @@ public class Client extends RSApplet {
 						// System.out.println(chatMessages[k]);
 						int chatType = chatTypes[k];
 						int yPos;
-						if (rs3ChatOverride && messageRect != null) {
-							yPos = messageAreaHeight - 6 - j77 * 14 + anInt1089;
-						} else {
-							yPos = (70 - j77 * 14) + anInt1089 + 5;
-						}
+						yPos = messageAreaHeight - 6 - j77 * 14 + anInt1089;
 						String s1 = chatNames[k];
 						//byte byte0 = 0;
 
@@ -10113,16 +10109,30 @@ public class Client extends RSApplet {
 		}
 
 		int boxWidth = 240;
-		int perkBlockHeight = 46;
-		int boxH = perkCount > 0 ? 76 + perkBlockHeight : 80;
+		int padding = 8;
+		int blockGap = 6;
+		int headerHeight = 48;
+		int maxDescLines = 3;
+		int blockHeight1 = 0;
+		int blockHeight2 = 0;
+		int columns = perkCount > 1 ? 2 : 1;
+		int blockWidth = columns == 2 ? (boxWidth - (padding * 2) - blockGap) / 2 : (boxWidth - (padding * 2));
+		if (attr != null && attr.perk1 > 0) {
+			blockHeight1 = getPerkBlockHeight(attr.perk1, attr.perk1Rank, blockWidth, maxDescLines);
+		}
+		if (attr != null && attr.perk2 > 0) {
+			blockHeight2 = getPerkBlockHeight(attr.perk2, attr.perk2Rank, blockWidth, maxDescLines);
+		}
+		int blockRowHeight = Math.max(blockHeight1, blockHeight2);
+		int boxH = perkCount > 0 ? headerHeight + blockRowHeight + 10 : 64;
 		int screenWidth = currentScreenMode == ScreenMode.FIXED ? 765 : currentGameWidth;
 		int screenHeight = currentScreenMode == ScreenMode.FIXED ? 503 : currentGameHeight;
 		int boxX = mouseX + 12;
 		int boxY = mouseY + 12;
 		boxX = Math.max(0, Math.min(boxX, screenWidth - boxWidth));
 		boxY = Math.max(0, Math.min(boxY, screenHeight - boxH));
-		DrawingArea.drawBoxOutline(boxX, boxY + 5, boxWidth, boxH, 0x696969);
-		DrawingArea.drawTransparentBox(boxX + 1, boxY + 6, boxWidth, boxH + 1, 0x000000, 90);
+		DrawingArea.drawBoxOutline(boxX, boxY + 4, boxWidth, boxH, 0x2A2A2A);
+		DrawingArea.drawTransparentBox(boxX + 1, boxY + 5, boxWidth, boxH - 1, 0x101010, 170);
 
 		Client.instance.newSmallFont.drawBasicString(itemName, boxX + 8, boxY + 18, color, 1);
 
@@ -10142,23 +10152,15 @@ public class Client extends RSApplet {
 			return;
 		}
 
-		int padding = 8;
-		int blockGap = 6;
-		int columns = perkCount > 1 ? 2 : 1;
-		int blockWidth = columns == 2 ? (boxWidth - (padding * 2) - blockGap) / 2 : (boxWidth - (padding * 2));
-		int blockY = boxY + 48;
+		int blockY = boxY + headerHeight;
 
 		if (attr.perk1 > 0) {
 			int blockX = boxX + padding;
-			drawPerkBlock(blockX, blockY, blockWidth, attr.perk1, attr.perk1Rank, color);
+			drawPerkBlock(blockX, blockY, blockWidth, attr.perk1, attr.perk1Rank, color, maxDescLines);
 		}
 		if (attr.perk2 > 0) {
 			int blockX = boxX + padding + blockWidth + blockGap;
-			if (columns == 1) {
-				blockX = boxX + padding;
-				blockY += perkBlockHeight + 6;
-			}
-			drawPerkBlock(blockX, blockY, blockWidth, attr.perk2, attr.perk2Rank, color);
+			drawPerkBlock(blockX, blockY, blockWidth, attr.perk2, attr.perk2Rank, color, maxDescLines);
 		}
 
 	}
@@ -10169,7 +10171,21 @@ public class Client extends RSApplet {
 				&& isAttrHoverInterface(lastActiveInvInterface);
 	}
 
-	private void drawPerkBlock(int x, int y, int width, int perkId, int perkRank, int textColor) {
+	private int getPerkBlockHeight(int perkId, int perkRank, int width, int maxDescLines) {
+		com.client.attributes.PerkDefinitions.PerkDefinition perk =
+				com.client.attributes.PerkDefinitions.forId(perkId);
+		String perkDesc = perk == null ? "Unknown perk effect." : perk.getDescription();
+		int iconSize = 24;
+		int textX = 2 + iconSize + 8;
+		int textWidth = Math.max(60, width - (textX) - 4);
+		String[] descLines = Client.instance.newSmallFont.wrap(perkDesc, textWidth);
+		int lineCount = Math.min(maxDescLines, descLines.length);
+		int textHeight = 28 + (lineCount * 12);
+		int iconHeight = 4 + iconSize;
+		return Math.max(textHeight, iconHeight) + 6;
+	}
+
+	private void drawPerkBlock(int x, int y, int width, int perkId, int perkRank, int textColor, int maxDescLines) {
 		com.client.attributes.PerkDefinitions.PerkDefinition perk =
 				com.client.attributes.PerkDefinitions.forId(perkId);
 		String perkName = perk == null ? ("Unknown Perk (" + perkId + ")") : perk.getName();
@@ -10192,7 +10208,7 @@ public class Client extends RSApplet {
 		);
 		String[] descLines = Client.instance.newSmallFont.wrap(perkDesc, textWidth);
 		int descY = y + 28;
-		for (int i = 0; i < descLines.length && i < 2; i++) {
+		for (int i = 0; i < descLines.length && i < maxDescLines; i++) {
 			Client.instance.newSmallFont.drawBasicString(descLines[i], textX, descY, 0xCCCCCC, 1);
 			descY += 12;
 		}
@@ -14713,9 +14729,12 @@ public class Client extends RSApplet {
 							Sprite sprite;
 
 							boolean hovered = (hoverId == class9_1.id);
+							boolean isSpellIcon = class9_1.spellName != null && !class9_1.spellName.isEmpty();
+							boolean hoverEnabled = hovered && class9_1.atActionType > 0 && !isSpellIcon && class9_1.sprite2 != null;
 
-
-							if (hovered || interfaceIsSelected(class9_1) || class9_1.active) {
+							if (hoverEnabled) {
+								sprite = class9_1.sprite2;
+							} else if (interfaceIsSelected(class9_1) || class9_1.active) {
 								sprite = class9_1.sprite2;
 							} else {
 								sprite = class9_1.sprite1;

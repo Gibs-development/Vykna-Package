@@ -18936,40 +18936,40 @@
     "CRUSH_BONUS": 19
   }
 },
-{
-  "id": 1100,
-  "attackSpeed": 4,
-  "attackStyle": "Stab",
-  "aggressive": false,
-  "isPoisonous": false,
-  "isImmuneToPoison": false,
-  "isImmuneToVenom": false,
-  "isImmuneToCannons": false,
-  "isImmuneToThralls": false,
-  "levels": {
-    "MAGIC": 1,
-    "ATTACK": 19,
-    "DEFENCE": 14,
-    "RANGE": 1,
-    "STRENGTH": 18,
-    "HITPOINTS": 22
+  {
+    "id": 1100,
+    "attackSpeed": 4,
+    "attackStyle": "Melee",
+    "aggressive": true,
+    "isPoisonous": false,
+    "isImmuneToPoison": false,
+    "isImmuneToVenom": false,
+    "isImmuneToCannons": false,
+    "isImmuneToThralls": false,
+    "levels": {
+      "MAGIC": 1,
+      "ATTACK": 10,
+      "DEFENCE": 8,
+      "RANGE": 1,
+      "STRENGTH": 10,
+      "HITPOINTS": 30
+    },
+    "attackBonuses": {
+      "ATTACK_MAGIC_BONUS": 0,
+      "ATTACK_BONUS": 5,
+      "STRENGTH_BONUS": 5,
+      "MAGIC_STRENGTH_BONUS": 0,
+      "ATTACK_RANGE_BONUS": 0,
+      "RANGE_STRENGTH_BONUS": 0
+    },
+    "defensiveBonuses": {
+      "SLASH_BONUS": 5,
+      "STAB_BONUS": 5,
+      "RANGE_BONUS": 5,
+      "MAGIC_BONUS": 5,
+      "CRUSH_BONUS": 5
+    }
   },
-  "attackBonuses": {
-    "ATTACK_MAGIC_BONUS": 0,
-    "ATTACK_BONUS": 4,
-    "STRENGTH_BONUS": 5,
-    "MAGIC_STRENGTH_BONUS": 0,
-    "ATTACK_RANGE_BONUS": 0,
-    "RANGE_STRENGTH_BONUS": 0
-  },
-  "defensiveBonuses": {
-    "SLASH_BONUS": 25,
-    "STAB_BONUS": 18,
-    "RANGE_BONUS": 20,
-    "MAGIC_BONUS": -4,
-    "CRUSH_BONUS": 19
-  }
-},
 {
   "id": 1111,
   "attackSpeed": 4,
@@ -106615,6 +106615,111 @@
       "RANGE_BONUS": 120,
       "MAGIC_BONUS": 190,
       "CRUSH_BONUS": 50
+    }
+  },
+
+  {
+    "id": 1102,
+    "attackSpeed": 4,
+    "attackStyle": "Ranged",
+    "aggressive": true,
+    "isPoisonous": false,
+    "isImmuneToPoison": false,
+    "isImmuneToVenom": false,
+    "isImmuneToCannons": false,
+    "isImmuneToThralls": false,
+    "levels": {
+      "MAGIC": 1,
+      "ATTACK": 1,
+      "DEFENCE": 12,
+      "RANGE": 20,
+      "STRENGTH": 1,
+      "HITPOINTS": 50
+    },
+    "attackBonuses": {
+      "ATTACK_MAGIC_BONUS": 0,
+      "ATTACK_BONUS": 0,
+      "STRENGTH_BONUS": 0,
+      "MAGIC_STRENGTH_BONUS": 0,
+      "ATTACK_RANGE_BONUS": 8,
+      "RANGE_STRENGTH_BONUS": 8
+    },
+    "defensiveBonuses": {
+      "SLASH_BONUS": 8,
+      "STAB_BONUS": 8,
+      "RANGE_BONUS": 10,
+      "MAGIC_BONUS": 5,
+      "CRUSH_BONUS": 8
+    }
+  },
+
+  {
+    "id": 1093,
+    "attackSpeed": 4,
+    "attackStyle": "Magic",
+    "aggressive": true,
+    "isPoisonous": false,
+    "isImmuneToPoison": false,
+    "isImmuneToVenom": false,
+    "isImmuneToCannons": false,
+    "isImmuneToThralls": false,
+    "levels": {
+      "MAGIC": 50,
+      "ATTACK": 1,
+      "DEFENCE": 35,
+      "RANGE": 1,
+      "STRENGTH": 1,
+      "HITPOINTS": 80
+    },
+    "attackBonuses": {
+      "ATTACK_MAGIC_BONUS": 12,
+      "ATTACK_BONUS": 0,
+      "STRENGTH_BONUS": 0,
+      "MAGIC_STRENGTH_BONUS": 8,
+      "ATTACK_RANGE_BONUS": 0,
+      "RANGE_STRENGTH_BONUS": 0
+    },
+    "defensiveBonuses": {
+      "SLASH_BONUS": 25,
+      "STAB_BONUS": 20,
+      "RANGE_BONUS": 25,
+      "MAGIC_BONUS": 30,
+      "CRUSH_BONUS": 20
+    }
+  },
+
+  {
+    "id": 1103,
+    "attackSpeed": 4,
+    "attackStyle": "Melee",
+    "aggressive": true,
+    "isPoisonous": false,
+    "isImmuneToPoison": false,
+    "isImmuneToVenom": false,
+    "isImmuneToCannons": false,
+    "isImmuneToThralls": false,
+    "levels": {
+      "MAGIC": 1,
+      "ATTACK": 55,
+      "DEFENCE": 45,
+      "RANGE": 1,
+      "STRENGTH": 55,
+      "HITPOINTS": 110
+    },
+    "attackBonuses": {
+      "ATTACK_MAGIC_BONUS": 0,
+      "ATTACK_BONUS": 20,
+      "STRENGTH_BONUS": 20,
+      "MAGIC_STRENGTH_BONUS": 0,
+      "ATTACK_RANGE_BONUS": 0,
+      "RANGE_STRENGTH_BONUS": 0
+    },
+    "defensiveBonuses": {
+      "SLASH_BONUS": 35,
+      "STAB_BONUS": 30,
+      "RANGE_BONUS": 25,
+      "MAGIC_BONUS": 20,
+      "CRUSH_BONUS": 30
     }
   },
 

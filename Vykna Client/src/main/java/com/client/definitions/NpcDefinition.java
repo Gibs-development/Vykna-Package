@@ -879,19 +879,247 @@ public final class NpcDefinition {
 
 		if (i == 1100) {
 			new NpcDefBuilder(entityDef)
-					.name("Starter Rat")
+					.name("Warped Rat")
 					.models(61020, 61011, 61022 )
 					.actions(null, "Attack", null, null, null)
 					.anims(14857+14000, 14862+14000)
-					.turn(-1)
+					.turn(14862+14000)
 					.size(30, 30)
 					.combat(16);
+			entityDef.size = 2;
+		}
+		if (i == 1102) {
+			new NpcDefBuilder(entityDef)
+					.name("Warped Fly")
+					.models(52569, 58979 )
+					.actions(null, "Attack", null, null, null)
+					.anims(7241+14000, 7241+14000)
+					.turn(7241+14000)
+					.size(100, 100)
+					.combat(32);
+			entityDef.size = 1;
+		}
+		if (i == 1103) {
+			new NpcDefBuilder(entityDef)
+					.name("Warped Skoblin")
+					.models(52571 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+11395, 14000+11394)
+					.turn(7241+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1093) {
+			entityDef.name = "Warped Terrorbird";
+			entityDef.combatLevel = 64;
+			entityDef.models = new int[] { 58333, 58338, 58334, 58335 };
+			entityDef.actions = new String[5];
+			entityDef.actions = new String[] { null, "Attack", null, null, null };
+			entityDef.anInt86 = 110; //WIDTH
+			entityDef.anInt91 = 110; // HEIGH
+			entityDef.standAnim = 14000+7105;
+			entityDef.walkAnim = 14000+7094;
 			entityDef.size = 2;
 		}
 
 		/*
 			END OF STARTER CRYPT NPCS
 		 */
+
+		/* 667 NPCS
+
+		 */
+
+		if (i == 1105) {
+			new NpcDefBuilder(entityDef)
+					.name("Night Spider")
+					.models(56827 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+5318, 14000+5317)
+					.turn(5317+14000)
+					.size(75, 75)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1106) {
+			new NpcDefBuilder(entityDef)
+					.name("Spiritual Guardian")
+					.models(55865 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+13818, 14000+11977)
+					.turn(11977+14000)
+					.size(50, 50)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1107) {
+			new NpcDefBuilder(entityDef)
+					.name("Seeker")
+					.models(55396 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+13299, 14000+13769)
+					.turn(13769+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1108) {
+			new NpcDefBuilder(entityDef)
+					.name("Jungle Strykewyrm")
+					.models(51852, 51853 )
+					.actions(null, "Attack", null, null, null)
+					.anims(12790+14000, -1)
+					.turn(12790+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1109) {
+			new NpcDefBuilder(entityDef)
+					.name("Desert Strykewyrm")
+					.models(51848, 51850 )
+					.actions(null, "Attack", null, null, null)
+					.anims(12790+14000, -1)
+					.turn(12790+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1110) {
+			new NpcDefBuilder(entityDef)
+					.name("Ice Strykewyrm")
+					.models(51847, 51849 )
+					.actions(null, "Attack", null, null, null)
+					.anims(12790+14000, -1)
+					.turn(12790+14000)
+					.size(50, 50)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1127) {
+			new NpcDefBuilder(entityDef)
+					.name("Aquanite")
+					.models(68181 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+11395, 14000+11394)
+					.turn(7241+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1112) {
+			new NpcDefBuilder(entityDef)
+					.name("Glacor")
+					.models(58940 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+10082, 14000+10083)
+					.turn(10083+14000)
+					.size(50, 50)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1113) {
+			new NpcDefBuilder(entityDef)
+					.name("Frost Dragon")
+					.models(56767, 55294 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+13156, 14000+13157)
+					.turn(13157+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1125) {
+			new NpcDefBuilder(entityDef)
+					.name("Edimmu")
+					.models(55296 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+13731, 14000+13739)
+					.turn(13739+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1124) {
+			new NpcDefBuilder(entityDef)
+					.name("Kal'gerion Demon")
+					.models(59612 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+14382, 14000+14397)
+					.turn(14397+14000)
+					.size(25, 25)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1123) {
+			new NpcDefBuilder(entityDef)
+					.name("Tormented Demon")
+					.models(64733 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+11395, 14000+11394)
+					.turn(7241+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1122) {
+			new NpcDefBuilder(entityDef)
+					.name("Living Rock Striker")
+					.models(59360 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+11395, 14000+11394)
+					.turn(7241+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1118) {
+			new NpcDefBuilder(entityDef)
+					.name("Living Rock Patriarch")
+					.models(59359 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+12193, 14000+12195)
+					.turn(12195+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1119) {
+			new NpcDefBuilder(entityDef)
+					.name("Lava Strykewyrm")
+					.models(63604, 63606 )
+					.actions(null, "Attack", null, null, null)
+					.anims(12790+14000, -1)
+					.turn(12790+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1120) {
+			new NpcDefBuilder(entityDef)
+					.name("Dreadnaut")
+					.models(61978 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+14977, 14000+14981)
+					.turn(14981+14000)
+					.size(100, 100)
+					.combat(83);
+			entityDef.size = 1;
+		}
+		if (i == 1121) {
+			new NpcDefBuilder(entityDef)
+					.name("Dragith Nurn")
+					.models(52475, 52476, 52473 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14000+12883, 14000+12872)
+					.turn(12872+14000)
+					.size(150, 150)
+					.combat(395);
+			entityDef.size = 1;
+		}
+
+		/*END 667*/
 		if (i == 5792) {
 			entityDef.models = new int[] { 54122 };
 			entityDef.actions = new String[5];
@@ -909,18 +1137,6 @@ public final class NpcDefinition {
 			entityDef.anInt86 = 35; //WIDTH
 			entityDef.anInt91 = 35; // HEIGH
 			entityDef.standAnim = 15015+14000;
-			entityDef.size = 3;
-
-		}
-		if (i == 1093) {
-			entityDef.name = "Starter Terrorbird";
-			entityDef.combatLevel = 64;
-			entityDef.models = new int[] { 58333, 58338, 58334, 58335 };
-			entityDef.actions = new String[5];
-			entityDef.actions = new String[] { null, "Attack", null, null, null };
-			entityDef.anInt86 = 100; //WIDTH
-			entityDef.anInt91 = 100; // HEIGH
-			entityDef.standAnim = -1;
 			entityDef.size = 3;
 
 		}
@@ -1571,6 +1787,11 @@ public final class NpcDefinition {
             model_1.method470(k);
         if (anInt91 != 128 || anInt86 != 128)
             model_1.method478(anInt91, anInt91, anInt86);
+		if (npcId == 1093) {
+			// Warped Terrorbird: models face backward, rotate 180 degrees.
+			model_1.method473();
+			model_1.method473();
+		}
         model_1.calculateDistances();
         model_1.faceGroups = null;
         model_1.vertexGroups = null;

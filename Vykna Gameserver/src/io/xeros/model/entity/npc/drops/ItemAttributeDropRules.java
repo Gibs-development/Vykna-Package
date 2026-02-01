@@ -175,8 +175,22 @@ public final class ItemAttributeDropRules {
 		private List<PerkSelection> rollPerks(int rarityId) {
 			if (useRarityPerkPool) {
 				List<PerkSelection> selections = new ArrayList<>();
+				int minPerks = io.xeros.model.items.RarityPerkPool.minPerksForRarity(rarityId);
+				int maxPerksForRarity = io.xeros.model.items.RarityPerkPool.maxPerksForRarity(rarityId);
+				int cappedMax = maxPerksForRarity;
+				if (maxPerks > 0) {
+					cappedMax = Math.min(cappedMax, maxPerks);
+				}
+				if (cappedMax <= 0) {
+					return selections;
+				}
+				int cappedMin = Math.min(minPerks, cappedMax);
+				int count = cappedMin;
+				if (cappedMax > cappedMin) {
+					count = cappedMin + Misc.random(cappedMax - cappedMin);
+				}
 				List<io.xeros.model.items.RarityPerkPool.PerkRoll> rolls =
-						io.xeros.model.items.RarityPerkPool.rollPerks(rarityId, maxPerks);
+						io.xeros.model.items.RarityPerkPool.rollPerks(rarityId, count);
 				for (io.xeros.model.items.RarityPerkPool.PerkRoll roll : rolls) {
 					selections.add(new PerkSelection(roll.perkId, roll.rank));
 				}

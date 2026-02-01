@@ -12,6 +12,13 @@ import java.net.URLConnection;
 import java.util.stream.IntStream;
 
 public final class ItemDefinition {
+	private static final boolean NORMALIZE_ITEM_MODELS = true;
+	private static final int ITEM_NORMALIZE_TARGET = 192;
+	private static final int EQUIP_NORMALIZE_MIN = 160;
+	private static final boolean ITEM_NORMALIZE_CENTER = true;
+	private static final int ITEM_NORMALIZE_Z_OFFSET = -20;
+	private static final int EQUIP_NORMALIZE_Z_OFFSET = 72;
+	private static final int EQUIP_NORMALIZE_Y_OFFSET = -14;
 
 	public byte[] customSpriteLocation;
 	public byte[] customSmallSpriteLocation;
@@ -106,6 +113,8 @@ public final class ItemDefinition {
 		itemDef.spriteCameraRoll = copyItemDef.spriteCameraRoll;
 		itemDef.spriteTranslateX = copyItemDef.spriteTranslateX;
 		itemDef.spriteTranslateY = copyItemDef.spriteTranslateY;
+		itemDef.equipNormalizeHeight = copyItemDef.equipNormalizeHeight;
+		itemDef.equipNormalizeCenter = copyItemDef.equipNormalizeCenter;
 		itemDef.inventoryOptions = copyItemDef.inventoryOptions;
 		itemDef.inventoryOptions = new String[5];
 		if (actions != null) {
@@ -146,6 +155,9 @@ public final class ItemDefinition {
 
 				itemDef.maleModel = 65297;
 				itemDef.femaleModel = 65316;
+				// Normalize equip model (667-sized) to fit 317 player.
+				itemDef.equipNormalizeHeight = 90;
+				itemDef.equipNormalizeCenter = true;
 				//itemDef.groundActions = new String[5];
 				//itemDef.groundActions[2] = "Take";
 				itemDef.inventoryOptions = new String[5];
@@ -157,7 +169,7 @@ public final class ItemDefinition {
 			case 33057:
 				itemDef.setDefaults();
 				itemDef.id = 33057;
-				itemDef.modelId = 65273;
+				itemDef.modelId = 50400;
 				itemDef.name = "Completionist hood";
 				itemDef.description = "A hood worn by those who've over achieved.";
 
@@ -168,12 +180,16 @@ public final class ItemDefinition {
 				itemDef.spriteTranslateX = 0;
 				itemDef.spriteTranslateY = 0;
 
-				itemDef.maleModel = 65292;
-				itemDef.femaleModel = 65310;
-				//itemDef.groundActions = new String[5];
-				//itemDef.groundActions[2] = "Take";
-				itemDef.inventoryOptions = new String[5];
-				itemDef.inventoryOptions[1] = "Wear";
+			itemDef.maleModel = 50406;
+			itemDef.femaleModel = 50409;
+			itemDef.equipNormalizeHeight = 160;
+			itemDef.equipNormalizeCenter = true;
+			itemDef.equipNormalizeOffsetY = 0;
+			itemDef.equipNormalizeOffsetZ = 0;
+			//itemDef.groundActions = new String[5];
+			//itemDef.groundActions[2] = "Take";
+			itemDef.inventoryOptions = new String[5];
+			itemDef.inventoryOptions[1] = "Wear";
 				return itemDef;
 		}
 
@@ -2237,6 +2253,7 @@ public final class ItemDefinition {
 				model.retexture(originalTextureColors[k2], modifiedTextureColors[k2]);
 
 		}
+		normalizeEquipModel(model);
 		return model;
 	}
 
@@ -2298,6 +2315,7 @@ public final class ItemDefinition {
 				model.retexture(originalTextureColors[k2], modifiedTextureColors[k2]);
 
 		}
+		normalizeEquipModel(model);
 		return model;
 	}
 
@@ -2346,6 +2364,10 @@ public final class ItemDefinition {
 		anInt196 = 0;
 		anInt184 = 0;
 		team = 0;
+		equipNormalizeHeight = -1;
+		equipNormalizeCenter = false;
+		equipNormalizeOffsetY = 0;
+		equipNormalizeOffsetZ = 0;
 
 		opcode140 = -1;
 		opcode139 = -1;
@@ -2353,6 +2375,152 @@ public final class ItemDefinition {
 		opcode149 = -1;
 
 		searchableItem = false;
+	}
+
+	private void normalizeEquipModel(Model model) {
+		if (model == null) {
+			return;
+		}
+		if (equipNormalizeHeight <= 0 && !equipNormalizeCenter) {
+			return;
+		}
+		if (model.verticesCount <= 0) {
+			return;
+		}
+
+		// Compute bounds directly from vertices (more reliable for 667 models).
+		int minX = model.verticesX[0];
+		int maxX = model.verticesX[0];
+		int minY = model.verticesY[0];
+		int maxY = model.verticesY[0];
+		int minZ = model.verticesZ[0];
+		int maxZ = model.verticesZ[0];
+		int maxAbs = Math.abs(model.verticesX[0]);
+		maxAbs = Math.max(maxAbs, Math.abs(model.verticesY[0]));
+		maxAbs = Math.max(maxAbs, Math.abs(model.verticesZ[0]));
+		for (int i = 1; i < model.verticesCount; i++) {
+			int x = model.verticesX[i];
+			int y = model.verticesY[i];
+			int z = model.verticesZ[i];
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+			if (y < minY) minY = y;
+			if (y > maxY) maxY = y;
+			if (z < minZ) minZ = z;
+			if (z > maxZ) maxZ = z;
+			int ax = Math.abs(x);
+			int ay = Math.abs(y);
+			int az = Math.abs(z);
+			if (ax > maxAbs) maxAbs = ax;
+			if (ay > maxAbs) maxAbs = ay;
+			if (az > maxAbs) maxAbs = az;
+		}
+
+		if (equipNormalizeHeight > 0) {
+			int current = Math.max(maxY - minY, maxAbs);
+			if (current > 0) {
+				int target = equipNormalizeHeight;
+				if (target < EQUIP_NORMALIZE_MIN) {
+					target = EQUIP_NORMALIZE_MIN;
+				}
+				double scaleD = (target * 128.0) / current;
+				int scale = (int) Math.round(scaleD);
+				if (scale < 1) {
+					scale = 1; // allow extreme downscale instead of skipping
+				}
+				if (scale != 128) {
+					model.method478(scale, scale, scale);
+					model.calculateDistances();
+				}
+			}
+		}
+
+		if (!equipNormalizeCenter && !ITEM_NORMALIZE_CENTER) {
+			return;
+		}
+		int centerX = (minX + maxX) / 2;
+		int centerZ = (minZ + maxZ) / 2;
+		int yOffset = EQUIP_NORMALIZE_Y_OFFSET + equipNormalizeOffsetY;
+		int zOffset = EQUIP_NORMALIZE_Z_OFFSET + equipNormalizeOffsetZ;
+        model.method475(-centerX, yOffset, -centerZ + zOffset);
+        model.calculateDistances();
+		// Force sane priorities for worn models to reduce see-through sorting issues.
+		if (model.face_render_priorities != null) {
+			for (int i = 0; i < model.face_render_priorities.length; i++) {
+				model.face_render_priorities[i] = 10;
+			}
+		} else {
+			model.face_priority = 10;
+		}
+    }
+
+	private void normalizeItemModel(Model model) {
+		if (!NORMALIZE_ITEM_MODELS) {
+			return;
+		}
+		if (model == null || model.verticesCount <= 0) {
+			return;
+		}
+		int minX = model.verticesX[0];
+		int maxX = model.verticesX[0];
+		int minY = model.verticesY[0];
+		int maxY = model.verticesY[0];
+		int minZ = model.verticesZ[0];
+		int maxZ = model.verticesZ[0];
+		int maxAbs = Math.abs(model.verticesX[0]);
+		maxAbs = Math.max(maxAbs, Math.abs(model.verticesY[0]));
+		maxAbs = Math.max(maxAbs, Math.abs(model.verticesZ[0]));
+		for (int i = 1; i < model.verticesCount; i++) {
+			int x = model.verticesX[i];
+			int y = model.verticesY[i];
+			int z = model.verticesZ[i];
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+			if (y < minY) minY = y;
+			if (y > maxY) maxY = y;
+			if (z < minZ) minZ = z;
+			if (z > maxZ) maxZ = z;
+			int ax = Math.abs(x);
+			int ay = Math.abs(y);
+			int az = Math.abs(z);
+			if (ax > maxAbs) maxAbs = ax;
+			if (ay > maxAbs) maxAbs = ay;
+			if (az > maxAbs) maxAbs = az;
+		}
+		int current = Math.max(maxY - minY, maxAbs);
+		if (current <= ITEM_NORMALIZE_TARGET) {
+			return;
+		}
+		int scale = (ITEM_NORMALIZE_TARGET * 128) / current;
+		if (scale < 1) {
+			scale = 1;
+		}
+		if (scale != 128) {
+			model.method478(scale, scale, scale);
+			model.calculateDistances();
+		}
+		if (!ITEM_NORMALIZE_CENTER) {
+			return;
+		}
+		// Recompute bounds after scaling and center in X/Z to avoid forward/back drift.
+		minX = model.verticesX[0];
+		maxX = model.verticesX[0];
+		minZ = model.verticesZ[0];
+		maxZ = model.verticesZ[0];
+		for (int i = 1; i < model.verticesCount; i++) {
+			int x = model.verticesX[i];
+			int z = model.verticesZ[i];
+			if (x < minX) minX = x;
+			if (x > maxX) maxX = x;
+			if (z < minZ) minZ = z;
+			if (z > maxZ) maxZ = z;
+		}
+		int centerX = (minX + maxX) / 2;
+		int centerZ = (minZ + maxZ) / 2;
+		if (centerX != 0 || centerZ != 0 || ITEM_NORMALIZE_Z_OFFSET != 0) {
+			model.method475(-centerX, 0, -centerZ + ITEM_NORMALIZE_Z_OFFSET);
+			model.calculateDistances();
+		}
 	}
 
 	public static void dumpBonuses() {
@@ -2999,6 +3167,7 @@ public final class ItemDefinition {
 			return null;
 		if (anInt167 != 128 || anInt192 != 128 || anInt191 != 128)
 			model.method478(anInt167, anInt191, anInt192);
+		normalizeItemModel(model);
 		if (modifiedModelColors != null) {
 			for (int l = 0; l < modifiedModelColors.length; l++)
 				model.recolor(modifiedModelColors[l], originalModelColors[l]);
@@ -3028,6 +3197,7 @@ public final class ItemDefinition {
 		Model model = Model.method462(modelId);
 		if (model == null)
 			return null;
+		normalizeItemModel(model);
 		if (modifiedModelColors != null) {
 			for (int l = 0; l < modifiedModelColors.length; l++)
 				model.recolor(modifiedModelColors[l], originalModelColors[l]);
@@ -3080,6 +3250,10 @@ public final class ItemDefinition {
 	private int anInt184;
 	private int anInt185;
 	private int anInt188;
+	private int equipNormalizeHeight;
+	private boolean equipNormalizeCenter;
+	public int equipNormalizeOffsetY;
+	public int equipNormalizeOffsetZ;
 	public String inventoryOptions[];
 	public String equipActions[];
 	public int spritePitch; // modelRotation1

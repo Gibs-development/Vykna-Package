@@ -1,0 +1,26 @@
+---
+npc_id: 1093
+common:
+  accessibility: 1
+  items:
+  - name: "bones"
+    minimum: 1
+    maximum: 1
+  - name: "Dragon scimitar"
+    minimum: 1
+    maximum: 1
+  - name: "Dragon dagger"
+    minimum: 1
+    maximum: 1
+  - name: "Dragon Crossbow"
+    minimum: 1
+    maximum: 1
+  - name: "Dragon bolts"
+    minimum: 50
+    maximum: 250
+  - name: "Master wand"
+    minimum: 1
+    maximum: 1
+  - name: "coins"
+    minimum: 20
+    maximum: 80

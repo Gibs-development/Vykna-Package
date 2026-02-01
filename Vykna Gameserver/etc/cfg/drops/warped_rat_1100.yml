@@ -1,0 +1,23 @@
+---
+npc_id: 1100
+common:
+  accessibility: 1
+  items:
+  - name: "bones"
+    minimum: 1
+    maximum: 1
+  - name: "Adamant scimitar"
+    minimum: 1
+    maximum: 1
+  - item: 9183
+    minimum: 1
+    maximum: 1
+  - name: "Adamant bolts"
+    minimum: 50
+    maximum: 250
+  - name: "Apprentice wand"
+    minimum: 1
+    maximum: 1
+  - name: "coins"
+    minimum: 5
+    maximum: 25
