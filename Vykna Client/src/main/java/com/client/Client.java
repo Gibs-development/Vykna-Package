@@ -4832,7 +4832,8 @@ public class Client extends RSApplet {
 		if (definition == null) {
 			return;
 		}
-		if (definition.ambientSoundId == -1
+		ManualAmbientDefinition manualDefinition = MANUAL_AMBIENT_OBJECTS.get(objectId);
+		if (manualDefinition == null && definition.ambientSoundId == -1
 				&& (definition.ambientSoundIds == null || definition.ambientSoundIds.length == 0)) {
 			return;
 		}
@@ -4840,9 +4841,13 @@ public class Client extends RSApplet {
 		if (ambientEmitters.containsKey(key)) {
 			return;
 		}
-		AmbientEmitter emitter = new AmbientEmitter(objectId, plane, localX, localY, definition.ambientSoundId,
-				definition.ambientMinDelay, definition.ambientMaxDelay, definition.ambientSoundRadius,
-				definition.ambientSoundIds);
+		int loopSoundId = manualDefinition != null ? manualDefinition.loopSoundId : definition.ambientSoundId;
+		int minDelay = manualDefinition != null ? manualDefinition.minDelay : definition.ambientMinDelay;
+		int maxDelay = manualDefinition != null ? manualDefinition.maxDelay : definition.ambientMaxDelay;
+		int range = manualDefinition != null ? manualDefinition.range : definition.ambientSoundRadius;
+		int[] randomSoundIds = manualDefinition != null ? manualDefinition.randomSoundIds : definition.ambientSoundIds;
+		AmbientEmitter emitter = new AmbientEmitter(objectId, plane, localX, localY, loopSoundId, minDelay, maxDelay,
+				range, randomSoundIds);
 		ambientEmitters.put(key, emitter);
 		if (loopCycle - lastAmbientRegisterLogTick >= 50) {
 			int worldX = baseX + localX;
@@ -4966,6 +4971,36 @@ public class Client extends RSApplet {
 
 	private static long ambientEmitterKey(int plane, int localX, int localY, int objectId) {
 		return ((long) plane << 48) | ((long) localX << 32) | ((long) localY << 16) | (objectId & 0xFFFFL);
+	}
+
+	static {
+		// Manual ambient overrides: objectId -> (loopSoundId, range, minDelay, maxDelay, randomSoundIds).
+		// Example (loop): MANUAL_AMBIENT_OBJECTS.put(12345, ManualAmbientDefinition.loop(3001, 10));
+		// Example (one-shot): MANUAL_AMBIENT_OBJECTS.put(12346, ManualAmbientDefinition.random(3002, 5, 120, 240));
+	}
+
+	private static final class ManualAmbientDefinition {
+		private final int loopSoundId;
+		private final int minDelay;
+		private final int maxDelay;
+		private final int range;
+		private final int[] randomSoundIds;
+
+		private ManualAmbientDefinition(int loopSoundId, int range, int minDelay, int maxDelay, int[] randomSoundIds) {
+			this.loopSoundId = loopSoundId;
+			this.range = range;
+			this.minDelay = minDelay;
+			this.maxDelay = maxDelay;
+			this.randomSoundIds = randomSoundIds;
+		}
+
+		private static ManualAmbientDefinition loop(int loopSoundId, int range) {
+			return new ManualAmbientDefinition(loopSoundId, range, 0, 0, null);
+		}
+
+		private static ManualAmbientDefinition random(int soundId, int range, int minDelay, int maxDelay) {
+			return new ManualAmbientDefinition(-1, range, minDelay, maxDelay, new int[] { soundId });
+		}
 	}
 
 	private static final class AmbientEmitter {
@@ -22869,6 +22904,7 @@ public class Client extends RSApplet {
 	private final int[] soundDelay;
 	private final int[] soundType;
 	private static int soundEffectVolume = 127;
+	private static final Map<Integer, ManualAmbientDefinition> MANUAL_AMBIENT_OBJECTS = new HashMap<>();
 	private final HashMap<Long, AmbientEmitter> ambientEmitters = new HashMap<>();
 	private int lastAmbientRegisterLogTick = -50;
 	private int lastAmbientUpdateLogTick = -50;
