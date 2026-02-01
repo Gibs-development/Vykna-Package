@@ -37,6 +37,7 @@ import com.client.sign.Signlink;
 import com.client.sound.MidiPlayer;
 import com.client.sound.Sound;
 import com.client.sound.SoundType;
+import com.client.sound.AmbientRegionSoundManager;
 import com.client.ui.DevConsole;
 import com.client.ui.panel.InventoryPanel;
 import com.client.ui.panel.PanelManager;
@@ -4819,6 +4820,7 @@ public class Client extends RSApplet {
 		processOnDemandQueue();
 		if (loggedIn) {
 			updateAmbientObjectSounds();
+			AmbientRegionSoundManager.tick(loopCycle, myPlayer);
 		}
 		// method49();
 		// handleSounds();
@@ -4828,11 +4830,22 @@ public class Client extends RSApplet {
 		if (objectId < 0) {
 			return;
 		}
+		ManualAmbientDefinition manualDefinition = MANUAL_AMBIENT_OBJECTS.get(objectId);
 		ObjectDefinition definition = ObjectDefinition.forID(objectId);
-		if (definition == null) {
+		if (manualDefinition == null && definition != null && "Fire of Exchange".equalsIgnoreCase(definition.name)) {
+			manualDefinition = ManualAmbientDefinition.loop(1669, 10);
+			if (loopCycle - lastAmbientRegisterLogTick >= 50) {
+				System.out.println("[AMB] Matched by name for obj=" + objectId + " name=" + definition.name);
+				lastAmbientRegisterLogTick = loopCycle;
+			}
+		}
+		if (definition == null && manualDefinition == null) {
+			if (loopCycle - lastAmbientRegisterLogTick >= 50) {
+				System.out.println("[AMB] Skip obj=" + objectId + " (no definition + no manual)");
+				lastAmbientRegisterLogTick = loopCycle;
+			}
 			return;
 		}
-		ManualAmbientDefinition manualDefinition = MANUAL_AMBIENT_OBJECTS.get(objectId);
 		if (manualDefinition == null && definition.ambientSoundId == -1
 				&& (definition.ambientSoundIds == null || definition.ambientSoundIds.length == 0)) {
 			return;
@@ -4852,8 +4865,9 @@ public class Client extends RSApplet {
 		if (loopCycle - lastAmbientRegisterLogTick >= 50) {
 			int worldX = baseX + localX;
 			int worldY = baseY + localY;
-			System.out.println("[AMB] Registered obj=" + objectId + " plane=" + plane + " local=(" + localX + "," + localY
-					+ ") world=(" + worldX + "," + worldY + ")");
+			String source = manualDefinition != null ? "manual" : "def";
+			System.out.println("[AMB] Registered obj=" + objectId + " src=" + source + " loop=" + loopSoundId
+					+ " plane=" + plane + " local=(" + localX + "," + localY + ") world=(" + worldX + "," + worldY + ")");
 			lastAmbientRegisterLogTick = loopCycle;
 		}
 	}
@@ -12633,6 +12647,14 @@ public class Client extends RSApplet {
 		if (initialSettings != null) {
 			setMinimapState(initialSettings.getMinimapState());
 		}
+		AmbientRegionSoundManager.initDefaults();
+		AmbientRegionSoundManager.registerRegion(12625, AmbientRegionSoundManager.RegionType.CAVE);
+		AmbientRegionSoundManager.setSoundSet(
+				AmbientRegionSoundManager.RegionType.CAVE,
+				new int[] { 2042, 2040, 2043, 2044, 2045, 2046, 2050, 2051, 2124, 2180 },
+				10,
+				17
+		);
 		if (initialSettings != null && initialSettings.isLoadPresetOnLogin()) {
 			Settings preset = SettingsManager.loadPreset(initialSettings.getActivePresetName());
 			if (preset != null) {
@@ -17765,6 +17787,9 @@ public class Client extends RSApplet {
 		spawnedObject.orientation = l;
 		spawnedObject.delay = j2;
 		spawnedObject.getLongetivity = j;
+		if (k == 33320) {
+			System.out.println("[AMB] SpawnedObject id=33320 plane=" + l1 + " x=" + i2 + " y=" + j1 + " type=" + k1 + " orientation=" + l);
+		}
 		if (k >= 0) {
 			registerAmbientEmitter(k, l1, i2, j1);
 		} else {

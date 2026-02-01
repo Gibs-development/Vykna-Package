@@ -1071,8 +1071,15 @@ final class ObjectManager {
 		int k2 = tileHeights[plane][x][y + 1];
 		int l2 = l1 + i2 + j2 + k2 >> 2;
 		ObjectDefinition definition = ObjectDefinition.forID(id);
+		if (definition != null && definition.name != null && definition.name.toLowerCase().contains("exchange")) {
+			System.out.println("[AMB] ObjectManager nameMatch id=" + id + " name=" + definition.name
+					+ " plane=" + plane + " x=" + x + " y=" + y + " type=" + type + " orientation=" + orientation);
+		}
 		Client client = Client.getInstance();
 		if (client != null) {
+			if (id == 33320) {
+				System.out.println("[AMB] ObjectManager placing id=33320 plane=" + plane + " x=" + x + " y=" + y + " type=" + type + " orientation=" + orientation);
+			}
 			client.registerAmbientEmitter(id, plane, x, y);
 		}
 		long key = (long) (orientation << 20 | type << 14 | (y << 7 | x) + 0x40000000);

@@ -268,6 +268,11 @@ public final class ObjectDefinition {
 		case 33320:
 			objectDef.name = "Fire of Exchange";
 			objectDef.actions = new String[] { "Burn", "Burn Rates", null, null, null };
+			objectDef.ambientSoundId = 1669;   // loop sound id
+			objectDef.ambientSoundRadius = 10; // tiles
+			objectDef.ambientMinDelay = 0;
+			objectDef.ambientMaxDelay = 0;
+			objectDef.ambientSoundIds = null;  // no random sounds
 			break;
 		case 33318:
 			objectDef.name = "Fire of Destruction";

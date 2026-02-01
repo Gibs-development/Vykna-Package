@@ -4,7 +4,6 @@ import com.client.sign.Signlink;
 
 import javax.sound.sampled.*;
 import java.io.File;
-import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -15,8 +14,8 @@ public class Sound {
     // store sound files as they come in (~100 max)
 
     private static final Sound SINGLETON = new Sound();
-    // Keep it small: opening many audio lines concurrently can fail on some systems.
-    private static final ExecutorService executor = Executors.newFixedThreadPool(2);
+    // Cached pool avoids queueing long-running sound playback.
+    private static final ExecutorService executor = Executors.newCachedThreadPool();
 
     // Basic debug (set to false once you're happy)
     private static final boolean DEBUG = true;
@@ -53,7 +52,7 @@ public class Sound {
                 if (DEBUG) {
                     System.out.println("[Sound] Play id=" + id + " type=" + soundType + " dist=" + distance + " file=" + f.getName());
                 }
-                sound(f, soundType, distance);
+                playClip(f, soundType, distance);
             } catch (Throwable t) {
                 // Don't kill the executor; just log.
                 System.err.println("[Sound] Failed playing id=" + id + " file=" + f.getAbsolutePath());
@@ -78,56 +77,49 @@ public class Sound {
         return (float) (soundVolume * distanceVolume);
     }
 
-    private void sound(File soundFile, SoundType soundType, double distanceFromOrigin) throws Exception {
-        AudioInputStream in = AudioSystem.getAudioInputStream(soundFile);
-        AudioFormat outFormat = getOutFormat(in.getFormat());
-        DataLine.Info info = new DataLine.Info(SourceDataLine.class, outFormat);
-        SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
-        if (line != null)
-        {
-            line.open(outFormat, 2200);
-            if (line.isControlSupported(FloatControl.Type.MASTER_GAIN))
-            {
-                float volume = calculateVolume(soundType, distanceFromOrigin);
-                if (volume <= 0f) {
-                    line.close();
-                    return;
-                }
-                FloatControl gainControl = (FloatControl) line.getControl(FloatControl.Type.MASTER_GAIN);
-                BooleanControl muteControl = (BooleanControl) line.getControl(BooleanControl.Type.MUTE);
-                System.out.println("Volume at playtime: " + volume);
-                if (volume <= 0.001f)
-                {
-                    muteControl.setValue(true);
-                }
-                else
-                {
-                    muteControl.setValue(false);
-                    gainControl.setValue((float) (Math.log10(volume) * 20.0));
-                }
+    private void playClip(File soundFile, SoundType soundType, double distanceFromOrigin) throws Exception {
+        try (AudioInputStream in = AudioSystem.getAudioInputStream(soundFile)) {
+            AudioFormat baseFormat = in.getFormat();
+            AudioFormat decoded = new AudioFormat(
+                    AudioFormat.Encoding.PCM_SIGNED,
+                    baseFormat.getSampleRate(),
+                    16,
+                    baseFormat.getChannels(),
+                    baseFormat.getChannels() * 2,
+                    baseFormat.getSampleRate(),
+                    false
+            );
+            try (AudioInputStream din = AudioSystem.getAudioInputStream(decoded, in)) {
+                DataLine.Info info = new DataLine.Info(Clip.class, decoded);
+                Clip clip = (Clip) AudioSystem.getLine(info);
+                clip.open(din);
+                applyVolume(clip, soundType, distanceFromOrigin);
+                clip.addLineListener(event -> {
+                    if (event.getType() == LineEvent.Type.STOP || event.getType() == LineEvent.Type.CLOSE) {
+                        clip.close();
+                    }
+                });
+                clip.start();
             }
-            line.start();
-            stream(AudioSystem.getAudioInputStream(outFormat, in), line);
-            line.drain();
-            line.stop();
         }
     }
 
-    private static AudioFormat getOutFormat(AudioFormat inFormat)
-    {
-        int ch = inFormat.getChannels();
-        float rate = inFormat.getSampleRate();
-        return new AudioFormat(AudioFormat.Encoding.PCM_UNSIGNED, rate, 8, ch, ch, rate, false);
-    }
-
-    private void stream(AudioInputStream in, SourceDataLine line) throws IOException
-    {
-        byte[] buffer = new byte[2200];
-        int n;
-        while ((n = in.read(buffer, 0, buffer.length)) != -1) {
-            if (n > 0) {
-                line.write(buffer, 0, n);
-            }
+    private void applyVolume(Clip clip, SoundType soundType, double distanceFromOrigin) {
+        float volume = calculateVolume(soundType, distanceFromOrigin);
+        if (volume <= 0f) {
+            clip.stop();
+            clip.close();
+            return;
+        }
+        if (clip.isControlSupported(FloatControl.Type.MASTER_GAIN)) {
+            FloatControl gain = (FloatControl) clip.getControl(FloatControl.Type.MASTER_GAIN);
+            float dB = (float) (Math.log10(Math.max(0.0001f, volume)) * 20.0);
+            dB = Math.max(gain.getMinimum(), Math.min(gain.getMaximum(), dB));
+            gain.setValue(dB);
+        }
+        if (clip.isControlSupported(BooleanControl.Type.MUTE)) {
+            BooleanControl mute = (BooleanControl) clip.getControl(BooleanControl.Type.MUTE);
+            mute.setValue(volume <= 0.001f);
         }
     }
 }
