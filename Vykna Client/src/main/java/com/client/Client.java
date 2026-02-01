@@ -4816,8 +4816,218 @@ public class Client extends RSApplet {
 			mainGameProcessor();
 
 		processOnDemandQueue();
+		if (loggedIn) {
+			updateAmbientObjectSounds();
+		}
 		// method49();
 		// handleSounds();
+	}
+
+	void registerAmbientEmitter(int objectId, int plane, int localX, int localY) {
+		if (objectId < 0) {
+			return;
+		}
+		ObjectDefinition definition = ObjectDefinition.forID(objectId);
+		if (definition == null) {
+			return;
+		}
+		ManualAmbientDefinition manualDefinition = MANUAL_AMBIENT_OBJECTS.get(objectId);
+		if (manualDefinition == null && definition.ambientSoundId == -1
+				&& (definition.ambientSoundIds == null || definition.ambientSoundIds.length == 0)) {
+			return;
+		}
+		long key = ambientEmitterKey(plane, localX, localY, objectId);
+		if (ambientEmitters.containsKey(key)) {
+			return;
+		}
+		int loopSoundId = manualDefinition != null ? manualDefinition.loopSoundId : definition.ambientSoundId;
+		int minDelay = manualDefinition != null ? manualDefinition.minDelay : definition.ambientMinDelay;
+		int maxDelay = manualDefinition != null ? manualDefinition.maxDelay : definition.ambientMaxDelay;
+		int range = manualDefinition != null ? manualDefinition.range : definition.ambientSoundRadius;
+		int[] randomSoundIds = manualDefinition != null ? manualDefinition.randomSoundIds : definition.ambientSoundIds;
+		AmbientEmitter emitter = new AmbientEmitter(objectId, plane, localX, localY, loopSoundId, minDelay, maxDelay,
+				range, randomSoundIds);
+		ambientEmitters.put(key, emitter);
+		if (loopCycle - lastAmbientRegisterLogTick >= 50) {
+			int worldX = baseX + localX;
+			int worldY = baseY + localY;
+			System.out.println("[AMB] Registered obj=" + objectId + " plane=" + plane + " local=(" + localX + "," + localY
+					+ ") world=(" + worldX + "," + worldY + ")");
+			lastAmbientRegisterLogTick = loopCycle;
+		}
+	}
+
+	private void unregisterAmbientEmittersAt(int plane, int localX, int localY) {
+		if (ambientEmitters.isEmpty()) {
+			return;
+		}
+		Iterator<Map.Entry<Long, AmbientEmitter>> iterator = ambientEmitters.entrySet().iterator();
+		while (iterator.hasNext()) {
+			AmbientEmitter emitter = iterator.next().getValue();
+			if (emitter.plane == plane && emitter.localX == localX && emitter.localY == localY) {
+				emitter.reset();
+				iterator.remove();
+			}
+		}
+	}
+
+	private void clearAmbientEmitters() {
+		if (ambientEmitters.isEmpty()) {
+			return;
+		}
+		for (AmbientEmitter emitter : ambientEmitters.values()) {
+			emitter.reset();
+		}
+		ambientEmitters.clear();
+	}
+
+	private void updateAmbientObjectSounds() {
+		if (myPlayer == null || ambientEmitters.isEmpty()) {
+			return;
+		}
+		int playerLocalX = myPlayer.x >> 7;
+		int playerLocalY = myPlayer.y >> 7;
+		int currentPlane = plane;
+		AmbientEmitter sampleEmitter = null;
+		double sampleDistance = 0.0;
+		boolean sampleInRange = false;
+		for (AmbientEmitter emitter : ambientEmitters.values()) {
+			if (sampleEmitter == null) {
+				sampleEmitter = emitter;
+			}
+			if (emitter.plane != currentPlane) {
+				emitter.reset();
+				continue;
+			}
+			int dx = playerLocalX - emitter.localX;
+			int dy = playerLocalY - emitter.localY;
+			double distance = Math.sqrt(dx * dx + dy * dy);
+			int range = emitter.range > 0 ? emitter.range : 10;
+			boolean inRange = distance <= range;
+			if (emitter == sampleEmitter) {
+				sampleDistance = distance;
+				sampleInRange = inRange;
+			}
+			if (!inRange) {
+				emitter.reset();
+				continue;
+			}
+			if (emitter.loopSoundId != -1) {
+				if (!emitter.loopPlaying) {
+					Sound.getSound().playSound(emitter.loopSoundId, SoundType.AREA_SOUND, distance);
+					emitter.loopPlaying = true;
+					emitter.nextLoopTick = loopCycle + getAmbientLoopDelay(emitter.loopSoundId);
+				} else if (emitter.nextLoopTick > 0 && loopCycle >= emitter.nextLoopTick) {
+					Sound.getSound().playSound(emitter.loopSoundId, SoundType.AREA_SOUND, distance);
+					emitter.nextLoopTick = loopCycle + getAmbientLoopDelay(emitter.loopSoundId);
+				}
+			}
+			if (emitter.randomSoundIds != null && emitter.randomSoundIds.length > 0) {
+				if (emitter.nextRandomTick == 0) {
+					emitter.nextRandomTick = loopCycle + getAmbientRandomDelay(emitter);
+				} else if (loopCycle >= emitter.nextRandomTick) {
+					int soundId = emitter.randomSoundIds[ThreadLocalRandom.current().nextInt(emitter.randomSoundIds.length)];
+					if (soundId != -1) {
+						Sound.getSound().playSound(soundId, SoundType.AREA_SOUND, distance);
+					}
+					emitter.nextRandomTick = loopCycle + getAmbientRandomDelay(emitter);
+				}
+			}
+		}
+		if (loopCycle - lastAmbientUpdateLogTick >= 50) {
+			String sampleInfo = sampleEmitter == null
+					? " sample=none"
+					: " sampleObj=" + sampleEmitter.objectId + " dist=" + String.format("%.2f", sampleDistance) + " inRange="
+					+ sampleInRange;
+			System.out.println("[AMB] Update plane=" + currentPlane + " player=(" + playerLocalX + "," + playerLocalY
+					+ ") emitters=" + ambientEmitters.size() + sampleInfo);
+			lastAmbientUpdateLogTick = loopCycle;
+		}
+	}
+
+	private int getAmbientLoopDelay(int soundId) {
+		if (soundId < 0 || soundId >= Sounds.anIntArray326.length) {
+			return 50;
+		}
+		int delay = Sounds.anIntArray326[soundId];
+		return delay > 0 ? delay : 50;
+	}
+
+	private int getAmbientRandomDelay(AmbientEmitter emitter) {
+		int minDelay = emitter.minDelay;
+		int maxDelay = emitter.maxDelay;
+		if (maxDelay < minDelay) {
+			int swap = minDelay;
+			minDelay = maxDelay;
+			maxDelay = swap;
+		}
+		int range = maxDelay - minDelay;
+		if (range <= 0) {
+			return minDelay > 0 ? minDelay : 50;
+		}
+		return minDelay + ThreadLocalRandom.current().nextInt(range + 1);
+	}
+
+	private static long ambientEmitterKey(int plane, int localX, int localY, int objectId) {
+		return ((long) plane << 48) | ((long) localX << 32) | ((long) localY << 16) | (objectId & 0xFFFFL);
+	}
+
+	private static final class ManualAmbientDefinition {
+		private final int loopSoundId;
+		private final int minDelay;
+		private final int maxDelay;
+		private final int range;
+		private final int[] randomSoundIds;
+
+		private ManualAmbientDefinition(int loopSoundId, int range, int minDelay, int maxDelay, int[] randomSoundIds) {
+			this.loopSoundId = loopSoundId;
+			this.range = range;
+			this.minDelay = minDelay;
+			this.maxDelay = maxDelay;
+			this.randomSoundIds = randomSoundIds;
+		}
+
+		private static ManualAmbientDefinition loop(int loopSoundId, int range) {
+			return new ManualAmbientDefinition(loopSoundId, range, 0, 0, null);
+		}
+
+		private static ManualAmbientDefinition random(int soundId, int range, int minDelay, int maxDelay) {
+			return new ManualAmbientDefinition(-1, range, minDelay, maxDelay, new int[] { soundId });
+		}
+	}
+
+	private static final class AmbientEmitter {
+		private final int objectId;
+		private final int plane;
+		private final int localX;
+		private final int localY;
+		private final int loopSoundId;
+		private final int minDelay;
+		private final int maxDelay;
+		private final int range;
+		private final int[] randomSoundIds;
+		private boolean loopPlaying;
+		private int nextLoopTick;
+		private int nextRandomTick;
+
+		private AmbientEmitter(int objectId, int plane, int localX, int localY, int loopSoundId, int minDelay, int maxDelay,
+							   int range, int[] randomSoundIds) {
+			this.objectId = objectId;
+			this.plane = plane;
+			this.localX = localX;
+			this.localY = localY;
+			this.loopSoundId = loopSoundId;
+			this.minDelay = minDelay;
+			this.maxDelay = maxDelay;
+			this.range = range;
+			this.randomSoundIds = randomSoundIds;
+		}
+
+		private void reset() {
+			loopPlaying = false;
+			nextLoopTick = 0;
+			nextRandomTick = 0;
+		}
 	}
 
 	public void method47(boolean flag) {
@@ -17554,6 +17764,11 @@ public class Client extends RSApplet {
 		spawnedObject.orientation = l;
 		spawnedObject.delay = j2;
 		spawnedObject.getLongetivity = j;
+		if (k >= 0) {
+			registerAmbientEmitter(k, l1, i2, j1);
+		} else {
+			unregisterAmbientEmittersAt(l1, i2, j1);
+		}
 	}
 
 	private boolean interfaceIsSelected(RSInterface class9) {
@@ -20023,6 +20238,7 @@ public class Client extends RSApplet {
 					currentRegionY = mapRegionY;
 					baseX = (currentRegionX - 6) * 8;
 					baseY = (currentRegionY - 6) * 8;
+					clearAmbientEmitters();
 					inTutorialIsland = (currentRegionX / 8 == 48 || currentRegionX / 8 == 49) && currentRegionY / 8 == 48;
 					if (currentRegionX / 8 == 48 && currentRegionY / 8 == 148)
 						inTutorialIsland = true;
@@ -22681,6 +22897,15 @@ public class Client extends RSApplet {
 	private final int[] soundDelay;
 	private final int[] soundType;
 	private static int soundEffectVolume = 127;
+	private static final Map<Integer, ManualAmbientDefinition> MANUAL_AMBIENT_OBJECTS = new HashMap<>();
+	private final HashMap<Long, AmbientEmitter> ambientEmitters = new HashMap<>();
+	private int lastAmbientRegisterLogTick = -50;
+	private int lastAmbientUpdateLogTick = -50;
+	static {
+		// Manual ambient overrides: objectId -> (loopSoundId, range, minDelay, maxDelay, randomSoundIds).
+		// Example (loop): MANUAL_AMBIENT_OBJECTS.put(12345, ManualAmbientDefinition.loop(3001, 10));
+		// Example (one-shot): MANUAL_AMBIENT_OBJECTS.put(12346, ManualAmbientDefinition.random(3002, 5, 120, 240));
+	}
 	public static int[] anIntArray385 = new int[] { 12800, 12800, 12800, 12800, 12800, 12800, 12800, 12800, 12800,
 			12800, 12800, 12800, 12800, 12800, 12800, 12800 };
 	public static boolean LOOP_MUSIC = false;
