@@ -648,6 +648,9 @@ public class ItemAssistant {
 	 * Handles tradable items.
 	 */
 	public boolean isTradable(int itemId) {
+		if (!io.xeros.content.questsystem.item.QuestItemService.isTradable(player, itemId)) {
+			return false;
+		}
 		if (itemId == 12899 && player.getToxicTridentCharge() > 0 || itemId == 11907 && player.getTridentCharge() > 0) {
 			return false;
 		}

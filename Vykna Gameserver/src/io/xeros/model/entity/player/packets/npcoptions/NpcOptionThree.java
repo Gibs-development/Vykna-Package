@@ -8,6 +8,7 @@ import io.xeros.content.achievement_diary.impl.FaladorDiaryEntry;
 import io.xeros.content.achievement_diary.impl.FremennikDiaryEntry;
 import io.xeros.content.achievement_diary.impl.VarrockDiaryEntry;
 import io.xeros.content.lottery.Lottery;
+import io.xeros.content.questsystem.item.QuestItemService;
 import io.xeros.content.skills.agility.AgilityHandler;
 import io.xeros.content.skills.herblore.PotionDecanting;
 import io.xeros.model.Npcs;
@@ -76,6 +77,14 @@ public class NpcOptionThree {
 			break;
 		case 1909:
 			player.getDH().sendDialogues(903, 1909);
+			break;
+		case Npcs.PERDU:
+			int reclaimed = QuestItemService.reclaimMissingItems(player);
+			if (reclaimed == 0) {
+				player.sendMessage("You don't have any quest items to reclaim.");
+			} else {
+				player.sendMessage("Reclaimed " + reclaimed + " quest item" + (reclaimed == 1 ? "." : "s."));
+			}
 			break;
 		case 2897:
 			player.getPA().c.itemAssistant.openUpBank();

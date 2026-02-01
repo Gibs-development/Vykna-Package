@@ -184,8 +184,8 @@ public final class ItemDefinition {
 			itemDef.femaleModel = 50409;
 			itemDef.equipNormalizeHeight = 160;
 			itemDef.equipNormalizeCenter = true;
-			itemDef.equipNormalizeOffsetY = 0;
-			itemDef.equipNormalizeOffsetZ = 0;
+			itemDef.equipNormalizeOffsetY = -35;
+			itemDef.equipNormalizeOffsetZ = -92;
 			//itemDef.groundActions = new String[5];
 			//itemDef.groundActions[2] = "Take";
 			itemDef.inventoryOptions = new String[5];

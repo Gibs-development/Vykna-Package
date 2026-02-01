@@ -57,6 +57,7 @@ import io.xeros.model.items.GameItem;
 import io.xeros.model.items.ItemAttributes;
 import io.xeros.model.items.bank.BankItem;
 import io.xeros.model.items.bank.BankTab;
+import io.xeros.model.entity.player.save.impl.QuestProfileSaveEntry;
 import io.xeros.model.entity.player.save.impl.VyknaProgressionSaveEntry;
 import io.xeros.content.vykna_progression.VyknaProgressionPersistence;
 import io.xeros.util.Misc;
@@ -125,6 +126,11 @@ public class PlayerSave {
         if (!hasVyknaProgression) {
             playerSaveEntryList.add(new VyknaProgressionSaveEntry());
         }
+        boolean hasQuestProfile = playerSaveEntryList.stream()
+                .anyMatch(entry -> entry instanceof QuestProfileSaveEntry);
+        if (!hasQuestProfile) {
+            playerSaveEntryList.add(new QuestProfileSaveEntry());
+        }
         playerSaveEntryList = Collections.unmodifiableList(playerSaveEntryList);
         logger.info("Loaded " + playerSaveEntryList.size() + " Player Save Entries.");
     }
@@ -192,7 +198,19 @@ public class PlayerSave {
                         if (ReadMode == 2) {
                             for (PlayerSaveEntry entry : playerSaveEntryList) {
                                 if (entry.getKeys(p).contains(token)) {
-                                    Preconditions.checkState(entry.decode(p, token, token2), "Failed to decode player save entry: " + entry.getClass() + ", token: " + token);
+                                    String valueToDecode = token2;
+                                    if ("quest_profile".equals(token) && "{".equals(token2)) {
+                                        StringBuilder json = new StringBuilder(token2);
+                                        String nextLine;
+                                        while ((nextLine = characterfile.readLine()) != null) {
+                                            json.append("\n").append(nextLine);
+                                            if ("}".equals(nextLine.trim())) {
+                                                break;
+                                            }
+                                        }
+                                        valueToDecode = json.toString();
+                                    }
+                                    Preconditions.checkState(entry.decode(p, token, valueToDecode), "Failed to decode player save entry: " + entry.getClass() + ", token: " + token);
                                     line = characterfile.readLine();
                                     continue main;
                                 }

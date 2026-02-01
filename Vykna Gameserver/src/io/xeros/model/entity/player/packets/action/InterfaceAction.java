@@ -1,6 +1,10 @@
 package io.xeros.model.entity.player.packets.action;
 
 import io.xeros.content.party.PartyInterface;
+import io.xeros.content.questsystem.QuestSystem;
+import io.xeros.content.questsystem.event.QuestEvent;
+import io.xeros.content.questsystem.event.QuestEventKeys;
+import io.xeros.content.questsystem.event.QuestEventType;
 import io.xeros.model.entity.player.PacketType;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.world.Clan;
@@ -16,6 +20,10 @@ public class InterfaceAction implements PacketType {
 		int id = player.getInStream().readUnsignedWord();
 		int action = player.getInStream().readUnsignedWord();
 		player.debug(String.format("InterfaceAction id=%d, action=%d", action, id));
+
+		QuestSystem.handle(player, new QuestEvent(QuestEventType.INTERFACE_ACTION)
+				.with(QuestEventKeys.INTERFACE_ID, id)
+				.with(QuestEventKeys.INTERFACE_ACTION, action));
 
 		if (PartyInterface.handleInterfaceAction(player, id, action))
 			return;

@@ -122,6 +122,8 @@ public final class Interfaces extends RSInterface {
 		Nightmare.instance.load(defaultTextDrawingAreas);
 		staffSpecialBar();
 		Autocast.getSingleton().load();
+		questListInterface(defaultTextDrawingAreas);
+		questRewardInterface(defaultTextDrawingAreas);
 		questInterface(defaultTextDrawingAreas);
 		DailyRewards.get().load();
 		StarterInterface.get().load();
@@ -188,6 +190,44 @@ public final class Interfaces extends RSInterface {
 			Ypos += 19;
 			Ypos ++;
 		}
+	}
+
+	public static void questListInterface(TextDrawingArea[] tda) {
+		int interfaceId = 638;
+		RSInterface tab = addTabInterface(interfaceId);
+		tab.width = 174;
+		tab.height = 196;
+		tab.scrollMax = 275;
+		tab.newScroller = false;
+		int lines = 20;
+		tab.totalChildren(lines);
+		int y = 5;
+		for (int index = 0; index < lines; index++) {
+			int lineId = interfaceId + 1 + index;
+			addClickableText(lineId, "", "Open quest journal", tda, 0, 0xff981f, false, true, 160, 16);
+			tab.child(index, lineId, 8, y);
+			y += 14;
+		}
+		tab.setNewButtonClicking();
+	}
+
+	public static void questRewardInterface(TextDrawingArea[] tda) {
+		RSInterface tab = addInterface(297);
+		addSprite(298, 0, "quest/questbg");
+		addSprite(299, 1, "quest/questbg");
+		addText(300, "Quest Complete!", 0xff981f, true, false, 52, tda, 3);
+		addText(301, "Quest Name", 0x000000, true, false, 52, tda, 2);
+		addText(302, "Reward 1", 0x000000, true, false, 52, tda, 1);
+		addText(303, "Reward 2", 0x000000, true, false, 52, tda, 1);
+		addText(304, "Reward 3", 0x000000, true, false, 52, tda, 1);
+		tab.totalChildren(7);
+		setBounds(298, 18, 62, 0, tab);
+		setBounds(299, 18, 4, 1, tab);
+		setBounds(300, 260, 15, 2, tab);
+		setBounds(301, 260, 48, 3, tab);
+		setBounds(302, 260, 85, 4, tab);
+		setBounds(303, 260, 104, 5, tab);
+		setBounds(304, 260, 123, 6, tab);
 	}
 
 	public static void staffSpecialBar() {

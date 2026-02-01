@@ -61,6 +61,9 @@ public class Questing {
     }
 
     public boolean clickButton(int buttonId) {
+        if (io.xeros.content.questsystem.QuestSystem.handleQuestListButton(player, buttonId)) {
+            return true;
+        }
         for (int index = 0; index < QUEST_LIST_INTERFACE_IDS.size(); index++) {
             if (buttonId == QUEST_LIST_INTERFACE_IDS.get(index)) {
                 if (questList.size() > index) {

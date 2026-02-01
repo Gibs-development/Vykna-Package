@@ -197,6 +197,7 @@ public class ClickingButtons implements PacketType {
 		if (c.getQuestTab().handleHelpTabActionButton(actionButtonId)) {
 			return;
 		}
+
 		if (SlayerRewardsInterface.clickButton(c, actionButtonId)) {
 			return;
 		}

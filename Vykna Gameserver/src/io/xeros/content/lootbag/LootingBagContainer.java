@@ -144,7 +144,7 @@ public class LootingBagContainer {
                 if (ItemDef.forId(item) == null) {
                     player.sendMessage("This item has no definition and cannot be put into the bag. (please report this, code: " + item + ")");
                     return false;
-                } else if (!ItemDef.forId(item).isTradable()) {
+                } else if (!player.getItems().isTradable(item)) {
                     player.sendMessage("This item is deemed untradable and cannot be put into the bag.");
                     return false;
                 }

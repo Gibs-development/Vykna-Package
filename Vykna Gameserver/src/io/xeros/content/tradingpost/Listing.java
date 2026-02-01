@@ -279,12 +279,12 @@ public class Listing {
 			return;
 		}
 		if (ItemDef.forId(itemId) != null) {
-			if (!ItemDef.forId(itemId).isTradable()) {
+			if (!c.getItems().isTradable(itemId)) {
 				c.sendMessage("[@red@Trading Post@bla@] You can't sell that item");
 				return;
 			}
 		}
-		if (!ItemDef.forId(itemId).isTradable()) {
+		if (!c.getItems().isTradable(itemId)) {
 			c.sendMessage("[@red@Trading Post@bla@] You can't sell that item");
 			return;
 		}
@@ -627,7 +627,7 @@ public class Listing {
 		int totalStock = (totalQuantity) - alreadySold;
 
 		if (ItemDef.forId(sales.getId()) != null) {
-			if (!ItemDef.forId(sales.getId()).isTradable()) {
+			if (!c.getItems().isTradable(sales.getId())) {
 				c.sendMessage("[@red@Trading Post@bla@] That item isn't tradeable.");
 				return;
 			}

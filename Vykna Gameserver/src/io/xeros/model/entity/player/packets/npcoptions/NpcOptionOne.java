@@ -16,6 +16,7 @@ import io.xeros.content.dialogue.impl.*;
 import io.xeros.content.minigames.inferno.Inferno;
 import io.xeros.content.minigames.tob.TobConstants;
 import io.xeros.content.miniquests.magearenaii.dialogue.KolodionDialogue;
+import io.xeros.content.questsystem.sample.ImpCatcherQuest;
 import io.xeros.content.referral.EnterReferralDialogue;
 import io.xeros.content.skills.*;
 import io.xeros.content.skills.crafting.Tanning;
@@ -53,6 +54,10 @@ public class NpcOptionOne {
 		player.clickNpcType = 0;
 		player.clickedNpcIndex = player.npcClickIndex;
 		player.npcClickIndex = 0;
+
+		if (ImpCatcherQuest.handleNpcTalk(player, npcType)) {
+			return;
+		}
 
 		/*
 		 * if(Fishing.fishingNPC(c, npcType)) { Fishing.fishingNPC(c, 1, npcType);

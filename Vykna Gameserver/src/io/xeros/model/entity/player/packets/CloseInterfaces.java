@@ -4,6 +4,10 @@ import java.util.Objects;
 
 import io.xeros.Server;
 import io.xeros.content.PriceChecker;
+import io.xeros.content.questsystem.QuestSystem;
+import io.xeros.content.questsystem.event.QuestEvent;
+import io.xeros.content.questsystem.event.QuestEventKeys;
+import io.xeros.content.questsystem.event.QuestEventType;
 import io.xeros.model.entity.player.PacketType;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.PlayerHandler;
@@ -20,6 +24,12 @@ public class CloseInterfaces implements PacketType {
 
 	@Override
 	public void processPacket(Player c, int packetType, int packetSize) {
+		int openInterface = c.getOpenInterface();
+		if (openInterface > 0) {
+			QuestSystem.handle(c, new QuestEvent(QuestEventType.INTERFACE_ACTION)
+					.with(QuestEventKeys.INTERFACE_ID, openInterface)
+					.with(QuestEventKeys.INTERFACE_ACTION, io.xeros.content.questsystem.step.PuzzleStep.ACTION_CLOSE));
+		}
 		MultiplayerSession session = Server.getMultiplayerSessionListener().getMultiplayerSession(c, MultiplayerSessionType.TRADE);
 		if (session != null && Server.getMultiplayerSessionListener().inSession(c, MultiplayerSessionType.TRADE)) {
 			c.sendMessage("You have declined the trade.");

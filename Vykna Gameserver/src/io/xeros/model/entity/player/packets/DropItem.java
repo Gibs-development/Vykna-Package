@@ -9,6 +9,7 @@ import io.xeros.content.combat.magic.SanguinestiStaff;
 import io.xeros.content.items.ItemCombinations;
 import io.xeros.content.miniquests.magearenaii.MageArenaII;
 import io.xeros.content.world_event.Tournament;
+import io.xeros.content.questsystem.item.QuestItemService;
 import io.xeros.model.Items;
 import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.entity.npc.pets.PetHandler;
@@ -105,6 +106,11 @@ public class DropItem implements PacketType {
 		}
 
 		ItemDef itemDef = ItemDef.forId(itemId);
+
+		if (!QuestItemService.isDroppable(c, itemId)) {
+			c.sendMessage("You can't drop this quest item!");
+			return;
+		}
 
 		if (itemDef.isDestroyable() || MageArenaII.isUntradable(itemId)) {
 			c.getPA().destroyInterface(new ItemToDestroy(itemId, slot, DestroyType.DESTROY));

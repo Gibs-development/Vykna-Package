@@ -53,6 +53,7 @@ import io.xeros.content.privatemessaging.FriendsList;
 import io.xeros.content.minigames.raids.Raids;
 import io.xeros.content.miniquests.magearenaii.MageArenaII;
 import io.xeros.content.questing.Questing;
+import io.xeros.content.questsystem.model.QuestProfile;
 import io.xeros.content.sound.AmbientSoundManager;
 import io.xeros.content.teleportation.inter.TeleportInterface;
 import io.xeros.content.tutorial.ModeSelection;
@@ -2058,7 +2059,6 @@ public class Player extends Entity {
         PollTab.updatePollTabDisplay(this);
         setSidebarInterface(0, 2423);
         setSidebarInterface(1, 13917); // Skilltab > 3917
-       // setSidebarInterface(2, QuestTab.INTERFACE_ID);
         setSidebarInterface(2, 638);
         setSidebarInterface(3, 3213);
         setSidebarInterface(4, 1644);
@@ -2327,6 +2327,9 @@ public class Player extends Entity {
             getOutStream().writeUnsignedWord(form);
             getOutStream().writeByteA(menuId);
             sideBarInterfaces.put(menuId, form);
+            if (menuId == 2 && form == io.xeros.content.questsystem.QuestSystem.QUEST_LIST_INTERFACE_ID) {
+                io.xeros.content.questsystem.QuestSystem.updateQuestList(this);
+            }
         }
     }
 
@@ -6721,6 +6724,15 @@ public class Player extends Entity {
     //new quest tab
     public long lastTabSwitch = 0;
     public int infoTabSelected = 0;
+    private QuestProfile questProfile = new QuestProfile();
+
+    public QuestProfile getQuestProfile() {
+        return questProfile;
+    }
+
+    public void setQuestProfile(QuestProfile questProfile) {
+        this.questProfile = questProfile == null ? new QuestProfile() : questProfile;
+    }
 
     public int diaryAmount = 0;
     public int amountOfDiariesComplete() {

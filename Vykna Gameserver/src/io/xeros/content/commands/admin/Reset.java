@@ -10,23 +10,49 @@ public class Reset extends Command {
 	@Override
 	public void execute(Player c, String commandName, String input) {
 		String[] args = input.split("-");
-		Player player = PlayerHandler.getPlayerByDisplayName(args[1]);
-		if (player == null) {
-			c.sendMessage("Player is null.");
+		if (args.length == 0 || args[0].isEmpty()) {
+			c.sendMessage("@red@Usage: ::reset-quest-questId[-player]");
 			return;
 		}
-		
+		if (!"quest".equals(args[0]) && args.length < 2) {
+			c.sendMessage("@red@Usage: ::reset-quest-questId[-player] or ::reset-district-player");
+			return;
+		}
+		Player player = args.length > 1 ? PlayerHandler.getPlayerByDisplayName(args[1]) : null;
+
 		switch (args[0]) {
 		case "":
-			player.sendMessage("@red@Usage: ::reset-farming-username");
+			c.sendMessage("@red@Usage: ::reset-farming-username");
+			break;
+		case "quest":
+			String questId = args.length > 1 ? args[1] : "";
+			Player target = args.length > 2 ? PlayerHandler.getPlayerByDisplayName(args[2]) : c;
+			if (questId.isEmpty()) {
+				c.sendMessage("Usage: ::reset-quest-questId[-player]");
+				return;
+			}
+			if (target == null) {
+				c.sendMessage("Player is null.");
+				return;
+			}
+			target.getQuestProfile().getQuests().remove(questId);
+			c.sendMessage("Reset quest " + questId + " for " + target.getDisplayName() + ".");
 			break;
 			
 		case "district":
+			if (player == null) {
+				c.sendMessage("Player is null.");
+				return;
+			}
 			player.pkDistrict = !player.pkDistrict;
 			player.sendMessage(player.getDisplayName() + ", pk district setting have been set to " + player.pkDistrict);
 			break;
 			
 		case "check":
+			if (player == null) {
+				c.sendMessage("Player is null.");
+				return;
+			}
 			c.getPA().sendFrame126("Check Bank", 36008);
 			c.getPA().sendFrame126("Kick", 36009);
 			c.getPA().sendFrame126("", 36010);

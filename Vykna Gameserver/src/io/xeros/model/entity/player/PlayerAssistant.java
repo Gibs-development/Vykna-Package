@@ -9,6 +9,10 @@ import com.google.common.base.Preconditions;
 import io.xeros.content.music.RegionalMusic;
 import io.xeros.Configuration;
 import io.xeros.Server;
+import io.xeros.content.questsystem.QuestSystem;
+import io.xeros.content.questsystem.event.QuestEvent;
+import io.xeros.content.questsystem.event.QuestEventKeys;
+import io.xeros.content.questsystem.event.QuestEventType;
 import io.xeros.achievements.AchievementList;
 import io.xeros.content.PriceChecker;
 import io.xeros.content.achievement_diary.impl.WildernessDiaryEntry;
@@ -1075,6 +1079,9 @@ public class PlayerAssistant {
 			c.getOutStream().writeUnsignedWord(interfaceid);
 			c.flushOutStream();
 			c.openedInterface(interfaceid);
+			QuestSystem.handle(c, new QuestEvent(QuestEventType.INTERFACE_ACTION)
+					.with(QuestEventKeys.INTERFACE_ID, interfaceid)
+					.with(QuestEventKeys.INTERFACE_ACTION, io.xeros.content.questsystem.step.PuzzleStep.ACTION_OPEN));
 			if (interfaceid == io.xeros.content.vykna_progression.VyknaProgressionInterfaces.HOME_INTERFACE_ID) {
 				io.xeros.content.vykna_progression.VyknaProgressionHandler.sendInitialData(c);
 			}

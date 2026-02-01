@@ -21,6 +21,11 @@ import io.xeros.content.bosses.nightmare.NightmareConstants;
 import io.xeros.content.bosses.wildypursuit.FragmentOfSeren;
 import io.xeros.content.bosspoints.BossPoints;
 import io.xeros.content.event.eventcalendar.EventChallenge;
+import io.xeros.content.questsystem.QuestSystem;
+import io.xeros.content.questsystem.event.QuestEvent;
+import io.xeros.content.questsystem.event.QuestEventKeys;
+import io.xeros.content.questsystem.event.QuestEventType;
+import io.xeros.content.questsystem.instance.QuestBossInstance;
 import io.xeros.content.minigames.warriors_guild.AnimatedArmour;
 import io.xeros.content.skills.Skill;
 import io.xeros.model.Npcs;
@@ -60,6 +65,12 @@ public class NPCDeath {
             c.setTargeted(null);
             c.getPA().sendEntityTarget(0, npc);
         }
+        QuestEvent questEvent = new QuestEvent(QuestEventType.NPC_KILL)
+                .with(QuestEventKeys.NPC_ID, npcId);
+        if (npc.getInstance() instanceof QuestBossInstance) {
+            questEvent.with(QuestEventKeys.INSTANCE_ID, ((QuestBossInstance) npc.getInstance()).getInstanceId());
+        }
+        QuestSystem.handle(c, questEvent);
         if (npc.getInstance() instanceof BossFactoryInstance) {
             ((BossFactoryInstance) npc.getInstance()).onBossDeath();
         }

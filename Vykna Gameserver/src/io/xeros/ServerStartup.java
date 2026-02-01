@@ -26,6 +26,7 @@ import io.xeros.content.lottery.Lottery;
 import io.xeros.content.pkertab.ToplistExecution;
 import io.xeros.content.polls.PollTab;
 import io.xeros.content.preset.PresetManager;
+import io.xeros.content.questsystem.QuestSystem;
 import io.xeros.content.referral.ReferralCode;
 import io.xeros.content.revenant_event.RevenantEventBossHandler;
 import io.xeros.content.shooting_star.ShootingStar;
@@ -88,6 +89,7 @@ public class ServerStartup {
         FountainOfRune.declare();//fountain of rune
         //DonationReward.load();
         PlayerSave.loadPlayerSaveEntries();
+        QuestSystem.init();
         EventCalendarWinnerSelect.getInstance().init();
         TrackedMonster.init();
         Boosts.init();

@@ -49,7 +49,7 @@ public class PriceChecker {
 		int slot = arraySlot(c, c.priceItem, id);
 		long price = (long) Math.floor(c.getShops().getItemShopValue(id));
 
-		if (!ItemDef.forId(id).isTradable() || ItemDef.forId(id).getName().contains("Clue scroll")) {
+		if (!c.getItems().isTradable(id) || ItemDef.forId(id).getName().contains("Clue scroll")) {
 			c.sendMessage("@red@This item is un-tradeable!");
 			return;
 		}
