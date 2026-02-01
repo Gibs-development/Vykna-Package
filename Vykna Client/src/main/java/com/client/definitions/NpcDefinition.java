@@ -860,19 +860,38 @@ public final class NpcDefinition {
 			entityDef.models = new int[] { 37142 };
 
 		}
-		if (i == 1091) {
-			entityDef.name = "Starter Rat";
-			entityDef.models = new int[] { 61020, 61011, 61022 };
-			entityDef.actions = new String[5];
-			entityDef.actions = new String[] { null, "Attack", null, null, null };
-			entityDef.originalColors = null;
-			entityDef.newColors = null;
-			entityDef.combatLevel = 0;
-			entityDef.standAnim = -1;
-			entityDef.anInt86 = 100; //WIDTH
-			entityDef.anInt91 = 100; // HEIGH
-			entityDef.walkAnim = 8306;
+		/*
+			STARTER CRYPT NPCS
+		 */
+//		if (i == 1091) {
+//			entityDef.name = "Starter Rat";
+//			entityDef.models = new int[] { 61020, 61011, 61022 };
+//			entityDef.actions = new String[5];
+//			entityDef.actions = new String[] { null, "Attack", null, null, null };
+//			entityDef.originalColors = null;
+//			entityDef.newColors = null;
+//			entityDef.combatLevel = 0;
+//			entityDef.standAnim = -1;
+//			entityDef.anInt86 = 100; //WIDTH
+//			entityDef.anInt91 = 100; // HEIGH
+//			entityDef.walkAnim = 8306;
+//		}
+
+		if (i == 1100) {
+			new NpcDefBuilder(entityDef)
+					.name("Starter Rat")
+					.models(61020, 61011, 61022 )
+					.actions(null, "Attack", null, null, null)
+					.anims(14857+14000, 14862+14000)
+					.turn(-1)
+					.size(30, 30)
+					.combat(16);
+			entityDef.size = 2;
 		}
+
+		/*
+			END OF STARTER CRYPT NPCS
+		 */
 		if (i == 5792) {
 			entityDef.models = new int[] { 54122 };
 			entityDef.actions = new String[5];
@@ -880,7 +899,6 @@ public final class NpcDefinition {
 			entityDef.standAnim = 14808;
 			entityDef.anInt86 = 35; //WIDTH
 			entityDef.anInt91 = 35; // HEIGH
-
 		}
 		if (i == 1092) {
 			entityDef.name = "Starter Gulega";
@@ -1329,6 +1347,20 @@ public final class NpcDefinition {
 	 *
 	 * } else if (i == 107) aBoolean84 = false; } while (true); }
 	 */
+
+	public static final class NpcDefBuilder {
+		private final NpcDefinition d;
+		public NpcDefBuilder(NpcDefinition d){ this.d = d; }
+
+		public NpcDefBuilder name(String v){ d.name=v; return this; }
+		public NpcDefBuilder models(int... v){ d.models=v; return this; }
+		public NpcDefBuilder actions(String... v){ d.actions=v; return this; }
+		public NpcDefBuilder anims(int stand, int walk){ d.standAnim=stand; d.walkAnim=walk; return this; }
+		public NpcDefBuilder turn(int v){ d.getDegreesToTurn=v; return this; }
+		public NpcDefBuilder size(int w, int h){ d.anInt86=w; d.anInt91=h; return this; }
+		public NpcDefBuilder combat(int v){ d.combatLevel=v; return this; }
+	}
+
 	private void readValues(Buffer stream) {
 		while (true) {
 			int opcode = stream.readUnsignedByte();
@@ -1495,56 +1527,102 @@ public final class NpcDefinition {
 		return var3 == -1 ? null : forID(var3);
 	}
 
-	public Model method164(int j, int k, int ai[]) {
-		if (childrenIDs != null) {
-			NpcDefinition entityDef = method161();
-			if (entityDef == null)
-				return null;
+    public Model method164(int j, int k, int ai[]) {
+        if (childrenIDs != null) {
+            NpcDefinition entityDef = method161();
+            if (entityDef == null)
+                return null;
 			else
 				return entityDef.method164(j, k, ai);
 		}
-		Model model = (Model) mruNodes.insertFromCache(npcId);
-		if (model == null) {
-			boolean flag = false;
-			for (int i1 = 0; i1 < models.length; i1++)
-				if (!Model.method463(models[i1]))
+        Model model = (Model) mruNodes.insertFromCache(npcId);
+        if (model == null) {
+            boolean flag = false;
+            for (int i1 = 0; i1 < models.length; i1++)
+                if (!Model.method463(models[i1]))
 					flag = true;
 
-			if (flag)
-				return null;
-			Model aclass30_sub2_sub4_sub6s[] = new Model[models.length];
-			for (int j1 = 0; j1 < models.length; j1++)
-				aclass30_sub2_sub4_sub6s[j1] = Model.method462(models[j1]);
+            if (flag)
+                return null;
+            Model aclass30_sub2_sub4_sub6s[] = new Model[models.length];
+            for (int j1 = 0; j1 < models.length; j1++)
+                aclass30_sub2_sub4_sub6s[j1] = Model.method462(models[j1]);
 
-			if (aclass30_sub2_sub4_sub6s.length == 1)
-				model = aclass30_sub2_sub4_sub6s[0];
-			else
-				model = new Model(aclass30_sub2_sub4_sub6s.length, aclass30_sub2_sub4_sub6s);
+            if (npcId == 1093) {
+                for (int j1 = 0; j1 < aclass30_sub2_sub4_sub6s.length; j1++) {
+                    Model part = aclass30_sub2_sub4_sub6s[j1];
+                    if (part == null) continue;
+                    int t2 = 0;
+                    int t3 = 0;
+                    if (part.types != null) {
+                        for (int f = 0; f < part.trianglesCount; f++) {
+                            int t = part.types[f] & 3;
+                            if (t == 2) t2++;
+                            else if (t == 3) t3++;
+                        }
+                    }
+                    System.out.println("[NPC1093] part model=" + models[j1]
+                            + " tri=" + part.trianglesCount
+                            + " types=" + (part.types == null ? "null" : "ok")
+                            + " t2=" + t2 + " t3=" + t3
+                            + " materials=" + (part.materials == null ? "null" : "ok")
+                            + " textures=" + (part.textures == null ? "null" : "ok")
+                            + " texCount=" + part.texturesCount);
+                }
+            }
+
+            if (aclass30_sub2_sub4_sub6s.length == 1)
+                model = aclass30_sub2_sub4_sub6s[0];
+            else
+                model = new Model(aclass30_sub2_sub4_sub6s.length, aclass30_sub2_sub4_sub6s);
 			if (originalColors != null) {
 				for (int k1 = 0; k1 < originalColors.length; k1++)
 					model.replaceColor(originalColors[k1], newColors[k1]);
 
 			}
-			model.method469();
-			model.method479(64 + anInt85, 850 + anInt92, -30, -50, -30, true);
-			// model.method479(84 + anInt85, 1000 + anInt92, -90, -580, -90, true);
-			mruNodes.removeFromCache(model, npcId);
-		}
+            model.method469();
+            model.method479(64 + anInt85, 850 + anInt92, -30, -50, -30, true);
+            // model.method479(84 + anInt85, 1000 + anInt92, -90, -580, -90, true);
+
+            if (npcId == 1093) {
+                model.forceRenderBothSides = true;
+                int t2 = 0;
+                int t3 = 0;
+                if (model.types != null) {
+                    for (int f = 0; f < model.trianglesCount; f++) {
+                        int t = model.types[f] & 3;
+                        if (t == 2) t2++;
+                        else if (t == 3) t3++;
+                    }
+                }
+                System.out.println("[NPC1093] merged tri=" + model.trianglesCount
+                        + " types=" + (model.types == null ? "null" : "ok")
+                        + " t2=" + t2 + " t3=" + t3
+                        + " materials=" + (model.materials == null ? "null" : "ok")
+                        + " textures=" + (model.textures == null ? "null" : "ok")
+                        + " texCount=" + model.texturesCount);
+            }
+            mruNodes.removeFromCache(model, npcId);
+        }
 		Model model_1 = Model.EMPTY_MODEL;
-		model_1.method464(model, Class36.method532(k) & Class36.method532(j));
-		if (k != -1 && j != -1)
-			model_1.method471(ai, j, k);
-		else if (k != -1)
-			model_1.method470(k);
-		if (anInt91 != 128 || anInt86 != 128)
-			model_1.method478(anInt91, anInt91, anInt86);
-		model_1.calculateDistances();
-		model_1.faceGroups = null;
-		model_1.vertexGroups = null;
-		if (size == 1)
-			model_1.fits_on_single_square = true;
-		return model_1;
-	}
+        model_1.method464(model, Class36.method532(k) & Class36.method532(j));
+        if (k != -1 && j != -1)
+            model_1.method471(ai, j, k);
+        else if (k != -1)
+            model_1.method470(k);
+        if (anInt91 != 128 || anInt86 != 128)
+            model_1.method478(anInt91, anInt91, anInt86);
+        model_1.calculateDistances();
+        model_1.faceGroups = null;
+        model_1.vertexGroups = null;
+        if (npcId == 1093) {
+            model_1.forceRenderBothSides = true;
+        }
+        if (size == 1)
+            model_1.fits_on_single_square = true;
+        return model_1;
+    }
+
 
 	private NpcDefinition() {
 		anInt55 = -1;

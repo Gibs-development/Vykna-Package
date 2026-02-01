@@ -286,6 +286,8 @@ public class ModelLoader {
             if (!validateModelInvariants(def, def.getModelId(), def.types != null, def.face_priority == 255 || def.face_priority == -1)) {
                 applyTextureCompatibilityFallback(def, def.getModelId(), "decode667");
             }
+            sanitizePriorities(def);
+            sanitizeTypesForNoTextures(def);
 
             // ✅ Build groups ONCE after successful decode
             try {
@@ -556,11 +558,41 @@ public class ModelLoader {
         def.textureTypes = null;
         def.textures = null;
         def.materials = null;
+        sanitizeTypesForNoTextures(def);
         if (DEBUG_MODEL_VALIDATION) {
             System.out.println("[model validate] id=" + modelId + " textures stripped (" + reason + ")");
         }
     }
 
+    private static void sanitizeTypesForNoTextures(Model def) {
+        if (def.types == null) {
+            return;
+        }
+        if (def.texturesCount > 0 || def.textures != null || def.materials != null) {
+            return;
+        }
+        for (int i = 0; i < def.trianglesCount; i++) {
+            int t = def.types[i] & 3;
+            if (t >= 2) {
+                def.types[i] = 0;
+            }
+        }
+    }
+
+    private static void sanitizePriorities(Model def) {
+        if (def.face_render_priorities != null) {
+            for (int i = 0; i < def.trianglesCount; i++) {
+                int p = def.face_render_priorities[i] & 0xFF;
+                if (p < 0) p = 0;
+                if (p > 11) p = 11;
+                def.face_render_priorities[i] = (byte) p;
+            }
+        } else {
+            if (def.face_priority < 0 || def.face_priority > 11) {
+                def.face_priority = 10;
+            }
+        }
+    }
 
 
 

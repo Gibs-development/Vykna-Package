@@ -183,6 +183,18 @@ public class Model extends Renderable {
         return null;
     }
 
+    private static boolean shouldFlipWinding(int modelId) {
+        switch (modelId) {
+            case 58333:
+            case 58334:
+            case 58335:
+            case 58338:
+                return true;
+            default:
+                return false;
+        }
+    }
+
     public Model(int model) {
         this.modelId = model;
         if (model == 0 || model == 39284) {
@@ -207,6 +219,9 @@ public class Model extends Renderable {
                 ModelLoader.decodeOldFormat(this, data);
             }
 
+            if (shouldFlipWinding(model)) {
+                method477();
+            }
 
             // ---- Optional scaling for new models ----
             if (newmodel[model]) {
@@ -885,9 +900,9 @@ public class Model extends Renderable {
             Model build;
             boolean anyParticles = false;
 
-            for (int segment_index = 0; segment_index < length; segment_index++) {
-                build = model_segments[segment_index];
-                if (build != null) {
+        for (int segment_index = 0; segment_index < length; segment_index++) {
+            build = model_segments[segment_index];
+            if (build != null) {
                     verticesCount += build.verticesCount;
                     trianglesCount += build.trianglesCount;
                     texturesCount += build.texturesCount;
@@ -1046,6 +1061,7 @@ public class Model extends Renderable {
                     }
                 }
             }
+            sanitizeTypesForNoTextures();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1275,7 +1291,23 @@ public class Model extends Renderable {
             }
         }
 
+        sanitizeTypesForNoTextures();
         calculateDistances();
+    }
+
+    private void sanitizeTypesForNoTextures() {
+        if (types == null) {
+            return;
+        }
+        if (materials != null || textures != null) {
+            return;
+        }
+        for (int i = 0; i < trianglesCount; i++) {
+            int t = types[i] & 3;
+            if (t >= 2) {
+                types[i] = 0;
+            }
+        }
     }
 
     public Model(boolean color_flag, boolean alpha_flag, boolean animated, Model model) {
@@ -1429,6 +1461,7 @@ public class Model extends Renderable {
         vertexNormals = model.vertexNormals;
         faceNormals = model.faceNormals;
         vertexNormalsOffsets = model.vertexNormalsOffsets;
+        forceRenderBothSides = model.forceRenderBothSides;
     }
 
     public Model(boolean flag, boolean flag1, Model model) {
@@ -1544,6 +1577,7 @@ public class Model extends Renderable {
         materials = model.materials;
         faceNormals = model.faceNormals;
         vertexNormalsOffsets = model.vertexNormalsOffsets;
+        forceRenderBothSides = model.forceRenderBothSides;
     }
 
     private static int[] buildVertexGroupMap(Model src) {
@@ -2648,10 +2682,11 @@ public class Model extends Renderable {
                         obj_key[obj_loaded++] = i22;
                         flag1 = false;
                     }
-                    if ((i3 - l3)
+                    int cross = (i3 - l3)
                             * (projected_verticesY[j2] - projected_verticesY[k1])
                             - (projected_verticesY[l] - projected_verticesY[k1])
-                            * (k4 - l3) > 0) {
+                            * (k4 - l3);
+                    if (forceRenderBothSides || cross > 0) {
                         outOfReach[k] = false;
                         if (i3 < 0 || l3 < 0 || k4 < 0
                                 || i3 > DrawingArea.centerX
@@ -3269,6 +3304,7 @@ public class Model extends Renderable {
     public int maximumYVertex;
     public int maxRenderDepth;
     public int diagonal3DAboveOrigin;
+    public boolean forceRenderBothSides = false;
     public int itemDropHeight;
     public int vertexData[];
     public int triangleData[];
