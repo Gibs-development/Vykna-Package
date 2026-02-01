@@ -447,6 +447,7 @@ public class Client extends RSApplet {
 	}
 
 	private void drawAchievementToastOverlay() {
+		Rasterizer.anIntArray1472 = anIntArray1181;
 		if (openWalkableWidgetID != AchievementCompleteToast.INTERFACE_ID) {
 			return;
 		}
@@ -456,7 +457,7 @@ public class Client extends RSApplet {
 		}
 		DrawingArea.defaultDrawingAreaSize();
 		// Toast draws last in RS3/resizable so it stays visible above all UI overlays.
-		drawInterface(0, 0, toast, 0);
+		drawInterface(0, 0, toast, 0, true);
 	}
 
 	private void drawLayoutDebugOverlay() {

@@ -869,13 +869,17 @@ public final class NpcDefinition {
 			entityDef.newColors = null;
 			entityDef.combatLevel = 0;
 			entityDef.standAnim = -1;
+			entityDef.anInt86 = 100; //WIDTH
+			entityDef.anInt91 = 100; // HEIGH
 			entityDef.walkAnim = 8306;
 		}
 		if (i == 5792) {
-			entityDef.models = new int[] { 37142 };
+			entityDef.models = new int[] { 54122 };
 			entityDef.actions = new String[5];
 			entityDef.actions = new String[] { "Trade", null, null, null, null };
-			entityDef.standAnim = 8307;
+			entityDef.standAnim = 14808;
+			entityDef.anInt86 = 35; //WIDTH
+			entityDef.anInt91 = 35; // HEIGH
 
 		}
 		if (i == 1092) {
@@ -896,9 +900,9 @@ public final class NpcDefinition {
 			entityDef.models = new int[] { 58333, 58338, 58334, 58335 };
 			entityDef.actions = new String[5];
 			entityDef.actions = new String[] { null, "Attack", null, null, null };
-			entityDef.anInt86 = 35; //WIDTH
-			entityDef.anInt91 = 35; // HEIGH
-			entityDef.standAnim = 15015+14000;
+			entityDef.anInt86 = 100; //WIDTH
+			entityDef.anInt91 = 100; // HEIGH
+			entityDef.standAnim = -1;
 			entityDef.size = 3;
 
 		}

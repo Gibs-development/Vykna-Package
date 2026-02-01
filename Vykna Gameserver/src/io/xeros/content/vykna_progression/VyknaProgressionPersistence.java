@@ -10,6 +10,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.AccessDeniedException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AtomicMoveNotSupportedException;
 import java.nio.file.Files;
@@ -121,14 +122,42 @@ public final class VyknaProgressionPersistence {
             Path tempFile = Paths.get(file.toString() + ".tmp");
             // Atomic write: temp file then replace to reduce corruption risk on crash.
             Files.writeString(tempFile, json, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
-            try {
-                Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (AtomicMoveNotSupportedException ex) {
-                Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+            if (!tryMoveWithRetry(tempFile, file)) {
+                // Fallback for Windows file-locking edge cases: write directly and clean temp.
+                Files.writeString(file, json, StandardCharsets.UTF_8, StandardOpenOption.CREATE, StandardOpenOption.TRUNCATE_EXISTING);
+                try {
+                    Files.deleteIfExists(tempFile);
+                } catch (IOException ignored) {
+                    // best effort cleanup; original save already written
+                }
             }
         } catch (IOException e) {
             logger.warn("Failed to save Vykna progression for {}.", player.getLoginName(), e);
         }
+    }
+
+    private static boolean tryMoveWithRetry(Path tempFile, Path file) throws IOException {
+        for (int attempt = 0; attempt < 4; attempt++) {
+            try {
+                Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+                return true;
+            } catch (AtomicMoveNotSupportedException ex) {
+                Files.move(tempFile, file, StandardCopyOption.REPLACE_EXISTING);
+                return true;
+            } catch (AccessDeniedException ex) {
+                // Windows can temporarily lock the target file; retry a few times.
+                if (attempt >= 3) {
+                    return false;
+                }
+                try {
+                    Thread.sleep(25L * (attempt + 1));
+                } catch (InterruptedException interrupted) {
+                    Thread.currentThread().interrupt();
+                    return false;
+                }
+            }
+        }
+        return false;
     }
 
     private static VyknaProgressionSaveData snapshot(VyknaProgressionPlayerState state) {
