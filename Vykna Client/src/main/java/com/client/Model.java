@@ -890,7 +890,7 @@ public class Model extends Renderable {
             boolean vSkin_flag = false;
             boolean texture_flag = false;
             boolean coordinate_flag = false;
-            boolean texturesSupported = true;
+            boolean texturesSupported = false;
 
             verticesCount = 0;
             trianglesCount = 0;
@@ -942,11 +942,9 @@ public class Model extends Renderable {
                     anyParticles |= build.hasParticleAttachments || (build.verticesParticle != null) || (build.verticesParticleLayers != null);
                 }
             }
-            if (!texturesSupported) {
-                texturesCount = 0;
-                texture_flag = false;
-                coordinate_flag = false;
-            }
+            texturesCount = 0;
+            texture_flag = false;
+            coordinate_flag = false;
             // Always allocate colors; most pipelines assume colors exists.
             colors = new short[trianglesCount];
 
@@ -984,17 +982,14 @@ public class Model extends Renderable {
             if (tSkin_flag)
                 triangleData = new int[trianglesCount];
 
-            if (texture_flag)
-                materials = new short[trianglesCount];
-
-            if (coordinate_flag)
-                textures = new byte[trianglesCount];
+            materials = null;
+            textures = null;
 
             if (texturesCount > 0 || hasParticleAttachments) {
-                textureTypes = new byte[texturesCount];
-                texturesX = new short[texturesCount];
-                texturesY = new short[texturesCount];
-                texturesZ = new short[texturesCount];
+                textureTypes = null;
+                texturesX = null;
+                texturesY = null;
+                texturesZ = null;
             }
 
             verticesCount = 0;
@@ -1081,7 +1076,7 @@ public class Model extends Renderable {
         boolean tSkin_flag = false;
         boolean texture_flag = false;
         boolean coordinate_flag = false;
-        boolean texturesSupported = true;
+        boolean texturesSupported = false;
         boolean anyParticles = false;
 
         verticesCount = 0;
@@ -1131,11 +1126,9 @@ public class Model extends Renderable {
                 anyParticles |= model.hasParticleAttachments || (model.verticesParticle != null) || (model.verticesParticleLayers != null);
             }
         }
-        if (!texturesSupported) {
-            texturesCount = 0;
-            texture_flag = false;
-            coordinate_flag = false;
-        }
+        texturesCount = 0;
+        texture_flag = false;
+        coordinate_flag = false;
 
         hasParticleAttachments = anyParticles;
         verticesParticle = anyParticles ? new int[verticesCount] : null;
@@ -1153,9 +1146,9 @@ public class Model extends Renderable {
         colorsY = new int[trianglesCount];
         colorsZ = new int[trianglesCount];
 
-        texturesX = new short[texturesCount];
-        texturesY = new short[texturesCount];
-        texturesZ = new short[texturesCount];
+        texturesX = null;
+        texturesY = null;
+        texturesZ = null;
 
         if (flag1)
             types = new int[trianglesCount];
@@ -1173,11 +1166,8 @@ public class Model extends Renderable {
         // Ensure colors exists (some merges assumed it)
         colors = new short[trianglesCount];
 
-        if (texture_flag)
-            materials = new short[trianglesCount];
-
-        if (coordinate_flag)
-            textures = new byte[trianglesCount];
+        materials = null;
+        textures = null;
 
         verticesCount = 0;
         trianglesCount = 0;

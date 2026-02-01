@@ -1548,29 +1548,6 @@ public final class NpcDefinition {
             for (int j1 = 0; j1 < models.length; j1++)
                 aclass30_sub2_sub4_sub6s[j1] = Model.method462(models[j1]);
 
-            if (npcId == 1093) {
-                for (int j1 = 0; j1 < aclass30_sub2_sub4_sub6s.length; j1++) {
-                    Model part = aclass30_sub2_sub4_sub6s[j1];
-                    if (part == null) continue;
-                    int t2 = 0;
-                    int t3 = 0;
-                    if (part.types != null) {
-                        for (int f = 0; f < part.trianglesCount; f++) {
-                            int t = part.types[f] & 3;
-                            if (t == 2) t2++;
-                            else if (t == 3) t3++;
-                        }
-                    }
-                    System.out.println("[NPC1093] part model=" + models[j1]
-                            + " tri=" + part.trianglesCount
-                            + " types=" + (part.types == null ? "null" : "ok")
-                            + " t2=" + t2 + " t3=" + t3
-                            + " materials=" + (part.materials == null ? "null" : "ok")
-                            + " textures=" + (part.textures == null ? "null" : "ok")
-                            + " texCount=" + part.texturesCount);
-                }
-            }
-
             if (aclass30_sub2_sub4_sub6s.length == 1)
                 model = aclass30_sub2_sub4_sub6s[0];
             else
@@ -1584,24 +1561,6 @@ public final class NpcDefinition {
             model.method479(64 + anInt85, 850 + anInt92, -30, -50, -30, true);
             // model.method479(84 + anInt85, 1000 + anInt92, -90, -580, -90, true);
 
-            if (npcId == 1093) {
-                model.forceRenderBothSides = true;
-                int t2 = 0;
-                int t3 = 0;
-                if (model.types != null) {
-                    for (int f = 0; f < model.trianglesCount; f++) {
-                        int t = model.types[f] & 3;
-                        if (t == 2) t2++;
-                        else if (t == 3) t3++;
-                    }
-                }
-                System.out.println("[NPC1093] merged tri=" + model.trianglesCount
-                        + " types=" + (model.types == null ? "null" : "ok")
-                        + " t2=" + t2 + " t3=" + t3
-                        + " materials=" + (model.materials == null ? "null" : "ok")
-                        + " textures=" + (model.textures == null ? "null" : "ok")
-                        + " texCount=" + model.texturesCount);
-            }
             mruNodes.removeFromCache(model, npcId);
         }
 		Model model_1 = Model.EMPTY_MODEL;
@@ -1615,9 +1574,6 @@ public final class NpcDefinition {
         model_1.calculateDistances();
         model_1.faceGroups = null;
         model_1.vertexGroups = null;
-        if (npcId == 1093) {
-            model_1.forceRenderBothSides = true;
-        }
         if (size == 1)
             model_1.fits_on_single_square = true;
         return model_1;
