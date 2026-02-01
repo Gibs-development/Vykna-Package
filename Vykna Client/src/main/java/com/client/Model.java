@@ -872,6 +872,7 @@ public class Model extends Renderable {
             boolean priority_flag = false;
             boolean alpha_flag = false;
             boolean tSkin_flag = false;
+            boolean vSkin_flag = false;
             boolean texture_flag = false;
             boolean coordinate_flag = false;
             boolean texturesSupported = true;
@@ -903,7 +904,8 @@ public class Model extends Renderable {
                             priority_flag = true;
                     }
 
-                    tSkin_flag |= build.triangleData != null;
+                    tSkin_flag |= build.triangleData != null || build.faceGroups != null;
+                    vSkin_flag |= build.vertexData != null || build.vertexGroups != null;
                     texture_flag |= build.materials != null;
                     coordinate_flag |= build.textures != null;
                     if (build.texturesCount > 0) {
@@ -945,7 +947,11 @@ public class Model extends Renderable {
             verticesX = new int[verticesCount];
             verticesY = new int[verticesCount];
             verticesZ = new int[verticesCount];
-            vertexData = new int[verticesCount];
+            if (vSkin_flag) {
+                vertexData = new int[verticesCount];
+            } else {
+                vertexData = null;
+            }
 
             trianglesX = new int[trianglesCount];
             trianglesY = new int[trianglesCount];
@@ -985,6 +991,9 @@ public class Model extends Renderable {
             for (int segment_index = 0; segment_index < length; segment_index++) {
                 build = model_segments[segment_index];
                 if (build != null) {
+                    int[] srcVertexGroups = vSkin_flag ? buildVertexGroupMap(build) : null;
+                    int[] srcFaceGroups = tSkin_flag ? buildFaceGroupMap(build) : null;
+
                     for (int face = 0; face < build.trianglesCount; face++) {
                         if (type_flag && build.types != null)
                             types[trianglesCount] = build.types[face];
@@ -999,8 +1008,8 @@ public class Model extends Renderable {
                         if (alpha_flag && build.alphas != null)
                             alphas[trianglesCount] = build.alphas[face];
 
-                        if (tSkin_flag && build.triangleData != null)
-                            triangleData[trianglesCount] = build.triangleData[face];
+                        if (tSkin_flag && srcFaceGroups != null)
+                            triangleData[trianglesCount] = srcFaceGroups[face];
 
                         if (texture_flag) {
                             if (build.materials != null)
@@ -1020,17 +1029,17 @@ public class Model extends Renderable {
                         // colors always exists in this merged model
                         colors[trianglesCount] = (build.colors != null ? build.colors[face] : 0);
 
-                        trianglesX[trianglesCount] = method465(build, build.trianglesX[face]);
-                        trianglesY[trianglesCount] = method465(build, build.trianglesY[face]);
-                        trianglesZ[trianglesCount] = method465(build, build.trianglesZ[face]);
+                        trianglesX[trianglesCount] = method465(build, build.trianglesX[face], srcVertexGroups);
+                        trianglesY[trianglesCount] = method465(build, build.trianglesY[face], srcVertexGroups);
+                        trianglesZ[trianglesCount] = method465(build, build.trianglesZ[face], srcVertexGroups);
                         trianglesCount++;
                     }
 
                     if (texturesSupported) {
                         for (int texture_edge = 0; texture_edge < build.texturesCount; texture_edge++) {
-                            texturesX[texturesCount] = (short) method465(build, build.texturesX[texture_edge]);
-                            texturesY[texturesCount] = (short) method465(build, build.texturesY[texture_edge]);
-                            texturesZ[texturesCount] = (short) method465(build, build.texturesZ[texture_edge]);
+                            texturesX[texturesCount] = (short) method465(build, build.texturesX[texture_edge], srcVertexGroups);
+                            texturesY[texturesCount] = (short) method465(build, build.texturesY[texture_edge], srcVertexGroups);
+                            texturesZ[texturesCount] = (short) method465(build, build.texturesZ[texture_edge], srcVertexGroups);
                             texturesCount++;
                         }
                         texture_face += build.texturesCount;
@@ -1052,6 +1061,8 @@ public class Model extends Renderable {
         boolean flag2 = false;
         boolean flag3 = false;
         boolean flag4 = false;
+        boolean vSkin_flag = false;
+        boolean tSkin_flag = false;
         boolean texture_flag = false;
         boolean coordinate_flag = false;
         boolean texturesSupported = true;
@@ -1081,6 +1092,8 @@ public class Model extends Renderable {
 
                 flag3 |= model.alphas != null;
                 flag4 |= model.colors != null;
+                vSkin_flag |= model.vertexData != null || model.vertexGroups != null;
+                tSkin_flag |= model.triangleData != null || model.faceGroups != null;
                 texture_flag |= model.materials != null;
                 coordinate_flag |= model.textures != null;
                 if (model.texturesCount > 0) {
@@ -1135,6 +1148,12 @@ public class Model extends Renderable {
         if (flag3)
             alphas = new int[trianglesCount];
 
+        if (vSkin_flag)
+            vertexData = new int[verticesCount];
+
+        if (tSkin_flag)
+            triangleData = new int[trianglesCount];
+
         // Ensure colors exists (some merges assumed it)
         colors = new short[trianglesCount];
 
@@ -1153,11 +1172,17 @@ public class Model extends Renderable {
         for (int j1 = 0; j1 < i; j1++) {
             Model model_1 = amodel[j1];
             if (model_1 != null) {
+                int[] srcVertexGroups = vSkin_flag ? buildVertexGroupMap(model_1) : null;
+                int[] srcFaceGroups = tSkin_flag ? buildFaceGroupMap(model_1) : null;
                 int k1 = verticesCount;
                 for (int l1 = 0; l1 < model_1.verticesCount; l1++) {
                     verticesX[verticesCount] = model_1.verticesX[l1];
                     verticesY[verticesCount] = model_1.verticesY[l1];
                     verticesZ[verticesCount] = model_1.verticesZ[l1];
+
+                    if (vertexData != null && srcVertexGroups != null) {
+                        vertexData[verticesCount] = srcVertexGroups[l1];
+                    }
 
                     if (verticesParticle != null && model_1.verticesParticle != null) {
                         int att = model_1.verticesParticle[l1];
@@ -1205,6 +1230,10 @@ public class Model extends Renderable {
                             alphas[trianglesCount] = 0;
                         else
                             alphas[trianglesCount] = model_1.alphas[i2];
+                    }
+
+                    if (triangleData != null && srcFaceGroups != null) {
+                        triangleData[trianglesCount] = srcFaceGroups[i2];
                     }
 
                     // colors always exists in merged output
@@ -1517,7 +1546,51 @@ public class Model extends Renderable {
         vertexNormalsOffsets = model.vertexNormalsOffsets;
     }
 
-    private final int method465(Model src, int srcIndex) {
+    private static int[] buildVertexGroupMap(Model src) {
+        if (src.vertexData != null) {
+            return src.vertexData;
+        }
+        if (src.vertexGroups == null) {
+            return null;
+        }
+        int[] map = new int[src.verticesCount];
+        for (int groupId = 0; groupId < src.vertexGroups.length; groupId++) {
+            int[] group = src.vertexGroups[groupId];
+            if (group == null) {
+                continue;
+            }
+            for (int v : group) {
+                if (v >= 0 && v < map.length) {
+                    map[v] = groupId;
+                }
+            }
+        }
+        return map;
+    }
+
+    private static int[] buildFaceGroupMap(Model src) {
+        if (src.triangleData != null) {
+            return src.triangleData;
+        }
+        if (src.faceGroups == null) {
+            return null;
+        }
+        int[] map = new int[src.trianglesCount];
+        for (int groupId = 0; groupId < src.faceGroups.length; groupId++) {
+            int[] group = src.faceGroups[groupId];
+            if (group == null) {
+                continue;
+            }
+            for (int f : group) {
+                if (f >= 0 && f < map.length) {
+                    map[f] = groupId;
+                }
+            }
+        }
+        return map;
+    }
+
+    private final int method465(Model src, int srcIndex, int[] srcVertexGroups) {
         int x = src.verticesX[srcIndex];
         int y = src.verticesY[srcIndex];
         int z = src.verticesZ[srcIndex];
@@ -1528,6 +1601,11 @@ public class Model extends Renderable {
                 if (hasParticleAttachments) {
                     mergeParticleLayers(dst, src, srcIndex);
                 }
+                if (srcVertexGroups != null && vertexData != null) {
+                    if (vertexData[dst] == 0) {
+                        vertexData[dst] = srcVertexGroups[srcIndex];
+                    }
+                }
                 return dst;
             }
         }
@@ -1537,8 +1615,8 @@ public class Model extends Renderable {
         verticesY[dst] = y;
         verticesZ[dst] = z;
 
-        if (src.vertexData != null && vertexData != null) {
-            vertexData[dst] = src.vertexData[srcIndex];
+        if (srcVertexGroups != null && vertexData != null) {
+            vertexData[dst] = srcVertexGroups[srcIndex];
         }
 
         if (hasParticleAttachments) {
