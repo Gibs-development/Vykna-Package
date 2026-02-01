@@ -4973,12 +4973,6 @@ public class Client extends RSApplet {
 		return ((long) plane << 48) | ((long) localX << 32) | ((long) localY << 16) | (objectId & 0xFFFFL);
 	}
 
-	static {
-		// Manual ambient overrides: objectId -> (loopSoundId, range, minDelay, maxDelay, randomSoundIds).
-		// Example (loop): MANUAL_AMBIENT_OBJECTS.put(12345, ManualAmbientDefinition.loop(3001, 10));
-		// Example (one-shot): MANUAL_AMBIENT_OBJECTS.put(12346, ManualAmbientDefinition.random(3002, 5, 120, 240));
-	}
-
 	private static final class ManualAmbientDefinition {
 		private final int loopSoundId;
 		private final int minDelay;
@@ -22908,6 +22902,11 @@ public class Client extends RSApplet {
 	private final HashMap<Long, AmbientEmitter> ambientEmitters = new HashMap<>();
 	private int lastAmbientRegisterLogTick = -50;
 	private int lastAmbientUpdateLogTick = -50;
+	static {
+		// Manual ambient overrides: objectId -> (loopSoundId, range, minDelay, maxDelay, randomSoundIds).
+		// Example (loop): MANUAL_AMBIENT_OBJECTS.put(12345, ManualAmbientDefinition.loop(3001, 10));
+		// Example (one-shot): MANUAL_AMBIENT_OBJECTS.put(12346, ManualAmbientDefinition.random(3002, 5, 120, 240));
+	}
 	public static int[] anIntArray385 = new int[] { 12800, 12800, 12800, 12800, 12800, 12800, 12800, 12800, 12800,
 			12800, 12800, 12800, 12800, 12800, 12800, 12800 };
 	public static boolean LOOP_MUSIC = false;
