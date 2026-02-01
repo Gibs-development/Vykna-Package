@@ -13,6 +13,7 @@ import java.util.List;
  * You will hook this from your server's ClickButton packet.
  */
 public final class TeleportButtonHandler {
+    private static final boolean DEBUG = true;
 
     // ---- Client ids (must match TeleportHomePage) ----
     private static final int INTERFACE_ID = TeleportInterfaceSender.INTERFACE_ID;
@@ -36,6 +37,11 @@ public final class TeleportButtonHandler {
     private TeleportButtonHandler() {}
 
     public static boolean handle(Player player, int buttonId) {
+        int rawId = buttonId;
+        buttonId = normalizeButtonId(buttonId);
+        if (DEBUG && (rawId == TELEPORT_BTN_ID || buttonId == TELEPORT_BTN_ID)) {
+            System.out.println("[Teleports] click rawId=" + rawId + " normalized=" + buttonId);
+        }
         if (buttonId == CLOSE_UI_ID) {
             player.getPA().closeAllWindows();
             return true;
@@ -93,6 +99,29 @@ public final class TeleportButtonHandler {
             return true;
         }
 
+        if (buttonId == TELEPORT_BTN_ID) {
+            int selected = player.getAttributes().getInt("vykna_tp_selected_id");
+            TeleportDefinition def = TeleportDefinitions.byId(selected);
+            if (DEBUG) {
+                int row = player.getAttributes().getInt("vykna_tp_selected_row");
+                String query = getSearchQuery(player);
+                TeleportCategory cat = getOrDefaultCategory(player, TeleportCategory.MONSTERS);
+                List<TeleportDefinition> visible = getVisibleDefinitions(player);
+                System.out.println("[Teleports] teleportBtn selectedId=" + selected
+                        + " selectedRow=" + row
+                        + " query=\"" + query + "\""
+                        + " category=" + cat
+                        + " visibleCount=" + (visible == null ? -1 : visible.size()));
+            }
+            if (def != null) {
+                // TODO: real requirement + quest checking here.
+                player.getPA().startTeleport(def.getDestination().getX(), def.getDestination().getY(), def.getDestination().getHeight(), "modern", false);
+            } else {
+                player.sendMessage("TELEPORT FALSE DEF MUST BE NULL.");
+            }
+            return true;
+        }
+
         // Row click
         for (int i = 0; i < MAX_ROWS; i++) {
             int rowBtn = (ROW_START_ID + (i * ROW_STRIDE)) + 0;
@@ -108,18 +137,16 @@ public final class TeleportButtonHandler {
                 return true;
             }
         }
-
-        if (buttonId == TELEPORT_BTN_ID) {
-            int selected = player.getAttributes().getInt("vykna_tp_selected_id");
-            TeleportDefinition def = TeleportDefinitions.byId(selected);
-            if (def != null) {
-                // TODO: real requirement + quest checking here.
-                player.getPA().startTeleport(def.getDestination().getX(), def.getDestination().getY(), def.getDestination().getHeight(), "modern", false);
-            }
-            return true;
-        }
-
         return false;
+    }
+
+    private static int normalizeButtonId(int buttonId) {
+        // Some client paths send a "real button id" offset by 93,000.
+        // Normalize so server-side ids match TeleportHomePage (base 31000).
+        if (buttonId >= 100000) {
+            return buttonId - 93000;
+        }
+        return buttonId;
     }
 
     private static TeleportCategory getOrDefaultCategory(Player player, TeleportCategory def) {

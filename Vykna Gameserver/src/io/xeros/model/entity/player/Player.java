@@ -2208,10 +2208,14 @@ public class Player extends Entity {
         if (Configuration.BOUNTY_HUNTER_ACTIVE) {
             bountyHunter.updateTargetUI();
         }
+        // Load persisted progression state before any derived refresh occurs.
+        PlayerSave.login(this);
+        getAttributes().setBoolean("vykna_progression_suppress_toasts", true);
         for (int i = 0; i < 22; i++) {
             getPA().setSkillLevel(i, playerLevel[i], playerXP[i]);
             getPA().refreshSkill(i);
         }
+        getAttributes().setBoolean("vykna_progression_suppress_toasts", false);
         health.setMaximumHealth(getPA().getLevelForXP(playerXP[playerHitpoints]));
         BankPin pin = getBankPin();
         if (pin.requiresUnlock()) {
@@ -2245,7 +2249,6 @@ public class Player extends Entity {
             Arrays.stream(Server.getConfiguration().getServerState().getLoginMessages()).forEach(this::sendMessage);
         }
         getDailyRewards().onLogin();
-        PlayerSave.login(this);
         VyknaProgressionHandler.refreshDerivedProgress(this, false);
         correctCoordinates();
         BossPoints.doRefund(this);

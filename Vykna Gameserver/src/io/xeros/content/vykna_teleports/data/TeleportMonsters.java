@@ -51,7 +51,7 @@ public final class TeleportMonsters {
          * 🪨 Low–Mid Level Training
          */
         defs.add(new TeleportDefinition(
-                1, TeleportCategory.MONSTERS,
+                2, TeleportCategory.MONSTERS,
                 "Training Crypt",
                 "Start your adventure here, A salve amulet will help.",
                 TeleportRequirement.combatLevel(1),

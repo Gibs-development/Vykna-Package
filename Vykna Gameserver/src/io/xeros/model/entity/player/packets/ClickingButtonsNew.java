@@ -6,6 +6,7 @@ import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.content.dailyrewards.DailyRewards;
 import io.xeros.content.party.PartyInterface;
 import io.xeros.content.wildwarning.WildWarning;
+import io.xeros.content.vykna_teleports.net.TeleportButtonHandler;
 import io.xeros.model.entity.player.PacketType;
 import io.xeros.model.entity.player.Player;
 import io.xeros.util.logging.player.ClickButtonLog;
@@ -37,6 +38,10 @@ public class ClickingButtonsNew implements PacketType {
         }
 
         if (c.getQuestTab().handleActionButton(buttonId)) {
+            return;
+        }
+
+        if (TeleportButtonHandler.handle(c, buttonId)) {
             return;
         }
 

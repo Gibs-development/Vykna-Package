@@ -3200,15 +3200,16 @@ public class PlayerAssistant {
 		c.nextChat = 0;
 	}
 
-	public void refreshSkill(int i) {
-		c.combatLevel = c.calculateCombatLevel();
-		if (i == Player.playerHitpoints) {
-			setSkillLevel(i, c.getHealth().getCurrentHealth(), c.playerXP[i]);
-		} else {
-			setSkillLevel(i, c.playerLevel[i], c.playerXP[i]);
-		}
-		VyknaProgressionHandler.refreshDerivedProgressForSkill(c, Skill.forId(i), true);
-	}
+    public void refreshSkill(int i) {
+        c.combatLevel = c.calculateCombatLevel();
+        if (i == Player.playerHitpoints) {
+            setSkillLevel(i, c.getHealth().getCurrentHealth(), c.playerXP[i]);
+        } else {
+            setSkillLevel(i, c.playerLevel[i], c.playerXP[i]);
+        }
+        boolean showFeedback = !c.getAttributes().getBoolean("vykna_progression_suppress_toasts");
+        VyknaProgressionHandler.refreshDerivedProgressForSkill(c, Skill.forId(i), showFeedback);
+    }
 
 	public void refreshSkills() {
 		for (Skill skill : Skill.values())

@@ -100,6 +100,9 @@ public class ClickingButtons implements PacketType {
 		if (TeleportButtonHandler.handle(c, realButtonId)) {
 			return;
 		}
+		if (TeleportButtonHandler.handle(c, actionButtonId)) {
+			return;
+		}
 
 		if (c.isFping()) {
 			/**

@@ -658,7 +658,8 @@ public final class VyknaProgressionHandler {
         state.setLastCompleted(entry.getEntryId(), entry.getListTypeId());
         updateLeaderboard(player, state);
         sendSummaryData(player);
-        if (showFeedback) {
+        boolean suppress = player != null && player.getAttributes().getBoolean("vykna_progression_suppress_toasts");
+        if (showFeedback && !suppress) {
             VyknaProgressionToast.showCompleteToast(player, entry);
             String pointsText = entry.getPoints() > 0 ? " (+" + entry.getPoints() + " points)" : "";
             player.sendMessage("Congratulations! You just completed: " + entry.getName() + pointsText + ".");

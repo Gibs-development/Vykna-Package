@@ -22906,6 +22906,7 @@ public class Client extends RSApplet {
 		// Manual ambient overrides: objectId -> (loopSoundId, range, minDelay, maxDelay, randomSoundIds).
 		// Example (loop): MANUAL_AMBIENT_OBJECTS.put(12345, ManualAmbientDefinition.loop(3001, 10));
 		// Example (one-shot): MANUAL_AMBIENT_OBJECTS.put(12346, ManualAmbientDefinition.random(3002, 5, 120, 240));
+		MANUAL_AMBIENT_OBJECTS.put(33320, ManualAmbientDefinition.loop(1669, 10));
 	}
 	public static int[] anIntArray385 = new int[] { 12800, 12800, 12800, 12800, 12800, 12800, 12800, 12800, 12800,
 			12800, 12800, 12800, 12800, 12800, 12800, 12800 };
