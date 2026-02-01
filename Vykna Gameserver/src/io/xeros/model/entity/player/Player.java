@@ -2058,7 +2058,8 @@ public class Player extends Entity {
         PollTab.updatePollTabDisplay(this);
         setSidebarInterface(0, 2423);
         setSidebarInterface(1, 13917); // Skilltab > 3917
-        setSidebarInterface(2, QuestTab.INTERFACE_ID);
+       // setSidebarInterface(2, QuestTab.INTERFACE_ID);
+        setSidebarInterface(2, 638);
         setSidebarInterface(3, 3213);
         setSidebarInterface(4, 1644);
         setSidebarInterface(5, 15608);

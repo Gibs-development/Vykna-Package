@@ -2,7 +2,7 @@ package com.client;
 
 public class ModelLoader {
     private static final boolean DEBUG_667 = true;
-    private static final boolean DEBUG_MODEL_VALIDATION = false;
+    private static final boolean DEBUG_MODEL_VALIDATION = true;
     /**
      * 525/667-era "bitmask" model format (commonly ends with -1, -1).
      * This is NOT the same as your decodeType1/2/3 variants when the header flag byte > 1 (e.g. 0x0F).

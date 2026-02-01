@@ -5,4 +5,11 @@
       <sourceFolder url="file://$MODULE_DIR$/../../Vykna Gameserver/build/generated/sources/annotationProcessor/java/main" isTestSource="false" generated="true" />
     </content>
   </component>
+  <component name="FacetManager">
+    <facet type="web" name="Web Gradle : Vykna Gameserver-2.0.10.war">
+      <configuration>
+        <webroots />
+      </configuration>
+    </facet>
+  </component>
 </module>

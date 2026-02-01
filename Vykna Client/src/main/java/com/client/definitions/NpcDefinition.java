@@ -872,10 +872,12 @@ public final class NpcDefinition {
 			entityDef.walkAnim = 8306;
 		}
 		if (i == 5792) {
-			entityDef.models = new int[] { 37142 };
+			entityDef.models = new int[] { 54122 };
 			entityDef.actions = new String[5];
 			entityDef.actions = new String[] { "Trade", null, null, null, null };
-			entityDef.standAnim = 8307;
+			entityDef.standAnim = 14808;
+			entityDef.anInt86 = 35; //WIDTH
+			entityDef.anInt91 = 35; // HEIGH
 
 		}
 		if (i == 1092) {
