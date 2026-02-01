@@ -1071,6 +1071,10 @@ final class ObjectManager {
 		int k2 = tileHeights[plane][x][y + 1];
 		int l2 = l1 + i2 + j2 + k2 >> 2;
 		ObjectDefinition definition = ObjectDefinition.forID(id);
+		Client client = Client.getInstance();
+		if (client != null) {
+			client.registerAmbientEmitter(id, plane, x, y);
+		}
 		long key = (long) (orientation << 20 | type << 14 | (y << 7 | x) + 0x40000000);
 		if(!definition.hasActions) {
 			key |= ~0x7fffffffffffffffL;

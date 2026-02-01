@@ -663,6 +663,11 @@ public final class ObjectDefinition {
 		varpId = -1;
 		configId = -1;
 		childrenIDs = null;
+		ambientSoundId = -1;
+		ambientSoundRadius = 0;
+		ambientMinDelay = 0;
+		ambientMaxDelay = 0;
+		ambientSoundIds = null;
 	}
 
 	public void method574(OnDemandFetcher class42_sub1) {
@@ -1009,12 +1014,21 @@ public final class ObjectDefinition {
 				}
 				childrenIDs[j1 + 1] = var3;
 			} else if(type == 78) {//ambient sound
-				stream.readUShort();
-				stream.readUnsignedByte();
+				ambientSoundId = stream.readUShort();
+				if (ambientSoundId == 65535) {
+					ambientSoundId = -1;
+				}
+				ambientSoundRadius = stream.readUnsignedByte();
 			} else if(type == 79) {
-				stream.currentOffset += 5;
+				ambientMinDelay = stream.readUShort();
+				ambientMaxDelay = stream.readUShort();
+				ambientSoundRadius = stream.readUnsignedByte();
 				int len = stream.readUnsignedByte();
-				stream.currentOffset += len * 2;
+				ambientSoundIds = new int[len];
+				for (int i2 = 0; i2 < len; i2++) {
+					int soundId = stream.readUShort();
+					ambientSoundIds[i2] = soundId == 65535 ? -1 : soundId;
+				}
 			} else if(type == 81) {
 				stream.readUnsignedByte();
 			} else if(type == 82) {
@@ -1096,6 +1110,11 @@ public final class ObjectDefinition {
 	public boolean aBoolean779;
 	public static MRUNodes mruNodes2 = new MRUNodes(30);
 	public int animation;
+	public int ambientSoundId = -1;
+	public int ambientSoundRadius;
+	public int ambientMinDelay;
+	public int ambientMaxDelay;
+	public int[] ambientSoundIds;
 	private static ObjectDefinition[] cache;
 	private int anInt783;
 	private int[] modifiedModelColors;
