@@ -13,17 +13,17 @@ public final class ItemAttributeDropConfig {
 
         rules.allowItems(
                 Items.ABYSSAL_WHIP,
-                1332,  // Adamant scimitar
+                1331,  // Adamant scimitar
                 9183,  // Adamant c'bow
-                6911,  // Apprentice wand
-                20402, // Rune scimitar
-                20555, // Rune 2h sword
+                6910,  // Apprentice wand
+                1333, // Rune scimitar
+                1319, // Rune 2h sword
                 9185,  // Rune c'bow
-                6913,  // Teacher wand
-                20406, // Dragon scimitar
-                20407, // Dragon dagger
+                6912,  // Teacher wand
+                4587, // Dragon scimitar
+                1215, // Dragon dagger
                 21902, // Dragon Crossbow
-                20560, // Master wand
+                6914, // Master wand
                 3842,  // Unholy book
                 3840,  // Holy book
                 3844,  // Book of balance
@@ -41,7 +41,7 @@ public final class ItemAttributeDropConfig {
                 .forceAttributes(1);
 
         // Warped Rat (t30) - up to Uncommon
-        rules.ruleForItem(1332)  // Adamant scimitar
+        rules.ruleForItem(1331)  // Adamant scimitar
                 .addRarityChance(1, 0.25)
                 .setMaxPerks(1)
                 .useRarityPerkPool(true)
@@ -51,7 +51,7 @@ public final class ItemAttributeDropConfig {
                 .setMaxPerks(1)
                 .useRarityPerkPool(true)
                 .forceAttributes(1);
-        rules.ruleForItem(6911)  // Apprentice wand
+        rules.ruleForItem(6910)  // Apprentice wand
                 .addRarityChance(1, 0.25)
                 .setMaxPerks(1)
                 .useRarityPerkPool(true)
@@ -91,7 +91,7 @@ public final class ItemAttributeDropConfig {
                 .setMaxPerks(2)
                 .useRarityPerkPool(true)
                 .forceAttributes(1);
-        rules.ruleForItem(20407) // Dragon dagger
+        rules.ruleForItem(1215) // Dragon dagger
                 .addRarityChance(1, 0.25)
                 .addRarityChance(2, 0.12)
                 .addRarityChance(3, 0.04)

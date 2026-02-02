@@ -2300,16 +2300,51 @@ public class Client extends RSApplet {
 		// Music is delivered by the server as cache index3 (on-demand type 2), gzipped MIDI.
 		// Once the on-demand fetcher provides the decompressed bytes we can play immediately.
 		if (!musicEnabled || lowMem || musicVolume == 0) {
+			if (!loggedIn && (currentSong == 0 || nextSong == 0 || currentSong == 1 || nextSong == 1)) {
+				long now = System.currentTimeMillis();
+				if (now - lastLoginMusicSaveDebug > 2000L) {
+					lastLoginMusicSaveDebug = now;
+					logger.info("[LoginMusic] saveMidi skipped: enabled={}, lowMem={}, volume={}, currentSong={}, nextSong={}",
+							musicEnabled, lowMem, musicVolume, currentSong, nextSong);
+					System.out.println("[LoginMusic] saveMidi skipped: enabled=" + musicEnabled
+							+ " lowMem=" + lowMem
+							+ " volume=" + musicVolume
+							+ " currentSong=" + currentSong
+							+ " nextSong=" + nextSong);
+				}
+			}
 			return;
 		}
 		if (midiBytes == null || midiBytes.length == 0) {
 			return;
 		}
+		if (!loggedIn && (currentSong == 0 || nextSong == 0 || currentSong == 1 || nextSong == 1)
+				&& nextSong != lastLoginMusicHeaderSong) {
+			lastLoginMusicHeaderSong = nextSong;
+			String header = midiBytes.length >= 4 ? new String(midiBytes, 0, 4) : "(short)";
+			int b0 = midiBytes.length > 0 ? (midiBytes[0] & 0xff) : -1;
+			int b1 = midiBytes.length > 1 ? (midiBytes[1] & 0xff) : -1;
+			int b2 = midiBytes.length > 2 ? (midiBytes[2] & 0xff) : -1;
+			int b3 = midiBytes.length > 3 ? (midiBytes[3] & 0xff) : -1;
+			logger.info("[LoginMusic] MIDI header for songId={} len={} head='{}' bytes=[{}, {}, {}, {}]",
+					nextSong, midiBytes.length, header, b0, b1, b2, b3);
+			System.out.println("[LoginMusic] MIDI header songId=" + nextSong
+					+ " len=" + midiBytes.length
+					+ " head='" + header + "' bytes=[" + b0 + "," + b1 + "," + b2 + "," + b3 + "]");
+		}
 		try {
 			MidiPlayer.get().play(nextSong, midiBytes, true, musicVolume);
+			if (!loggedIn && (currentSong == 0 || nextSong == 0 || currentSong == 1 || nextSong == 1)) {
+				logger.info("[LoginMusic] Playing songId={} bytes={}", nextSong, midiBytes.length);
+				System.out.println("[LoginMusic] Playing songId=" + nextSong + " bytes=" + midiBytes.length);
+			}
 		} catch (Throwable t) {
 			// Never break the game loop because of audio.
 			// (Some machines may not have a MIDI synthesizer available.)
+			if (!loggedIn && (currentSong == 0 || nextSong == 0 || currentSong == 1 || nextSong == 1)) {
+				logger.info("[LoginMusic] MidiPlayer.play failed for songId={}", nextSong, t);
+				System.out.println("[LoginMusic] MidiPlayer.play failed for songId=" + nextSong + " err=" + t);
+			}
 		}
 	}
 
@@ -18026,7 +18061,7 @@ public class Client extends RSApplet {
 		int bob = (int)(Math.sin(loopCycle / 12.0) * 3.0);
 		int pulse = (int)(Math.sin(loopCycle / 18.0) * 18.0) + 35; // 17..53-ish alpha
 
-		int x = 386 - (logo2021.myWidth / 2) + 8-20 + 5;
+		int x = 386 - (logo2021.myWidth / 2)-5;
 		int y = 85 - (logo2021.myHeight / 2) + 35- 20 + bob;
 
 		try {
@@ -18843,6 +18878,13 @@ public class Client extends RSApplet {
 
 
 	public void drawLoginScreen(boolean flag) {
+		long nowLogin = System.currentTimeMillis();
+		if (!loggedIn && nowLogin - lastLoginScreenDebug > 2000L) {
+			lastLoginScreenDebug = nowLogin;
+			logger.info("[LoginMusic] drawLoginScreen tick");
+			System.out.println("[LoginMusic] drawLoginScreen tick");
+		}
+		ensureLoginMusic();
 		int layoutWidth = ScreenMode.FIXED.getWidth();
 		int layoutHeight = ScreenMode.FIXED.getHeight();
 		int centerX = layoutWidth / 2;
@@ -18857,11 +18899,6 @@ public class Client extends RSApplet {
 				loginScreenBackgroundCaptcha.drawAdvancedSprite(0,0);
 			else
 				loginScreenBackground.drawAdvancedSprite(0,0);
-			// Example brazier positions (tweak to match your art)
-			int brazierLeftX = 105;
-			int brazierLeftY = 220;
-			int brazierRightX = 580;
-			int brazierRightY = 220;
 
 // draw your brazier sprites first (no fire)
 // brazierSprite.drawAdvancedSprite(brazierLeftX, brazierLeftY);
@@ -18872,17 +18909,6 @@ public class Client extends RSApplet {
 			brazierFlameRight.update();
 
 // draw flames on top, offset into the “bowl” area
-			int flameOffsetX = 0;
-			int flameOffsetY = 0;
-
-// IMPORTANT: draw into the SAME pixel buffer your login buffer uses.
-// If your client has Rasterizer2D / DrawingArea pixels, use that.
-// Most bases: DrawingArea.pixels + DrawingArea.width.
-			brazierFlameLeft.draw(DrawingArea.pixels, DrawingArea.width,
-					brazierLeftX + flameOffsetX, brazierLeftY + flameOffsetY -24+20-8, 190);
-
-			brazierFlameRight.draw(DrawingArea.pixels, DrawingArea.width,
-					brazierRightX + flameOffsetX, brazierRightY + flameOffsetY - 24+20-8, 190);
 			tickAndDrawLoginParticles();
 			//	logo2021.drawAdvancedSprite(386 - (logo2021.myWidth / 2),85 - (logo2021.myHeight / 2));
 		}
@@ -18918,7 +18944,7 @@ public class Client extends RSApplet {
 				newBoldFont.drawCenteredString(firstLoginMessage, centerX - 3, j - 11, 0xffffff, 0x191919, 255);
 				j += 30;
 			} else {
-				kingthingsPetrock.drawCenteredString("Welcome to Vykna", centerX - 3 + 5, j - 11+5, 0xffffff, 0x423f3f, 255);
+				newSmallFont.drawCenteredString("Welcome to Arywn", centerX - 3 + 5, j - 11+5, 0xffffff, 0x423f3f, 255);
 			}
 			drawLoginLogoFx();
 			ensureEmbersInit();
@@ -18926,22 +18952,22 @@ public class Client extends RSApplet {
 
 // spawn a few per tick while on login screen
 			for (int i = 0; i < 2; i++) spawnEmber(288, 270, 200, 120);
-			renderEmbers();
-			Sprite skullOverlay = new Sprite("loginscreen/skullOverlay");
-			skullOverlay.drawAdvancedSprite(0,0);
-			drawSkullEyeGlowFx(centerX, centerY);
+			//renderEmbers();
+			//Sprite skullOverlay = new Sprite("loginscreen/skullOverlay");
+			//skullOverlay.drawAdvancedSprite(0,0);
+		//	drawSkullEyeGlowFx(centerX, centerY);
 			//
 
-			usernameIcon.drawSprite((layoutWidth / 2) - 119+30+5, layoutHeight / 2 - 21+50-10-15-5);
-			kingthingsPetrock.drawString(
+			usernameIcon.drawSprite((layoutWidth / 2) - 119+30+5, layoutHeight / 2 - 21+50-10-15-5-30);
+			newSmallFont.drawString(
 					"★" + myUsername + ((loginScreenCursorPos == 0) & (loopCycle % 40 < 20) ? "|" : ""),
-					(layoutWidth / 2) - 119+30+27, layoutHeight / 2 - 21+50-9, 0xffffff, 0x191919, 255);
+					(layoutWidth / 2) - 119+30+27, layoutHeight / 2 - 21+50-9-30, 0xffffff, 0x191919, 255);
 			j += 15;
-			passIcon.drawSprite((layoutWidth / 2) - 119+30+5, layoutHeight / 2 - 21+50-10-15-5+25+5);
-			lato.drawString(
+			passIcon.drawSprite((layoutWidth / 2) - 119+30+5, layoutHeight / 2 - 21+50-10-15-5+25+5-30);
+			newSmallFont.drawString(
 					"★" + StringUtils.passwordAsterisks(getPassword())
 							+ ((loginScreenCursorPos == 1) & (loopCycle % 40 < 20) ? "|" : ""),
-					(layoutWidth / 2) - 119+30+27, layoutHeight / 2 + 31+20-10+4+5, 0xffffff, 0x191919, 255);
+					(layoutWidth / 2) - 119+30+27, layoutHeight / 2 + 31+20-10+4+5-30, 0xffffff, 0x191919, 255);
 
 			int rememberYOffset = 6;
 
@@ -18949,10 +18975,10 @@ public class Client extends RSApplet {
 			rememberMeHover = mouseInRegion(286 - extraPos, 300, 301 - extraPos, 313);
 			rememberPasswordHover = mouseInRegion(416 - extraPos, 300, 433 - extraPos, 313);
 
-			kingthingsPetrockLight.drawString("[Save Details]", 343, 308 + rememberYOffset+15, 0xfec943, 0x191919, 255);
+			kingthingsPetrockLight.drawString("[Save Details]", 343, 308 + rememberYOffset+15-30, 0xfec943, 0x191919, 255);
 			//kingthingsPetrockLight.drawString("Save Password?", 350, 308 + rememberYOffset+10, 0xffffff, 0x191919, 255);
-			final int btnX = (layoutWidth / 2) - 119 + 30 + 5 - 20 + 8 + 2+1-3-1;
-			final int btnY = (layoutHeight / 2) - 21 + 50 - 10 - 15 - 5 + 30 + 50;
+			final int btnX = (layoutWidth / 2) - 119 + 30 + 5 - 20 + 8 + 2+1-3-1+10-4;
+			final int btnY = (layoutHeight / 2) - 21 + 50 - 10 - 15 - 5 + 30 + 50-20-6;
 
 // Prefer the actual sprite dimensions
 			final int btnW = loginButtonStandard.myWidth;   // or loginButtonHovered.myWidth
@@ -18965,6 +18991,18 @@ public class Client extends RSApplet {
 			} else {
 				loginButtonStandard.drawAdvancedSprite(btnX, btnY);
 			}
+			// Example brazier positions (tweak to match your art)
+			int brazierLeftX = 257;
+			int brazierLeftY = 320;
+			int brazierRightX = 446;
+			int brazierRightY = 320;
+			int flameOffsetX = 0;
+			int flameOffsetY = 0;
+			// Draw braziers AFTER the login button so flames sit on top.
+			brazierFlameLeft.draw(DrawingArea.pixels, DrawingArea.width,
+					brazierLeftX + flameOffsetX, brazierLeftY + flameOffsetY -24+20-8, 190);
+			brazierFlameRight.draw(DrawingArea.pixels, DrawingArea.width,
+					brazierRightX + flameOffsetX, brazierRightY + flameOffsetY - 24+20-8, 190);
 
 
 
@@ -19010,6 +19048,46 @@ public class Client extends RSApplet {
 
 
 		loginScreenGraphicsBuffer.drawGraphics(0, 0, super.graphics);
+	}
+
+	private void ensureLoginMusic() {
+		if (loggedIn || !musicEnabled || lowMem || musicVolume == 0) {
+			long now = System.currentTimeMillis();
+			if (now - lastLoginMusicDebug > 2000L) {
+				lastLoginMusicDebug = now;
+				logger.info("[LoginMusic] Skipped: loggedIn={}, enabled={}, lowMem={}, volume={}",
+						loggedIn, musicEnabled, lowMem, musicVolume);
+				System.out.println("[LoginMusic] Skipped: loggedIn=" + loggedIn
+						+ " enabled=" + musicEnabled
+						+ " lowMem=" + lowMem
+						+ " volume=" + musicVolume);
+			}
+			return;
+		}
+		if (onDemandFetcher == null) {
+			long now = System.currentTimeMillis();
+			if (now - lastLoginMusicDebug > 2000L) {
+				lastLoginMusicDebug = now;
+				logger.info("[LoginMusic] Skipped: onDemandFetcher not ready.");
+				System.out.println("[LoginMusic] Skipped: onDemandFetcher not ready.");
+			}
+			return;
+		}
+		final int loginSongId = 1;
+		if (currentSong == loginSongId && nextSong == loginSongId) {
+			return;
+		}
+		long now = System.currentTimeMillis();
+		if (now - lastLoginMusicDebug > 500L) {
+			lastLoginMusicDebug = now;
+			logger.info("[LoginMusic] Requesting songId={}", loginSongId);
+			System.out.println("[LoginMusic] Requesting songId=" + loginSongId);
+		}
+		currentSong = loginSongId;
+		nextSong = loginSongId;
+		songChanging = false;
+		prevSong = 0;
+		onDemandFetcher.provide(2, nextSong);
 	}
 
 	private void drawFlames() {
@@ -20472,27 +20550,32 @@ public class Client extends RSApplet {
 					int j3 = inStream.method436();
 					int j11 = inStream.method436();
 					RSInterface npcInterface = RSInterface.interfaceCache[j11];
-					npcInterface.anInt233 = 2;
-					npcInterface.mediaID = j3;
-					if (npcInterface.autoNpcZoom) {
-						npcInterface.modelZoom = RSInterface.autoZoomForNpc(
-								j3,
-								npcInterface.width,
-								npcInterface.height
-						);
-					}
-					if (npcInterface.useNpcStandAnim) {
+					if (npcInterface != null) {
+						npcInterface.type = 6;
+						npcInterface.anInt233 = 2;
+						npcInterface.mediaID = j3;
+						npcInterface.useNpcFullModel = true;
+						npcInterface.useNpcStandAnim = true;
 						npcInterface.anInt257 = -1;
 						npcInterface.anInt258 = -1;
 						npcInterface.anInt246 = 0;
+						npcInterface.autoNpcZoom = true;
+						if (npcInterface.width <= 0) {
+							npcInterface.width = 32;
+						}
+						if (npcInterface.height <= 0) {
+							npcInterface.height = 32;
+						}
+						if (npcInterface.autoNpcZoom) {
+							npcInterface.modelZoom = RSInterface.autoZoomForNpc(
+									j3,
+									npcInterface.width,
+									npcInterface.height
+							);
+						}
+						System.out.println("[opcode75] interface=" + j11 + " npc=" + j3
+								+ " anim1=" + npcInterface.anInt257 + " anim2=" + npcInterface.anInt258);
 					}
-					if (npcInterface.type == 6 && npcInterface.anInt257 == 0 && npcInterface.anInt258 == 0) {
-						npcInterface.anInt257 = -1;
-						npcInterface.anInt258 = -1;
-						npcInterface.anInt246 = 0;
-					}
-					System.out.println("[opcode75] interface=" + j11 + " npc=" + j3
-							+ " anim1=" + npcInterface.anInt257 + " anim2=" + npcInterface.anInt258);
 					incomingPacket = -1;
 					return true;
 
@@ -22606,6 +22689,10 @@ public class Client extends RSApplet {
 	private static int anInt1226;
 	private int nextSong;
 	private boolean songChanging;
+	private long lastLoginMusicDebug;
+	private long lastLoginMusicSaveDebug;
+	private int lastLoginMusicHeaderSong = -1;
+	private long lastLoginScreenDebug;
 	private final int[] anIntArray1229;
 	private CollisionMap[] aClass11Array1230;
 	public static int anIntArray1232[];

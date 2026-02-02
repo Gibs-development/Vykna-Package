@@ -198,18 +198,31 @@ public class PlayerSave {
                         if (ReadMode == 2) {
                             for (PlayerSaveEntry entry : playerSaveEntryList) {
                                 if (entry.getKeys(p).contains(token)) {
-                                    String valueToDecode = token2;
-                                    if ("quest_profile".equals(token) && "{".equals(token2)) {
-                                        StringBuilder json = new StringBuilder(token2);
-                                        String nextLine;
-                                        while ((nextLine = characterfile.readLine()) != null) {
-                                            json.append("\n").append(nextLine);
-                                            if ("}".equals(nextLine.trim())) {
-                                                break;
-                                            }
-                                        }
-                                        valueToDecode = json.toString();
-                                    }
+                                      String valueToDecode = token2;
+                                      if ("quest_profile".equals(token) && "{".equals(token2)) {
+                                          StringBuilder json = new StringBuilder(token2);
+                                          String nextLine;
+                                          while ((nextLine = characterfile.readLine()) != null) {
+                                              json.append("\n").append(nextLine);
+                                              if ("}".equals(nextLine.trim())) {
+                                                  break;
+                                              }
+                                          }
+                                          valueToDecode = json.toString();
+                                      } else if ("vykna_progression_state".equals(token) && "{".equals(token2)) {
+                                          StringBuilder json = new StringBuilder(token2);
+                                          String nextLine;
+                                          int depth = 1;
+                                          while ((nextLine = characterfile.readLine()) != null) {
+                                              json.append("\n").append(nextLine);
+                                              depth += countChar(nextLine, '{');
+                                              depth -= countChar(nextLine, '}');
+                                              if (depth <= 0) {
+                                                  break;
+                                              }
+                                          }
+                                          valueToDecode = json.toString();
+                                      }
                                     Preconditions.checkState(entry.decode(p, token, valueToDecode), "Failed to decode player save entry: " + entry.getClass() + ", token: " + token);
                                     line = characterfile.readLine();
                                     continue main;
@@ -1444,10 +1457,10 @@ public class PlayerSave {
             return true;
         }
 
-        public static boolean saveGameInstant(Player p) {
-            if (!p.saveCharacter) {
-                return false;
-            }
+    public static boolean saveGameInstant(Player p) {
+        if (!p.saveCharacter) {
+            return false;
+        }
             if (p.getLoginName() == null || PlayerHandler.players[p.getIndex()] == null) {
                 return false;
             }
@@ -2873,8 +2886,21 @@ public class PlayerSave {
                 ioexception.printStackTrace();
                 return false;
             }
-            return true;
+        return true;
+    }
+
+    private static int countChar(String value, char target) {
+        if (value == null || value.isEmpty()) {
+            return 0;
         }
+        int count = 0;
+        for (int i = 0; i < value.length(); i++) {
+            if (value.charAt(i) == target) {
+                count++;
+            }
+        }
+        return count;
+    }
 
 
     public static final Gson GSON = new GsonBuilder().setPrettyPrinting().create();

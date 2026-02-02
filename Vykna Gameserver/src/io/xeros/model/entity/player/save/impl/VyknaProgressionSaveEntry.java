@@ -6,7 +6,6 @@ import io.xeros.content.vykna_progression.VyknaProgressionPlayerState;
 import io.xeros.content.vykna_progression.VyknaProgressionPersistence;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.save.PlayerSaveEntry;
-import io.xeros.util.JsonUtil;
 
 import java.util.List;
 
@@ -43,7 +42,8 @@ public class VyknaProgressionSaveEntry implements PlayerSaveEntry {
         if (!KEY.equals(key)) {
             return "";
         }
-        return JsonUtil.toJson(player.getVyknaProgressionState());
+        // Compact JSON to keep player save entries single-line.
+        return GSON.toJson(player.getVyknaProgressionState());
     }
 
     @Override

@@ -13,6 +13,10 @@ import io.xeros.content.Bonfire;
 import io.xeros.content.FountainOfRune;
 import io.xeros.content.QuestTab;
 import io.xeros.content.barrows.Barrows;
+import io.xeros.content.questsystem.QuestSystem;
+import io.xeros.content.questsystem.event.QuestEvent;
+import io.xeros.content.questsystem.event.QuestEventKeys;
+import io.xeros.content.questsystem.event.QuestEventType;
 import io.xeros.content.items.UseItem;
 import io.xeros.content.upgrade_table.Upgradeables;
 import io.xeros.model.collisionmap.WorldObject;
@@ -164,6 +168,12 @@ public class ItemOnObject implements PacketType {
 			}
 
 			c.facePosition(objectX, objectY);
+			QuestSystem.handle(c, new QuestEvent(QuestEventType.ITEM_ON_OBJECT)
+					.with(QuestEventKeys.ITEM_ID, itemId)
+					.with(QuestEventKeys.OBJECT_ID, objectId)
+					.with(QuestEventKeys.AREA_X, objectX)
+					.with(QuestEventKeys.AREA_Y, objectY)
+					.with(QuestEventKeys.AREA_HEIGHT, c.getHeight()));
 			UseItem.ItemonObject(c, objectId, objectX, objectY, itemId);
 		}));
 	}

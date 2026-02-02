@@ -31,6 +31,7 @@ import io.xeros.model.definitions.ItemDef;
 import io.xeros.model.definitions.ItemStats;
 import io.xeros.model.entity.player.Boundary;
 import io.xeros.model.entity.player.Player;
+import io.xeros.content.vykna_progression.VyknaProgressionHandler;
 import io.xeros.model.entity.player.PlayerHandler;
 import io.xeros.model.entity.player.Right;
 import io.xeros.model.entity.player.mode.group.GroupIronmanBank;
@@ -1677,7 +1678,41 @@ public class ItemAssistant {
 		this.addContainerUpdate(ContainerUpdate.EQUIPMENT);
 		this.addContainerUpdate(ContainerUpdate.INVENTORY);
 		processContainerUpdates();
+		trackEquipRarityProgress(invAttrs);
 		return true;
+	}
+
+	private void trackEquipRarityProgress(ItemAttributes attrs) {
+		if (attrs == null) {
+			return;
+		}
+		int rarityId = attrs.rarityId;
+		String rarityKey;
+		switch (rarityId) {
+			case 0:
+				rarityKey = "common";
+				break;
+			case 1:
+				rarityKey = "uncommon";
+				break;
+			case 2:
+				rarityKey = "rare";
+				break;
+			case 3:
+				rarityKey = "epic";
+				break;
+			case 4:
+			case 5:
+				rarityKey = "mythic";
+				break;
+			default:
+				rarityKey = null;
+				break;
+		}
+		if (rarityKey == null) {
+			return;
+		}
+		VyknaProgressionHandler.addProgress(player, "equip_rarity:" + rarityKey, 1);
 	}
 
 

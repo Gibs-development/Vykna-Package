@@ -102,6 +102,32 @@ tasks.test {
     useJUnitPlatform()
 }
 
+tasks.register<Jar>("runnableJar") {
+    group = "build"
+    description = "Builds a runnable (fat) jar with all dependencies."
+
+    archiveFileName.set("ClientRunnable.jar")
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
+    manifest {
+        attributes["Main-Class"] = "com.client.Client"
+    }
+
+    // Your compiled classes/resources
+    from(sourceSets["main"].output)
+
+    // Pull in runtime dependencies
+    dependsOn(configurations.runtimeClasspath)
+    from({
+        configurations.runtimeClasspath.get()
+            .filter { it.name.endsWith(".jar") }
+            .map { zipTree(it) }
+    })
+
+    // Avoid signature conflicts when merging jars
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
+}
+
 tasks.register<Jar>("createStandardJar") {
     archiveFileName.set("NotObfuscatedClient.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE

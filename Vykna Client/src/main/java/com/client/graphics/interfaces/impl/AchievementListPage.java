@@ -80,9 +80,9 @@ public final class AchievementListPage extends RSInterface {
     private static final int ROW_START_ID = INTERFACE_ID + 3100;
     private static final int ROW_STRIDE = 30;
 
-    // Progress bar (separate block)
-    private static final int TEXT_PROGRESS = INTERFACE_ID + 4000;
-    private static final int PROGRESS_BAR_ID = INTERFACE_ID + 4010;
+    // Progress bar (separate block, kept well clear of row ids)
+    private static final int TEXT_PROGRESS = INTERFACE_ID + 12000;
+    private static final int PROGRESS_BAR_ID = INTERFACE_ID + 12010;
 
     // Dropdown colors (dark)
     private static final int[] DARK_DROPDOWN_COLORS = { 0x2b2118, 0x3a2a1c, 0x4a3624, 0x5a4331, 0x6a503b };

@@ -16,7 +16,11 @@ import io.xeros.content.dialogue.impl.*;
 import io.xeros.content.minigames.inferno.Inferno;
 import io.xeros.content.minigames.tob.TobConstants;
 import io.xeros.content.miniquests.magearenaii.dialogue.KolodionDialogue;
+import io.xeros.content.questsystem.sample.CourierFavorQuest;
+import io.xeros.content.questsystem.sample.DesertTreasureQuest;
 import io.xeros.content.questsystem.sample.ImpCatcherQuest;
+import io.xeros.content.questsystem.sample.OneSmallFavorQuest;
+import io.xeros.content.questsystem.sample.WaterfallQuest;
 import io.xeros.content.referral.EnterReferralDialogue;
 import io.xeros.content.skills.*;
 import io.xeros.content.skills.crafting.Tanning;
@@ -56,6 +60,18 @@ public class NpcOptionOne {
 		player.npcClickIndex = 0;
 
 		if (ImpCatcherQuest.handleNpcTalk(player, npcType)) {
+			return;
+		}
+		if (CourierFavorQuest.handleNpcTalk(player, npcType)) {
+			return;
+		}
+		if (OneSmallFavorQuest.handleNpcTalk(player, npcType)) {
+			return;
+		}
+		if (DesertTreasureQuest.handleNpcTalk(player, npcType)) {
+			return;
+		}
+		if (WaterfallQuest.handleNpcTalk(player, npcType)) {
 			return;
 		}
 

@@ -30,14 +30,17 @@ public final class TitleBar extends JPanel {
         JPanel controls = new JPanel(new FlowLayout(FlowLayout.RIGHT, 6, 5));
         controls.setOpaque(false);
 
-        // Sidebar toggle (drawn chevron)
-        WindowControlButton sidebarBtn = new WindowControlButton(WindowControlButton.Type.SIDEBAR);
-        sidebarBtn.setToolTipText("Toggle sidebar");
-        sidebarBtn.addActionListener(() -> {
+        TopActionButton settingsBtn = new TopActionButton("/vykna/icons/settings.png", "Settings");
+        settingsBtn.addActionListener(() -> {
             if (frame instanceof VyknaShell) {
-                VyknaShell shell = (VyknaShell) frame;
-                shell.toggleSidebar();
-                sidebarBtn.setSidebarClosed(shell.isSidebarHidden());
+                ((VyknaShell) frame).toggleSettingsPopup(settingsBtn);
+            }
+        });
+
+        TopActionButton characterBtn = new TopActionButton("/vykna/icons/character_information.png", "Character Info");
+        characterBtn.addActionListener(() -> {
+            if (frame instanceof VyknaShell) {
+                ((VyknaShell) frame).toggleCharacterPopup(characterBtn);
             }
         });
 
@@ -60,9 +63,8 @@ public final class TitleBar extends JPanel {
             System.exit(0);
         });
 
-        if (frame instanceof VyknaShell) {
-            controls.add(sidebarBtn);
-        }
+        controls.add(settingsBtn);
+        controls.add(characterBtn);
         controls.add(minBtn);
         controls.add(maxBtn);
         controls.add(closeBtn);
@@ -197,27 +199,77 @@ public final class TitleBar extends JPanel {
                         g2.drawLine(cx + 5, cy - 5, cx - 5, cy + 5);
                         break;
 
-                    case SIDEBAR:
-                        // Draw chevrons that indicate collapse/expand
-                        if (!sidebarClosed) {
-                            // collapse: < <
-                            g2.drawLine(cx + 3, cy - 5, cx - 2, cy);
-                            g2.drawLine(cx - 2, cy, cx + 3, cy + 5);
-
-                            g2.drawLine(cx - 1, cy - 5, cx - 6, cy);
-                            g2.drawLine(cx - 6, cy, cx - 1, cy + 5);
-                        } else {
-                            // expand: > >
-                            g2.drawLine(cx - 3, cy - 5, cx + 2, cy);
-                            g2.drawLine(cx + 2, cy, cx - 3, cy + 5);
-
-                            g2.drawLine(cx + 1, cy - 5, cx + 6, cy);
-                            g2.drawLine(cx + 6, cy, cx + 1, cy + 5);
-                        }
-                        break;
                 }
 
 
+            } finally {
+                g2.dispose();
+            }
+        }
+    }
+
+    static final class TopActionButton extends JComponent {
+        private final ImageIcon icon;
+        private final String tooltip;
+        private boolean hover = false;
+        private boolean pressed = false;
+
+        private Runnable onClick;
+
+        TopActionButton(String iconPath, String tooltip) {
+            this.icon = IconResources.load(iconPath, 14);
+            this.tooltip = tooltip;
+            setToolTipText(tooltip);
+            setPreferredSize(new Dimension(28, 20));
+            setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+
+            MouseAdapter m = new MouseAdapter() {
+                @Override public void mouseEntered(MouseEvent e) { hover = true; repaint(); }
+                @Override public void mouseExited(MouseEvent e) { hover = false; pressed = false; repaint(); }
+                @Override public void mousePressed(MouseEvent e) { pressed = true; repaint(); }
+                @Override public void mouseReleased(MouseEvent e) {
+                    if (pressed && hover) fireAction();
+                    pressed = false;
+                    repaint();
+                }
+            };
+            addMouseListener(m);
+        }
+
+        void addActionListener(Runnable r) { this.onClick = r; }
+
+        private void fireAction() {
+            if (onClick != null) onClick.run();
+        }
+
+        @Override
+        protected void paintComponent(Graphics g) {
+            Graphics2D g2 = (Graphics2D) g.create();
+            try {
+                g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+                int w = getWidth();
+                int h = getHeight();
+
+                Color bg = hover ? new Color(26, 28, 30) : new Color(18, 19, 21);
+                if (pressed) {
+                    bg = new Color(20, 21, 23);
+                }
+
+                g2.setColor(bg);
+                g2.fillRoundRect(0, 0, w, h, 8, 8);
+                g2.setColor(VyknaShell.BORDER);
+                g2.drawRoundRect(0, 0, w - 1, h - 1, 8, 8);
+
+                if (icon != null) {
+                    int iw = icon.getIconWidth();
+                    int ih = icon.getIconHeight();
+                    int ix = (w - iw) / 2;
+                    int iy = (h - ih) / 2;
+                    icon.paintIcon(this, g2, ix, iy);
+                } else {
+                    g2.setColor(VyknaShell.TEXT);
+                    g2.drawString(tooltip.substring(0, 1), w / 2 - 3, h / 2 + 4);
+                }
             } finally {
                 g2.dispose();
             }

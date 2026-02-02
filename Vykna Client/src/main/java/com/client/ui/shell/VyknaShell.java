@@ -77,6 +77,12 @@ public final class VyknaShell extends JFrame {
     private final IconTabButton characterBtn;
     private final CharacterInfoPanel characterPanel;
 
+    // Top dropdown panels
+    private PinnedPopup settingsPopup;
+    private PinnedPopup characterPopup;
+    private SettingsPanel popupSettingsPanel;
+    private CharacterInfoPanel popupCharacterPanel;
+
     private static final Map<Integer, ImageIcon> chatIconCache = new HashMap<>();
 
     public VyknaShell(String title, Client client) {
@@ -254,6 +260,10 @@ public final class VyknaShell extends JFrame {
         settingsBtn.setSelected(true);
         show("settings", settingsBtn);
 
+        // Sidebar is no longer shown; keep it hidden to remove the pop-out UI.
+        sidebarHidden = true;
+        sidebar.setVisible(false);
+
         // Install resize handlers AFTER layout is built (otherwise bounds are wrong)
         installResizeHandler(root);
         installResizeHandler(root, titleBar);
@@ -311,6 +321,162 @@ public final class VyknaShell extends JFrame {
 
     public boolean isSidebarHidden() {
         return sidebarHidden;
+    }
+
+    public void toggleSettingsPopup(Component invoker) {
+        if (invoker == null) return;
+        if (settingsPopup == null) {
+            popupSettingsPanel = new SettingsPanel(this);
+            applyThemeRecursive(popupSettingsPanel);
+            settingsPopup = buildPopup("Settings", popupSettingsPanel, new Dimension(380, 520));
+        }
+        togglePopup(settingsPopup, invoker, characterPopup);
+    }
+
+    public void toggleCharacterPopup(Component invoker) {
+        if (invoker == null) return;
+        if (characterPopup == null) {
+            popupCharacterPanel = new CharacterInfoPanel();
+            applyThemeRecursive(popupCharacterPanel);
+            characterPopup = buildPopup("Character Info", popupCharacterPanel, new Dimension(360, 420));
+        } else if (popupCharacterPanel != null) {
+            popupCharacterPanel.refresh();
+        }
+        togglePopup(characterPopup, invoker, settingsPopup);
+    }
+
+    private void togglePopup(PinnedPopup popup, Component invoker, PinnedPopup otherPopup) {
+        if (popup == null || invoker == null) return;
+        if (otherPopup != null && otherPopup.isVisible() && !otherPopup.isPinned()) {
+            otherPopup.hide();
+        }
+        if (popup.isVisible()) {
+            popup.hide();
+            return;
+        }
+        popup.showAt(invoker);
+    }
+
+    private PinnedPopup buildPopup(String title, JComponent content, Dimension size) {
+        return new PinnedPopup(this, title, content, size);
+    }
+
+    private static final class PinnedPopup {
+        private final JDialog dialog;
+        private final JToggleButton pinButton;
+        private boolean pinned = false;
+        private Point dragOffset;
+
+        PinnedPopup(JFrame owner, String title, JComponent content, Dimension size) {
+            dialog = new JDialog(owner);
+            dialog.setUndecorated(true);
+            dialog.setFocusableWindowState(true);
+            dialog.setAlwaysOnTop(true);
+            dialog.getRootPane().setBorder(BorderFactory.createLineBorder(BORDER));
+
+            JPanel root = new JPanel(new BorderLayout());
+            root.setOpaque(true);
+            root.setBackground(BG);
+
+            JPanel header = new JPanel(new BorderLayout());
+            header.setOpaque(true);
+            header.setBackground(new Color(18, 19, 21));
+            header.setBorder(BorderFactory.createMatteBorder(0, 0, 1, 0, BORDER));
+
+            JLabel label = new JLabel("  " + title);
+            label.setForeground(TEXT);
+            label.setFont(label.getFont().deriveFont(Font.BOLD, 12f));
+            header.add(label, BorderLayout.WEST);
+
+            pinButton = new JToggleButton("Pin");
+            pinButton.setToolTipText("Keep this panel open");
+            themeToggle(pinButton);
+            pinButton.addActionListener(e -> {
+                pinned = pinButton.isSelected();
+                pinButton.setText(pinned ? "Unpin" : "Pin");
+            });
+            header.add(pinButton, BorderLayout.EAST);
+
+            root.add(header, BorderLayout.NORTH);
+
+            JScrollPane sp = new JScrollPane(content);
+            sp.setBorder(BorderFactory.createLineBorder(BORDER));
+            sp.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
+            sp.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
+            sp.getViewport().setBackground(BG);
+            sp.setBackground(BG);
+            sp.setPreferredSize(size);
+
+            JScrollBar vbar = sp.getVerticalScrollBar();
+            vbar.setUnitIncrement(16);
+            vbar.setPreferredSize(new Dimension(10, 10));
+            vbar.setUI(new BasicScrollBarUI() {
+                @Override protected void configureScrollBarColors() {
+                    this.thumbColor = new Color(45, 48, 52);
+                    this.trackColor = new Color(18, 19, 21);
+                }
+                @Override protected JButton createDecreaseButton(int orientation) { return zeroButton(); }
+                @Override protected JButton createIncreaseButton(int orientation) { return zeroButton(); }
+                private JButton zeroButton() {
+                    JButton b = new JButton();
+                    b.setPreferredSize(new Dimension(0, 0));
+                    b.setMinimumSize(new Dimension(0, 0));
+                    b.setMaximumSize(new Dimension(0, 0));
+                    return b;
+                }
+            });
+
+            root.add(sp, BorderLayout.CENTER);
+            dialog.setContentPane(root);
+            dialog.pack();
+
+            dialog.addWindowFocusListener(new java.awt.event.WindowAdapter() {
+                @Override
+                public void windowLostFocus(java.awt.event.WindowEvent e) {
+                    if (!pinned) {
+                        dialog.setVisible(false);
+                    }
+                }
+            });
+
+            MouseAdapter drag = new MouseAdapter() {
+                @Override
+                public void mousePressed(MouseEvent e) {
+                    dragOffset = e.getPoint();
+                }
+
+                @Override
+                public void mouseDragged(MouseEvent e) {
+                    if (dragOffset == null) return;
+                    Point p = e.getLocationOnScreen();
+                    dialog.setLocation(p.x - dragOffset.x, p.y - dragOffset.y);
+                }
+            };
+            header.addMouseListener(drag);
+            header.addMouseMotionListener(drag);
+            label.addMouseListener(drag);
+            label.addMouseMotionListener(drag);
+        }
+
+        boolean isPinned() {
+            return pinned;
+        }
+
+        boolean isVisible() {
+            return dialog.isVisible();
+        }
+
+        void showAt(Component invoker) {
+            if (invoker == null) return;
+            Point p = invoker.getLocationOnScreen();
+            dialog.setLocation(p.x, p.y + invoker.getHeight());
+            dialog.setVisible(true);
+            dialog.toFront();
+        }
+
+        void hide() {
+            dialog.setVisible(false);
+        }
     }
 
     static void styleComboBox(JComboBox<?> cb) {

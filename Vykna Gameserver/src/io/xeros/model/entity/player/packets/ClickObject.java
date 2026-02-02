@@ -25,6 +25,7 @@ import io.xeros.content.skills.hunter.impling.PuroPuro;
 import io.xeros.content.skills.runecrafting.ouriana.OurianaAltar;
 import io.xeros.content.skills.runecrafting.ouriana.OurianaBanker;
 import io.xeros.content.skills.slayer.LarrensKey;
+import io.xeros.content.questsystem.sample.WaterfallQuest;
 import io.xeros.model.collisionmap.WorldObject;
 import io.xeros.model.entity.player.*;
 import io.xeros.model.multiplayersession.MultiplayerSessionFinalizeType;
@@ -195,6 +196,9 @@ public class ClickObject implements PacketType {
 
 
         if (c.getQuesting().handleObjectClick(worldObject, option)) {
+            return;
+        }
+        if (WaterfallQuest.handleObjectClick(c, worldObject, option)) {
             return;
         }
 

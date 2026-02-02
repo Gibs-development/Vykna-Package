@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/.idea/Vykna-Package.iml" filepath="$PROJECT_DIR$/.idea/Vykna-Package.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/Vykna_Client.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Vykna_Client.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Vykna_Gameserver.iml" filepath="$PROJECT_DIR$/.idea/modules/Vykna_Gameserver.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Vykna_Gameserver.main.iml" filepath="$PROJECT_DIR$/.idea/modules/Vykna_Gameserver.main.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/modules/Vykna_Gameserver.test.iml" filepath="$PROJECT_DIR$/.idea/modules/Vykna_Gameserver.test.iml" />

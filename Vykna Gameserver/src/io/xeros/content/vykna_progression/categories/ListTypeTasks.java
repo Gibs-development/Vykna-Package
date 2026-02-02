@@ -63,7 +63,27 @@ public enum ListTypeTasks {
     VISIT_TAVERLY(1025, "Visit Taverley", "Travel to Taverley.", "Travel",
             "visit:taverly", 1, 2, 2),
     VISIT_VARROCK_MUSEUM(1049, "Visit Varrock Museum", "Travel to Varrock Museum.", "Travel",
-            "visit:varrock", 1, 2, 2);
+            "visit:varrock", 1, 2, 2),
+    QUEST_IMP_CATCHER(1050, "Complete Imp Catcher", "Complete the Imp Catcher quest.", "Quests",
+            "quest_complete:imp_catcher", 1, 4, 1),
+    QUEST_COURIER_FAVOR(1051, "Complete Courier's Favor", "Complete the Courier's Favor quest.", "Quests",
+            "quest_complete:courier_favor", 1, 4, 2),
+    QUEST_ONE_SMALL_FAVOUR(1052, "Complete One Small Favour", "Complete the One Small Favour quest.", "Quests",
+            "quest_complete:one_small_favour", 1, 5, 3),
+    QUEST_DESERT_TREASURE(1053, "Complete Desert Treasure", "Complete the Desert Treasure quest.", "Quests",
+            "quest_complete:desert_treasure", 1, 6, 4),
+    QUEST_WATERFALL(1054, "Complete Waterfall Quest", "Complete the Waterfall Quest.", "Quests",
+            "quest_complete:waterfall_quest", 1, 4, 1),
+    EQUIP_COMMON(1055, "Equip a Common Item", "Equip a common rarity item.", "Equipment",
+            "equip_rarity:common", 1, 2, 1),
+    EQUIP_UNCOMMON(1056, "Equip an Uncommon Item", "Equip an uncommon rarity item.", "Equipment",
+            "equip_rarity:uncommon", 1, 3, 2),
+    EQUIP_RARE(1057, "Equip a Rare Item", "Equip a rare rarity item.", "Equipment",
+            "equip_rarity:rare", 1, 4, 3),
+    EQUIP_EPIC(1058, "Equip an Epic Item", "Equip an epic rarity item.", "Equipment",
+            "equip_rarity:epic", 1, 5, 4),
+    EQUIP_MYTHIC(1059, "Equip a Mythic Item", "Equip a mythic rarity item.", "Equipment",
+            "equip_rarity:mythic", 1, 6, 1);
 
     private final int entryId;
     private final String name;

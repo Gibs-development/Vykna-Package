@@ -92,6 +92,11 @@ public class QuestServiceImpl implements QuestService {
         if (newStage >= handler.completionStage()) {
             progress.setState(QuestState.COMPLETED);
             QuestFeedback.showQuestComplete(player, getRewardLines(handler.questId()));
+            io.xeros.content.vykna_progression.VyknaProgressionHandler.addProgress(
+                    player,
+                    "quest_complete:" + handler.questId(),
+                    1
+            );
         } else {
             progress.setState(QuestState.IN_PROGRESS);
             QuestFeedback.showQuestUpdatedToast(player, getCurrentObjectiveText(player, handler.questId(), newStage));
