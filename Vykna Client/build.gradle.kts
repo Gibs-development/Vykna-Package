@@ -1,5 +1,88 @@
 import proguard.gradle.ProGuardTask
 import org.gradle.jvm.tasks.Jar
+import java.security.MessageDigest
+import java.util.Properties
+
+/**
+ * Resolve the GitHub CLI executable.
+ * - If GH_EXE is set and points to an existing file, use it.
+ * - Otherwise try common Windows install paths.
+ * - Otherwise fall back to "gh" (PATH).
+ */
+fun ghExe(): String {
+    val env = System.getenv("GH_EXE")
+    if (!env.isNullOrBlank() && file(env).exists()) return env
+
+    val candidates = listOf(
+        "C:\\Program Files\\GitHub CLI\\gh.exe",
+        "C:\\Program Files (x86)\\GitHub CLI\\gh.exe"
+    )
+    return candidates.firstOrNull { file(it).exists() } ?: "gh"
+}
+
+/**
+ * Compute SHA-256 hex for a file (lowercase).
+ */
+fun sha256Hex(file: java.io.File): String {
+    val digest = MessageDigest.getInstance("SHA-256")
+    file.inputStream().use { input ->
+        val buf = ByteArray(1024 * 1024)
+        while (true) {
+            val read = input.read(buf)
+            if (read <= 0) break
+            digest.update(buf, 0, read)
+        }
+    }
+    return digest.digest().joinToString("") { b -> "%02x".format(b) }
+}
+
+/**
+ * Bump patch version (MAJOR.MINOR.PATCH).
+ */
+fun bumpPatch(v: String): String {
+    val parts = v.trim().split(".")
+    if (parts.size != 3) throw GradleException("clientVersion must be MAJOR.MINOR.PATCH (e.g. 0.0.1) but was: $v")
+    val major = parts[0].toInt()
+    val minor = parts[1].toInt()
+    val patch = parts[2].toInt()
+    return "$major.$minor.${patch + 1}"
+}
+
+/**
+ * release.properties management (keeps publishClient one-command).
+ *
+ * Create release.properties at repo root:
+ *   clientVersion=0.0.1
+ */
+val releasePropsFile = file("release.properties")
+
+fun readClientVersion(): String {
+    if (!releasePropsFile.exists()) return "0.0.0"
+    val p = Properties()
+    releasePropsFile.inputStream().use { p.load(it) }
+    return p.getProperty("clientVersion") ?: "0.0.0"
+}
+
+fun writeClientVersion(v: String) {
+    val p = Properties()
+    p.setProperty("clientVersion", v)
+    releasePropsFile.outputStream().use { out ->
+        p.store(out, "Auto-managed by publishClient")
+    }
+}
+
+/**
+ * Check if a GitHub release tag exists using gh CLI.
+ */
+fun ghReleaseExists(repo: String, tag: String): Boolean {
+    val result = exec {
+        isIgnoreExitValue = true
+        commandLine(ghExe(), "release", "view", tag, "-R", repo)
+        standardOutput = org.gradle.internal.io.NullOutputStream.INSTANCE
+        errorOutput = org.gradle.internal.io.NullOutputStream.INSTANCE
+    }
+    return result.exitValue == 0
+}
 
 plugins {
     java
@@ -13,13 +96,8 @@ java {
 }
 
 application {
-    // Gradle 7+ style
     mainClass.set("com.client.Client")
-
-    // Optional but commonly needed for desktop clients
-    applicationDefaultJvmArgs = listOf(
-        "-Dfile.encoding=UTF-8"
-    )
+    applicationDefaultJvmArgs = listOf("-Dfile.encoding=UTF-8")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -44,9 +122,7 @@ buildscript {
 
 sourceSets {
     named("main") {
-        java.srcDirs(
-            "src/main/java",
-        )
+        java.srcDirs("src/main/java")
         resources.srcDirs(
             "runelite/http-api/src/main/resources",
             "runelite/runelite-client/src/main/resources"
@@ -55,7 +131,6 @@ sourceSets {
 }
 
 dependencies {
-
     /* Core */
     implementation("com.thoughtworks.xstream:xstream:1.4.7")
     implementation("org.slf4j:slf4j-api:1.7.36")
@@ -102,6 +177,9 @@ tasks.test {
     useJUnitPlatform()
 }
 
+/**
+ * Runnable fat jar (optional).
+ */
 tasks.register<Jar>("runnableJar") {
     group = "build"
     description = "Builds a runnable (fat) jar with all dependencies."
@@ -113,10 +191,8 @@ tasks.register<Jar>("runnableJar") {
         attributes["Main-Class"] = "com.client.Client"
     }
 
-    // Your compiled classes/resources
     from(sourceSets["main"].output)
 
-    // Pull in runtime dependencies
     dependsOn(configurations.runtimeClasspath)
     from({
         configurations.runtimeClasspath.get()
@@ -124,37 +200,172 @@ tasks.register<Jar>("runnableJar") {
             .map { zipTree(it) }
     })
 
-    // Avoid signature conflicts when merging jars
     exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
 }
 
-tasks.register<Jar>("createStandardJar") {
-    archiveFileName.set("NotObfuscatedClient.jar")
+/**
+ * Standard non-obfuscated fat jar — client.jar
+ */
+val createStandardJar = tasks.register<Jar>("createStandardJar") {
+    group = "build"
+    description = "Builds client.jar (fat jar, non-obfuscated)."
+
+    archiveFileName.set("client.jar")
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+
     from(sourceSets["main"].output)
+
     manifest {
         attributes["Main-Class"] = "com.client.Client"
     }
+
     dependsOn(configurations.runtimeClasspath)
     from({
         configurations.runtimeClasspath.get()
             .filter { it.name.endsWith(".jar") }
             .map { zipTree(it) }
     })
+
+    exclude("META-INF/*.SF", "META-INF/*.DSA", "META-INF/*.RSA")
 }
 
-tasks.register<ProGuardTask>("obfuscateStandard") {
+/**
+ * Writes build/libs/client.jar.sha256
+ */
+val writeStandardSha256 = tasks.register("writeStandardSha256") {
+    group = "build"
+    description = "Writes build/libs/client.jar.sha256"
+
+    dependsOn(createStandardJar)
+
+    doLast {
+        val jarFile = createStandardJar.get().archiveFile.get().asFile
+        val shaFile = jarFile.parentFile.resolve("${jarFile.name}.sha256")
+
+        val hash = sha256Hex(jarFile)
+        shaFile.writeText("$hash  ${jarFile.name}\n", Charsets.US_ASCII)
+
+        println("Wrote SHA-256: ${shaFile.absolutePath}")
+    }
+}
+
+createStandardJar.configure {
+    finalizedBy(writeStandardSha256)
+}
+
+/**
+ * ProGuard obfuscation — outputs build/libs/deploy/client.jar (kept for later).
+ */
+val obfuscateStandard = tasks.register<ProGuardTask>("obfuscateStandard") {
+    group = "build"
+    description = "Obfuscates client.jar -> build/libs/deploy/client.jar"
+
     configuration("proguard.conf")
+    dependsOn(createStandardJar)
 
     configurations.runtimeClasspath.get().forEach {
         libraryjars(it)
     }
 
-    injars("build/libs/NotObfuscatedClient.jar")
-    outjars("build/libs/deploy/ObfuscatedClient.jar")
+    injars("build/libs/client.jar")
+    outjars("build/libs/deploy/client.jar")
 }
 
+/**
+ * Writes build/libs/deploy/client.jar.sha256
+ */
+val writeDeploySha256 = tasks.register("writeDeploySha256") {
+    group = "build"
+    description = "Writes build/libs/deploy/client.jar.sha256"
+
+    dependsOn(obfuscateStandard)
+
+    doLast {
+        val jarFile = file("build/libs/deploy/client.jar")
+        if (!jarFile.exists()) throw GradleException("Missing obfuscated jar: ${jarFile.absolutePath}")
+
+        val shaFile = file("build/libs/deploy/client.jar.sha256")
+        val hash = sha256Hex(jarFile)
+        shaFile.writeText("$hash  ${jarFile.name}\n", Charsets.US_ASCII)
+
+        println("Wrote SHA-256: ${shaFile.absolutePath}")
+    }
+}
+
+obfuscateStandard.configure {
+    finalizedBy(writeDeploySha256)
+}
+
+/**
+ * publishClient
+ *
+ * One-command publish:
+ * - Auto-bumps patch version (stored in release.properties)
+ * - Builds build/libs/client.jar + build/libs/client.jar.sha256
+ * - Creates a NEW GitHub Release with the bumped tag (vX.Y.Z) and uploads the assets
+ *
+ * Requires GitHub CLI installed + authenticated:
+ *   gh auth login
+ */
+tasks.register("publishClient") {
+    group = "release"
+    description = "Auto-bumps version and publishes client.jar + sha256 to GitHub Releases."
+
+    dependsOn(createStandardJar)
+    dependsOn(writeStandardSha256)
+
+    doLast {
+        val repo = "Gibs-Development/arwyn-client-releases"
+
+        val jarFile = file("build/libs/client.jar")
+        val shaFile = file("build/libs/client.jar.sha256")
+
+        if (!jarFile.exists()) throw GradleException("Missing: ${jarFile.absolutePath}")
+        if (!shaFile.exists()) throw GradleException("Missing: ${shaFile.absolutePath}")
+
+        val current = readClientVersion()
+
+        // Find next available tag (in case a tag already exists)
+        var next = bumpPatch(current)
+        var tag = "v$next"
+
+        var guard = 0
+        while (ghReleaseExists(repo, tag)) {
+            next = bumpPatch(next)
+            tag = "v$next"
+            guard++
+            if (guard > 50) throw GradleException("Could not find a free version tag after 50 bumps (starting from $current).")
+        }
+
+        // Create the release + upload assets
+        exec {
+            commandLine(
+                ghExe(), "release", "create", tag,
+                "-R", repo,
+                "--title", tag,
+                "--notes", "Automated client build ($tag)",
+                jarFile.absolutePath,
+                shaFile.absolutePath
+            )
+        }
+
+        // Only bump local version AFTER successful publish (safer)
+        writeClientVersion(next)
+
+        println("Published $tag to $repo")
+        println("Updated release.properties -> clientVersion=$next")
+    }
+}
+
+/**
+ * Convenience task: build everything needed for release
+ */
 tasks.register("buildJars") {
-    dependsOn("createStandardJar")
-    dependsOn("obfuscateStandard")
+    group = "build"
+    description = "Builds client.jar, sha, and obfuscated jar + sha."
+
+    dependsOn(createStandardJar)
+    dependsOn(obfuscateStandard)
+    dependsOn(writeStandardSha256)
+    dependsOn(writeDeploySha256)
 }

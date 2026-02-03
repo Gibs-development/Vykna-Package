@@ -5,6 +5,7 @@ import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.SourceDataLine;
+import javax.sound.sampled.AudioInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 
@@ -33,11 +34,16 @@ public final class MidiPlayer {
     private Sequencer sequencer;
     private Synthesizer synth;
     private SourceDataLine audioLine;
+    private Receiver synthReceiver;
+    private AudioInputStream synthStream;
+    private Thread audioPumpThread;
     private int currentTrackId = -1;
     private int volume0To255 = 255;
     private boolean deviceInfoLogged = false;
     private long lastPlayDebugAt = 0L;
     private int lastPlayDebugTrackId = -1;
+    private int noteOnCount = 0;
+    private int loggedNoteOns = 0;
 
     private MidiPlayer() {}
 
@@ -46,8 +52,14 @@ public final class MidiPlayer {
         try {
             if (synth == null || !synth.isOpen()) {
                 synth = MidiSystem.getSynthesizer();
-                boolean openedWithLine = openSynthWithLineIfPossible(synth);
-                if (!openedWithLine) {
+                boolean openedWithStream = openSynthWithStreamIfPossible(synth);
+                if (!openedWithStream) {
+                    boolean openedWithLine = openSynthWithLineIfPossible(synth);
+                    if (!openedWithLine) {
+                        openSynthWithGainIfSupported(synth);
+                    }
+                }
+                if (!synth.isOpen()) {
                     openSynthWithGainIfSupported(synth);
                 }
                 loadDefaultSoundbankIfMissing(synth);
@@ -66,8 +78,9 @@ public final class MidiPlayer {
 
                 // Route sequencer -> synth
                 Transmitter transmitter = sequencer.getTransmitter();
-                Receiver receiver = synth.getReceiver();
-                transmitter.setReceiver(receiver);
+                synthReceiver = synth.getReceiver();
+                transmitter.setReceiver(new CountingReceiver(synthReceiver));
+                System.out.println("[MidiPlayer] Sequencer routed to synth receiver=" + synthReceiver.getClass().getSimpleName());
             } else {
                 // Fallback: let the system pick whatever default device is available.
                 sequencer = MidiSystem.getSequencer(true);
@@ -116,6 +129,9 @@ public final class MidiPlayer {
             sequencer.setSequence(sequence);
 
             this.currentTrackId = trackId;
+            this.noteOnCount = 0;
+            this.loggedNoteOns = 0;
+            resetSynthChannels();
             setVolume(volume0To255);
 
             sequencer.setLoopCount(loop ? Sequencer.LOOP_CONTINUOUSLY : 0);
@@ -128,6 +144,9 @@ public final class MidiPlayer {
                 }
             } catch (Throwable ignored) {}
             sequencer.start();
+            // Re-apply volume shortly after start in case the sequence sets volume to 0.
+            scheduleVolumeBump(trackId, 250L);
+            scheduleVolumeBump(trackId, 1000L);
             debugPlayState(trackId);
         } catch (Throwable t) {
             // Never let audio break the client.
@@ -152,7 +171,17 @@ public final class MidiPlayer {
                 audioLine.close();
             }
         } catch (Throwable ignored) {}
+        try {
+            if (synthStream != null) {
+                synthStream.close();
+            }
+        } catch (Throwable ignored) {}
+        synthStream = null;
         audioLine = null;
+        if (audioPumpThread != null) {
+            audioPumpThread.interrupt();
+        }
+        audioPumpThread = null;
         currentTrackId = -1;
     }
 
@@ -170,6 +199,8 @@ public final class MidiPlayer {
                 if (channels != null) {
                     for (MidiChannel ch : channels) {
                         if (ch != null) {
+                            ch.setMute(false);
+                            ch.setSolo(false);
                             ch.controlChange(7, vol); // Channel volume
                             ch.controlChange(11, vol); // Expression (helps on some synths)
                         }
@@ -205,12 +236,55 @@ public final class MidiPlayer {
                     long pos = sequencer != null ? sequencer.getMicrosecondPosition() : -1L;
                     long len = sequencer != null ? sequencer.getMicrosecondLength() : -1L;
                     System.out.println("[MidiPlayer] debug trackId=" + trackId + " running=" + running
-                            + " pos=" + pos + " len=" + len);
+                            + " pos=" + pos + " len=" + len + " noteOn=" + noteOnCount);
                 } catch (Throwable ignored) {}
             }
         }, "MidiDebug");
         t.setDaemon(true);
         t.start();
+    }
+
+    private void scheduleVolumeBump(int trackId, long delayMs) {
+        Thread t = new Thread(() -> {
+            try {
+                Thread.sleep(delayMs);
+            } catch (InterruptedException ignored) {
+                return;
+            }
+            synchronized (MidiPlayer.this) {
+                if (currentTrackId != trackId) {
+                    return;
+                }
+                setVolume(volume0To255);
+                System.out.println("[MidiPlayer] Volume bump at +" + delayMs + "ms for trackId=" + trackId);
+            }
+        }, "MidiVolBump");
+        t.setDaemon(true);
+        t.start();
+    }
+
+    private void resetSynthChannels() {
+        try {
+            if (synthReceiver == null) {
+                return;
+            }
+            // GM Reset SysEx: F0 7E 7F 09 01 F7
+            byte[] gmReset = new byte[] { (byte) 0xF0, 0x7E, 0x7F, 0x09, 0x01, (byte) 0xF7 };
+            synthReceiver.send(new SysexMessage(gmReset, gmReset.length), -1);
+
+            // Reset all controllers + all notes off on each channel.
+            for (int ch = 0; ch < 16; ch++) {
+                ShortMessage reset = new ShortMessage();
+                reset.setMessage(ShortMessage.CONTROL_CHANGE, ch, 121, 0);
+                synthReceiver.send(reset, -1);
+
+                ShortMessage allOff = new ShortMessage();
+                allOff.setMessage(ShortMessage.CONTROL_CHANGE, ch, 123, 0);
+                synthReceiver.send(allOff, -1);
+            }
+        } catch (Throwable t) {
+            System.out.println("[MidiPlayer] resetSynthChannels failed: " + t);
+        }
     }
 
     private void openSynthWithGainIfSupported(Synthesizer synth) throws MidiUnavailableException {
@@ -252,6 +326,109 @@ public final class MidiPlayer {
         } catch (Throwable t) {
             System.out.println("[MidiPlayer] AudioSynthesizer line open failed: " + t);
             return false;
+        }
+    }
+
+    private boolean openSynthWithStreamIfPossible(Synthesizer synth) {
+        try {
+            Class<?> audioSynthClass = Class.forName("com.sun.media.sound.AudioSynthesizer");
+            if (!audioSynthClass.isInstance(synth)) {
+                return false;
+            }
+            AudioFormat format = new AudioFormat(44100f, 16, 2, true, false);
+            java.lang.reflect.Method openStream = audioSynthClass.getMethod("openStream", AudioFormat.class, java.util.Map.class);
+            java.util.Map<String, Object> props = new java.util.HashMap<>();
+            props.put("javax.sound.midi.softsynth.gain", 1.0f);
+            Object streamObj = openStream.invoke(synth, format, props);
+            if (!(streamObj instanceof AudioInputStream)) {
+                return false;
+            }
+            synthStream = (AudioInputStream) streamObj;
+
+            DataLine.Info info = new DataLine.Info(SourceDataLine.class, format);
+            SourceDataLine line = (SourceDataLine) AudioSystem.getLine(info);
+            line.open(format, 16384);
+            line.start();
+            audioLine = line;
+
+            startAudioPump();
+            System.out.println("[MidiPlayer] AudioSynthesizer opened with stream pump.");
+            return true;
+        } catch (Throwable t) {
+            System.out.println("[MidiPlayer] AudioSynthesizer stream open failed: " + t);
+            return false;
+        }
+    }
+
+    private void startAudioPump() {
+        if (synthStream == null || audioLine == null || (audioPumpThread != null && audioPumpThread.isAlive())) {
+            return;
+        }
+        audioPumpThread = new Thread(() -> {
+            byte[] buf = new byte[4096];
+            try {
+                while (!Thread.currentThread().isInterrupted()) {
+                    int read = synthStream.read(buf, 0, buf.length);
+                    if (read == -1) {
+                        break;
+                    }
+                    if (read > 0) {
+                        audioLine.write(buf, 0, read);
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }, "MidiAudioPump");
+        audioPumpThread.setDaemon(true);
+        audioPumpThread.start();
+    }
+
+    private void playTestToneOnce() {
+        // test tone removed
+    }
+
+    private final class CountingReceiver implements Receiver {
+        private final Receiver delegate;
+
+        private CountingReceiver(Receiver delegate) {
+            this.delegate = delegate;
+        }
+
+        @Override
+        public void send(MidiMessage message, long timeStamp) {
+            if (message instanceof ShortMessage) {
+                ShortMessage sm = (ShortMessage) message;
+                int cmd = sm.getCommand();
+                if (cmd == ShortMessage.NOTE_ON && sm.getData2() > 0) {
+                    noteOnCount++;
+                    if (loggedNoteOns < 5) {
+                        loggedNoteOns++;
+                        System.out.println("[MidiPlayer] NOTE_ON ch=" + sm.getChannel()
+                                + " note=" + sm.getData1() + " vel=" + sm.getData2());
+                    }
+                } else if (cmd == ShortMessage.CONTROL_CHANGE) {
+                    int ctrl = sm.getData1();
+                    if (ctrl == 7 || ctrl == 11) {
+                        int desired = (volume0To255 * 127) / 255;
+                        int val = sm.getData2();
+                        if (val == 0 && desired > 0) {
+                            try {
+                                sm.setMessage(ShortMessage.CONTROL_CHANGE, sm.getChannel(), ctrl, desired);
+                            } catch (Throwable ignored) {}
+                        }
+                    }
+                }
+            }
+            if (delegate != null) {
+                delegate.send(message, timeStamp);
+            }
+        }
+
+        @Override
+        public void close() {
+            if (delegate != null) {
+                delegate.close();
+            }
         }
     }
 

@@ -8,7 +8,7 @@ public class Configuration {
 	public static int frameHeight = 503;
 
 
-	public static boolean LOCAL_HOST = true;// Change to false for live client.
+	public static boolean LOCAL_HOST = false;// Change to false for live client.
 
 	public static boolean DEBUG_MODE = true;
 
@@ -23,9 +23,9 @@ public class Configuration {
 	 * Cache version is written to the cache folder inside a version file.
 	 * This is read on startup to tell if the cache is out of date or not.
 	 */
-	public static final int CACHE_VERSION = 94; // Change this up one when making cache updates.
+	public static final int CACHE_VERSION = 1; // Change this up one when making cache updates.
 
-	public static final String CACHE_LINK = "https://www.dropbox.com/s/6xw18kyzpdw2zvs/.runerogue_v1.zip?dl=1";
+	public static final String CACHE_LINK = "https://cache.ourcall.uk/cache.zip";
 
 	/**
 	 * The server version. The cache path is append with a _v1/2/3 etc for the version number
@@ -36,10 +36,10 @@ public class Configuration {
 	public static final int SERVER_VERSION = 1;
 
 
-	public static final String CLIENT_TITLE = "RuneRogue";
+	public static final String CLIENT_TITLE = "Arwyn";
 	public static final String WEBSITE = "vykna.co.uk";
-	public static final String DEDICATED_SERVER_ADDRESS = LOCAL_HOST ? "127.0.0.1" : "2.126.28.170";//2.126.28.136
-	public static final String TEST_SERVER_ADDRESS = LOCAL_HOST ? "127.0.0.1" : "2.126.28.170";//2.126.28.136
+	public static final String DEDICATED_SERVER_ADDRESS = LOCAL_HOST ? "127.0.0.1" : "72.145.9.18";//2.126.28.136
+	public static final String TEST_SERVER_ADDRESS = LOCAL_HOST ? "127.0.0.1" : "72.145.9.18";//2.126.28.136
 	public static final int PORT = 43594;
 	public static final int TEST_PORT = 43595;
 	public static final int CACHE_FOLDER_VERSION = 0;

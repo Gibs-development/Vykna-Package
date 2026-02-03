@@ -19073,7 +19073,7 @@ public class Client extends RSApplet {
 			}
 			return;
 		}
-		final int loginSongId = 1;
+		final int loginSongId = 0;
 		if (currentSong == loginSongId && nextSong == loginSongId) {
 			return;
 		}
