@@ -8,7 +8,7 @@ public class Configuration {
 	public static int frameHeight = 503;
 
 
-	public static boolean LOCAL_HOST = true;
+	public static boolean LOCAL_HOST = false;
 
 	public static boolean DEBUG_MODE = true;
 
