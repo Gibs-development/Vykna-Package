@@ -6,6 +6,7 @@ import io.xeros.Configuration;
 import io.xeros.Server;
 import io.xeros.content.dialogue.DialogueBuilder;
 import io.xeros.content.dialogue.DialogueOption;
+import io.xeros.content.cutscene.Cutscenes;
 import io.xeros.content.items.Starter;
 import io.xeros.model.entity.player.Player;
 import io.xeros.model.entity.player.PlayerHandler;
@@ -21,13 +22,22 @@ public class TutorialDialogue extends DialogueBuilder {
 
     public static final int TUTORIAL_NPC = 3248;
     private static final String IN_TUTORIAL_KEY = "in_tutorial";
+    private static final String CUTSCENE_DONE_KEY = "tutorial_cutscene_done";
+    private static final String CUTSCENE_RUNNING_KEY = "tutorial_cutscene_running";
     private static final DialogueOption[] XP_RATES = {
             new DialogueOption("Fast Xp Rate (standard) ", p -> chosenXpRate(p, ModeType.STANDARD)),
             new DialogueOption("5x Xp Rate (rogue)", p -> chosenXpRate(p, ModeType.ROGUE))
     };
 
+    private final boolean repeat;
+    private final boolean skipCutscene;
+
     public static boolean inTutorial(Player player) {
         return player.getAttributes().getBoolean(IN_TUTORIAL_KEY);
+    }
+
+    public static boolean isCutsceneRunning(Player player) {
+        return player.getAttributes().getBoolean(CUTSCENE_RUNNING_KEY);
     }
 
     private static void setInTutorial(Player player, boolean inTutorial) {
@@ -116,7 +126,13 @@ public class TutorialDialogue extends DialogueBuilder {
     }
 
     public TutorialDialogue(Player player, boolean repeat) {
+        this(player, repeat, false);
+    }
+
+    private TutorialDialogue(Player player, boolean repeat, boolean skipCutscene) {
         super(player);
+        this.repeat = repeat;
+        this.skipCutscene = skipCutscene;
 
         setNpcId(TUTORIAL_NPC);
         if (!Server.isTest()) {
@@ -149,7 +165,25 @@ public class TutorialDialogue extends DialogueBuilder {
     @Override
     public void initialise() {
         setInTutorial(getPlayer(), true);
+        if (shouldPlayCutscene()) {
+            getPlayer().getAttributes().setBoolean(CUTSCENE_RUNNING_KEY, true);
+            Cutscenes.startTutorialTour(getPlayer(), player -> {
+                player.getAttributes().setBoolean(CUTSCENE_DONE_KEY, true);
+                player.getAttributes().removeBoolean(CUTSCENE_RUNNING_KEY);
+                player.getPA().sendScreenFade("", -1, 1);
+                player.getPA().closeAllWindows();
+                player.start(new TutorialDialogue(player, repeat, true));
+            });
+            return;
+        }
         super.initialise();
+    }
+
+    private boolean shouldPlayCutscene() {
+        return !skipCutscene
+                && !repeat
+                && !getPlayer().getAttributes().getBoolean(CUTSCENE_DONE_KEY)
+                && !getPlayer().getAttributes().getBoolean(CUTSCENE_RUNNING_KEY);
     }
 
     private void npc(Position teleport, String...text) {

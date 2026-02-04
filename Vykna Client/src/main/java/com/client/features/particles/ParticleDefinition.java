@@ -150,7 +150,79 @@ public class ParticleDefinition {
                 setAdditive(true);
                 updateSteps();
             }},
+//thieving cape
+            new ParticleDefinition() {{
+                setStartVelocity(new Vector(0, 0, 0));
+                setEndVelocity(new Vector(0, 0, 0));
 
+                // This layer should NOT fall. It should sit and pulse/fade.
+                setGravity(new Vector(0, 0, 0));
+
+                setStartColor(0xa451fc);
+                setEndColor(0x8c06cf);
+
+                setLifespan(6);
+                setStartAlpha(0.70f);
+                setEndAlpha(0.0f);
+
+                setSpawnRate(18);
+
+                setStartSize(0.14f);
+                setEndSize(0.35f);
+
+                setSprite(new Sprite("light_01")); // works, but a dedicated soft круг glow sprite is even better
+                setAdditive(true); // you need this (see section 3)
+                updateSteps();
+            }},
+            //4
+            new ParticleDefinition() {{
+                // slight sideways + upward drift (don’t keep it zero)
+                setStartVelocity(new Vector(0, 2, 0));
+                setEndVelocity(new Vector(0, 0, 0));
+
+                // In your coordinate space, your smoke is behaving like Y is vertical.
+                // If -1 makes it fall, +1 will make it rise.
+                setGravity(new Vector(0, +1, -1));
+
+                setStartColor(0x7b04c4);
+                setEndColor(0x45024f);
+
+                setLifespan(20);
+                setStartAlpha(1f);
+                setEndAlpha(0.7f);
+
+                setSpawnRate(20);
+
+                setStartSize(0.10f);
+                setEndSize(0.55f);
+
+                setSprite(new Sprite("smoke_01"));
+                updateSteps();
+            }},
+            //5
+            new ParticleDefinition() {{
+                setStartVelocity(new Vector(0, 3, 0));
+                setEndVelocity(new Vector(0, 0, 0));
+                setGravity(new Vector(0, +1, 0));
+
+                setStartColor(0xa600ff);
+                setEndColor(0x360145);
+
+                setLifespan(16);
+                setStartAlpha(0.85f);
+                setEndAlpha(0.0f);
+
+                setSpawnRate(12);
+
+                setStartSize(0.30f);
+                setEndSize(0.50f);
+
+                setSprite(new Sprite("flare_01")); // tiny dot sprite is best
+                setAdditive(true);
+                updateSteps();
+            }},
+
+//end thieving
             new ParticleDefinition() {
                 { // wyrm
                     setStartVelocity(new Vector(0, 2, 0));

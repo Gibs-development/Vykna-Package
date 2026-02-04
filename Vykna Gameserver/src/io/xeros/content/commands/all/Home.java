@@ -26,7 +26,7 @@ public class Home extends Command {
 			c.sendMessage("You can't use this command in the wilderness.");
 			return;
 		}
-		c.getPA().spellTeleport(3091, 3490, 0, false);
+		c.getPA().spellTeleport(3165, 3485, 0, false);
 		//c.getPA().movePlayer(3091, 3490, 0 );
 		c.getPA().removeAllWindows();
 	}

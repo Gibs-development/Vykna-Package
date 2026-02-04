@@ -12,11 +12,17 @@ public final class CutsceneRunner extends CycleEvent {
 
     private final Player player;
     private final List<CutsceneStep> steps;
+    private final java.util.function.Consumer<Player> onComplete;
     private int index = 0;
 
     public CutsceneRunner(Player player, List<CutsceneStep> steps) {
+        this(player, steps, null);
+    }
+
+    public CutsceneRunner(Player player, List<CutsceneStep> steps, java.util.function.Consumer<Player> onComplete) {
         this.player = player;
         this.steps = steps;
+        this.onComplete = onComplete;
     }
 
     @Override
@@ -47,6 +53,9 @@ public final class CutsceneRunner extends CycleEvent {
     private void end(CycleEventContainer container) {
         player.getPA().resetCamera();
         player.unlock();
+        if (onComplete != null) {
+            onComplete.accept(player);
+        }
         container.stop();
     }
 }

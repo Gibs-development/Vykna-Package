@@ -2576,6 +2576,7 @@ public class Player extends Entity {
         }
         // If player hasn't completed tutorial, no dialogues are open and mode selection interface isn't open, then we open it.
         if (!isCompletedTutorial()
+                && !TutorialDialogue.isCutsceneRunning(this)
                 && (getDialogueBuilder() == null || getDialogueBuilder().getCurrent() == null)
                 && !isInterfaceOpen(ModeSelection.INTERFACE_ID)) {
             modeSelection.openInterface();
