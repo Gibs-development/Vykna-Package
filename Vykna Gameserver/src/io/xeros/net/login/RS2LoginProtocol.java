@@ -276,30 +276,32 @@ public class RS2LoginProtocol extends ByteToMessageDecoder {
 						}
 					}
 
-					boolean passedCaptcha = false;
-					CaptchaRequirement captchaRequirement = LoginCaptcha.get(nameLower);
-					if (captchaRequirement != null) {
-						logger.debug("Player {} has pending captcha {}, entered {}.", name, captchaRequirement.getCaptcha(), captcha);
-						if (captchaRequirement.isIncorrect(captcha)) {
-							captchaRequirement = LoginCaptcha.refresh(nameLower);
-							LoginThrottler.addIncorrectLoginAttempt(nameLower, ip, macAddress, uuid);
-							sendCaptcha(channel, LoginReturnCode.CAPTCHA_INCORRECT, captchaRequirement);
-							logger.debug("Player failed captcha, sending again, name={}, captchaInput={}", name, captcha);
-							return;
+					boolean passedCaptcha = Configuration.DISABLE_CAPTCHA;
+					if (!Configuration.DISABLE_CAPTCHA) {
+						CaptchaRequirement captchaRequirement = LoginCaptcha.get(nameLower);
+						if (captchaRequirement != null) {
+							logger.debug("Player {} has pending captcha {}, entered {}.", name, captchaRequirement.getCaptcha(), captcha);
+							if (captchaRequirement.isIncorrect(captcha)) {
+								captchaRequirement = LoginCaptcha.refresh(nameLower);
+								LoginThrottler.addIncorrectLoginAttempt(nameLower, ip, macAddress, uuid);
+								sendCaptcha(channel, LoginReturnCode.CAPTCHA_INCORRECT, captchaRequirement);
+								logger.debug("Player failed captcha, sending again, name={}, captchaInput={}", name, captcha);
+								return;
+							}
+
+							logger.debug("Player {} passed captcha.", name);
+							LoginCaptcha.remove(nameLower);
+							passedCaptcha = true;
+						} else {
+							logger.debug("Player {} has no pending captcha.", name);
 						}
 
-						logger.debug("Player {} passed captcha.", name);
-						LoginCaptcha.remove(nameLower);
-						passedCaptcha = true;
-					} else {
-						logger.debug("Player {} has no pending captcha.", name);
-					}
-
-					if (!Configuration.DISABLE_CAPTCHA_EVERY_LOGIN && !passedCaptcha) {
-						CaptchaRequirement captchaRequirement1 = LoginCaptcha.create(nameLower);
-						sendCaptcha(channel, LoginReturnCode.CAPTCHA_INCORRECT, captchaRequirement1);
-						logger.debug("Requiring captcha for every login, name={}, captchaInput={}", name, captcha);
-						return;
+						if (!Configuration.DISABLE_CAPTCHA_EVERY_LOGIN && !passedCaptcha) {
+							CaptchaRequirement captchaRequirement1 = LoginCaptcha.create(nameLower);
+							sendCaptcha(channel, LoginReturnCode.CAPTCHA_INCORRECT, captchaRequirement1);
+							logger.debug("Requiring captcha for every login, name={}, captchaInput={}", name, captcha);
+							return;
+						}
 					}
 
 					final int[] isaacSeed = { (int) (clientHalf >> 32), (int) clientHalf, (int) (serverHalf >> 32), (int) serverHalf };
@@ -485,8 +487,12 @@ public class RS2LoginProtocol extends ByteToMessageDecoder {
 			}
 
 			if (returnCode == LoginReturnCode.CAPTCHA_REQUIRED) {
-				sendCaptcha(channel, LoginReturnCode.CAPTCHA_REQUIRED, LoginCaptcha.create(name.toLowerCase()));
-				return null;
+				if (Configuration.DISABLE_CAPTCHA) {
+					returnCode = LoginReturnCode.SUCCESS;
+				} else {
+					sendCaptcha(channel, LoginReturnCode.CAPTCHA_REQUIRED, LoginCaptcha.create(name.toLowerCase()));
+					return null;
+				}
 			}
 
 			long time = System.currentTimeMillis() - startTime;
@@ -539,7 +545,9 @@ public class RS2LoginProtocol extends ByteToMessageDecoder {
 					return LoginReturnCode.UNABLE_TO_CONNECT;
 				}
 
-				if (!Configuration.DISABLE_NEW_ACCOUNT_CAPTCHA && !passedCaptcha) {
+				if (!Configuration.DISABLE_CAPTCHA
+						&& !Configuration.DISABLE_NEW_ACCOUNT_CAPTCHA
+						&& !passedCaptcha) {
 					logger.debug("New player, requiring captcha: {}", name);
 					return LoginReturnCode.CAPTCHA_REQUIRED;
 				}

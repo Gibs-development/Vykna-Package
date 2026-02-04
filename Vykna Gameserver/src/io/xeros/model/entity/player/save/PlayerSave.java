@@ -257,7 +257,9 @@ public class PlayerSave {
                                     }
                                 } else if (token.equals("character-mac-address")) {
                                     if (!p.getMacAddress().equalsIgnoreCase(token2)) {
-                                        if (!Configuration.DISABLE_CHANGE_ADDRESS_CAPTCHA && !passedCaptcha)
+                                        if (!Configuration.DISABLE_CAPTCHA
+                                                && !Configuration.DISABLE_CHANGE_ADDRESS_CAPTCHA
+                                                && !passedCaptcha)
                                             return LoadGameResult.REQUIRE_CAPTCHA;
                                         p.setAddressChanged("mac", token2, p.getMacAddress(), true);
                                     }
@@ -267,7 +269,9 @@ public class PlayerSave {
                                     }
                                 } else if (token.equals("character-uuid")) {
                                     if (!p.getUUID().equalsIgnoreCase(token2)) {
-                                        if (!Configuration.DISABLE_CHANGE_ADDRESS_CAPTCHA && !passedCaptcha)
+                                        if (!Configuration.DISABLE_CAPTCHA
+                                                && !Configuration.DISABLE_CHANGE_ADDRESS_CAPTCHA
+                                                && !passedCaptcha)
                                             return LoadGameResult.REQUIRE_CAPTCHA;
                                         p.setAddressChanged("uuid", token2, p.getUUID(), true);
                                     }

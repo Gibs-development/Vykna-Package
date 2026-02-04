@@ -11930,6 +11930,15 @@ public class Client extends RSApplet {
 				return;
 			}
 			if (responseCode == 27 || responseCode == 28) {
+				if (Configuration.DISABLE_CAPTCHA) {
+					loginScreenState = LoginScreenState.LOGIN;
+					firstLoginMessage = "Captcha is disabled.";
+					captcha = null;
+					synchronized (CAPTCHA_LOCK) {
+						captchaInput = "";
+					}
+					return;
+				}
 				try {
 					int length = ((socketStream.read() & 0xFF) << 8) + socketStream.read();
 					byte[] captchaData = new byte[length];
@@ -12734,6 +12743,7 @@ public class Client extends RSApplet {
 		//repackCacheIndex(2);
 
 		new CacheDownloader(this).downloadCache();
+		ensureLoginSpritesLoaded();
 
 		SpriteLoader1.loadSprites();
 		cacheSprite1 = SpriteLoader1.sprites;
@@ -18013,6 +18023,39 @@ public class Client extends RSApplet {
 		screenImages.put("background", new Sprite("Login/background")); // not used
 	}
 
+	private void ensureLoginSpritesLoaded() {
+		if (loginButtonStandard == null || loginButtonStandard.myWidth == 0) {
+			loginButtonStandard = new Sprite("Login/loginStandard");
+		}
+		if (loginButtonHovered == null || loginButtonHovered.myWidth == 0) {
+			loginButtonHovered = new Sprite("Login/loginHovered");
+		}
+		if (passIcon == null || passIcon.myWidth == 0) {
+			passIcon = new Sprite("Login/passIcon");
+		}
+		if (usernameIcon == null || usernameIcon.myWidth == 0) {
+			usernameIcon = new Sprite("Login/userIcon");
+		}
+		if (loginAsset4 == null || loginAsset4.myWidth == 0) {
+			loginAsset4 = new Sprite("Login/logo");
+		}
+		if (loginScreenBackground == null || loginScreenBackground.myWidth == 0) {
+			loginScreenBackground = new Sprite("/loginscreen/background2");
+		}
+		if (loginScreenBackgroundCaptcha == null || loginScreenBackgroundCaptcha.myWidth == 0) {
+			loginScreenBackgroundCaptcha = new Sprite("/loginscreen/captcha_background");
+		}
+		if (captchaExit == null || captchaExit.myWidth == 0) {
+			captchaExit = new Sprite("/loginscreen/captcha-exit");
+		}
+		if (captchaExitHover == null || captchaExitHover.myWidth == 0) {
+			captchaExitHover = new Sprite("/loginscreen/captcha-exit-hover");
+		}
+		if (logo2021 == null || logo2021.myWidth == 0) {
+			logo2021 = new Sprite("/loginscreen/logo");
+		}
+	}
+
 	public Sprite loginAsset0;
 	public Sprite loginAsset1;
 	public Sprite loginAsset2;
@@ -18878,6 +18921,7 @@ public class Client extends RSApplet {
 
 
 	public void drawLoginScreen(boolean flag) {
+		ensureLoginSpritesLoaded();
 		long nowLogin = System.currentTimeMillis();
 		if (!loggedIn && nowLogin - lastLoginScreenDebug > 2000L) {
 			lastLoginScreenDebug = nowLogin;

@@ -124,7 +124,7 @@ public final class Cutscenes {
 
         List<CutsceneStep> steps = new ArrayList<>();
         steps.add(new ActionStep(player -> startPos[0] = player.getPosition().deepCopy()));
-        steps.add(new FadeStep("Arwyn", 1, 1, 0));
+    //    steps.add(new FadeStep("Arwyn", 1, 1, 0));
         steps.add(new WaitStep(2));
         steps.add(new ActionStep(player -> {
             int height = player.getHeight();
@@ -135,7 +135,7 @@ public final class Cutscenes {
                 guide[0].facePlayer(player.getIndex());
             }
         }));
-        steps.add(new FadeStep("", -1, 1, 0));
+    //    steps.add(new FadeStep("", -1, 1, 0));
         steps.add(new WaitStep(1));
         steps.add(new ActionStep(player -> {
             if (guide[0] != null) {
@@ -145,7 +145,7 @@ public final class Cutscenes {
         }));
         steps.add(new WaitStep(tourWaitTicks));
 
-        steps.add(new FadeStep("", 1, 1, 0));
+     //   steps.add(new FadeStep("", 1, 1, 0));
         steps.add(new WaitStep(2));
         steps.add(new ActionStep(player -> {
             int height = player.getHeight();
@@ -155,7 +155,7 @@ public final class Cutscenes {
                 guide[0].facePlayer(player.getIndex());
             }
         }));
-        steps.add(new FadeStep("", -1, 1, 0));
+    //    steps.add(new FadeStep("", -1, 1, 0));
         steps.add(new WaitStep(1));
         steps.add(new ActionStep(player -> {
             if (guide[0] != null) {
@@ -165,7 +165,7 @@ public final class Cutscenes {
         }));
         steps.add(new WaitStep(tourWaitTicks));
 
-        steps.add(new FadeStep("", 1, 1, 0));
+    //    steps.add(new FadeStep("", 1, 1, 0));
         steps.add(new WaitStep(2));
         steps.add(new ActionStep(player -> {
             int height = player.getHeight();
@@ -175,7 +175,7 @@ public final class Cutscenes {
                 guide[0].facePlayer(player.getIndex());
             }
         }));
-        steps.add(new FadeStep("", -1, 1, 0));
+  //      steps.add(new FadeStep("", -1, 1, 0));
         steps.add(new WaitStep(1));
         steps.add(new ActionStep(player -> {
             if (guide[0] != null) {
@@ -185,7 +185,7 @@ public final class Cutscenes {
         }));
         steps.add(new WaitStep(tourWaitTicks));
 
-        steps.add(new FadeStep("", 1, 1, 0));
+   //     steps.add(new FadeStep("", 1, 1, 0));
         steps.add(new WaitStep(2));
         steps.add(new ActionStep(player -> {
             int height = player.getHeight();
@@ -195,7 +195,7 @@ public final class Cutscenes {
                 guide[0].facePlayer(player.getIndex());
             }
         }));
-        steps.add(new FadeStep("", -1, 1, 0));
+ //       steps.add(new FadeStep("", -1, 1, 0));
         steps.add(new WaitStep(1));
         steps.add(new ActionStep(player -> {
             if (guide[0] != null) {
@@ -205,7 +205,7 @@ public final class Cutscenes {
         }));
         steps.add(new WaitStep(tourWaitTicks));
 
-        steps.add(new FadeStep("", 1, 1, 0));
+  //      steps.add(new FadeStep("", 1, 1, 0));
         steps.add(new WaitStep(2));
         steps.add(new ActionStep(player -> {
             int height = player.getHeight();
@@ -215,7 +215,7 @@ public final class Cutscenes {
                 guide[0].facePlayer(player.getIndex());
             }
         }));
-        steps.add(new FadeStep("", -1, 1, 0));
+     //   steps.add(new FadeStep("", -1, 1, 0));
         steps.add(new WaitStep(1));
         steps.add(new ActionStep(player -> {
             if (guide[0] != null) {
@@ -225,7 +225,7 @@ public final class Cutscenes {
         }));
         steps.add(new WaitStep(tourWaitTicks));
 
-        steps.add(new FadeStep("", 1, 1, 0));
+   //     steps.add(new FadeStep("", 1, 1, 0));
         steps.add(new WaitStep(2));
         steps.add(new ActionStep(player -> {
             Position home = startPos[0] == null ? player.getPosition() : startPos[0];
@@ -235,7 +235,7 @@ public final class Cutscenes {
                 guide[0].facePlayer(player.getIndex());
             }
         }));
-        steps.add(new FadeStep("", -1, 1, 0));
+    //    steps.add(new FadeStep("", -1, 1, 0));
         steps.add(new WaitStep(1));
         steps.add(new ActionStep(player -> {
             if (guide[0] != null) {

@@ -82,6 +82,7 @@ public class Configuration {
 	public static boolean DISABLE_DISCORD_MESSAGING = false;
 
 	public static boolean DISABLE_CONNECTION_REQUEST_LIMIT = false;
+	public static boolean DISABLE_CAPTCHA = true;
 	public static boolean DISABLE_CAPTCHA_EVERY_LOGIN = true;
 	public static boolean DISABLE_CHANGE_ADDRESS_CAPTCHA = true;
 	public static boolean DISABLE_NEW_ACCOUNT_CAPTCHA = true;

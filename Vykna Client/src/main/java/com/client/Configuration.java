@@ -8,7 +8,7 @@ public class Configuration {
 	public static int frameHeight = 503;
 
 
-	public static boolean LOCAL_HOST = true;// Change to false for live client.
+	public static boolean LOCAL_HOST = true;
 
 	public static boolean DEBUG_MODE = true;
 
@@ -39,7 +39,6 @@ public class Configuration {
 	public static final String CLIENT_TITLE = "Arwyn";
 	public static final String WEBSITE = "vykna.co.uk";
 	public static final String DEDICATED_SERVER_ADDRESS = LOCAL_HOST ? "127.0.0.1" : "72.145.9.18";//2.126.28.136
-	public static final String TEST_SERVER_ADDRESS = LOCAL_HOST ? "127.0.0.1" : "72.145.9.18";//2.126.28.136
 	public static final int PORT = 43594;
 	public static final int TEST_PORT = 43595;
 	public static final int CACHE_FOLDER_VERSION = 0;
@@ -126,5 +125,6 @@ public class Configuration {
 	public static boolean statusBars;
 	public static boolean menuHovers;
 	public static boolean rs3StyleUiEnabled = true;
+	public static final boolean DISABLE_CAPTCHA = true;
 
 }
