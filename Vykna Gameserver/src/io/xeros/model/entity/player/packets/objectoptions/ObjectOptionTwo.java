@@ -228,52 +228,22 @@ public class ObjectOptionTwo {
 		case 36062:
 			c.getTeleportInterface().repeatLastTeleport();
 			break;
-			case 4874:
-		case 11730:
-			c.getThieving().steal(Stall.Crafting, location);
-			c.objectDistance = 1;
-			break;
-		case 4877:
-		case 11731:
-			if (Boundary.isIn(c, Boundary.FALADOR_BOUNDARY)) {
-				c.getDiaryManager().getFaladorDiary().progress(FaladorDiaryEntry.STEAL_GEM_FAL);
-				c.getThieving().steal(Stall.Magic, location);
+			case 630:
+				c.getThieving().steal(Stall.BAKER, location);
 				c.objectDistance = 1;
-				return;
-			}
-			c.getThieving().steal(Stall.Magic, location);
-			break;
-		case 11729:
-			c.getThieving().steal(Stall.Silk, location);
-			c.objectDistance = 1;
-			break;
-		case 4876:
-			c.getThieving().steal(Stall.General, location);
-			c.objectDistance = 1;
-			break;
-		case 4878:
-			c.getThieving().steal(Stall.Scimitar, location);
-			c.objectDistance = 1;
-			break;
-		case 4875:
-			c.getThieving().steal(Stall.Food, location);
-			c.objectDistance = 1;
-			break;
-		case 11734:
-			c.getThieving().steal(Stall.Silver, location);
-			break;
-		case 11732:
-			c.getThieving().steal(Stall.Fur, location);
-			break;
-		case 11733:
-			c.getThieving().steal(Stall.Spice, location);
-			break;
-		case 29165:
-			c.getThieving().steal(Stall.Gold, location);
-			break;
-		case 6162:
-			c.getThieving().steal(Stall.LZ_GOLD, location);
-			break;
+				break;
+			case 629:
+				c.getThieving().steal(Stall.SILK, location);
+				c.objectDistance = 1;
+				break;
+			case 628:
+				c.getThieving().steal(Stall.SILVER, location);
+				c.objectDistance = 1;
+				break;
+			case 631:
+				c.getThieving().steal(Stall.GEM, location);
+				c.objectDistance = 1;
+				break;
 		case 23609:
 			c.getPA().movePlayer(3507, 9494, 0);
 			break;

@@ -2335,7 +2335,9 @@ public class PlayerAssistant {
 		startTeleport(position.getX(), position.getY(), position.getHeight(), teleportType, homeTeleport);
 	}
 
-
+	public void homeTeleport() {
+		c.getPA().spellTeleport(Configuration.START_LOCATION_X, Configuration.START_LOCATION_Y, 0, true);
+	}
 	public void spellTeleport(int x, int y, int height, boolean homeTeleport) {
 		startTeleport(x, y, height, c.playerMagicBook == 1 ? "ancient" : "modern", homeTeleport);
 	}

@@ -93,36 +93,7 @@ public class Thieving {
 			player.getInterfaceEvent().execute();
 			return;
 		}
-		player.getEventCalendar().progress(EventChallenge.THIEVE_X_STALLS);
-		switch (stall) {
-		case Food:
-			player.getDiaryManager().getVarrockDiary().progress(VarrockDiaryEntry.TEA_STALL);
-			break;
-		case Crafting:
-			if (Boundary.isIn(player, Boundary.ARDOUGNE_BOUNDARY)) {
-				player.getDiaryManager().getArdougneDiary().progress(ArdougneDiaryEntry.STEAL_CAKE);
-			}
-			break;
-		case Magic:
-			if (Boundary.isIn(player, Boundary.ARDOUGNE_BOUNDARY)) {
-				player.getDiaryManager().getArdougneDiary().progress(ArdougneDiaryEntry.STEAL_GEM_ARD);
-			}
-			if (Boundary.isIn(player, Boundary.FALADOR_BOUNDARY)) {
-				player.getDiaryManager().getFaladorDiary().progress(FaladorDiaryEntry.STEAL_GEM_FAL);
-			}
-			break;
-		case Scimitar:
-			break;
-		case Fur:
-			if (Boundary.isIn(player, Boundary.ARDOUGNE_BOUNDARY)) {
-				player.getDiaryManager().getArdougneDiary().progress(ArdougneDiaryEntry.STEAL_FUR);
-			}
-			DailyTasks.increase(player, DailyTasks.PossibleTasks.FUR);//Daily tasks
-			break;
-		case Gold:
-		default:
-			break;
-		}
+
 		player.facePosition(location.getX(), location.getY());
 /**		if (Misc.random(stall.depletionProbability) == 0) {
 			GlobalObject stallObj = Server.getGlobalObjects().get(objectId, location.getX(), location.getY(), location.getZ());
@@ -140,7 +111,7 @@ public class Thieving {
 			 player.getCollectionLog().handleDrop(player, 5, 20663, 1);
 		 }
 
-		if (Misc.hasOneOutOf(20)) {//Thieving tomes
+		if (Misc.hasOneOutOf(50)) {//Thieving tomes
 			player.getItems().addItemUnderAnyCircumstance(7785, 1);
 			player.sendMessage("@red@You notice an thieving tome hidden under the stall.");
 		}
@@ -148,8 +119,8 @@ public class Thieving {
 		player.startAnimation(ANIMATION);
 		player.getItems().addItem(item.getId(), item.getAmount());
 		player.getPA().addSkillXPMultiplied((int) (stall.experience * (1 + (getRoguesPieces() * 0.12))), Skill.THIEVING.getId(), true);
-		player.sendMessage("You steal a " + definition.getName() + " from the stall.");
-		Achievements.increase(player, AchievementType.THIEV, 1);
+		player.getPA().sendSound(2581);
+		player.sendMessage("You steal some coins from the stall.");
 		lastInteraction = System.currentTimeMillis();
 	}
 
@@ -402,17 +373,10 @@ public class Thieving {
 	}
 
 	public enum Stall {
-		Crafting(new GameItem(1893), 1, 16, 20, 15000),
-		Silk(new GameItem(950), 25, 30, 10, 13000),
-		Silver(new GameItem(2961), 50, 54, 10, 12000),
-		Fur(new GameItem(6814), 65, 80, 10, 11000),
-		Magic(new GameItem(1613), 90, 100, 10, 10000),
-		Food(new GameItem(712), 25, 30, 10, 13000),
-		General(new GameItem(2961), 50, 54, 10, 12000),
-		Scimitar(new GameItem(1993), 90, 100, 10, 10000),
-		Spice(new GameItem(2007), 50, 54, 10, 12000),
-		Gold(new GameItem(4692), 95, 110, 10, 9000),
-		LZ_GOLD(new GameItem(19473), 99, 120, 10, 8500);
+		BAKER(new GameItem(995, Misc.random(100,1000)), 1, 15, 20, 15000),
+		SILK(new GameItem(995, Misc.random(1500,3500)), 25, 30, 10, 13000),
+		SILVER(new GameItem(995, Misc.random(2500,4500)), 50, 60, 10, 12000),
+		GEM(new GameItem(995, Misc.random(4000,10000)), 75, 120, 10, 11000);
 
 		/**
 		 * The item received from the stall

@@ -85,7 +85,7 @@ public final class TeleportMonsters {
                 60,
                 false,
                 2,
-                new TeleportDestination(3253, 3266, 0)
+                new TeleportDestination(3097, 9871, 0)
         ));
 
         defs.add(new TeleportDefinition(
@@ -102,7 +102,7 @@ public final class TeleportMonsters {
                 40,
                 false,
                 3,
-                new TeleportDestination(2675, 3710, 0) // TODO set real coords
+                new TeleportDestination(2884, 9799, 0) // TODO set real coords
         ));
 
         defs.add(new TeleportDefinition(
@@ -119,7 +119,7 @@ public final class TeleportMonsters {
                 55,
                 false,
                 4,
-                new TeleportDestination(1700, 3460, 0) // TODO set real coords
+                new TeleportDestination(2710, 9466, 0) // TODO set real coords
         ));
 
         defs.add(new TeleportDefinition(
@@ -136,7 +136,7 @@ public final class TeleportMonsters {
                 55,
                 false,
                 6,
-                new TeleportDestination(3420, 3536, 0) // TODO set real coords
+                new TeleportDestination(2798, 9997, 0) // TODO set real coords
         ));
 
         defs.add(new TeleportDefinition(
@@ -153,7 +153,7 @@ public final class TeleportMonsters {
                 65,
                 false,
                 5,
-                new TeleportDestination(3550, 9948, 0) // TODO set real coords
+                new TeleportDestination(1666, 10048, 0) // TODO set real coords
         ));
 
         /*
@@ -174,7 +174,7 @@ public final class TeleportMonsters {
                 70,
                 true,
                 28,
-                new TeleportDestination(3000, 5000, 0) // TODO set real coords
+                new TeleportDestination(1430, 9894, 0) // TODO set real coords
         ));
 
         defs.add(new TeleportDefinition(
@@ -208,7 +208,7 @@ public final class TeleportMonsters {
                 80,
                 true,
                 30,
-                new TeleportDestination(3000, 5010, 0) // TODO set real coords
+                new TeleportDestination(1424, 9866, 0) // TODO set real coords
         ));
 
         defs.add(new TeleportDefinition(
@@ -225,7 +225,7 @@ public final class TeleportMonsters {
                 75,
                 true,
                 12,
-                new TeleportDestination(2402, 9782, 0) // TODO set real coords
+                new TeleportDestination(1459, 9889, 0) // TODO set real coords
         ));
 
         /*
