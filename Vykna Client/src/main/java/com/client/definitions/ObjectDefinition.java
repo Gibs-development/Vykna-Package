@@ -102,9 +102,14 @@ public final class ObjectDefinition {
 
 			case 34918://Evil tree
 				objectDef.name = "Crystal tree";
-				//objectDef.anIntArray773 = new int[] { 45755 };
-				//objectDef.animation = -1;
 				objectDef.actions = new String[] {"Chop", null, null, null, null};
+				break;
+
+			case 630:
+			case 628:
+			case 631:
+			case 629:
+				objectDef.actions = new String[] {"Steal-from", null, null, null, null};
 				break;
 
 			case 7127://Xeric leaderboards

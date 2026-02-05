@@ -2700,13 +2700,13 @@ public class ClickingButtons implements PacketType {
 				c.sendMessage("You can't teleport above " + Configuration.NO_TELEPORT_WILD_LEVEL + " in the wilderness.");
 				return;
 			}
-			c.getPA().spellTeleport(3102, 3510, 0, true);
+			c.getPA().homeTeleport();
 			break;
 		case 50056:
 			if (c.homeTeleport >= 1 && c.homeTeleport <= 10) {
 				return;
 			}
-			c.getPA().spellTeleport(3102, 3510, 0, true);
+			c.getPA().homeTeleport();
 			break;
 
 

@@ -596,9 +596,20 @@ public class ObjectOptionOne {
 				c.objectDistance = 3;
 				AgilityHandler.delayEmote(c, "CRAWL", 1312, 10188, 0, 2);
 				break;
-			case 4874:
-			case 11730:
-				c.getThieving().steal(Stall.Crafting, location);
+			case 630:
+				c.getThieving().steal(Stall.BAKER, location);
+				c.objectDistance = 1;
+				break;
+			case 629:
+				c.getThieving().steal(Stall.SILK, location);
+				c.objectDistance = 1;
+				break;
+			case 628:
+				c.getThieving().steal(Stall.SILVER, location);
+				c.objectDistance = 1;
+				break;
+			case 631:
+				c.getThieving().steal(Stall.GEM, location);
 				c.objectDistance = 1;
 				break;
 			case 8929:
