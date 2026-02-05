@@ -1,0 +1,137 @@
+[
+  {
+    "id": 1107,
+    "position": {
+      "x": 1459,
+      "y": 9889,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1457,
+      "y": 9895,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1458,
+      "y": 9899,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1453,
+      "y": 9899,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1455,
+      "y": 9904,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1450,
+      "y": 9902,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1449,
+      "y": 9907,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1452,
+      "y": 9910,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1457,
+      "y": 9909,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1461,
+      "y": 9907,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1463,
+      "y": 9903,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1459,
+      "y": 9902,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1462,
+      "y": 9894,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1457,
+      "y": 9905,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  },
+  {
+    "id": 1107,
+    "position": {
+      "x": 1454,
+      "y": 9902,
+      "height": 0
+    },
+    "walkingType": "WALK"
+  }
+]
